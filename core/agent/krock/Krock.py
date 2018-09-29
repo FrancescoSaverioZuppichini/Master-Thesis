@@ -36,12 +36,13 @@ class Krock(RospyAgent):
 
     def callback_pose(self, data):
         self.state['pose'] = data
+        rospy.loginfo('pose received.')
 
     def callback_touch_sensors(self, data):
-        pass
+        self.state['touch_sensors'] = data
 
     def callback_torques_feedback(self, data):
-        pass
+        self.state['torques_feedback'] = data
 
     def move(self, gait, frontal_freq, lateral_freq, manual_mode=False):
         mode = int(manual_mode)
@@ -49,9 +50,26 @@ class Krock(RospyAgent):
         self.publishers['manual_control'].publish(msg)
 
     def spawn(self, pos=None):
-        pos = pos if pos != None else PoseStamped(pose = generate_random_pose())
+        pos = PoseStamped(pose=generate_random_pose()) if pos == None else pos
         self.publishers['spawn'].publish(pos)
 
     def on_shut_down(self):
         self.notify('on_shut_down')
-        pass
+
+map_max_x = 5.0
+map_max_y = 5.0
+map_max_z = 1.0
+# TODO this stuff should go in utils or in simlation class
+def generate_random_pose():
+    # x,y (z will be fixed as the max_hm_z so that the robot will drop down), gamma as orientation
+    rn = np.random.random_sample((3,))
+    random_pose = Pose()
+    random_pose.position.x = 2 * map_max_x *rn[0] - map_max_x
+    random_pose.position.y = 2 * map_max_x *rn[1] - map_max_x
+    random_pose.position.z = map_max_z * 1.0 # spawn on the air
+    qto = transformations.quaternion_from_euler(0, 0, 2*np.pi * rn[1], axes='sxyz')
+    random_pose.orientation.x = qto[0]
+    random_pose.orientation.y = qto[1]
+    random_pose.orientation.z = qto[2]
+    random_pose.orientation.w = qto[3]
+    return random_pose
