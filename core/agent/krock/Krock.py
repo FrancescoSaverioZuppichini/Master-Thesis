@@ -36,13 +36,15 @@ class Krock(RospyAgent):
 
     def callback_pose(self, data):
         self.state['pose'] = data
-        rospy.loginfo('pose received.')
+        rospy.loginfo('pose received')
 
     def callback_touch_sensors(self, data):
         self.state['touch_sensors'] = data
+        rospy.loginfo('touch_sensors received')
 
     def callback_torques_feedback(self, data):
         self.state['torques_feedback'] = data
+        rospy.loginfo('torques_feedback received')
 
     def move(self, gait, frontal_freq, lateral_freq, manual_mode=False):
         mode = int(manual_mode)

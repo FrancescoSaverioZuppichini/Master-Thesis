@@ -6,13 +6,12 @@ class Simulation(Callbackable):
         self.should_stop = False
         self.set_callbacks([])
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, world, agent, *args, **kwargs):
+        self.notify('on_start')
+        self.run(world, agent, *args, **kwargs)
+        self.notify('on_finished')
+
+    def run(self, world, agent, *args, **kwargs):
         pass
 
-class RosSimulation(Simulation):
-    def __call__(self, world, agent, schedule, *args, **kwargs):
-        self.notify('on_start')
-        while not self.should_stop or not rospy.is_shutdown():
-            schedule(world, agent, *args, **kwargs)
-        self.notify('on_finished')
 
