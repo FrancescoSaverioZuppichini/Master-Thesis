@@ -1,9 +1,8 @@
 import rospy
 
 from .Agent import Agent
-from protocols import Callbackable
 
-class RospyAgent(Agent, Callbackable):
+class RospyAgent(Agent):
     def __init__(self, rate=None):
         super().__init__()
         self.rate = rospy.Rate(hz=10) if rate == None else rate

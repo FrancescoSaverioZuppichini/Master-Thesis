@@ -1,1 +1,1 @@
-from .Simulation import *
+from .Simulation import Simulation

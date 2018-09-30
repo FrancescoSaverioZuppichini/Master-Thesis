@@ -1,6 +1,9 @@
-class Agent():
+from protocols import Callbackable
+
+class Agent(Callbackable):
     def __init__(self):
         self.state = {}
+        self.set_callbacks([self])
 
     def spawn(self, pos):
         pass

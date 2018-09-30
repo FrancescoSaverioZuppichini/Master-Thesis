@@ -1,7 +1,8 @@
 import rosbag
+import threading
+import tqdm
 
 from .AgentCallback import AgentCallback
-import threading
 
 class RosBagSaver(AgentCallback):
     def __init__(self, save_dir, topics=None):
@@ -19,14 +20,13 @@ class RosBagSaver(AgentCallback):
         self.cache[key].append(value)
 
     def store(self):
-        print('Writing to disk...')
         self.iter = 0
         bag = rosbag.Bag(self.save_dir, 'w')
-
-        for key, values in self.cache.items():
+        bar = tqdm.tqdm(self.cache.items())
+        bar.set_description('Writing to disk...')
+        for key, values in bar:
             for value in values:
                 bag.write(key, value)
-        print('Done')
         bag.close()
 
 

@@ -1,6 +1,7 @@
 class AgentCallback():
     def on_state_change(self, key, value):
         pass
+
     def on_subscribe(self, topic, data):
         pass
 

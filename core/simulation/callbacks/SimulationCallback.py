@@ -1,9 +1,9 @@
 class SimulationCallback():
-    def on_start(self, *args, **kwargs):
+    def on_start(self, sim, *args, **kwargs):
         pass
 
-    def on_run_finished(self, *args, **kwargs):
+    def on_finished(self, sim, *args, **kwargs):
         pass
 
-    def on_finished(self, *args, **kwargs):
+    def tick(self, sim, *args, **kwargs):
         pass
