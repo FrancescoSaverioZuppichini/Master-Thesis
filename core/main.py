@@ -10,7 +10,7 @@ from simulation import Simulation
 from simulation.callbacks import Alarm
 
 N_SIM = 20
-SIM_TIME = 2
+SIM_TIME = 10
 
 rospy.init_node("record_single_trajectory")
 
@@ -32,6 +32,12 @@ class MySimulation(Simulation):
                    lateral_freq=0,
                    manual_mode=True)
         nap.sleep()
+
+    def on_finished(self, sim, *args, **kwargs):
+        krock.move(gait=1,
+                   frontal_freq=0,
+                   lateral_freq=0,
+                   manual_mode=True)
 
 sim = MySimulation()
 sim.add_callback(Alarm(stop_after_s=SIM_TIME))

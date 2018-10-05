@@ -40,6 +40,23 @@ class WebotsServiceTools:
         finally:
             return world
 
+    def reload_world(self):
+        service = self.model_name + '/supervisor/world_reload'
+        rospy.wait_for_service(service)
+        try:
+            res = rospy.ServiceProxy(service, get_uint64)
+            print(res)
+        except rospy.ServiceException as e:
+            print("Service call failed: ", e)
+
+    def reset_rimulation(self):
+        service = self.model_name + '/supervisor/simulation_reset'
+        rospy.wait_for_service(service)
+        try:
+            res = rospy.ServiceProxy(service, get_uint64)
+        except rospy.ServiceException as e:
+            print("Service call failed: ", e)
+
     def get_robot_node(self):
         service = self.model_name+'/supervisor/get_self'
         if self.verbose: rospy.loginfo("Waiting for service %s", service)

@@ -61,6 +61,8 @@ class Krock(RospyAgent):
 
     def spawn(self, pos=None):
         pos = generate_random_pose() if pos == None else pos
+
+        self.services.reset_rimulation()
         # self.publishers['spawn'].publish(pos)
         # in webots y and z are inverted
         self.services.set_robot_position(x=pos.position.x,
