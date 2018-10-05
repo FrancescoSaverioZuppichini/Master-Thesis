@@ -10,7 +10,7 @@ from simulation import Simulation
 from simulation.callbacks import Alarm
 
 N_SIM = 20
-SIM_TIME = 4
+SIM_TIME = 2
 
 rospy.init_node("record_single_trajectory")
 
