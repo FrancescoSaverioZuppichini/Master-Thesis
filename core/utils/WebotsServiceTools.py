@@ -23,131 +23,79 @@ from utils.ros import ros_service
 # generation segment in the CMakeLists.txt of this package
 from webots_ros.srv import get_bool, get_int, get_uint64, set_int, node_get_field, field_get_node, field_get_vec3f, node_get_position, node_get_orientation, field_set_vec3f, field_set_rotation
 
-class WebotsServiceTools:
-    def __init__(self, model_name, verbose=False):
-        # constants of the robot
-        self.model_name = model_name
-        self.verbose = verbose
+class Supervisor:
+    name = None
+
+    @staticmethod
+    def get_service(service, type):
+        res = None
+        try:
+            res = rospy.ServiceProxy(service, type)
+        except rospy.ServiceException as e:
+            rospy.logerr(e)
+        finally:
+            return res
 
     def get_world_node(self):
-        service = self.model_name + '/supervisor/get_root'
-        world = None
-        try:
-            get_world = rospy.ServiceProxy(service, get_uint64)
-            world = get_world()
-        except rospy.ServiceException as e:
-            print ("Service call failed: ", e)
-        finally:
-            return world
+        service = self.name + '/supervisor/get_root'
+        world = self.get_service(service, get_uint64)
+        return world.get_world()
 
     def reload_world(self):
-        service = self.model_name + '/supervisor/world_reload'
-        rospy.wait_for_service(service)
-        try:
-            res = rospy.ServiceProxy(service, get_uint64)
-            print(res)
-        except rospy.ServiceException as e:
-            print("Service call failed: ", e)
+        service = self.name + '/supervisor/world_reload'
+        res = self.get_service(service, get_uint64)
+        return res
 
-    def reset_rimulation(self):
-        service = self.model_name + '/supervisor/simulation_reset'
-        rospy.wait_for_service(service)
-        try:
-            res = rospy.ServiceProxy(service, get_uint64)
-        except rospy.ServiceException as e:
-            print("Service call failed: ", e)
+    def reset_simulation(self):
+        service = self.name + '/supervisor/simulation_reset'
+        res = self.get_service(service, get_uint64)
+        return res
+
+    def reset_simulation_physics(self):
+        service = self.name + '/supervisor/simulation_reset_physics'
+        res = self.get_service(service, get_uint64)
+        return res
 
     def get_robot_node(self):
-        service = self.model_name+'/supervisor/get_self'
-        if self.verbose: rospy.loginfo("Waiting for service %s", service)
-        rospy.wait_for_service(service)
-        try:
-            get_self = rospy.ServiceProxy(service, get_uint64)
-            self.robot_node = get_self()
-            print (self.robot_node)
-        except rospy.ServiceException as e:
-            print ("Service call failed: ", e)
+        service = self.name+'/supervisor/get_self'
+        res = self.get_service(service, get_uint64)
+        self.robot_node = res()
+        return self.robot_node
 
     def get_robot_position(self):
-        service = self.model_name+'/supervisor/node/get_position'
-        if self.verbose: rospy.loginfo("Waiting for service %s", service)
-        rospy.wait_for_service(service)
-        try:
-            request_position = rospy.ServiceProxy(service, node_get_position)
-            position = request_position(self.robot_node.value)
-            print (position)
-
-        except rospy.ServiceException as e:
-            print ("Service call failed: ", e)
+        service = self.name +'/supervisor/node/get_position'
+        req_pos = self.get_service(service, node_get_position)
+        pos = req_pos(self.robot_node.value)
+        return pos
 
     def get_robot_orientation(self):
-        service = self.model_name+'/supervisor/node/get_orientation'
-        if self.verbose: rospy.loginfo("Waiting for service %s", service)
-        rospy.wait_for_service(service)
-        try:
-            request_position = rospy.ServiceProxy(service, node_get_orientation)
-            orientation = request_position(self.robot_node.value)
-            print (orientation)
-
-        except rospy.ServiceException as e:
-            print ("Service call failed: ", e)
+        service = self.name+'/supervisor/node/get_orientation'
+        req_orient = self.get_service(service, node_get_orientation)
+        orient = req_orient(self.robot_node.value)
+        return orient
 
     def set_robot_position(self, x, y, z):
-        service = self.model_name+'/supervisor/node/get_field'
-        if self.verbose: rospy.loginfo("Waiting for service %s", service)
-        rospy.wait_for_service(service)
-        try:
-            request_field = rospy.ServiceProxy(service, node_get_field)
-            field = request_field(self.robot_node.value, 'translation')
-            print (field)
+        service = self.name+'/supervisor/node/get_field'
 
-            other_service = self.model_name+'/supervisor/field/set_vec3f'
-            if self.verbose: rospy.loginfo("Waiting for service %s", service)
-            rospy.wait_for_service(other_service)
-            try:
-                set_field = rospy.ServiceProxy(other_service, field_set_vec3f)
-                new_position = Vector3()
-                # webots position, also called translation is different from ROS
-                # x -> forward, z-> right, y -> upward
-                new_position.x = x
-                new_position.y = y
-                new_position.z = z
-                resp = set_field(field.field, 0, new_position)
-                print (resp)
-            except rospy.ServiceException as e:
-                print ("Service call failed: ", e)
+        req_field = self.get_service(service, node_get_field)
+        field = req_field(self.robot_node.value, 'translation')
 
-        except rospy.ServiceException as e:
-            print ("Service call failed: ", e)
+        service = self.name + '/supervisor/field/set_vec3f'
+        set_pos = self.get_service(service, field_set_vec3f)
+        pos_res = set_pos(field.field, 0, Vector3(x,y,z))
+
+        return pos_res
 
     def set_robot_orientation(self, x, y, z, w):
-        service = self.model_name+'/supervisor/node/get_field'
-        if self.verbose: rospy.loginfo("Waiting for service %s", service)
-        rospy.wait_for_service(service)
-        try:
-            request_field = rospy.ServiceProxy(service, node_get_field)
-            field = request_field(self.robot_node.value, 'rotation')
-            print (field)
+        service = self.name+'/supervisor/node/get_field'
 
-            other_service = self.model_name+'/supervisor/field/set_rotation'
-            if self.verbose: rospy.loginfo("Waiting for service %s", service)
-            rospy.wait_for_service(other_service)
-            try:
-                set_field = rospy.ServiceProxy(other_service, field_set_rotation)
-                new_orientation = Quaternion()
-                # remember that the rotation in webots is different from
-                # rotation in ROS. Webots x,y,z is in m and w is in rad
-                # (yaw)
-                new_orientation.x = x
-                new_orientation.y = y
-                new_orientation.z = z
-                new_orientation.w = w
+        req_field = self.get_service(service, node_get_field)
+        field = req_field(self.robot_node.value, 'rotation')
 
-                resp = set_field(field.field, 0, new_orientation)
-                print (resp)
-            except rospy.ServiceException as e:
-                print ("Service call failed: ", e)
+        service = self.name + '/supervisor/field/set_rotation'
+        set_rot = self.get_service(service, field_set_rotation)
+        rot_res = set_rot(field.field, 0, Quaternion(x,y,x,w))
 
-        except rospy.ServiceException as e:
-            print ("Service call failed: ", e)
+        return rot_res
+
 

@@ -1,5 +1,6 @@
 import rospy
 import numpy as np
+import time
 
 from geometry_msgs.msg import Point, Pose, Quaternion, Twist, Wrench, PoseStamped, TwistStamped
 from nav_msgs.msg import Odometry
@@ -9,24 +10,24 @@ from std_msgs.msg import String, Header
 from tf import transformations
 
 from agent import RospyAgent
-from utils.WebotsServiceTools import WebotsServiceTools
+from utils.WebotsServiceTools import Supervisor
 
-class Krock(RospyAgent):
+class Krock(RospyAgent, Supervisor):
     BASE_TOPIC = '/krock'
+    # sub
     POSE_SUB = '{}/pose'.format(BASE_TOPIC)
+    TOUCH_SENSOR = '{}/touch_sensors'.format(BASE_TOPIC)
+    TORQUES_FEEDBACK = '{}/torques_feedback'.format(BASE_TOPIC)
+    # pub
     GAIT_CHOOSER = '{}/gait_chooser'.format(BASE_TOPIC)
     MANUAL_CONTROL = '{}/manual_control_input'.format(BASE_TOPIC)
     STATUS = '{}/status'.format(BASE_TOPIC)
     SPAWN = '{}/spawn_pose'.format(BASE_TOPIC)
-    TOUCH_SENSOR = '{}/touch_sensors'.format(BASE_TOPIC)
-    TORQUES_FEEDBACK = '{}/torques_feedback'.format(BASE_TOPIC)
-
-    POS_SERVICE = '{}/supervisor/node/get_field'.format(BASE_TOPIC)
 
     def __init__(self):
         super().__init__()
-        self.services = WebotsServiceTools(self.BASE_TOPIC)
-        self.services.get_robot_node()
+        self.name = self.BASE_TOPIC
+        self.get_robot_node()
 
     def init_publishers(self):
         return {
@@ -44,15 +45,12 @@ class Krock(RospyAgent):
 
     def callback_pose(self, data):
         self.state['pose'] = data
-        # rospy.loginfo('pose received')
 
     def callback_touch_sensors(self, data):
         self.state['touch_sensors'] = data
-        # rospy.loginfo('touch_sensors received')
 
     def callback_torques_feedback(self, data):
         self.state['torques_feedback'] = data
-        # rospy.loginfo('torques_feedback received')
 
     def move(self, gait, frontal_freq, lateral_freq, manual_mode=False):
         mode = int(manual_mode)
@@ -62,18 +60,18 @@ class Krock(RospyAgent):
     def spawn(self, pos=None):
         pos = generate_random_pose() if pos == None else pos
 
-        self.services.reset_rimulation()
-        # self.publishers['spawn'].publish(pos)
-        # in webots y and z are inverted
-        self.services.set_robot_position(x=pos.position.x,
-                                         y=pos.position.z,
-                                         z=pos.position.y,
+        # res = self.reset_simulation_physics()
+        res = self.reset_simulation()
+        # res = self.reload_world()
+
+        self.set_robot_position(x=pos.position.x,
+                                 y=pos.position.z,
+                                 z=pos.position.y,
                                          )
-        self.services.set_robot_orientation(x=pos.orientation.x,
+        self.set_robot_orientation(x=pos.orientation.x,
                                             y=pos.orientation.z,
                                             z=pos.orientation.y,
                                             w=pos.orientation.w)
-
     def on_shut_down(self):
         self.notify('on_shut_down')
 

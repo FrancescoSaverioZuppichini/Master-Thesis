@@ -1,5 +1,6 @@
 from protocols import Callbackable
 from .callbacks.SimulationCallback import SimulationCallback
+from .errors import SimulationException
 import rospy
 
 class Simulation(Callbackable, SimulationCallback):
@@ -11,12 +12,15 @@ class Simulation(Callbackable, SimulationCallback):
         self.should_stop = False
         self.notify('on_start', self, world, agent)
         self.run(world, agent, *args, **kwargs)
-        self.notify('on_finished', self, world, agent)
+        self.notify('on_finish', self, world, agent)
 
     def run(self, world, agent, *args, **kwargs):
         while not self.should_stop:
-            self.loop(world, agent, *args, **kwargs)
-            self.notify('tick', self, world, agent)
-
+            try:
+                self.loop(world, agent, *args, **kwargs)
+                self.notify('tick', self, world, agent)
+            except SimulationException as e:
+                print(e)
+                self.should_stop = True
     def loop(self, world, agent, *args, **kwargs):
         pass

@@ -1,1 +1,1 @@
-from .Simulation import Simulation
+from .Simulation import SimulationException, Simulation

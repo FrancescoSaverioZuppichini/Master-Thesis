@@ -2,6 +2,7 @@ import threading
 import time
 
 from .SimulationCallback import SimulationCallback
+from ..errors import SimulationException
 
 class Alarm(SimulationCallback):
     def __init__(self, stop_after_s=60):
@@ -12,4 +13,5 @@ class Alarm(SimulationCallback):
 
     def tick(self, sim, *args, **kwargs):
         elapsed = (time.time() - self.start)
-        sim.should_stop = elapsed >= self.stop_after_s
+        should_stop = elapsed >= self.stop_after_s
+        if should_stop: raise SimulationException('Time elapsed!')
