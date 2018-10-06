@@ -3,6 +3,7 @@ from .callbacks.SimulationCallback import SimulationCallback
 from .errors import SimulationException
 import rospy
 
+
 class Simulation(Callbackable, SimulationCallback):
     def __init__(self):
         self.should_stop = False
@@ -22,5 +23,6 @@ class Simulation(Callbackable, SimulationCallback):
             except SimulationException as e:
                 print(e)
                 self.should_stop = True
+
     def loop(self, world, agent, *args, **kwargs):
         pass

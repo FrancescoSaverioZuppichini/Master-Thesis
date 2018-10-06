@@ -12,6 +12,7 @@ from tf import transformations
 from agent import RospyAgent
 from utils.WebotsServiceTools import Supervisor
 
+
 class Krock(RospyAgent, Supervisor):
     BASE_TOPIC = '/krock'
     # sub
@@ -31,7 +32,7 @@ class Krock(RospyAgent, Supervisor):
 
     def init_publishers(self):
         return {
-            'joy' : rospy.Publisher('/joy', Joy, queue_size=1),
+            'joy': rospy.Publisher('/joy', Joy, queue_size=1),
             'gait': rospy.Publisher(self.GAIT_CHOOSER, Int8Stamped, queue_size=1),
             'manual_control': rospy.Publisher(self.MANUAL_CONTROL, Float64ArrayStamped, queue_size=1),
             'status': rospy.Publisher(self.STATUS, String, queue_size=1),
@@ -65,19 +66,24 @@ class Krock(RospyAgent, Supervisor):
         # res = self.reload_world()
 
         self.set_robot_position(x=pos.position.x,
-                                 y=pos.position.z,
-                                 z=pos.position.y,
-                                         )
+                                y=pos.position.z,
+                                z=pos.position.y,
+                                )
+
         self.set_robot_orientation(x=pos.orientation.x,
-                                            y=pos.orientation.z,
-                                            z=pos.orientation.y,
-                                            w=pos.orientation.w)
-    def on_shut_down(self):
+                                   y=pos.orientation.z,
+                                   z=pos.orientation.y,
+                                   w=pos.orientation.w)
+
+    def die(self):
         self.notify('on_shut_down')
 
-map_max_x = 5.0
-map_max_y = 5.0
+
+map_max_x = 5.0 - 0.3
+map_max_y = 5.0 - 0.3
 map_max_z = 0.5
+
+
 # TODO this stuff should go in utils or in simlation class
 def generate_random_pose():
     # x,y (z will be fixed as the max_hm_z so that the robot will drop down), gamma as orientation
@@ -86,8 +92,8 @@ def generate_random_pose():
     random_pose = Pose()
     random_pose.position.x = rx
     random_pose.position.y = ry
-    random_pose.position.z = map_max_z * 1.0 # spawn on the air
-    qto = transformations.quaternion_from_euler(0, 0, 2*np.pi * np.random.uniform(0,1), axes='sxyz')
+    random_pose.position.z = map_max_z * 1.0  # spawn on the air
+    qto = transformations.quaternion_from_euler(0, 0, 2 * np.pi * np.random.uniform(0, 1), axes='sxyz')
     random_pose.orientation.x = qto[0]
     random_pose.orientation.y = qto[1]
     random_pose.orientation.z = qto[2]

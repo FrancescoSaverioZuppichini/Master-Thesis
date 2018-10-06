@@ -32,4 +32,6 @@ class RosBagSaver(AgentCallback):
 
     def on_shut_down(self):
         self.tr.start()
+        self.tr.join()
+        self.tr = threading.Thread(target=self.store)
         # self.bag.close()

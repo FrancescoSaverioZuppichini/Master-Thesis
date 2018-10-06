@@ -2,6 +2,7 @@ import rospy
 
 from .Agent import Agent
 
+
 class RospyAgent(Agent):
     def __init__(self, rate=None):
         super().__init__()
@@ -18,6 +19,7 @@ class RospyAgent(Agent):
 
     def init_subscribers(self):
         return {}
+
 
 class AgentState(dict):
     def __init__(self, agent: RospyAgent):

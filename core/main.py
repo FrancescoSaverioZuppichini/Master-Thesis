@@ -7,19 +7,20 @@ import tqdm
 from agent.krock import Krock
 from agent.callbacks import RosBagSaver
 from simulation import Simulation
-from simulation.callbacks import Alarm, FallDetector
+from simulation.callbacks import *
 
-N_SIM = 20
-SIM_TIME = 2
+N_SIM = 100
+SIM_TIME = 5
 
 rospy.init_node("record_single_trajectory")
 
 nap = rospy.Rate(hz=10)
 
 krock = Krock()
-krock.add_callback(RosBagSaver('./data.bag', topics=['pose']))
+krock.add_callback(RosBagSaver('./data/{}.bag'.format(time.time()), topics=['pose']))
 krock()
-rospy.on_shutdown(krock.on_shut_down)
+rospy.on_shutdown(krock.die)
+
 
 class MySimulation(Simulation):
     def on_start(self, *args, **kwargs):
@@ -38,10 +39,11 @@ class MySimulation(Simulation):
                    frontal_freq=0,
                    lateral_freq=0,
                    manual_mode=True)
+        krock.die()
 
 sim = MySimulation()
 sim.add_callback(Alarm(stop_after_s=SIM_TIME))
-sim.add_callback(FallDetector())
+sim.add_callback(OutOfMap(x=(-5,5), y=(-5,5)))
 
 bar = tqdm.tqdm(range(N_SIM))
 bar.set_description('Running simulations')
