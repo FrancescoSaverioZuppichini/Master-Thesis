@@ -10,7 +10,7 @@ from std_msgs.msg import String, Header
 from tf import transformations
 
 from agent import RospyAgent
-from utils.WebotsServiceTools import Supervisor
+from utils.webots import Supervisor
 
 
 class Krock(RospyAgent, Supervisor):
@@ -74,9 +74,6 @@ class Krock(RospyAgent, Supervisor):
                                    y=pos.orientation.z,
                                    z=pos.orientation.y,
                                    w=pos.orientation.w)
-
-    def die(self):
-        self.notify('on_shut_down')
 
 
 map_max_x = 5.0 - 0.3
