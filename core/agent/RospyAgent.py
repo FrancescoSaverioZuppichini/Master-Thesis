@@ -8,7 +8,7 @@ class RospyAgent(Agent):
         super().__init__()
         self.rate = rospy.Rate(hz=10) if rate == None else rate
         self.state = AgentState(self)
-        rospy.on_shutdown(self.die)
+        # rospy.on_shutdown(self.die)
 
     def __call__(self, *args, **kwargs):
         self.subscribers = self.init_subscribers()

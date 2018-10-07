@@ -1,6 +1,7 @@
 from protocols import Callbackable
+from .callbacks import AgentCallback
 
-class Agent(Callbackable):
+class Agent(Callbackable, AgentCallback):
     def __init__(self):
         self.state = {}
         self.set_callbacks([self])

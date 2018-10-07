@@ -3,8 +3,7 @@ import time
 
 from .SimulationCallback import SimulationCallback
 from ..errors import SimulationException
-# TODO this is a naive implementation, a more robust approach
-# should be tracing the z and check how much it changed in time
+# TODO an extractor function should be added to allow more flexibility into the agent state
 class OutOfMap(SimulationCallback):
     def __init__(self, x, y, z=0, tol=-.01):
         self.x, self.y, self.z = x, y, z

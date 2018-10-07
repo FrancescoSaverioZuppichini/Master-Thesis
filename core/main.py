@@ -11,25 +11,26 @@ from simulation import Simulation
 from simulation.callbacks import *
 
 from world import *
+from utils import Supervisor
 
 N_SIM = 100
-SIM_TIME = 5
+SIM_TIME = 20
 WORLD = 'krock2'
 
 rospy.init_node("record_single_trajectory")
 
 nap = rospy.Rate(hz=10)
 
-krock = Krock()
-krock.add_callback(RosBagSaver('./data/{}.bag'.format(time.time()), topics=['pose']))
-krock()
-
 w = World('krock2',
           format='wbt',
           base_dir='../../resources/worlds/webots')
 
-class MySimulation(Simulation):
-    def on_start(self, *args, **kwargs):
+# TODO move this class away and create a WebotsSimulation class
+class MySimulation(Simulation, Supervisor):
+    name = '/krock'
+
+    def on_start(self, sim, world, agent, *args, **kwargs):
+        self.load_world(str(world.path))
         krock.spawn(pos=None)
 
     def loop(self, world, agent, *args, **kwargs):
@@ -55,4 +56,8 @@ bar = tqdm.tqdm(range(N_SIM))
 bar.set_description('Running simulations')
 
 for _ in bar:
-    sim(world=None, agent=krock)
+    krock = Krock()
+    krock.add_callback(RosBagSaver('./data/{}.bag'.format(time.time()),
+                                   topics=['pose']))
+    krock()
+    sim(world=w, agent=krock)
