@@ -6,11 +6,15 @@ import tqdm
 
 from agent.krock import Krock
 from agent.callbacks import RosBagSaver
+
 from simulation import Simulation
 from simulation.callbacks import *
 
+from world import *
+
 N_SIM = 100
 SIM_TIME = 5
+WORLD = 'krock2'
 
 rospy.init_node("record_single_trajectory")
 
@@ -19,7 +23,10 @@ nap = rospy.Rate(hz=10)
 krock = Krock()
 krock.add_callback(RosBagSaver('./data/{}.bag'.format(time.time()), topics=['pose']))
 krock()
-rospy.on_shutdown(krock.die)
+
+w = World('krock2',
+          format='wbt',
+          base_dir='../../resources/worlds/webots')
 
 class MySimulation(Simulation):
     def on_start(self, *args, **kwargs):
@@ -41,8 +48,8 @@ class MySimulation(Simulation):
         krock.die()
 
 sim = MySimulation()
-sim.add_callback(Alarm(stop_after_s=SIM_TIME))
-sim.add_callback(OutOfMap(x=(-5,5), y=(-5,5)))
+sim.add_callbacks([Alarm(stop_after_s=SIM_TIME),
+                   OutOfMap(x=(-5, 5), y=(-5, 5))])
 
 bar = tqdm.tqdm(range(N_SIM))
 bar.set_description('Running simulations')
