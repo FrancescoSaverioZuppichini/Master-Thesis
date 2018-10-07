@@ -21,7 +21,6 @@ krock.add_callback(RosBagSaver('./data/{}.bag'.format(time.time()), topics=['pos
 krock()
 rospy.on_shutdown(krock.die)
 
-
 class MySimulation(Simulation):
     def on_start(self, *args, **kwargs):
         krock.spawn(pos=None)

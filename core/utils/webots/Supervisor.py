@@ -22,10 +22,15 @@ from utils.ros import ros_service
 # If the srv is not found, verify that it appears in the service
 # generation segment in the CMakeLists.txt of this package
 from webots_ros.srv import get_bool, get_int, get_uint64, set_int, node_get_field, field_get_node, field_get_vec3f, \
-    node_get_position, node_get_orientation, field_set_vec3f, field_set_rotation
+    node_get_position, node_get_orientation, field_set_vec3f, field_set_rotation, set_string
 
 
 class Supervisor:
+    """
+    Interface to access all the services exposed by the Webots Supervisor class.
+    This class can be inherited to automatically access all the methods,
+    or it can be instantiated to be used and shared/
+    """
     name = None
 
     @staticmethod
@@ -42,6 +47,12 @@ class Supervisor:
         service = self.name + '/supervisor/get_root'
         world = self.get_service(service, get_uint64)
         return world.get_world()
+
+    def load_world(self, world_name):
+        service = self.name + '/supervisor/world_load'
+        set_world = self.get_service(service, set_string)
+        res = set_world(world_name)
+        return res
 
     def reload_world(self):
         service = self.name + '/supervisor/world_reload'

@@ -13,3 +13,6 @@ class Agent(Callbackable):
 
     def stop(self):
         pass
+
+    def die(self):
+        self.notify('on_shut_down')
