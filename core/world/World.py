@@ -1,5 +1,6 @@
 from pathlib import Path
 
+
 class World():
     """
     Basic abstraction of a world. It contains the basic information
@@ -7,6 +8,7 @@ class World():
     Ideally it should be able to load some information about it,
     for example the coordinates.
     """
+
     def __init__(self, name, format, base_dir='./worlds'):
         self.name = name
         self.base_dir = base_dir
@@ -15,8 +17,8 @@ class World():
     @property
     def path(self):
         return Path("{}/{}.{}".format(self.base_dir,
-                                          self.name,
-                                          self.format))
+                                      self.name,
+                                      self.format))
 
     def __call__(self, *args, **kwargs):
         """

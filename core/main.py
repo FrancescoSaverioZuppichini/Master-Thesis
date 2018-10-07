@@ -1,7 +1,5 @@
 import rospy
-import numpy as np
 import time
-from geometry_msgs.msg import Pose, PoseStamped
 import tqdm
 
 from agent.krock import Krock
@@ -25,6 +23,7 @@ w = World('krock2',
           format='wbt',
           base_dir='../../resources/worlds/webots')
 
+
 # TODO move this class away and create a WebotsSimulation class
 class MySimulation(Simulation, Supervisor):
     name = '/krock'
@@ -47,6 +46,7 @@ class MySimulation(Simulation, Supervisor):
                    lateral_freq=0,
                    manual_mode=True)
         krock.die()
+
 
 sim = MySimulation()
 sim.add_callbacks([Alarm(stop_after_s=SIM_TIME),
