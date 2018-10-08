@@ -14,7 +14,7 @@ parser.add_argument('-w',
                     '--world',
                     type=str,
                     help='The path to the world file',
-                    default='../resources/worlds/webots/krock2.wbt',
+                    default='../../resources/worlds/webots/krock2.wbt',
                     required=False)
 parser.add_argument('-e',
                     '--engine',
@@ -32,7 +32,7 @@ parser.add_argument('-t',
                     '--time',
                     type=float,
                     help='Maximum time per simulation',
-                    default=10)
+                    default=5)
 parser.add_argument('-r',
                     '--robot',
                     type=str,

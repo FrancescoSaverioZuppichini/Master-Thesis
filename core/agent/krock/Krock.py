@@ -81,6 +81,13 @@ class Krock(RospyAgent, Supervisor):
                   lateral_freq=0,
                   manual_mode=True)
 
+    def act(self, world):
+        self.move(gait=1,
+                  frontal_freq=1.0,
+                  lateral_freq=0,
+                  manual_mode=True)
+
+
 map_max_x = 5.0 - 0.3
 map_max_y = 5.0 - 0.3
 map_max_z = 0.5

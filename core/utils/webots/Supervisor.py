@@ -110,3 +110,6 @@ class Supervisor:
         rot_res = set_rot(field.field, 0, Quaternion(x, y, x, w))
 
         return rot_res
+
+    def restart_robot(self):
+        service = self.name + '/krock/supervisor/node/restart_controller'
