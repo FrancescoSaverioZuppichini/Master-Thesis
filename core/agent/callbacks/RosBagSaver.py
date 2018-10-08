@@ -4,6 +4,7 @@ import tqdm
 
 from .AgentCallback import AgentCallback
 
+
 class RosBagSaver(AgentCallback):
     def __init__(self, save_dir, topics=None):
         self.save_dir = save_dir
@@ -22,13 +23,12 @@ class RosBagSaver(AgentCallback):
     def store(self):
         self.iter = 0
         bag = rosbag.Bag(self.save_dir, 'w')
-        bar = tqdm.tqdm(self.cache.items())
-        bar.set_description('Writing to disk...')
-        for key, values in bar:
+        # bar = tqdm.tqdm(self.cache.items())
+        # bar.set_description('Writing to disk...')
+        for key, values in self.cache.items():
             for value in values:
                 bag.write(key, value)
         bag.close()
-
 
     def on_shut_down(self):
         self.tr.start()
