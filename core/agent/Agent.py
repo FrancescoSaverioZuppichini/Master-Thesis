@@ -15,5 +15,8 @@ class Agent(Callbackable, AgentCallback):
     def stop(self):
         pass
 
+    def sleep(self):
+        pass
+
     def die(self):
         self.notify('on_shut_down')

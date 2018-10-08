@@ -9,20 +9,17 @@ class World():
     for example the coordinates.
     """
 
-    def __init__(self, name, format, base_dir='./worlds'):
-        self.name = name
-        self.base_dir = base_dir
-        self.format = format
+    def __init__(self, file_path):
+        self.file_path = file_path
 
     @property
     def path(self):
-        return Path("{}/{}.{}".format(self.base_dir,
-                                      self.name,
-                                      self.format))
+        return Path(self.file_path)
 
     def __call__(self, *args, **kwargs):
         """
-        TODO load information about the world
+        This method should initialise the world. E.g. open file,
+        load information or load the map into the simulator
         :param args:
         :param kwargs:
         :return:

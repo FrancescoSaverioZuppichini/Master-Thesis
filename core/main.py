@@ -1,6 +1,7 @@
 import rospy
 import time
 import tqdm
+import subprocess
 
 from agent.krock import Krock
 from agent.callbacks import RosBagSaver
@@ -8,47 +9,32 @@ from agent.callbacks import RosBagSaver
 from simulation import Simulation
 from simulation.callbacks import *
 
+from webots import WebotsSimulation
+
 from world import *
 from utils import Supervisor
 
-N_SIM = 100
-SIM_TIME = 20
-WORLD = 'krock2'
+from webots import *
 
-rospy.init_node("record_single_trajectory")
+from parser import args
 
-nap = rospy.Rate(hz=10)
+N_SIM = args.n_sim
+SIM_TIME = args.time
+WORLD = args.world
 
-w = World('krock2',
-          format='wbt',
-          base_dir='../../resources/worlds/webots')
+rospy.init_node("traversability_simulation")
 
+w = World(file_path=WORLD)
+w()
 
-# TODO move this class away and create a WebotsSimulation class
-class MySimulation(Simulation, Supervisor):
-    name = '/krock'
+def create_agent():
+    krock = Krock()
+    krock.add_callback(RosBagSaver('./data/{}.bag'.format(time.time()),
+                                   topics=['pose']))
+    krock()
+    return krock
 
-    def on_start(self, sim, world, agent, *args, **kwargs):
-        self.load_world(str(world.path))
-        krock.spawn(pos=None)
-
-    def loop(self, world, agent, *args, **kwargs):
-        nap.sleep()
-        agent.move(gait=1,
-                   frontal_freq=1.0,
-                   lateral_freq=0,
-                   manual_mode=True)
-        nap.sleep()
-
-    def on_finish(self, sim, *args, **kwargs):
-        krock.move(gait=1,
-                   frontal_freq=0,
-                   lateral_freq=0,
-                   manual_mode=True)
-        krock.die()
-
-
-sim = MySimulation()
+sim = WebotsSimulation(name=args.robot)
 sim.add_callbacks([Alarm(stop_after_s=SIM_TIME),
                    OutOfMap(x=(-5, 5), y=(-5, 5))])
 
@@ -56,8 +42,6 @@ bar = tqdm.tqdm(range(N_SIM))
 bar.set_description('Running simulations')
 
 for _ in bar:
-    krock = Krock()
-    krock.add_callback(RosBagSaver('./data/{}.bag'.format(time.time()),
-                                   topics=['pose']))
-    krock()
-    sim(world=w, agent=krock)
+    a = create_agent()
+    sim(world=w,
+        agent=a)
