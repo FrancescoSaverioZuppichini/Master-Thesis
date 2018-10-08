@@ -75,6 +75,11 @@ class Krock(RospyAgent, Supervisor):
                                    z=pos.orientation.y,
                                    w=pos.orientation.w)
 
+    def stop(self):
+        self.move(gait=1,
+                  frontal_freq=0,
+                  lateral_freq=0,
+                  manual_mode=True)
 
 map_max_x = 5.0 - 0.3
 map_max_y = 5.0 - 0.3

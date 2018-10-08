@@ -5,7 +5,8 @@ import rospy
 
 
 class Simulation(Callbackable, SimulationCallback):
-    def __init__(self):
+    def __init__(self, name='simulation'):
+        self.name = name
         self.should_stop = False
         self.set_callbacks([self])
 
