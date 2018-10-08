@@ -18,7 +18,8 @@ class World():
 
     def __call__(self, *args, **kwargs):
         """
-        TODO load information about the world
+        This method should initialise the world. E.g. open file,
+        load information or load the map into the simulator
         :param args:
         :param kwargs:
         :return:

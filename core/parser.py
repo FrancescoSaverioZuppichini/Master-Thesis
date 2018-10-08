@@ -14,7 +14,8 @@ parser.add_argument('-w',
                     '--world',
                     type=str,
                     help='The path to the world file',
-                    required=True)
+                    default='../resources/worlds/webots/krock2.wbt',
+                    required=False)
 parser.add_argument('-e',
                     '--engine',
                     type=str,
@@ -32,6 +33,11 @@ parser.add_argument('-t',
                     type=float,
                     help='Maximum time per simulation',
                     default=10)
+parser.add_argument('-r',
+                    '--robot',
+                    type=str,
+                    help='Name of the robot. Available: krock',
+                    default='krock')
 
 args = parser.parse_args()
 
@@ -41,3 +47,6 @@ print(art)
 header = list(args.__dict__.keys())
 rows = [list(args.__dict__.values())]
 print(tabulate.tabulate(rows, header))
+
+# with open('./krock.txt', 'r') as f:
+#     print(f.read())

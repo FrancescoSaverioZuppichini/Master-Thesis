@@ -5,7 +5,8 @@ import rospy
 
 
 class Simulation(Callbackable, SimulationCallback):
-    def __init__(self):
+    def __init__(self, name='simulation'):
+        self.name = name
         self.should_stop = False
         self.set_callbacks([self])
 
@@ -21,7 +22,7 @@ class Simulation(Callbackable, SimulationCallback):
                 self.loop(world, agent, *args, **kwargs)
                 self.notify('tick', self, world, agent)
             except SimulationException as e:
-                # print(e)
+                print(e)
                 self.should_stop = True
 
     def loop(self, world, agent, *args, **kwargs):
