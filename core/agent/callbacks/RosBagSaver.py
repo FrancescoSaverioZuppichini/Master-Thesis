@@ -22,9 +22,9 @@ class RosBagSaver(AgentCallback):
     def store(self):
         self.iter = 0
         bag = rosbag.Bag(self.save_dir, 'w')
-        bar = tqdm.tqdm(self.cache.items())
-        bar.set_description('Writing to disk...')
-        for key, values in bar:
+        # bar = tqdm.tqdm(self.cache.items())
+        # bar.set_description('Writing to disk...')
+        for key, values in self.cache.items():
             for value in values:
                 bag.write(key, value)
         bag.close()

@@ -1,6 +1,7 @@
 import rospy
 import time
 import tqdm
+import subprocess
 
 from agent.krock import Krock
 from agent.callbacks import RosBagSaver
@@ -14,7 +15,7 @@ from utils import Supervisor
 from parser import args
 from pprint import pprint
 
-pprint(args.__dict__)
+# pprint(args.__dict__)
 
 N_SIM = args.n_sim
 SIM_TIME = args.time
@@ -25,6 +26,10 @@ rospy.init_node("record_single_trajectory")
 nap = rospy.Rate(hz=10)
 
 w = World(file_path=WORLD)
+
+# subprocess.call('webots --stdout --minimize --batch', shell=True)
+
+# time.sleep(10)
 
 
 # TODO move this class away and create a WebotsSimulation class

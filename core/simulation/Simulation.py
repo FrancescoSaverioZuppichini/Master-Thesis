@@ -21,7 +21,7 @@ class Simulation(Callbackable, SimulationCallback):
                 self.loop(world, agent, *args, **kwargs)
                 self.notify('tick', self, world, agent)
             except SimulationException as e:
-                print(e)
+                # print(e)
                 self.should_stop = True
 
     def loop(self, world, agent, *args, **kwargs):

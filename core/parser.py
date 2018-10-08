@@ -1,4 +1,7 @@
 import argparse
+import tabulate
+
+from art import *
 
 class CheckEngine(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
@@ -11,16 +14,14 @@ parser.add_argument('-w',
                     '--world',
                     type=str,
                     help='The path to the world file',
-                    required=True
-                    )
+                    required=True)
 parser.add_argument('-e',
                     '--engine',
                     type=str,
                     help='The Engine used to run the simulation. '
                          'Available: webots, gazebo. Default webots',
                     default='webots',
-                    action=CheckEngine
-                    )
+                    action=CheckEngine)
 parser.add_argument('-n',
                     '--n-sim',
                     type=int,
@@ -31,4 +32,12 @@ parser.add_argument('-t',
                     type=float,
                     help='Maximum time per simulation',
                     default=10)
+
 args = parser.parse_args()
+
+art = text2art('Traversability Simulator')
+print(art)
+
+header = list(args.__dict__.keys())
+rows = [list(args.__dict__.values())]
+print(tabulate.tabulate(rows, header))
