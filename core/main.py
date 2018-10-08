@@ -11,17 +11,20 @@ from simulation.callbacks import *
 from world import *
 from utils import Supervisor
 
-N_SIM = 100
-SIM_TIME = 20
-WORLD = 'krock2'
+from parser import args
+from pprint import pprint
+
+pprint(args.__dict__)
+
+N_SIM = args.n_sim
+SIM_TIME = args.time
+WORLD = args.world
 
 rospy.init_node("record_single_trajectory")
 
 nap = rospy.Rate(hz=10)
 
-w = World('krock2',
-          format='wbt',
-          base_dir='../../resources/worlds/webots')
+w = World(file_path=WORLD)
 
 
 # TODO move this class away and create a WebotsSimulation class

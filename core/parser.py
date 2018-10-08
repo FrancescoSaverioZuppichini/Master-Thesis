@@ -21,6 +21,14 @@ parser.add_argument('-e',
                     default='webots',
                     action=CheckEngine
                     )
+parser.add_argument('-n',
+                    '--n-sim',
+                    type=int,
+                    help="Number of simulation used.",
+                    default=100)
+parser.add_argument('-t',
+                    '--time',
+                    type=float,
+                    help='Maximum time per simulation',
+                    default=10)
 args = parser.parse_args()
-
-print(args)
