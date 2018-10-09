@@ -1,9 +1,11 @@
 from protocols import Callbackable
 from .callbacks import AgentCallback
 
+from world import World
+
 class Agent(Callbackable, AgentCallback):
     """
-    Basic Agent inferface. An agent is an entity that interacts with a world,
+    Basic Agent interface. An agent is an entity that interacts with a world,
     and environment.
     It is defined by the action it can do. This interfaces exposes some basic
     interaction such as 'move'.
@@ -14,7 +16,7 @@ class Agent(Callbackable, AgentCallback):
         self.set_callbacks([self])
 
     # TODO what about pass the world param?
-    def spawn(self, pos):
+    def spawn(self, pos, world: World, *args, **kwargs):
         """
         Spawn the robot in the world.
         :param pos:
@@ -34,7 +36,7 @@ class Agent(Callbackable, AgentCallback):
         """
         pass
 
-    def act(self, world, *args, **kwargs):
+    def act(self, world: World, *args, **kwargs):
         """
         This function should do something based on the world the agent
         is in. Ideally it should move it based on some input.
@@ -60,4 +62,8 @@ class Agent(Callbackable, AgentCallback):
         pass
 
     def die(self):
+        """
+        This function kill the agent.
+        :return:
+        """
         self.notify('on_shut_down')

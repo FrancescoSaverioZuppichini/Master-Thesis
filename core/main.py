@@ -19,7 +19,7 @@ WORLD = args.world
 
 rospy.init_node("traversability_simulation")
 
-w = World(file_path=WORLD)
+w = WebotsWorld(file_path=WORLD)
 w()
 
 
