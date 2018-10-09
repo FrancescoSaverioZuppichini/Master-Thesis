@@ -4,8 +4,6 @@ from utils.webots import Supervisor
 
 class WebotsSimulation(Simulation, Supervisor):
     def on_start(self, sim, world, agent, *args, **kwargs):
-        self.load_world(str(world.path))
-        self.reset_simulation_physics()
         agent.spawn()
 
     def loop(self, world, agent, *args, **kwargs):
