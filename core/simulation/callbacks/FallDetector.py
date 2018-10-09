@@ -10,6 +10,8 @@ class OutOfMap(SimulationCallback):
         self.tol = tol
 
     def tick(self, sim, world, agent, *args, **kwargs):
+        if 'pose' not in agent.state: return
+
         pose = agent.state['pose']
         pos = pose.pose.position
         x, y, z = pos.x, pos.y, pos.z
