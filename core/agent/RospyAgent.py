@@ -4,10 +4,14 @@ from .Agent import Agent
 
 
 class RospyAgent(Agent):
+    """
+    ROS agent. This class adds some features to the basic Agent interface.
+    I allows to initialize subscribers and publisher and keep a organize
+    reference to them into a dictionary.
+    """
     def __init__(self, rate=None):
         super().__init__()
         self.rate = rospy.Rate(hz=10) if rate == None else rate
-        self.state = AgentState(self)
 
     def __call__(self, *args, **kwargs):
         self.subscribers = self.init_subscribers()
@@ -22,11 +26,3 @@ class RospyAgent(Agent):
     def sleep(self):
         self.rate.sleep()
 
-class AgentState(dict):
-    def __init__(self, agent: RospyAgent):
-        super().__init__()
-        self.agent = agent
-
-    def __setitem__(self, key, value):
-        super().__setitem__(key, value)
-        self.agent.notify('on_state_change', key, value)
