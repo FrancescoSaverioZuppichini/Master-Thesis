@@ -14,7 +14,7 @@ parser.add_argument('-w',
                     '--world',
                     type=str,
                     help='The path to the world file',
-                    default='./resources/worlds/webots/krock2.wbt',
+                    default='/home/francesco/Documents/krock-sim/krock/krock2_ros/worlds/krock2_camera.wbt',
                     required=False)
 parser.add_argument('-e',
                     '--engine',
