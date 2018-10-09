@@ -113,3 +113,17 @@ class Supervisor:
 
     def restart_robot(self):
         service = self.name + '/krock/supervisor/node/restart_controller'
+
+    def enable_front_camera(self, enable=1):
+        # this is a serivce call that will enable the camera at the fron
+        # of the robot. Once it is enabled, the webots controller will
+        # publish the image data in /self.model_name/front_camera/image
+        service = self.name+'/front_camera/enable'
+        rospy.loginfo("Waiting for service %s", service)
+        rospy.wait_for_service(service)
+        try:
+            request_enable = rospy.ServiceProxy(service, set_int)
+            answer = request_enable(enable) # use 0 for disabling
+            print (answer)
+        except rospy.ServiceException as e:
+            print ("Service call failed: ", e)
