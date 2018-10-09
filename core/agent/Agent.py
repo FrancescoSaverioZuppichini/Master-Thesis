@@ -12,7 +12,7 @@ class Agent(Callbackable, AgentCallback):
     # TODO I should add a Brain that decide how to act based on the enviroment
     """
     def __init__(self):
-        self.state = {}
+        self.state = AgentState(self)
         self.set_callbacks([self])
 
     # TODO what about pass the world param?
@@ -67,3 +67,12 @@ class Agent(Callbackable, AgentCallback):
         :return:
         """
         self.notify('on_shut_down')
+
+class AgentState(dict):
+    def __init__(self, agent: Agent):
+        super().__init__()
+        self.agent = agent
+
+    def __setitem__(self, key, value):
+        super().__setitem__(key, value)
+        self.agent.notify('on_state_change', key, value)
