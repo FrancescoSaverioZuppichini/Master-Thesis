@@ -1,5 +1,5 @@
 from world import World
-from utils import Supervisor
+from utils.webots import *
 import time
 from deprecation import deprecated
 
@@ -9,4 +9,11 @@ class WebotsWorld(World, Supervisor):
     def __call__(self, *args, **kwargs):
         self.load_world(str(self.path))
         time.sleep(3)
-        self.reset_simulation_physics()
+
+        self.grid = Node.from_def(self.name, 'EL_GRID')
+
+        self.x_dim = self.grid['xDimension'][0].value
+        self.x_spac = self.grid['xSpacing'][0].value
+
+        self.y_dim = self.grid['zDimension'][0].value
+        self.y_spac = self.grid['zSpacing'][0].value

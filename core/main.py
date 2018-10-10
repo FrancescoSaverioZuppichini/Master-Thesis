@@ -25,14 +25,13 @@ w()
 
 def create_agent():
     krock = Krock()
-    krock.add_callback(RosBagSaver('./data/{}.bag'.format(time.time()),
-                                   topics=['pose']))
+    # krock.add_callback(RosBagSaver('./data/{}.bag'.format(time.time()),
+    #                                topics=['pose']))
     krock()
     return krock
 
-
 sim = WebotsSimulation(name=args.robot)
-sim.add_callbacks([Alarm(stop_after_s=SIM_TIME),
+sim.add_callbacks([Alarm(stop_after_s=1000),
                    OutOfMap(x=(-5, 5), y=(-5, 5))])
 
 bar = tqdm.tqdm(range(N_SIM))
