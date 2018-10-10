@@ -10,7 +10,7 @@ Let's see some code:
 from utils.webots import Node 
 # create a Node
 
-node = Node.from_def('EL_GRID')
+node = Node.from_def('/krock','EL_GRID')
 
 # get a field from that node
 
@@ -23,7 +23,7 @@ print(el.value)
 print(type(el.value))
 ```
 
-All the headless of calling for each service is hidden inside Node
+All the complexity of calling for each service is hidden inside Node
 The base interface is `Supervisor` that exposes an array of useful methods to call the services
 exposed by ros.
 
