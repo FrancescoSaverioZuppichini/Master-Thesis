@@ -5,25 +5,30 @@ import time
 from geometry_msgs.msg import Point, Pose, Quaternion, Twist, Wrench, PoseStamped, TwistStamped
 from nav_msgs.msg import Odometry
 from webots_ros.msg import Int8Stamped, Float64ArrayStamped
-from sensor_msgs.msg import JointState, Joy
+from sensor_msgs.msg import JointState, Joy, Image
 from std_msgs.msg import String, Header
 from tf import transformations
 
 from agent import RospyAgent
 from utils.webots import Supervisor
 
+import cv2
+import matplotlib.pyplot as plt
+
+from cv_bridge import CvBridge
 
 class Krock(RospyAgent, Supervisor):
     BASE_TOPIC = '/krock'
-    # sub
-    POSE_SUB = '{}/pose'.format(BASE_TOPIC)
-    TOUCH_SENSOR = '{}/touch_sensors'.format(BASE_TOPIC)
-    TORQUES_FEEDBACK = '{}/torques_feedback'.format(BASE_TOPIC)
     # pub
     GAIT_CHOOSER = '{}/gait_chooser'.format(BASE_TOPIC)
     MANUAL_CONTROL = '{}/manual_control_input'.format(BASE_TOPIC)
     STATUS = '{}/status'.format(BASE_TOPIC)
     SPAWN = '{}/spawn_pose'.format(BASE_TOPIC)
+    # sub
+    POSE_SUB = '{}/pose'.format(BASE_TOPIC)
+    TOUCH_SENSOR = '{}/touch_sensors'.format(BASE_TOPIC)
+    TORQUES_FEEDBACK = '{}/torques_feedback'.format(BASE_TOPIC)
+    FRONTAL_CAMERA = '{}/front_camera/image'.format(BASE_TOPIC)
 
     def __init__(self):
         super().__init__()
@@ -43,6 +48,8 @@ class Krock(RospyAgent, Supervisor):
         rospy.Subscriber(self.POSE_SUB, PoseStamped, self.callback_pose)
         rospy.Subscriber(self.TOUCH_SENSOR, Float64ArrayStamped, self.callback_touch_sensors)
         rospy.Subscriber(self.TORQUES_FEEDBACK, Float64ArrayStamped, self.callback_torques_feedback)
+        self.enable_front_camera()
+        rospy.Subscriber(self.FRONTAL_CAMERA, Image, self.callbacks_frontal_camera, buff_size=2*32)
 
     def callback_pose(self, data):
         self.state['pose'] = data
@@ -53,12 +60,15 @@ class Krock(RospyAgent, Supervisor):
     def callback_torques_feedback(self, data):
         self.state['torques_feedback'] = data
 
+    def callbacks_frontal_camera(self, data):
+        # self.state['frontal_camera'] = data
+        pass
     def move(self, gait, frontal_freq, lateral_freq, manual_mode=False):
         mode = int(manual_mode)
         msg = Float64ArrayStamped(data=[mode, gait, frontal_freq, lateral_freq])
         self.publishers['manual_control'].publish(msg)
 
-    def spawn(self, pos=None, world=None):
+    def spawn(self,world, pos=None, *args, **kwargs):
         pos = generate_random_pose() if pos == None else pos
 
         # res = self.reset_simulation_physics()

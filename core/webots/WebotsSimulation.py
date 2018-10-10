@@ -4,10 +4,9 @@ from utils.webots import Supervisor
 
 class WebotsSimulation(Simulation, Supervisor):
     def on_start(self, sim, world, agent, *args, **kwargs):
-        agent.spawn()
+        agent.spawn(world)
 
     def loop(self, world, agent, *args, **kwargs):
-        # TODO simulation should be agent agnostic
         agent.act(world)
         agent.sleep()
 

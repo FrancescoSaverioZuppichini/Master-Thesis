@@ -22,7 +22,8 @@ from utils.ros import ros_service
 # If the srv is not found, verify that it appears in the service
 # generation segment in the CMakeLists.txt of this package
 from webots_ros.srv import get_bool, get_int, get_uint64, set_int, node_get_field, field_get_node, field_get_vec3f, \
-    node_get_position, node_get_orientation, field_set_vec3f, field_set_rotation, set_string
+    node_get_position, node_get_orientation, field_set_vec3f, field_set_rotation, set_string,\
+    node_get_name, supervisor_get_from_def
 
 
 class Supervisor:
@@ -46,7 +47,8 @@ class Supervisor:
     def get_world_node(self):
         service = self.name + '/supervisor/get_root'
         world = self.get_service(service, get_uint64)
-        return world.get_world()
+        self.world = world()
+        return self.world
 
     def load_world(self, world_name):
         service = self.name + '/supervisor/world_load'
@@ -118,12 +120,24 @@ class Supervisor:
         # this is a serivce call that will enable the camera at the fron
         # of the robot. Once it is enabled, the webots controller will
         # publish the image data in /self.model_name/front_camera/image
-        service = self.name+'/front_camera/enable'
-        rospy.loginfo("Waiting for service %s", service)
-        rospy.wait_for_service(service)
-        try:
-            request_enable = rospy.ServiceProxy(service, set_int)
-            answer = request_enable(enable) # use 0 for disabling
-            print (answer)
-        except rospy.ServiceException as e:
-            print ("Service call failed: ", e)
+        service = self.name + '/front_camera/enable'
+
+        request_enable = self.get_service(service, set_int)
+        res = request_enable(enable)
+
+        return res
+
+# s = Supervisor()
+# s.name = '/krock'
+# s.get_robot_node()
+# s.get_world_node()
+# s.enable_front_camera()
+# service = s.name +'/supervisor/get_from_def'
+# req_node = s.get_service(service, supervisor_get_from_def)
+# node = req_node('TERRAIN')
+#
+# service = s.name + '/supervisor/node/get_position'
+# req_pos = s.get_service(service, node_get_position)
+# pos = req_pos(node.node)
+# print(pos)
+
