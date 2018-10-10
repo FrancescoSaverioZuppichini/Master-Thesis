@@ -8,5 +8,5 @@ class WebotsWorld(World, Supervisor):
 
     def __call__(self, *args, **kwargs):
         self.load_world(str(self.path))
-        time.sleep(7)
+        time.sleep(3)
         self.reset_simulation_physics()

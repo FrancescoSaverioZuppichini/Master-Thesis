@@ -16,7 +16,7 @@ class Agent(Callbackable, AgentCallback):
         self.set_callbacks([self])
 
     # TODO what about pass the world param?
-    def spawn(self, pos, world: World, *args, **kwargs):
+    def spawn(self, world: World, pos=None, *args, **kwargs):
         """
         Spawn the robot in the world.
         :param pos:
