@@ -25,6 +25,7 @@ class RosBagSaver(AgentCallback):
         bag = rosbag.Bag(self.save_dir, 'w')
         # bar = tqdm.tqdm(self.cache.items())
         # bar.set_description('Writing to disk...')
+        # TODO parallize this loop!
         for key, values in self.cache.items():
             for value in values:
                 bag.write(key, value)
