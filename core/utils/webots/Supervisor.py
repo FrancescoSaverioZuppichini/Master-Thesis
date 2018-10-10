@@ -21,10 +21,7 @@ from utils.ros import ros_service
 # here. I have included such files in the srv folder of this package
 # If the srv is not found, verify that it appears in the service
 # generation segment in the CMakeLists.txt of this package
-from webots_ros.srv import get_bool, get_int, get_uint64, set_int, node_get_field, field_get_node, field_get_vec3f, \
-    node_get_position, node_get_orientation, field_set_vec3f, field_set_rotation, set_string,\
-    node_get_name, supervisor_get_from_def
-
+from webots_ros.srv import *
 
 class Supervisor:
     """
@@ -117,9 +114,6 @@ class Supervisor:
         service = self.name + '/krock/supervisor/node/restart_controller'
 
     def enable_front_camera(self, enable=1):
-        # this is a serivce call that will enable the camera at the fron
-        # of the robot. Once it is enabled, the webots controller will
-        # publish the image data in /self.model_name/front_camera/image
         service = self.name + '/front_camera/enable'
 
         request_enable = self.get_service(service, set_int)
@@ -127,17 +121,96 @@ class Supervisor:
 
         return res
 
-# s = Supervisor()
-# s.name = '/krock'
-# s.get_robot_node()
-# s.get_world_node()
-# s.enable_front_camera()
-# service = s.name +'/supervisor/get_from_def'
-# req_node = s.get_service(service, supervisor_get_from_def)
-# node = req_node('TERRAIN')
-#
-# service = s.name + '/supervisor/node/get_position'
-# req_pos = s.get_service(service, node_get_position)
-# pos = req_pos(node.node)
-# print(pos)
+class Field(Supervisor):
 
+    WEBOTS_TYPE_TO_ROS = {
+        'SFInt32' : field_get_int32,
+        'MFFloat' : field_get_float,
+        'SFBool' : field_get_bool,
+        'SFRotation': field_get_rotation,
+        'SFVec3f' : field_get_vec3f,
+        'SFFloat': field_get_float
+    }
+
+    WEBOTS_TYPE_TO_URL = {
+        'SFInt32' : 'get_int32',
+        'MFFloat' : 'get_float',
+        'SFBool' : 'get_bool',
+        'SFRotation' : 'get_rotation'
+    }
+
+    def __init__(self, field, node):
+        super().__init__()
+        self.field = field
+        self.node = node
+
+    @property
+    def get_type(self):
+        service = self.node.name + '/supervisor/field/get_type_name'
+        req = self.get_service(service, field_get_type_name)
+        type_name = req(self.field.field)
+
+        return type_name, self.WEBOTS_TYPE_TO_ROS[type_name.name]
+
+    def get_type_url(self, webots_type: str):
+        type = "".join(webots_type.split('SF')[-1]).lower()
+
+        return 'get_' + type
+
+    def __getitem__(self, index):
+        wb_type, ros_type = self.get_type
+        # url = self.WEBOTS_TYPE_TO_URL[wb_type.name]
+        url = self.get_type_url(wb_type.name)
+        service = self.node.name + '/supervisor/field/{}'.format(url)
+        req = self.get_service(service, ros_type)
+        value = req(self.field.field, index)
+        return value
+
+class Node(Supervisor):
+    def __init__(self, node):
+        super().__init__()
+        self.node = node
+
+    @classmethod
+    def from_def(cls, base: str, name: str):
+        service = base + '/supervisor/get_from_def'
+        req = cls.get_service(service, supervisor_get_from_def)
+        node = req(name)
+
+        node = cls(node)
+        node.name = base
+
+        return node
+
+    def __getitem__(self, key):
+        service = self.name + '/supervisor/node/get_field'
+        req = self.get_service(service, node_get_field)
+        wb_field = req(self.node.node, key)
+
+        field = Field(wb_field, self)
+        field.name = self.name
+
+        return field
+
+"""
+Little abstraction for easy ros - webots manipulation
+Usage:
+
+# create a Node
+
+>>> node = Node.from_def('EL_GRID')
+
+# get a field from that node
+
+>>> x_dim = node['height']
+
+# get an element in that field
+
+>>> el = x_dim[0]
+>>> print(el)
+>>> print(el.value)
+>>> print(type(el.value))
+"""
+
+robot = Node.from_def('/krock', 'EL_GRID')
+print(robot['zSpacing'][0])
