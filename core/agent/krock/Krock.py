@@ -63,6 +63,7 @@ class Krock(RospyAgent, Supervisor):
     def callbacks_frontal_camera(self, data):
         # self.state['frontal_camera'] = data
         pass
+
     def move(self, gait, frontal_freq, lateral_freq, manual_mode=False):
         mode = int(manual_mode)
         msg = Float64ArrayStamped(data=[mode, gait, frontal_freq, lateral_freq])

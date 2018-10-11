@@ -1,9 +1,19 @@
-import rospy
+from .Simulation  import Simulation
 
-from .Simulation import Simulation
 
-class TraversabilitySimulation(Simulation):
+class BasicSimulation(Simulation):
+    """
+    Basic simulation. It:
+    1) spawns the agent at start
+    2) calls the agent.act function at every iteration
+    3) kills the agent when it is finished
+    """
+    def on_start(self, sim, world, agent, *args, **kwargs):
+        agent.spawn(world)
 
-    def run(self, world, agent, schedule):
-        while not self.should_stop or not rospy.is_shutdown():
-            schedule(world, agent)
+    def loop(self, world, agent, *args, **kwargs):
+        agent.act(world)
+        agent.sleep()
+
+    def on_finish(self, sim, world, agent, *args, **kwargs):
+        agent.stop()

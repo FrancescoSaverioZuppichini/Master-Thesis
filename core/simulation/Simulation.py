@@ -16,12 +16,13 @@ class Simulation(Callbackable, SimulationCallback):
     Before, during and after the main loop it fires event that can be subscribed
     using the SimulationCallback class.
     """
+    # TODO add a n parameter to decide the max number of iteration?
     def __init__(self, name='simulation'):
         self.name = name
         self.should_stop = False
         self.set_callbacks([self])
 
-    def __call__(self, world, agent, *args, **kwargs):
+    def __call__(self, world: World, agent: Agent, *args, **kwargs):
         """
         When called the simulation start and continue to loop until it is stopped
         :param world:
