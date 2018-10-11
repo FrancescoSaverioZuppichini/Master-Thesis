@@ -1,5 +1,5 @@
 from world import World
-from utils.webots import *
+from utils.webots2ros import *
 import time
 from deprecation import deprecated
 

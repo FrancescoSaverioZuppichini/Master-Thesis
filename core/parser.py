@@ -5,7 +5,7 @@ from art import *
 
 class CheckEngine(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
-        if values.lower() not in ['webots, gazebo']:
+        if values.lower() not in ['webots2ros, gazebo']:
             raise ValueError("Engine should be one of: webouts, gazebo")
         setattr(namespace, self.dest, values)
 
@@ -20,8 +20,8 @@ parser.add_argument('-e',
                     '--engine',
                     type=str,
                     help='The Engine used to run the simulation. '
-                         'Available: webots, gazebo. Default webots',
-                    default='webots',
+                         'Available: webots2ros, gazebo. Default webots2ros',
+                    default='webots2ros',
                     action=CheckEngine)
 parser.add_argument('-n',
                     '--n-sim',
