@@ -10,7 +10,7 @@ from std_msgs.msg import String, Header
 from tf import transformations
 
 from agent import RospyAgent
-from utils.webots import Supervisor
+from utils.webots2ros import Supervisor
 
 import cv2
 import matplotlib.pyplot as plt

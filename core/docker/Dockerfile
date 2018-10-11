@@ -12,7 +12,7 @@ COPY ./webots_ros/ root/catkin_ws/src/webots_ros
 RUN cd root/catkin_ws/ \
 && . /opt/ros/melodic/setup.sh \
 && . ./devel/setup.sh \
-&& export PYTHONPATH="${PYTHONPATH}:/usr/local/lib/python3.6/dist-packages" \
+&& export PYTHONPATH="${PYTHONPATH}:/usr/local/lib/python3.6/dist-packages": \
 && catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3
 
 RUN /bin/bash -c "echo '. /root/catkin_ws/devel/setup.bash' >> ~/.bashrc"

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# implementation of service calls using the supervisor API of webots
+# implementation of service calls using the supervisor API of webots2ros
 #
 import sys
 import rospy
@@ -11,7 +11,7 @@ from geometry_msgs.msg import Quaternion, Vector3
 from webots_ros.srv import *
 
 """
-Little abstraction for easy ros - webots manipulation
+Little abstraction for easy ros - webots2ros manipulation
 Usage:
 
 # create a Node
