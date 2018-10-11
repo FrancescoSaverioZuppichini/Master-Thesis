@@ -1,7 +1,6 @@
 # Webots 
 ## Utilities to easy work with ROS and Webots
-
-This package contains an easy interface to interact with Webots using ROS.
+Probably you want to avoid all the ceremony around asking a field value to Webots while using ROS. This package contains an easy object oriented interface that hides all the complexity needed to fetch a field value from a node.
 
 ### Getting Started
 Let's see some code:
@@ -22,21 +21,24 @@ print(el)
 print(el.value)
 print(type(el.value))
 ```
+A `Node` istance is used to get a node from Webots. The easier way is to use the builder `from_def`
 
-All the headless of calling for each service is hidden inside Node
-The base interface is `Supervisor` that exposes an array of useful methods to call the services
-exposed by ros.
+```
+node = Node.from_def('EL_GRID')
+```
+Under the hood the correct service is called used ROS.
 
-Then we have the `Node` that extends `Supervisor`. To get a field from a node you
+`Node` implementes `Supervisor` that is an interface with a wide array of useful methods.
+
+To get a field from a node you
 can access it as it was a dictionary since it overrides `__getitem__`
 ```python
-# get a field from that node
-
-field = node['some_field_name']
+node = Node.from_def('EL_GRID')
+# get a field from a node
+field = node['some_field_name'] 
 ```
 
-This will return a `Field` instance that can be also accessed as an array by passing
-the index of the value we want
+This will return a `Field` instance that can be also accessed as an array by passing the index of the value we want.
 
 ```python
 # get an element in that field
@@ -49,5 +51,5 @@ correct type and then using a dictionary to get the correct ROS msg and the url 
 the service request.
 
 ### TODO
-- change the name
+- change the name in something like **webots2ros**
 - create setup.py
