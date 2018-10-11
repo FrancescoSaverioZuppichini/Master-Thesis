@@ -13,13 +13,16 @@ node = Node.from_def('EL_GRID')
 
 # get a field from that node
 
-x_dim = node['height']
+h = node['height']
 
 # get an element in that field
-el = x_dim[0]
+el = h[0]
 print(el)
 print(el.value)
 print(type(el.value))
+el = h[1]
+...
+
 ```
 A `Node` istance is used to get a node from Webots. The easier way is to use the builder `from_def`
 
