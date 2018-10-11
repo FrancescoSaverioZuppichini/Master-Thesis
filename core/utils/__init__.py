@@ -1,1 +1,1 @@
-from .webots import *
+from .webots2ros import *
