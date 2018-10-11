@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# implementation of service calls using the supervisor API of webots
+# implementation of service calls using the supervisor API of webots2ros
 #
 import sys
 import rospy
@@ -8,11 +8,11 @@ import time
 import numpy as np
 import math
 
-# API reference for supervisor services exposed from webots
+# API reference for supervisor services exposed from webots2ros
 # https://www.cyberbotics.com/doc/reference/supervisor
 
 # These message type definitions are needed to request or set values
-# to some webots services. These requirements are found in the API
+# to some webots2ros services. These requirements are found in the API
 # reference.
 from geometry_msgs.msg import Quaternion, Vector3
 
@@ -89,7 +89,7 @@ class ServiceTools:
             try:
                 set_field = rospy.ServiceProxy(other_service, field_set_vec3f)
                 new_position = Vector3()
-                # webots position, also called translation is different from ROS
+                # webots2ros position, also called translation is different from ROS
                 # x -> forward, z-> right, y -> upward
                 new_position.x = 0.1
                 new_position.y = 0.3
@@ -118,7 +118,7 @@ class ServiceTools:
             try:
                 set_field = rospy.ServiceProxy(other_service, field_set_rotation)
                 new_orientation = Quaternion()
-                # remember that the rotation in webots is different from
+                # remember that the rotation in webots2ros is different from
                 # rotation in ROS. Webots x,y,z is in m and w is in rad
                 # (yaw)
                 new_orientation.x = 0.0
@@ -136,7 +136,7 @@ class ServiceTools:
 
     def enable_front_camera(self):
         # this is a serivce call that will enable the camera at the fron
-        # of the robot. Once it is enabled, the webots controller will
+        # of the robot. Once it is enabled, the webots2ros controller will
         # publish the image data in /self.model_name/front_camera/image
         service = self.model_name+'/front_camera/enable'
         rospy.loginfo("Waiting for service %s", service)
@@ -162,7 +162,7 @@ if __name__ == "__main__":
     tools.get_world_node()
     tools.get_robot_node()
 
-    # examples on how to use the webots expose services to query
+    # examples on how to use the webots2ros expose services to query
     tools.get_robot_position()
     tools.get_robot_orientation()
 

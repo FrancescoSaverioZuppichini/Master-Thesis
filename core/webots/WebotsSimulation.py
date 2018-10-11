@@ -1,5 +1,5 @@
 from simulation import Simulation
-from utils.webots import Supervisor
+from utils.webots2ros import Supervisor
 
 
 class WebotsSimulation(Simulation, Supervisor):
