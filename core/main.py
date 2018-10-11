@@ -5,9 +5,8 @@ import tqdm
 from agent.krock import Krock
 from agent.callbacks import RosBagSaver
 
+from simulation import BasicSimulation
 from simulation.callbacks import *
-
-from world import *
 
 from webots import *
 
@@ -30,7 +29,8 @@ def create_agent():
     krock()
     return krock
 
-sim = WebotsSimulation(name=args.robot)
+
+sim = BasicSimulation(name=args.robot)
 sim.add_callbacks([Alarm(stop_after_s=1000),
                    OutOfMap(x=(-5, 5), y=(-5, 5))])
 
