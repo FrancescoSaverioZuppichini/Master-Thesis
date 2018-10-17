@@ -1,4 +1,4 @@
-FROM ros-melodic-python3
+FROM zuppif/ros-melodic-python3:test
 
 RUN ln -s /usr/local/lib/python3.6/dist-packages /usr/local/lib/python3.6/site-packages
 
@@ -7,7 +7,7 @@ RUN mkdir -p root/catkin_ws/src \
 && . /opt/ros/melodic/setup.sh \ 
 && catkin_make
 
-COPY ./webots_ros/ root/catkin_ws/src/webots_ros
+COPY ./catkin_ws_src/webots_ros/ root/catkin_ws/src/webots_ros
 
 RUN cd root/catkin_ws/ \
 && . /opt/ros/melodic/setup.sh \
@@ -23,5 +23,6 @@ WORKDIR /root/code
 RUN pip3 install -r requirements.txt
 RUN chmod 777 /root/code/start.sh
 SHELL ["/bin/bash", "-c"]
-
 CMD ["./start.sh"]
+
+#CMD ["python", "main.py"]
