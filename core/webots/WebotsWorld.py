@@ -1,7 +1,6 @@
 from world import World
 from utils.webots2ros import *
 import time
-from deprecation import deprecated
 
 class WebotsWorld(World, Supervisor):
     name = '/krock'

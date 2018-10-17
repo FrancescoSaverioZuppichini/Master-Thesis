@@ -1,7 +1,7 @@
 import time
 
 from simulation import Simulation
-from simulation.callbacks import Alarm
+from simulation.callbacks import Alarm, SimulationCallback
 from agent import Agent
 
 class DummyAgent(Agent):
@@ -16,12 +16,21 @@ class MySimulation(Simulation):
         agent.move()
         time.sleep(1)
 
+class Tick(SimulationCallback):
+    def __init__(self):
+        self.n = 0
+
+    def tick(self, sim, world, agent, *args, **kwargs):
+        self.n += 1
+        print(self.n)
+
 N_SIM = 2
 
 agent = DummyAgent()
 
 sim = MySimulation()
 sim.add_callback(Alarm(stop_after_s=2))
+sim.add_callback(Tick())
 
 for _ in range(N_SIM):
     sim(world=None, agent=agent)

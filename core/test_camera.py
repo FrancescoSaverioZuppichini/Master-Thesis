@@ -4,7 +4,7 @@ from sensor_msgs.msg import Image
 from webots_ros.srv import *
 from webots_ros.msg import Float64ArrayStamped
 
-FRONTAL_CAMERA = '/krock/front_camera/image'
+FRONTAL_CAMERA = '/krock/front_camera/image_throttle'
 MANUAL_CONTROL = '/krock/manual_control_input'
 
 rospy.init_node("test_camera")

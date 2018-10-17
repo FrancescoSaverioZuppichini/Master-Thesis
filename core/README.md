@@ -47,13 +47,117 @@ map name and size. TODO
 - `Simulation`: a simulation it's something that loops over and over
 until certain condition are reached, e.g. time. It must be subclassed in order
 to create custom simulation
+## Simulation
+
+### Usage
+```
+from simulation import *
+```
+The `simulation` package contains all the code to create and run a simulation. A simulation is something that runs moving the agent around in the world untils it is stopped.
+
+The basic class is `Simulation`. A useful implementation that moves and agent in world is contained into `BasicSimulation`. 
+
+In order to create a simulation you need to subclass `Simulation` and override the `loop` methods that will be called at each iteration
+
+```python
+class MySimulation(Simulation):
+    def loop(self, world, agent, *args, **kwargs):
+        print('looping forever')
+        time.sleep(1)
+```
+Then, to run it
+```
+
+sim = MySimulation()
+sim(world, agent)
+```
+Where `world` and `agent` are instances of `world.World` and `agent.Agent`. You need to first create the simulation class and then call it to correctly initialise everything. You can think of it like a *lazy* loader.
+
+#### Callbacks
+
+ `Simulation` implements the `Callbackable` protocol that exposes a simple observer pattern. To create a callback you need to implement `SimulationCallback`
+
+```python
+class SimulationCallback():
+    def on_start(self, sim, *args, **kwargs):
+        pass
+
+    def on_finished(self, sim, *args, **kwargs):
+        pass
+
+    def tick(self, sim, *args, **kwargs):
+        pass
+```
+`tick` is called at every iteration.
+
+Example
+
+```python
+from simulation.callbacks import Alarm, SimulationCallback
+
+class Tick(SimulationCallback):
+    """
+    This callback counts the number of the simulation iteration
+    """
+    def __init__(self):
+        self.n = 0
+
+    def tick(self, sim, world, agent, *args, **kwargs):
+        self.n += 1
+        print(self.n)
+
+```
+
+To **add callback to a simulation** you can use 
+
+```python
+sim = MySimulation()
+sim.add_callback(Tick())
+sim.add_callbacks([Tick()])
+```
+
+## Agent
+
+### Usage
+```
+from agent import Agent
+
+class DummyAgent(Agent):
+    def move(self, *args, **kwargs):
+        print('I am moving!')
+
+a = DummyAgent()
+a()
+```
+You need to first create the agent class and then call it to correctly initialise everything. You can think of it like a *lazy* loader.
+### ROS
+A `Rospy` agent is already implemented and can be found at `agent.RospyAgent`. It adds two methods to the basic `Agent`: `init_publishers` and `init_subscribers`. They must be overrided to initialise the subscribers and listeners
+
+Example:
+
+```python
+class MyRospyAgent(RospyAgent):
+    def init_publishers(self):
+        return {
+            'joy': rospy.Publisher('/joy', Joy, queue_size=1),
+            'spawn': rospy.Publisher(self.SPAWN, PoseStamped, queue_size=1)
+        }
+
+    def init_subscribers(self):
+        rospy.Subscriber('/pose', PoseStamped, self.callback_pose)
+
+    def callback_pose(self, data):
+        # this will triggers the `on_state_change` method in all callbacks
+        self.state['pose'] = data
+```
+It is convinient to return a dictionary from `init_publishers` because it will be store inside the agent. The publishers can be access in any part of the code by `self.subscribers['spawn](...)`
+
 
 ### Callbacks
-`Agent` and `Simulation` implement the same protocol `Callbackable` that is just an easy observer pattern. A callback can be
-added by calling the `add_callback`. 
+`Agent` implements the protocol `Callbackable` protocol. A callback can be
+added by calling the `add_callback` or `add_callbacks`. 
 
-#### AgentCallback
-The following interface expose the callback methods for the Agent
+The following interface expose the callback methods for `Agent`
 ```python
 class AgentCallback():
     def on_state_change(self, key, value):
@@ -68,21 +172,8 @@ class AgentCallback():
     def on_shut_down(self):
         pass
 ```
-Each `Agent` has a `state` that is just a `dict` that every time it is changed it triggers the `on_state_change` event. This is usefull
+Each `Agent` has a `state` that is just a `dict` . Every time it is changed it triggers the `on_state_change` event. This is usefull
 to record stuff.
 
-#### SimulationCallback
-```python
-class SimulationCallback():
-    def on_start(self, sim, *args, **kwargs):
-        pass
-
-    def on_finished(self, sim, *args, **kwargs):
-        pass
-
-    def tick(self, sim, *args, **kwargs):
-        pass
-```
-`tick` is called at every iteration
 
 **BOOTH `Agent` and `Simulation` are callback themself**
