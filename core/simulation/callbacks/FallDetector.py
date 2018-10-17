@@ -19,10 +19,10 @@ class OutOfMap(SimulationCallback):
         def check_if_inside(to_check, bounds):
             lower, upper = bounds
             if to_check - self.tol <= lower:
-                raise SimulationException('Agent is going to fall!')
+                raise SimulationException('Fall.')
             # upper bound
             elif to_check + self.tol >= upper:
-                raise SimulationException('Agent is going to fall!')
+                raise SimulationException('Fall.')
 
         check_if_inside(x, self.x)
         check_if_inside(y, self.y)

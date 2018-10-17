@@ -22,7 +22,7 @@ WORKDIR /root/code
 
 RUN pip3 install -r requirements.txt
 RUN chmod 777 /root/code/start.sh
-SHELL ["/bin/bash", "-c"]
+SHELL [" ", "-c"]
 CMD ["./start.sh"]
 
 #CMD ["python", "main.py"]
