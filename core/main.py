@@ -43,11 +43,10 @@ b = range(N_SIM)
 
 start = time.time()
 print('')
-print('{:20s} {:^40s} {:12s}'.format('iteration', 'error', 'dur'))
 for iter, _ in enumerate(b):
     a = create_agent()
     sim(world=w,
         agent=a)
     end = time.time() - start
 
-    print('{:20s} {:40s} {:20.4f}'.format(str(iter), sim.history['error', -1], end))
+    print('Iter={:} Error={:} Time={:.4f}'.format(str(iter), sim.history['error', -1], end))
