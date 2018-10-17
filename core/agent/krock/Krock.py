@@ -12,9 +12,6 @@ from tf import transformations
 from agent import RospyAgent
 from utils.webots2ros import Supervisor
 
-import cv2
-import matplotlib.pyplot as plt
-
 from cv_bridge import CvBridge
 
 class Krock(RospyAgent, Supervisor):

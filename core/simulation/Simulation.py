@@ -1,11 +1,10 @@
 from protocols import Callbackable
 from .callbacks.SimulationCallback import SimulationCallback
 from .errors import SimulationException
+from utils.History import History
 
 from world import World
 from agent import Agent
-import rospy
-
 
 class Simulation(Callbackable, SimulationCallback):
     """
@@ -20,6 +19,7 @@ class Simulation(Callbackable, SimulationCallback):
     def __init__(self, name='simulation'):
         self.name = name
         self.should_stop = False
+        self.history = History()
         self.set_callbacks([self])
 
     def __call__(self, world: World, agent: Agent, *args, **kwargs):
@@ -46,11 +46,13 @@ class Simulation(Callbackable, SimulationCallback):
         :param kwargs:
         :return:
         """
+        self.history.new_epoch()
         while not self.should_stop:
             try:
                 self.loop(world, agent, *args, **kwargs)
                 self.notify('tick', self, world, agent)
             except SimulationException  as e:
+                self.history.record('error', str(e))
                 self.should_stop = True
 
     def loop(self, world: World, agent: Agent, *args, **kwargs):
