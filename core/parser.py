@@ -3,6 +3,9 @@ import tabulate
 
 from art import *
 
+QUARRY = '/home/francesco/Documents/krock-sim/krock/krock2_ros/map_generation/quarry.wbt'
+BASIC = '/home/francesco/Documents/krock-sim/krock/krock2_ros/worlds/krock2_camera.wbt'
+
 class CheckEngine(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
         if values.lower() not in ['webots2ros, gazebo']:
@@ -14,7 +17,7 @@ parser.add_argument('-w',
                     '--world',
                     type=str,
                     help='The path to the world file',
-                    default='/home/francesco/Documents/krock-sim/krock/krock2_ros/worlds/krock2_camera.wbt',
+                    default=QUARRY,
                     required=False)
 parser.add_argument('-e',
                     '--engine',
@@ -32,7 +35,7 @@ parser.add_argument('-t',
                     '--time',
                     type=float,
                     help='Maximum time per simulation',
-                    default=5)
+                    default=2)
 parser.add_argument('-r',
                     '--robot',
                     type=str,

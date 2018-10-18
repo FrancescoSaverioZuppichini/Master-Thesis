@@ -68,6 +68,7 @@ class Krock(RospyAgent, Supervisor):
 
     def spawn(self,world, pos=None, *args, **kwargs):
         pos = generate_random_pose(world) if pos == None else pos
+        self.reset_simulation_physics()
 
         self.set_robot_position(x=pos.position.x,
                                 y=pos.position.z,
@@ -90,25 +91,27 @@ class Krock(RospyAgent, Supervisor):
                   frontal_freq=1.0,
                   lateral_freq=0,
                   manual_mode=True)
+        pass
 
-
-map_max_x = 5.0 - 0.3
-map_max_y = 5.0 - 0.3
+map_x = (0,10)
+map_y = (0,10)
 map_max_z = 0.5
 
 
 # TODO this stuff should go in utils or in simlation class
 def generate_random_pose(world):
     # x,y (z will be fixed as the max_hm_z so that the robot will drop down), gamma as orientation
-    rx = np.random.uniform(-map_max_x, map_max_x)
-    ry = np.random.uniform(-map_max_y, map_max_y)
+    rx = np.random.uniform(*map_x)
+    ry = np.random.uniform(*map_y)
     random_pose = Pose()
     random_pose.position.x = rx
     random_pose.position.y = ry
-
+    # random_pose.position.x = 2
+    random_pose.position.y = 1
     ix, iy = int((rx - 5) * 100), int((ry - 5) * 100)
-    # h = world.grid['height'][ix * iy].value * 5
-    random_pose.position.z = 1
+    h = world.grid['height'][ix * iy].value
+    print(h)
+    random_pose.position.z = h
     # print(random_pose.position.z )
     qto = transformations.quaternion_from_euler(0, 0, 2 * np.pi * np.random.uniform(0, 1), axes='sxyz')
     random_pose.orientation.x = qto[0]

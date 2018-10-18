@@ -6,8 +6,9 @@ class WebotsWorld(World, Supervisor):
     name = '/krock'
 
     def __call__(self, *args, **kwargs):
-        self.load_world(str(self.path))
-        time.sleep(5)
+        # self.load_world(str(self.path))
+        # time.sleep(10)
+        self.reset_simulation_physics()
 
         self.grid = Node.from_def(self.name, 'EL_GRID')
 
