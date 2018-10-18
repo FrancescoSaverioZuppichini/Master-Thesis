@@ -7,7 +7,7 @@ class WebotsWorld(World, Supervisor):
 
     def __call__(self, *args, **kwargs):
         self.load_world(str(self.path))
-        time.sleep(3)
+        time.sleep(5)
 
         self.grid = Node.from_def(self.name, 'EL_GRID')
 
