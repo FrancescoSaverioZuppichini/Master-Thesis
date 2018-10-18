@@ -32,8 +32,8 @@ def create_agent():
 
 
 sim = BasicSimulation(name=args.robot)
-sim.add_callbacks([Alarm(stop_after_s=1000),
-                   OutOfMap(x=(-5, 5), y=(-5, 5))])
+sim.add_callbacks([Alarm(stop_after_s=SIM_TIME),
+                   ])
 
 # bar = tqdm.tqdm(range(N_SIM), leave=False)
 # bar.set_description('Running simulations')
