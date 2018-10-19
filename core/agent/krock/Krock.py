@@ -110,7 +110,7 @@ def generate_random_pose(world):
     random_pose.position.y = 1
     ix, iy = int((rx - 5) * 100), int((ry - 5) * 100)
     h = world.grid['height'][ix * iy].value
-    print(h)
+    # print(h)
     random_pose.position.z = h
     # print(random_pose.position.z )
     qto = transformations.quaternion_from_euler(0, 0, 2 * np.pi * np.random.uniform(0, 1), axes='sxyz')

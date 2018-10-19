@@ -7,7 +7,7 @@ RUN mkdir -p root/catkin_ws/src \
 && . /opt/ros/melodic/setup.sh \ 
 && catkin_make
 
-COPY ./catkin_ws_src/webots_ros/ root/catkin_ws/src/webots_ros
+COPY ./resources/catkin_ws_src/webots_ros/ root/catkin_ws/src/webots_ros
 
 RUN cd root/catkin_ws/ \
 && . /opt/ros/melodic/setup.sh \
