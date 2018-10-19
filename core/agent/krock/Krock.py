@@ -93,25 +93,34 @@ class Krock(RospyAgent, Supervisor):
                   manual_mode=True)
         pass
 
-map_x = (0,10)
-map_y = (0,10)
-map_max_z = 0.5
-
 
 # TODO this stuff should go in utils or in simlation class
 def generate_random_pose(world):
+    map_x = (0, world.x)
+    map_y = (0, world.y)
+    map_max_z = 0.5
+
     # x,y (z will be fixed as the max_hm_z so that the robot will drop down), gamma as orientation
     rx = np.random.uniform(*map_x)
     ry = np.random.uniform(*map_y)
+
+    rx = rx
+    ry = ry
     random_pose = Pose()
+    # random_pose.position.x = rx * world.x_spac
+    # random_pose.position.y = ry * world.y_spac
+
     random_pose.position.x = rx
     random_pose.position.y = ry
+
     # random_pose.position.x = 2
-    random_pose.position.y = 1
-    ix, iy = int((rx - 5) * 100), int((ry - 5) * 100)
-    h = world.grid['height'][ix * iy].value
-    # print(h)
-    random_pose.position.z = h
+    # random_pose.position.y = 1
+    ix, iy =int(rx), int(ry)
+    idx = (int(ix / world.x_spac) + (1600 * int(iy / world.y_spac)))
+
+    h = world.grid['height'][idx].value
+
+    random_pose.position.z = h + 0.5
     # print(random_pose.position.z )
     qto = transformations.quaternion_from_euler(0, 0, 2 * np.pi * np.random.uniform(0, 1), axes='sxyz')
     random_pose.orientation.x = qto[0]
