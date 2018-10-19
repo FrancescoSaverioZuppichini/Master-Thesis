@@ -13,7 +13,9 @@ services:
       - "ROS_IP=127.0.0.1"
       - "ROS_MASTER_URI=http://127.0.0.1:11311"
     # set this to link to your Dockerfile, this will build the image in case it is not present or you want to rebuild it
-    build: .
+    build:
+      dockerfile: ./docker/Dockerfile
+      context: .
     network_mode: host
     command: /bin/bash -c "./start.sh"
     # in case you want to expose some devices, e.g. joystick
@@ -34,6 +36,6 @@ services:
       - /tmp/.X11-unix:/tmp/.X11-unix
     network_mode: host
     build:
-      dockerfile: Dockerfile-webots
+      dockerfile: ./docker/Dockerfile-webots
       context: .
     command: /bin/bash -c "webots --mode=fast --stdout"

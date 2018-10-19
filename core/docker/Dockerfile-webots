@@ -4,7 +4,7 @@ FROM nvidia/cuda
 # change this based on your location
 ENV TZ=America/Los_Angeles
 ENV DEBIAN_FRONTEND noninteractive
-COPY ./webots_2018a-rev2_amd64_p.deb ./webots/
+COPY ./resources/webots_2018a-rev2_amd64_p.deb ./webots/
 RUN apt-get update &&  \
 apt-get install libnss3-dev -y && \
 apt-get install gdebi -y && \
