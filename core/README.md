@@ -1,5 +1,32 @@
-# Simulation
+# Core
 
+## Stucture
+
+```
+├── agent # Agent package
+├── data
+├── docker # contains all the docker files
+├── docker-compose.yml
+├── __init__.py
+├── main.py
+├── notebooks # contains the notebooks used to test/visualise
+├── parser.py
+├── protocols # shared protocols used across the code
+├── README.md
+├── requirements.txt
+├── resources # resources, e.g. webots.deb, used by docker
+├── services_test.py
+├── simulation # Simulation package
+├── start.sh
+├── test_camera.py
+├── test.py
+├── utils # utils code
+    ...
+│   ├── webots2ros # package to easily call webots using ROS
+├── webots # package to use Webots in the current framework
+└── world # World package
+```
+## How to create a simulation pipeline
 ### Getting started
 Let's see some code
 

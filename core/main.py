@@ -33,6 +33,7 @@ def create_agent():
 
 sim = BasicSimulation(name=args.robot)
 sim.add_callbacks([Alarm(stop_after_s=SIM_TIME),
+                   # OutOfMap()
                    ])
 
 # bar = tqdm.tqdm(range(N_SIM), leave=False)
