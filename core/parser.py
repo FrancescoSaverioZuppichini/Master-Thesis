@@ -35,7 +35,7 @@ parser.add_argument('-t',
                     '--time',
                     type=float,
                     help='Maximum time per simulation',
-                    default=100)
+                    default=1)
 parser.add_argument('-r',
                     '--robot',
                     type=str,

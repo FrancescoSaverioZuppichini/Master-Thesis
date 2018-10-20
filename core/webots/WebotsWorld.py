@@ -13,7 +13,6 @@ class WebotsWorld(World, Supervisor):
         # self.load_world(str(self.path))
         # time.sleep(10)
         self.reset_simulation_physics()
-        # self.restart_robot()
         self.grid = Node.from_def(self.name, 'EL_GRID')
         self.terrain = Node.from_def(self.name, 'TERRAIN')
 
@@ -46,7 +45,7 @@ class WebotsWorld(World, Supervisor):
 
         h = self.grid['height'][idx].value
 
-        random_pose.position.z = h + 1
+        random_pose.position.z = h + 0.5
         print(h)
         # print(random_pose.position.z )
         qto = transformations.quaternion_from_euler(0, 0, 2 * np.pi * np.random.uniform(0, 1), axes='sxyz')

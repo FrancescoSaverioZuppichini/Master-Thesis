@@ -17,3 +17,4 @@ class BasicSimulation(Simulation):
 
     def on_finish(self, sim, world, agent, *args, **kwargs):
         agent.stop()
+        agent.die()
