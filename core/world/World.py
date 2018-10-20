@@ -12,10 +12,6 @@ class World():
     def __init__(self, file_path):
         self.file_path = file_path
 
-    @property
-    def path(self):
-        return Path(self.file_path)
-
     def __call__(self, *args, **kwargs):
         """
         This method should initialise the world. E.g. open file,
@@ -25,3 +21,16 @@ class World():
         :return:
         """
         pass
+
+    # TODO probably it is better to add a class method to CREATE the world from a file
+    @property
+    def path(self):
+        return Path(self.file_path)
+
+    @property
+    def random_position(self):
+        """
+        This function must return a random position inside the world
+        :return:
+        """
+        return None
