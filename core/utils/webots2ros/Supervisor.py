@@ -119,7 +119,7 @@ class Supervisor:
         return rot_res
 
     def restart_robot(self):
-        service = self.name + '/krock/supervisor/node/restart_controller'
+        service = self.name + '/supervisor/node/restart_controller'
 
     def enable_front_camera(self, enable=1):
         service = self.name + '/front_camera/enable'
@@ -128,6 +128,21 @@ class Supervisor:
         res = request_enable(enable)
 
         return res
+
+    def simulation_set_mode(self, mode):
+        service = self.name + '/supervisor/supervisor_simulation_set_mode'
+
+        req_mode = self.get_service(service, set_int)
+
+        res = req_mode(mode)
+
+    def simulation_get_mode(self):
+        service = self.name + '/supervisor/supervisor_simulation_get_mode'
+
+        get_mode = self.get_service(service, get_int)
+        res = get_mode()
+        return res
+
 
 
 class Field(Supervisor):
@@ -203,3 +218,4 @@ class Node(Supervisor):
         field.name = self.name
 
         return field
+

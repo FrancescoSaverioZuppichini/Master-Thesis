@@ -18,6 +18,7 @@ class OutOfMap(SimulationCallback):
 
         def check_if_inside(to_check, bounds):
             lower, upper = bounds
+            # TODO bad raising in if statement
             if to_check - self.tol <= lower:
                 raise SimulationException('Fall.')
             # upper bound
@@ -27,4 +28,4 @@ class OutOfMap(SimulationCallback):
         check_if_inside(x, self.x)
         check_if_inside(y, self.y)
 
-        if self.z + z < self.tol: raise SimulationException('Agent has felt!')
+        if self.z + z < self.tol: raise SimulationException('Fall.')
