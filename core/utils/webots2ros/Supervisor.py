@@ -41,6 +41,7 @@ class Supervisor:
 
     @staticmethod
     def get_service(service, type):
+        # rospy.wait_for_service(service, timeout=None)
         res = None
         try:
             res = rospy.ServiceProxy(service, type)
@@ -68,12 +69,26 @@ class Supervisor:
 
     def reset_simulation(self):
         service = self.name + '/supervisor/simulation_reset'
-        res = self.get_service(service, get_uint64)
+
+        req_res = self.get_service(service, get_bool)
+        res = req_res()
+
         return res
 
     def reset_simulation_physics(self):
         service = self.name + '/supervisor/simulation_reset_physics'
-        res = self.get_service(service, get_uint64)
+
+        req_res = self.get_service(service, get_bool)
+        res = req_res()
+
+        return res
+
+    def reset_node_physics(self, node):
+        service = self.name + '/supervisor/node/restart_controller'
+
+        req_res = self.get_service(service, node_reset_functions)
+        res = req_res(node.value)
+
         return res
 
     def get_robot_node(self):
@@ -121,6 +136,12 @@ class Supervisor:
     def restart_robot(self):
         service = self.name + '/supervisor/node/restart_controller'
 
+        req_res = self.get_service(service, node_reset_functions)
+
+        res = req_res(self.robot_node.value)
+
+        return res
+
     def enable_front_camera(self, enable=1):
         service = self.name + '/front_camera/enable'
 
@@ -133,14 +154,16 @@ class Supervisor:
         service = self.name + '/supervisor/supervisor_simulation_set_mode'
 
         req_mode = self.get_service(service, set_int)
-
         res = req_mode(mode)
+
+        return res
 
     def simulation_get_mode(self):
         service = self.name + '/supervisor/supervisor_simulation_get_mode'
 
         get_mode = self.get_service(service, get_int)
         res = get_mode()
+
         return res
 
 
@@ -219,3 +242,17 @@ class Node(Supervisor):
 
         return field
 
+# #
+# s = Supervisor()
+# s.name = '/krock'
+# s.get_world_node()
+# s.get_robot_node()
+# print(s.get_robot_position())
+#
+# print(s.reset_simulation())
+# time.sleep(5)
+# s = Supervisor()
+# s.name = '/krock'
+# s.get_world_node()
+# s.get_robot_node()
+# print(s.get_robot_position())

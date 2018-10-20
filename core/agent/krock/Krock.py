@@ -10,7 +10,7 @@ from agent import RospyAgent
 from utils.webots2ros import Supervisor
 
 from cv_bridge import CvBridge
-
+import time
 
 class Krock(RospyAgent, Supervisor):
     BASE_TOPIC = '/krock'
@@ -67,8 +67,6 @@ class Krock(RospyAgent, Supervisor):
     def spawn(self, world, pos=None, *args, **kwargs):
         pos = world.random_position if pos == None else pos
 
-        self.reset_simulation_physics()
-
         self.set_robot_position(x=pos.position.x,
                                 y=pos.position.z,
                                 z=pos.position.y)
@@ -90,3 +88,6 @@ class Krock(RospyAgent, Supervisor):
                   lateral_freq=0,
                   manual_mode=True)
         pass
+
+    def die(self):
+        self.reset_simulation()
