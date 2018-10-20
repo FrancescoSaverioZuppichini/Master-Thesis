@@ -1,18 +1,16 @@
 import rospy
 import numpy as np
-import time
 
-from geometry_msgs.msg import Point, Pose, Quaternion, Twist, Wrench, PoseStamped, TwistStamped
-from nav_msgs.msg import Odometry
+from geometry_msgs.msg import PoseStamped
 from webots_ros.msg import Int8Stamped, Float64ArrayStamped
-from sensor_msgs.msg import JointState, Joy, Image
-from std_msgs.msg import String, Header
-from tf import transformations
+from sensor_msgs.msg import Joy
+from std_msgs.msg import String
 
 from agent import RospyAgent
 from utils.webots2ros import Supervisor
 
 from cv_bridge import CvBridge
+
 
 class Krock(RospyAgent, Supervisor):
     BASE_TOPIC = '/krock'
@@ -66,14 +64,14 @@ class Krock(RospyAgent, Supervisor):
         msg = Float64ArrayStamped(data=[mode, gait, frontal_freq, lateral_freq])
         self.publishers['manual_control'].publish(msg)
 
-    def spawn(self,world, pos=None, *args, **kwargs):
-        pos = generate_random_pose(world) if pos == None else pos
+    def spawn(self, world, pos=None, *args, **kwargs):
+        pos = world.random_position if pos == None else pos
+
         self.reset_simulation_physics()
 
         self.set_robot_position(x=pos.position.x,
                                 y=pos.position.z,
-                                z=pos.position.y,
-                                )
+                                z=pos.position.y)
 
         self.set_robot_orientation(x=pos.orientation.x,
                                    y=pos.orientation.z,
@@ -92,39 +90,3 @@ class Krock(RospyAgent, Supervisor):
                   lateral_freq=0,
                   manual_mode=True)
         pass
-
-
-# TODO this stuff should go in utils or in simlation class
-def generate_random_pose(world):
-    map_x = (0, world.x)
-    map_y = (0, world.y)
-    map_max_z = 0.5
-
-    # x,y (z will be fixed as the max_hm_z so that the robot will drop down), gamma as orientation
-    rx = np.random.uniform(*map_x)
-    ry = np.random.uniform(*map_y)
-
-    rx = rx
-    ry = ry
-    random_pose = Pose()
-    # random_pose.position.x = rx * world.x_spac
-    # random_pose.position.y = ry * world.y_spac
-
-    random_pose.position.x = rx
-    random_pose.position.y = ry
-
-    # random_pose.position.x = 2
-    # random_pose.position.y = 1
-    ix, iy =int(rx), int(ry)
-    idx = (int(ix / world.x_spac) + (1600 * int(iy / world.y_spac)))
-
-    h = world.grid['height'][idx].value
-
-    random_pose.position.z = h + 0.5
-    # print(random_pose.position.z )
-    qto = transformations.quaternion_from_euler(0, 0, 2 * np.pi * np.random.uniform(0, 1), axes='sxyz')
-    random_pose.orientation.x = qto[0]
-    random_pose.orientation.y = qto[1]
-    random_pose.orientation.z = qto[2]
-    random_pose.orientation.w = qto[3]
-    return random_pose
