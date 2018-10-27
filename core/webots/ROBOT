@@ -1,0 +1,1388 @@
+DEF ROBOT Supervisor {
+  translation -0.10561704932755216 0.2732234651277961 0.013781858880013938
+  rotation -0.11334535944990937 0.9583357520886916 0.2621934700936934 -0.2715324798272836
+  children [
+    DEF Head_T Transform {
+      translation 0.14 0 0
+      children [
+        Solid {
+          children [
+            DEF Head_transform Transform {
+              translation -0.02 0 0.005
+              rotation 0 1 0 1.5708
+              children [
+                Camera {
+                  translation -0.01 -0.005 0.04
+                  rotation 0 1 0 3.14
+                  name "front_camera"
+                  fieldOfView 1.047
+                  width 800
+                  height 600
+                }
+                USE Cameras_Shape
+              ]
+            }
+          ]
+          boundingObject Transform {
+            translation -0.01 0 0
+            children [
+              Shape {
+                geometry Box {
+                  size 0.05 0.07 0.07
+                }
+              }
+            ]
+          }
+          physics Physics {
+            density -1
+            mass 0.2
+            centerOfMass [
+              0.06 0 0
+            ]
+          }
+        }
+      ]
+    }
+    DEF FrontGirdle Group {
+      children [
+        DEF FrontGirdleSpineMX Transform {
+          translation -0.028 0 0
+          rotation 0 1 0 -1.5708
+          children [
+            USE MX64Shape
+          ]
+        }
+        DEF FrontGirdleMain Transform {
+          translation 0.018 0 0
+          rotation 0 1 0 1.5708
+          children [
+            USE GirdleShape
+          ]
+        }
+        DEF FrontLeftPitchMX Transform {
+          translation -0.047 0 -0.07
+          rotation 0 1 0 1.5708
+          children [
+            USE MX106Shape
+          ]
+        }
+        DEF FrontRightPitchMX Transform {
+          translation -0.047 0 0.07
+          rotation 0.7071067811865477 0 0.7071067811865477 3.14159
+          children [
+            USE MX106Shape
+          ]
+        }
+      ]
+    }
+    DEF SPINE1_T Transform {
+      translation -0.0499 0 0
+      children [
+        DEF SPINE1_HJ HingeJoint {
+          jointParameters HingeJointParameters {
+            position -6.262354440406638e-8
+            axis 0 1 0
+          }
+          device [
+            RotationalMotor {
+              name "spine1_motor"
+            }
+            PositionSensor {
+              name "spine1_sensor"
+            }
+          ]
+          endPoint Solid {
+            rotation 0 -1 0 5.960464477539063e-8
+            children [
+              Transform {
+              }
+              DEF SPINE2_T Transform {
+                translation -0.246 0 0
+                children [
+                  DEF SPINE2_HJ HingeJoint {
+                    jointParameters HingeJointParameters {
+                      position 6.070348002548631e-7
+                      axis 0 1 0
+                    }
+                    device [
+                      RotationalMotor {
+                        name "spine2_motor"
+                      }
+                      PositionSensor {
+                        name "spine2_sensor"
+                      }
+                    ]
+                    endPoint Solid {
+                      rotation 0 1 0 6.07119464500649e-7
+                      children [
+                        DEF Tail1MX Transform {
+                          translation -0.175 0 -2.58924e-9
+                          rotation 0 1 0 4.71239
+                          children [
+                            USE MX64Shape
+                          ]
+                        }
+                        DEF TAIL1_T Transform {
+                          translation -0.185 0 0
+                          children [
+                            HingeJoint {
+                              jointParameters HingeJointParameters {
+                                position -3.2967612125887416e-7
+                                axis 0 1 0
+                              }
+                              device [
+                                RotationalMotor {
+                                  name "tail1_motor"
+                                }
+                                PositionSensor {
+                                  name "tail1_sensor"
+                                }
+                              ]
+                              endPoint Solid {
+                                rotation 0 -1 0 3.2917740992269735e-7
+                                children [
+                                  DEF TAIL_Passive1 Transform {
+                                    translation -0.08 0 0
+                                    children [
+                                      HingeJoint {
+                                        jointParameters HingeJointParameters {
+                                          position 1.3050992433532878
+                                          axis 0 0 1
+                                          dampingConstant 0.05
+                                          suspensionAxis 0 0 1
+                                        }
+                                        endPoint Solid {
+                                          rotation 0 0 1 1.3050992433532875
+                                          children [
+                                            DEF TAIL2_T Transform {
+                                              translation -0.07 0 0
+                                              children [
+                                                HingeJoint {
+                                                  jointParameters HingeJointParameters {
+                                                    position -2.1896541558412382e-7
+                                                    axis 0 1 0
+                                                  }
+                                                  device [
+                                                    RotationalMotor {
+                                                      name "tail2_motor"
+                                                    }
+                                                    PositionSensor {
+                                                      name "tail2_sensor"
+                                                    }
+                                                  ]
+                                                  endPoint Solid {
+                                                    rotation 0 -1 0 2.1900144899933154e-7
+                                                    children [
+                                                      DEF Fin_Transform Transform {
+                                                        translation -0.07 0 -5.5203565e-7
+                                                        rotation 0 1 0 1.5708
+                                                        scale 1 1 0.3
+                                                        children [
+                                                          USE FIN_Shape
+                                                        ]
+                                                      }
+                                                    ]
+                                                    boundingObject Transform {
+                                                      translation -0.07 0 0
+                                                      children [
+                                                        Shape {
+                                                          geometry Box {
+                                                            size 0.1 0.03 0.04
+                                                          }
+                                                        }
+                                                      ]
+                                                    }
+                                                    physics Physics {
+                                                      density -1
+                                                      mass 0.1
+                                                      centerOfMass [
+                                                        -0.22 0 0
+                                                      ]
+                                                    }
+                                                    linearVelocity -2.0823864778338752e-5 6.339625498084089e-6 6.911702508380913e-6
+                                                    angularVelocity 5.468588915398519e-5 4.698143502120716e-5 -9.98512939783206e-5
+                                                  }
+                                                }
+                                              ]
+                                            }
+                                            DEF TAIL2MX Transform {
+                                              translation -0.05 0 -7.19235e-10
+                                              rotation 0 1 0 4.71239
+                                              children [
+                                                USE MX64Shape
+                                              ]
+                                            }
+                                          ]
+                                          boundingObject Transform {
+                                            translation -0.05 0 0
+                                            children [
+                                              Box {
+                                                size 0.06 0.04 0.04
+                                              }
+                                            ]
+                                          }
+                                          physics Physics {
+                                            density -1
+                                            mass 0.13
+                                            centerOfMass [
+                                              -0.05 0 0
+                                            ]
+                                          }
+                                          linearVelocity 2.953867217341938e-6 -2.650591438868588e-6 1.5689760006655826e-5
+                                          angularVelocity 5.4688652668710834e-5 4.69807082554311e-5 -9.985061722943522e-5
+                                        }
+                                      }
+                                    ]
+                                  }
+                                  DEF Tail2MX Transform {
+                                    translation -0.06 0 -8.63081e-10
+                                    rotation -0.5773502691896257 -0.5773502691896257 0.5773502691896257 2.0944
+                                    children [
+                                      USE MX64Shape
+                                    ]
+                                  }
+                                ]
+                                boundingObject Transform {
+                                  translation -0.06 0 0
+                                  rotation 1 0 0 4.71239
+                                  children [
+                                    Box {
+                                      size 0.05 0.05 0.04
+                                    }
+                                  ]
+                                }
+                                physics Physics {
+                                  density -1
+                                  mass 0.13
+                                  centerOfMass [
+                                    -0.06 0 0
+                                  ]
+                                }
+                                linearVelocity 8.149153261817797e-6 -4.51426351723956e-6 1.6606684140602493e-5
+                                angularVelocity 2.5956141035149935e-5 4.462024321474295e-5 7.67695349468545e-6
+                              }
+                            }
+                          ]
+                        }
+                        DEF HLpitch_T Transform {
+                          translation -0.0499 0 -0.0905
+                          children [
+                            DEF HLpitch_HJ HingeJoint {
+                              jointParameters HingeJointParameters {
+                                position 2.342550939949067e-6
+                              }
+                              device [
+                                RotationalMotor {
+                                  name "HLpitch_motor"
+                                }
+                                PositionSensor {
+                                  name "HLpitch_sensor"
+                                }
+                              ]
+                              endPoint Solid {
+                                rotation 0.9999999999999999 0 0 2.34247012294885e-6
+                                children [
+                                  DEF HLyaw_HJ HingeJoint {
+                                    jointParameters HingeJointParameters {
+                                      position 7.155065717615671e-7
+                                      axis 0 1 0
+                                    }
+                                    device [
+                                      RotationalMotor {
+                                        name "HLyaw_motor"
+                                      }
+                                      PositionSensor {
+                                        name "HLyaw_sensor"
+                                      }
+                                    ]
+                                    endPoint Solid {
+                                      rotation 0 1 0 7.152557373046913e-7
+                                      children [
+                                        DEF HLroll_T Transform {
+                                          translation 0 0 -0.1474
+                                          children [
+                                            DEF HLroll_HJ HingeJoint {
+                                              jointParameters HingeJointParameters {
+                                                position 1.570799391902025
+                                                axis 0 0 1
+                                              }
+                                              device [
+                                                RotationalMotor {
+                                                  name "HLroll_motor"
+                                                }
+                                                PositionSensor {
+                                                  name "HLroll_sensor"
+                                                }
+                                              ]
+                                              endPoint Solid {
+                                                translation 1.0634235927541902e-23 -3.469449999983704e-18 0
+                                                rotation 0 0 1 1.5707993919020253
+                                                children [
+                                                  DEF HLknee_HJ HingeJoint {
+                                                    jointParameters HingeJointParameters {
+                                                      position -1.6457778038617775e-7
+                                                      axis 0 1 0
+                                                    }
+                                                    device [
+                                                      RotationalMotor {
+                                                        name "HLknee_motor"
+                                                      }
+                                                      PositionSensor {
+                                                        name "HLknee_sensor"
+                                                      }
+                                                    ]
+                                                    endPoint Solid {
+                                                      rotation 0 -0.9999999999999999 0 1.632340423778195e-7
+                                                      children [
+                                                        DEF HL_TOUCH_T Transform {
+                                                          translation -0.12 0 0
+                                                          children [
+                                                            DEF TS_HL TouchSensor {
+                                                              translation 3.5914492569344425e-6 1.0158152649597518e-6 -2.7299666249813725e-7
+                                                              rotation 0.13501802705304003 -0.6720552342413468 -0.7280878343301123 6.468266026963649e-10
+                                                              children [
+                                                                DEF TS_SHAPE Shape {
+                                                                  appearance Appearance {
+                                                                    material Material {
+                                                                    }
+                                                                  }
+                                                                  geometry DEF TS_GEOMETRY Sphere {
+                                                                    radius 0.012
+                                                                    subdivision 3
+                                                                  }
+                                                                }
+                                                              ]
+                                                              name "hl_touch"
+                                                              contactMaterial "foot"
+                                                              boundingObject DEF TS_GEOMETRY Sphere {
+                                                                radius 0.012
+                                                                subdivision 3
+                                                              }
+                                                              physics Physics {
+                                                                density -1
+                                                                mass 0.001
+                                                                centerOfMass [
+                                                                  0 0 0
+                                                                ]
+                                                              }
+                                                              type "force-3d"
+                                                              lookupTable []
+                                                              linearVelocity 9.444017941007132e-7 2.051392193384849e-6 2.523371861684609e-6
+                                                              angularVelocity 2.593885167059249e-5 4.461636139419707e-5 7.679655191334845e-6
+                                                            }
+                                                          ]
+                                                        }
+                                                        DEF LeftHindFoot Transform {
+                                                          translation -0.06 0 0
+                                                          rotation 0 1 0 3.14159
+                                                          children [
+                                                            USE FootMountShape
+                                                          ]
+                                                        }
+                                                      ]
+                                                      boundingObject Group {
+                                                        children [
+                                                          Transform {
+                                                            translation -0.036 0 0
+                                                            children [
+                                                              Box {
+                                                                size 0.05 0.05 0.03
+                                                              }
+                                                            ]
+                                                          }
+                                                          Transform {
+                                                            translation -0.08 2.35697e-7 0
+                                                            rotation 0 0 1 1.5708
+                                                            children [
+                                                              Cylinder {
+                                                                height 0.04
+                                                                radius 0.007
+                                                              }
+                                                            ]
+                                                          }
+                                                        ]
+                                                      }
+                                                      physics Physics {
+                                                        density -1
+                                                        mass 0.1
+                                                        centerOfMass [
+                                                          -0.07 0 0
+                                                        ]
+                                                      }
+                                                      linearVelocity 6.423642482454198e-7 2.039665645831659e-6 3.6570170141452644e-6
+                                                      angularVelocity 2.593897122967782e-5 4.461637691972503e-5 7.679595321066429e-6
+                                                    }
+                                                  }
+                                                  DEF HindLeftKneeMX Transform {
+                                                    translation 0.016 0 0
+                                                    rotation 0 1 0 4.71239
+                                                    children [
+                                                      USE MX64Shape
+                                                    ]
+                                                  }
+                                                ]
+                                                boundingObject Transform {
+                                                  translation 0.018 0 0
+                                                  scale 0.910734 1 1
+                                                  children [
+                                                    Box {
+                                                      size 0.062 0.04 0.04
+                                                    }
+                                                  ]
+                                                }
+                                                physics Physics {
+                                                  density -1
+                                                  mass 0.14
+                                                  centerOfMass [
+                                                    0 0 0
+                                                  ]
+                                                }
+                                                linearVelocity 2.2253928722540887e-7 2.0175801919555055e-6 5.248693778515258e-6
+                                                angularVelocity 2.5941175994093598e-5 4.4616287326976354e-5 7.678687964436727e-6
+                                              }
+                                            }
+                                          ]
+                                        }
+                                        DEF HindLeftRollMX Transform {
+                                          translation 0.016 0 -0.102
+                                          rotation 0.5773502691896257 0.5773502691896257 -0.5773502691896257 4.18879
+                                          children [
+                                            USE MX64Shape
+                                          ]
+                                        }
+                                        DEF HindLeftFemur Transform {
+                                          translation 0 0 -0.05
+                                          rotation 0 1 0 1.5708
+                                          children [
+                                            USE FemurShape
+                                          ]
+                                        }
+                                      ]
+                                      boundingObject Group {
+                                        children [
+                                          Transform {
+                                            translation 0.015 0 -0.1
+                                            children [
+                                              Box {
+                                                size 0.053 0.04 0.04
+                                              }
+                                            ]
+                                          }
+                                          DEF FemurBoundingBox Transform {
+                                            translation 0 0 -0.05
+                                            children [
+                                              Box {
+                                                size 0.016 0.054 0.1
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                      physics Physics {
+                                        density -1
+                                        mass 0.16
+                                        centerOfMass [
+                                          0 0 -0.08
+                                        ]
+                                      }
+                                      linearVelocity 3.1304701566703394e-6 2.0930701971894653e-7 5.976397321111235e-6
+                                      angularVelocity 2.5942888807702808e-5 4.4616263147135065e-5 7.676958229824731e-6
+                                    }
+                                  }
+                                  DEF HindLeftYawMX Transform {
+                                    translation 0 0 0.016
+                                    rotation 0 1 0 3.14159
+                                    children [
+                                      USE MX64Shape
+                                    ]
+                                  }
+                                ]
+                                boundingObject Transform {
+                                  translation 0.004 0 0.016
+                                  children [
+                                    Box {
+                                      size 0.04 0.05 0.06
+                                    }
+                                  ]
+                                }
+                                physics Physics {
+                                  density -1
+                                  mass 0.14
+                                  centerOfMass [
+                                    0 0 0
+                                  ]
+                                }
+                                linearVelocity 6.583438569535599e-6 -1.9396591733244452e-6 6.842277805435636e-6
+                                angularVelocity 2.5946373442371304e-5 4.461715145875185e-5 7.676414436351318e-6
+                              }
+                            }
+                          ]
+                        }
+                        DEF HRpitch_T Transform {
+                          translation -0.0499 0 0.0905
+                          children [
+                            DEF HRpitch_HJ HingeJoint {
+                              jointParameters HingeJointParameters {
+                                position 3.4794665473574613e-7
+                              }
+                              device [
+                                RotationalMotor {
+                                  name "HRpitch_motor"
+                                }
+                                PositionSensor {
+                                  name "HRpitch_sensor"
+                                }
+                              ]
+                              endPoint Solid {
+                                rotation 1 0 0 3.4755181639464544e-7
+                                children [
+                                  DEF HRyaw_HJ HingeJoint {
+                                    jointParameters HingeJointParameters {
+                                      position 6.911443068696981e-8
+                                      axis 0 1 0
+                                    }
+                                    device [
+                                      RotationalMotor {
+                                        name "HRyaw_motor"
+                                      }
+                                      PositionSensor {
+                                        name "HRyaw_sensor"
+                                      }
+                                    ]
+                                    endPoint Solid {
+                                      rotation 0 1 0 6.664001874625056e-8
+                                      children [
+                                        DEF HRroll_T Transform {
+                                          translation 0 0 0.1474
+                                          children [
+                                            DEF HRroll_HJ HingeJoint {
+                                              jointParameters HingeJointParameters {
+                                                position 1.5708000005969573
+                                                axis 0 0 1
+                                              }
+                                              device [
+                                                RotationalMotor {
+                                                  name "HRroll_motor"
+                                                }
+                                                PositionSensor {
+                                                  name "HRroll_sensor"
+                                                }
+                                              ]
+                                              endPoint Solid {
+                                                translation 1.2746072559032248e-23 -3.4694499999765865e-18 0
+                                                rotation 0 0 1 1.5708000005969571
+                                                children [
+                                                  DEF HRknee_HJ HingeJoint {
+                                                    jointParameters HingeJointParameters {
+                                                      position 1.704126288355642e-10
+                                                      axis 0 1 0
+                                                    }
+                                                    device [
+                                                      RotationalMotor {
+                                                        name "HRknee_motor"
+                                                      }
+                                                      PositionSensor {
+                                                        name "HRknee_sensor"
+                                                      }
+                                                    ]
+                                                    endPoint Solid {
+                                                      children [
+                                                        DEF HR_TOUCH_T Transform {
+                                                          translation -0.12 0 0
+                                                          children [
+                                                            DEF TS_HR TouchSensor {
+                                                              translation -3.853737134962287e-9 -2.2594721094115755e-9 7.824407788348253e-12
+                                                              rotation -0.2620899431996243 0.06552248579990608 0.9628165274486198 1.9062172130000165e-15
+                                                              children [
+                                                                DEF TS_SHAPE Shape {
+                                                                  appearance Appearance {
+                                                                    material Material {
+                                                                    }
+                                                                  }
+                                                                  geometry USE TS_GEOMETRY
+                                                                }
+                                                              ]
+                                                              name "hr_touch"
+                                                              contactMaterial "foot"
+                                                              boundingObject USE TS_GEOMETRY
+                                                              physics Physics {
+                                                                density -1
+                                                                mass 0.001
+                                                                centerOfMass [
+                                                                  0 0 0
+                                                                ]
+                                                              }
+                                                              type "force-3d"
+                                                              lookupTable []
+                                                              linearVelocity 2.162204705107717e-5 -1.076558959908075e-5 7.710838726389816e-6
+                                                              angularVelocity 2.606920619267229e-5 4.5547181870861886e-5 7.728153345215353e-6
+                                                            }
+                                                          ]
+                                                        }
+                                                        DEF RightHindFoot Transform {
+                                                          translation -0.06 0 0
+                                                          rotation 0 1 0 3.14159
+                                                          children [
+                                                            USE FootMountShape
+                                                          ]
+                                                        }
+                                                      ]
+                                                      boundingObject Group {
+                                                        children [
+                                                          Transform {
+                                                            translation -0.036 0 0
+                                                            children [
+                                                              Box {
+                                                                size 0.05 0.05 0.03
+                                                              }
+                                                            ]
+                                                          }
+                                                          Transform {
+                                                            translation -0.08 2.35697e-7 0
+                                                            rotation 0 0 1 1.5708
+                                                            children [
+                                                              Cylinder {
+                                                                height 0.04
+                                                                radius 0.007
+                                                              }
+                                                            ]
+                                                          }
+                                                        ]
+                                                      }
+                                                      physics Physics {
+                                                        density -1
+                                                        mass 0.01
+                                                        centerOfMass [
+                                                          -0.07 0 0
+                                                        ]
+                                                      }
+                                                      linearVelocity 2.1326994912205856e-5 -1.0791581767963662e-5 8.859325708308634e-6
+                                                      angularVelocity 2.6069206191123397e-5 4.5547181870660536e-5 7.728153350926199e-6
+                                                    }
+                                                  }
+                                                  DEF HindRightKneeMX Transform {
+                                                    translation 0.016 0 0
+                                                    rotation 0 1 0 4.71239
+                                                    children [
+                                                      USE MX64Shape
+                                                    ]
+                                                  }
+                                                ]
+                                                boundingObject Transform {
+                                                  translation 0.018 0 0
+                                                  scale 0.910734 1 1
+                                                  children [
+                                                    Box {
+                                                      size 0.062 0.04 0.04
+                                                    }
+                                                  ]
+                                                }
+                                                physics Physics {
+                                                  density -1
+                                                  mass 0.14
+                                                  centerOfMass [
+                                                    0 0 0
+                                                  ]
+                                                }
+                                                linearVelocity 2.0913928619233075e-5 -1.0827971745073219e-5 1.0467208789206442e-5
+                                                angularVelocity 2.606920641348986e-5 4.554718184699899e-5 7.728153863258881e-6
+                                              }
+                                            }
+                                          ]
+                                        }
+                                        DEF HindRightRollMX Transform {
+                                          translation 0.016 0 0.102
+                                          rotation 0.5773502691896257 0.5773502691896257 -0.5773502691896257 4.18879
+                                          children [
+                                            USE MX64Shape
+                                          ]
+                                        }
+                                        DEF HindRightFemur Transform {
+                                          translation 0 0 0.05
+                                          rotation 0 1 0 1.5708
+                                          children [
+                                            USE FemurShape
+                                          ]
+                                        }
+                                      ]
+                                      boundingObject Group {
+                                        children [
+                                          Transform {
+                                            translation 0.015 0 0.1
+                                            children [
+                                              Box {
+                                                size 0.053 0.04 0.04
+                                              }
+                                            ]
+                                          }
+                                          DEF FemurBoundingBox Transform {
+                                            translation 0 0 0.05
+                                            children [
+                                              Box {
+                                                size 0.016 0.054 0.1
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                      physics Physics {
+                                        density -1
+                                        mass 0.16
+                                        centerOfMass [
+                                          0 0 0.08
+                                        ]
+                                      }
+                                      linearVelocity 1.7937849975429813e-5 -8.996415741131649e-6 9.712068378126264e-6
+                                      angularVelocity 2.6069206455925747e-5 4.554718198916377e-5 7.728154144431626e-6
+                                    }
+                                  }
+                                  DEF HindRightYawMX Transform {
+                                    translation 0 0 -0.016
+                                    rotation 0 1 0 3.14159
+                                    children [
+                                      USE MX64Shape
+                                    ]
+                                  }
+                                ]
+                                boundingObject Transform {
+                                  translation 0.004 0 -0.016
+                                  children [
+                                    Box {
+                                      size 0.04 0.05 0.06
+                                    }
+                                  ]
+                                }
+                                physics Physics {
+                                  density -1
+                                  mass 0.14
+                                  centerOfMass [
+                                    0 0 0
+                                  ]
+                                }
+                                linearVelocity 1.4405457226382073e-5 -6.822463779512222e-6 8.815769373940594e-6
+                                angularVelocity 2.6007124367410373e-5 4.4614195077056136e-5 7.691089642334842e-6
+                              }
+                            }
+                          ]
+                        }
+                        DEF HindLeftPitchMX Transform {
+                          translation 0 0 -0.07
+                          rotation 0.7071067811865477 0 -0.7071067811865477 3.14159
+                          children [
+                            USE MX106Shape
+                          ]
+                        }
+                        DEF HindRightPitchMX Transform {
+                          translation 0 0 0.07
+                          rotation 0 1 0 -1.5708
+                          children [
+                            USE MX106Shape
+                          ]
+                        }
+                        DEF HindGirdleSpineMX Transform {
+                          translation -0.018 0 0
+                          rotation 0 1 0 1.5708
+                          children [
+                            USE MX64Shape
+                          ]
+                        }
+                        DEF HindGirdleMain Transform {
+                          translation -0.065 0 0
+                          rotation 0 1 0 -1.5708
+                          children [
+                            USE GirdleShape
+                          ]
+                        }
+                        DEF GPS_HGIRDLE GPS {
+                          name "gps_hgirdle"
+                        }
+                      ]
+                      boundingObject Group {
+                        children [
+                          Transform {
+                            translation -0.06 0 0
+                            children [
+                              Box {
+                                size 0.17 0.057 0.207
+                              }
+                            ]
+                          }
+                          Transform {
+                            translation -0.17 0 0
+                            children [
+                              Box {
+                                size 0.06 0.05 0.05
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                      physics Physics {
+                        density -1
+                        mass 0.634
+                        centerOfMass [
+                          -0.05 0 0
+                        ]
+                      }
+                      linearVelocity 1.0489555547087099e-5 -4.374050679536217e-6 7.827816521499616e-6
+                      angularVelocity 2.5958989399425833e-5 4.4617926696072014e-5 7.67830833811169e-6
+                    }
+                  }
+                ]
+              }
+              DEF SPINE_Transform Transform {
+                translation -0.12 0 -0.0213
+                rotation 0 1 0 1.5708
+                children [
+                  USE SpineShape
+                ]
+              }
+            ]
+            boundingObject Transform {
+              translation -0.123 0 0
+              children [
+                Box {
+                  size 0.2 0.05 0.05
+                }
+              ]
+            }
+            physics Physics {
+              density -1
+              mass 0.909
+              centerOfMass [
+                -0.12 0 0
+              ]
+            }
+            linearVelocity 1.2594607858862644e-5 -4.234013671072685e-6 -1.0797125176769263e-7
+            angularVelocity 2.5965994555960614e-5 4.46122262581048e-5 7.68000976752671e-6
+          }
+        }
+      ]
+    }
+    DEF FLpitch_T Transform {
+      translation 0 0 -0.0905
+      children [
+        DEF FLpitch_HJ HingeJoint {
+          jointParameters HingeJointParameters {
+            position -1.9458921649631351e-7
+          }
+          device [
+            RotationalMotor {
+              name "FLpitch_motor"
+            }
+            PositionSensor {
+              name "FLpitch_sensor"
+            }
+          ]
+          endPoint Solid {
+            rotation -1 0 0 1.954268969387413e-7
+            children [
+              DEF FLyaw_HJ HingeJoint {
+                jointParameters HingeJointParameters {
+                  position -8.762486050059985e-8
+                  axis 0 1 0
+                }
+                device [
+                  RotationalMotor {
+                    name "FLyaw_motor"
+                  }
+                  PositionSensor {
+                    name "FLyaw_sensor"
+                  }
+                ]
+                endPoint Solid {
+                  rotation 0 -1 0 8.940696716308595e-8
+                  children [
+                    DEF FLroll_T Transform {
+                      translation 0 0 -0.1474
+                      children [
+                        DEF FLroll_HJ HingeJoint {
+                          jointParameters HingeJointParameters {
+                            position -1.5707999514345927
+                            axis 0 0 1
+                          }
+                          device [
+                            RotationalMotor {
+                              name "FLroll_motor"
+                            }
+                            PositionSensor {
+                              name "FLroll_sensor"
+                            }
+                          ]
+                          endPoint Solid {
+                            translation 1.2575506193088519e-23 3.4694499999772105e-18 0
+                            rotation 0 0 -1 1.5707999514345925
+                            children [
+                              DEF FLknee_HJ HingeJoint {
+                                jointParameters HingeJointParameters {
+                                  position -3.2105825207359234e-7
+                                  axis 0 1 0
+                                }
+                                device [
+                                  RotationalMotor {
+                                    name "FLknee_motor"
+                                  }
+                                  PositionSensor {
+                                    name "FLknee_sensor"
+                                  }
+                                ]
+                                endPoint Solid {
+                                  rotation 0 -1 0 3.2098083538618743e-7
+                                  children [
+                                    DEF FL_TOUCH_T Transform {
+                                      translation 0.12 0 0
+                                      children [
+                                        DEF TS_FL TouchSensor {
+                                          translation -4.144608885009449e-6 -7.086611793771791e-7 1.520589036657638e-6
+                                          rotation 0.3269126601564052 0.25981588724000004 0.9086384414975817 -1.0767539956067815e-8
+                                          children [
+                                            DEF TS_SHAPE Shape {
+                                              appearance Appearance {
+                                                material Material {
+                                                }
+                                              }
+                                              geometry DEF TS_GEOMETRY Sphere {
+                                                radius 0.012
+                                                subdivision 3
+                                              }
+                                            }
+                                          ]
+                                          name "fl_touch"
+                                          contactMaterial "foot"
+                                          boundingObject USE TS_GEOMETRY
+                                          physics Physics {
+                                            density -1
+                                            mass 0.001
+                                            centerOfMass [
+                                              0 0 0
+                                            ]
+                                          }
+                                          type "force-3d"
+                                          lookupTable []
+                                          linearVelocity 5.136071065114933e-6 2.4571308822537996e-6 -1.3143762274125947e-5
+                                          angularVelocity 2.598318623337849e-5 4.459061360289207e-5 7.690244925237505e-6
+                                        }
+                                      ]
+                                    }
+                                    DEF LeftFrontFoot Transform {
+                                      translation 0.06 0 0
+                                      children [
+                                        USE FootMountShape
+                                      ]
+                                    }
+                                  ]
+                                  boundingObject Group {
+                                    children [
+                                      Transform {
+                                        translation 0.036 0 0
+                                        children [
+                                          Box {
+                                            size 0.05 0.05 0.03
+                                          }
+                                        ]
+                                      }
+                                      Transform {
+                                        translation 0.08 1.9896495e-7 0
+                                        rotation 0 0 1 1.5708
+                                        children [
+                                          Cylinder {
+                                            height 0.04
+                                            radius 0.007
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                  physics Physics {
+                                    density -1
+                                    mass 0.1
+                                    centerOfMass [
+                                      0.07 0 0
+                                    ]
+                                  }
+                                  linearVelocity 4.823599337278128e-6 2.4207570750257913e-6 -1.1993687560817382e-5
+                                  angularVelocity 2.5983115950175952e-5 4.459068048953915e-5 7.690060909016553e-6
+                                }
+                              }
+                              DEF FrontLeftKneeMX Transform {
+                                translation -0.016 0 0
+                                rotation 0 1 0 1.5708
+                                children [
+                                  USE MX64Shape
+                                ]
+                              }
+                            ]
+                            boundingObject Transform {
+                              translation -0.018 0 0
+                              scale 0.910734 1 1
+                              children [
+                                Box {
+                                  size 0.062 0.04 0.04
+                                }
+                              ]
+                            }
+                            physics Physics {
+                              density -1
+                              mass 0.14
+                              centerOfMass [
+                                0 0 0
+                              ]
+                            }
+                            linearVelocity 4.393124249941713e-6 2.373979613292863e-6 -1.0384550394679749e-5
+                            angularVelocity 2.598303229381732e-5 4.459082360294712e-5 7.687980623628089e-6
+                          }
+                        }
+                      ]
+                    }
+                    DEF FrontLeftRollMX Transform {
+                      translation -0.016 0 -0.102
+                      rotation 0.5773502691896257 -0.5773502691896257 0.5773502691896257 4.18879
+                      children [
+                        USE MX64Shape
+                      ]
+                    }
+                    DEF FrontLeftFemur Transform {
+                      translation 0 0 -0.05
+                      rotation 0 1 0 1.5708
+                      children [
+                        USE FemurShape
+                      ]
+                    }
+                  ]
+                  boundingObject Group {
+                    children [
+                      Transform {
+                        translation -0.015 0 -0.1
+                        children [
+                          Box {
+                            size 0.053 0.04 0.04
+                          }
+                        ]
+                      }
+                      DEF FemurBoundingBox Transform {
+                        translation 0 0 -0.05
+                        children [
+                          Box {
+                            size 0.016 0.054 0.1
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                  physics Physics {
+                    density -1
+                    mass 0.16
+                    centerOfMass [
+                      0 0 -0.08
+                    ]
+                  }
+                  linearVelocity 7.289586153895551e-6 5.383449938216662e-7 -9.643051724329656e-6
+                  angularVelocity 2.598235539745174e-5 4.459097840117088e-5 7.686600443957352e-6
+                }
+              }
+              DEF FrontLeftYawMX Transform {
+                translation 0 0 0.016
+                rotation 0 1 0 3.14159
+                children [
+                  USE MX64Shape
+                ]
+              }
+            ]
+            boundingObject Transform {
+              translation 0.004 0 0.016
+              children [
+                Box {
+                  size 0.04 0.05 0.06
+                }
+              ]
+            }
+            physics Physics {
+              density -1
+              mass 0.14
+              centerOfMass [
+                0 0 0
+              ]
+            }
+            linearVelocity 1.0730784599380993e-5 -1.6384890142092381e-6 -8.763469782082437e-6
+            angularVelocity 2.5980361113546562e-5 4.459274549826212e-5 7.684045221730965e-6
+          }
+        }
+      ]
+    }
+    DEF FRpitch_T Transform {
+      translation 0 0 0.0905
+      children [
+        DEF FRpitch_HJ HingeJoint {
+          jointParameters HingeJointParameters {
+            position -2.7206393266602736e-6
+          }
+          device [
+            RotationalMotor {
+              name "FRpitch_motor"
+            }
+            PositionSensor {
+              name "FRpitch_sensor"
+            }
+          ]
+          endPoint Solid {
+            rotation -1 0 0 2.720676193482419e-6
+            children [
+              DEF FRyaw_HJ HingeJoint {
+                jointParameters HingeJointParameters {
+                  position 9.427999673735877e-7
+                  axis 0 1 0
+                }
+                device [
+                  RotationalMotor {
+                    name "FRyaw_motor"
+                  }
+                  PositionSensor {
+                    name "FRyaw_sensor"
+                  }
+                ]
+                endPoint Solid {
+                  rotation 0 0.9999999999999999 0 9.429032814238382e-7
+                  children [
+                    DEF FRroll_T Transform {
+                      translation 0 0 0.1474
+                      children [
+                        DEF FRroll_HJ HingeJoint {
+                          jointParameters HingeJointParameters {
+                            position -1.57079991096965
+                            axis 0 0 1
+                          }
+                          device [
+                            RotationalMotor {
+                              name "FRroll_motor"
+                            }
+                            PositionSensor {
+                              name "FRroll_sensor"
+                            }
+                          ]
+                          endPoint Solid {
+                            translation 1.2435115098689784e-23 3.469449999977715e-18 0
+                            rotation 0 0 -1 1.5707999109696502
+                            children [
+                              DEF FRknee_HJ HingeJoint {
+                                jointParameters HingeJointParameters {
+                                  position -1.4339915330476857e-9
+                                  axis 0 1 0
+                                }
+                                device [
+                                  RotationalMotor {
+                                    name "FRknee_motor"
+                                  }
+                                  PositionSensor {
+                                    name "FRknee_sensor"
+                                  }
+                                ]
+                                endPoint Solid {
+                                  children [
+                                    DEF FR_TOUCH_T Transform {
+                                      translation 0.12 0 0
+                                      children [
+                                        DEF TS_FR TouchSensor {
+                                          translation -7.4901196014387494e-6 4.942816103081782e-7 -6.444230086777303e-7
+                                          rotation 0.07671374682322489 -0.2933835682026491 -0.9529118967444072 2.5228959173546536e-8
+                                          children [
+                                            DEF TS_SHAPE Shape {
+                                              appearance Appearance {
+                                                material Material {
+                                                }
+                                              }
+                                              geometry DEF TS_GEOMETRY Sphere {
+                                                radius 0.012
+                                                subdivision 3
+                                              }
+                                            }
+                                          ]
+                                          name "fr_touch"
+                                          contactMaterial "foot"
+                                          boundingObject USE TS_GEOMETRY
+                                          physics Physics {
+                                            density -1
+                                            mass 0.001
+                                            centerOfMass [
+                                              0 0 0
+                                            ]
+                                          }
+                                          type "force-3d"
+                                          lookupTable []
+                                          linearVelocity 2.601450640771219e-5 -1.0533141158015902e-5 -7.908032467751624e-6
+                                          angularVelocity 2.623136782054255e-5 4.817182204225603e-5 7.811210204890072e-6
+                                        }
+                                      ]
+                                    }
+                                    DEF RightFrontFoot Transform {
+                                      translation 0.06 0 0
+                                      children [
+                                        USE FootMountShape
+                                      ]
+                                    }
+                                  ]
+                                  boundingObject Group {
+                                    children [
+                                      Transform {
+                                        translation 0.036 0 0
+                                        children [
+                                          Box {
+                                            size 0.05 0.05 0.03
+                                          }
+                                        ]
+                                      }
+                                      Transform {
+                                        translation 0.08 2.35697e-7 0
+                                        rotation 0 0 1 1.5708
+                                        children [
+                                          Cylinder {
+                                            height 0.04
+                                            radius 0.007
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                  physics Physics {
+                                    density -1
+                                    mass 0.1
+                                    centerOfMass [
+                                      0.07 0 0
+                                    ]
+                                  }
+                                  linearVelocity 2.5743160509031953e-5 -1.0555912242173934e-5 -6.734756175978526e-6
+                                  angularVelocity 2.6231084728151534e-5 4.817194959045141e-5 7.811433214986088e-6
+                                }
+                              }
+                              DEF FrontRightKneeMX Transform {
+                                translation -0.016 0 0
+                                rotation 0 1 0 1.5708
+                                children [
+                                  USE MX64Shape
+                                ]
+                              }
+                            ]
+                            boundingObject Transform {
+                              translation -0.018 0 0
+                              scale 0.910734 1 1
+                              children [
+                                Box {
+                                  size 0.062 0.04 0.04
+                                }
+                              ]
+                            }
+                            physics Physics {
+                              density -1
+                              mass 0.14
+                              centerOfMass [
+                                0 0 0
+                              ]
+                            }
+                            linearVelocity 2.535416413602899e-5 -1.0589075917959046e-5 -5.102296201449943e-6
+                            angularVelocity 2.622646443605865e-5 4.817227303543282e-5 7.813988368761762e-6
+                          }
+                        }
+                      ]
+                    }
+                    DEF FrontRightRollMX Transform {
+                      translation -0.016 0 0.102
+                      rotation 0.5773502691896257 -0.5773502691896257 0.5773502691896257 4.18879
+                      children [
+                        USE MX64Shape
+                      ]
+                    }
+                    DEF FrontRightFemur Transform {
+                      translation 0 0 0.05
+                      rotation 0 1 0 1.5708
+                      children [
+                        USE FemurShape
+                      ]
+                    }
+                  ]
+                  boundingObject Group {
+                    children [
+                      Transform {
+                        translation -0.015 0 0.1
+                        children [
+                          Box {
+                            size 0.053 0.04 0.04
+                          }
+                        ]
+                      }
+                      DEF FemurBoundingBox Transform {
+                        translation 0 0 0.05
+                        children [
+                          Box {
+                            size 0.016 0.054 0.1
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                  physics Physics {
+                    density -1
+                    mass 0.16
+                    centerOfMass [
+                      0 0 0.08
+                    ]
+                  }
+                  linearVelocity 2.2229569527741184e-5 -8.742662087634577e-6 -5.877427702551832e-6
+                  angularVelocity 2.6222898537116992e-5 4.817247742318781e-5 7.817772459291122e-6
+                }
+              }
+              DEF FrontRightYawMX Transform {
+                translation 0 0 -0.016
+                rotation 0 1 0 3.14159
+                children [
+                  USE MX64Shape
+                ]
+              }
+            ]
+            boundingObject Transform {
+              translation 0.004 0 -0.016
+              children [
+                Box {
+                  size 0.04 0.05 0.06
+                }
+              ]
+            }
+            physics Physics {
+              density -1
+              mass 0.14
+              centerOfMass [
+                0 0 0
+              ]
+            }
+            linearVelocity 1.8516631081966206e-5 -6.551678602177006e-6 -6.8022346452236735e-6
+            angularVelocity 2.5980409174006484e-5 4.459101600809055e-5 7.678176299742898e-6
+          }
+        }
+      ]
+    }
+    DEF GPS_FGIRDLE GPS {
+      name "gps_fgirdle"
+    }
+    DEF IMU InertialUnit {
+      name "IMU"
+    }
+  ]
+  name "robot"
+  boundingObject Transform {
+    translation 0.016 0 0
+    children [
+      Box {
+        size 0.17 0.057 0.207
+      }
+    ]
+  }
+  physics Physics {
+    density -1
+    mass 0.634
+    centerOfMass [
+      0 0 0
+    ]
+  }
+  controller "RosRobotControllerSim"
+  controllerArgs "--name=krock --clock"
+  linearVelocity 1.5201142855152824e-5 -4.062455463122573e-6 -9.922771795221861e-6
+  angularVelocity 2.597262642528491e-5 4.459573003527993e-5 7.679982656350777e-6
+}

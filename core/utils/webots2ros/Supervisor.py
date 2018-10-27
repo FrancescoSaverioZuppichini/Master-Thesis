@@ -166,7 +166,13 @@ class Supervisor:
 
         return res
 
+    def remove_node(self, node):
+        service = self.name + '/supervisor/node/remove'
 
+        remove_node = self.get_service(service, node_remove)
+        res = remove_node(node)
+
+        return res
 
 class Field(Supervisor):
     WEBOTS_TYPE_TO_ROS = {

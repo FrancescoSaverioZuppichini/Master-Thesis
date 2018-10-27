@@ -17,7 +17,7 @@ parser.add_argument('-w',
                     '--world',
                     type=str,
                     help='The path to the world file',
-                    default=QUARRY,
+                    default=BASIC,
                     required=False)
 parser.add_argument('-e',
                     '--engine',
