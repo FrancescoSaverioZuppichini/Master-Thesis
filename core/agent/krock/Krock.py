@@ -3,7 +3,7 @@ import numpy as np
 
 from geometry_msgs.msg import PoseStamped
 from webots_ros.msg import Int8Stamped, Float64ArrayStamped
-from sensor_msgs.msg import Joy
+from sensor_msgs.msg import Joy, Image
 from std_msgs.msg import String
 
 from agent import RospyAgent
@@ -44,7 +44,7 @@ class Krock(RospyAgent, Supervisor):
         rospy.Subscriber(self.TOUCH_SENSOR, Float64ArrayStamped, self.callback_touch_sensors)
         rospy.Subscriber(self.TORQUES_FEEDBACK, Float64ArrayStamped, self.callback_torques_feedback)
         self.enable_front_camera()
-        # rospy.Subscriber(self.FRONTAL_CAMERA, Image, self.callbacks_frontal_camera)
+        rospy.Subscriber(self.FRONTAL_CAMERA, Image, self.callbacks_frontal_camera)
 
     def callback_pose(self, data):
         self.state['pose'] = data
@@ -89,5 +89,5 @@ class Krock(RospyAgent, Supervisor):
                   manual_mode=True)
         pass
 
-    def die(self):
-        self.reset_simulation()
+    # def die(self):
+    #     self.reset_simulation()
