@@ -20,6 +20,8 @@ WORLD = args.world
 
 rospy.init_node("traversability_simulation")
 
+rospy.on_shutdown(lambda : print('diocannenene'))
+
 w = WebotsWorld(file_path=WORLD)
 w()
 

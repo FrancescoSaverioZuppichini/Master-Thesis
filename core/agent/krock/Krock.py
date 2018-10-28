@@ -43,8 +43,8 @@ class Krock(RospyAgent, Supervisor):
         rospy.Subscriber(self.POSE_SUB, PoseStamped, self.callback_pose)
         rospy.Subscriber(self.TOUCH_SENSOR, Float64ArrayStamped, self.callback_touch_sensors)
         rospy.Subscriber(self.TORQUES_FEEDBACK, Float64ArrayStamped, self.callback_torques_feedback)
-        self.enable_front_camera()
-        rospy.Subscriber(self.FRONTAL_CAMERA, Image, self.callbacks_frontal_camera)
+        # self.enable_front_camera()
+        # rospy.Subscriber(self.FRONTAL_CAMERA, Image, self.callbacks_frontal_camera)
 
     def callback_pose(self, data):
         self.state['pose'] = data
