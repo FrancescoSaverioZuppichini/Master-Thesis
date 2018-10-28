@@ -40,11 +40,12 @@ class Krock(RospyAgent, Supervisor):
         }
 
     def init_subscribers(self):
-        rospy.Subscriber(self.POSE_SUB, PoseStamped, self.callback_pose)
-        rospy.Subscriber(self.TOUCH_SENSOR, Float64ArrayStamped, self.callback_touch_sensors)
-        rospy.Subscriber(self.TORQUES_FEEDBACK, Float64ArrayStamped, self.callback_torques_feedback)
-        # self.enable_front_camera()
-        # rospy.Subscriber(self.FRONTAL_CAMERA, Image, self.callbacks_frontal_camera)
+        return {
+            'pose' :rospy.Subscriber(self.POSE_SUB, PoseStamped, self.callback_pose),
+            'touch_sensor' :rospy.Subscriber(self.TOUCH_SENSOR, Float64ArrayStamped, self.callback_touch_sensors),
+            'toques_feedback' :rospy.Subscriber(self.TORQUES_FEEDBACK, Float64ArrayStamped, self.callback_torques_feedback),
+            'frontal_camera' :rospy.Subscriber(self.FRONTAL_CAMERA, Image, self.callbacks_frontal_camera)
+        }
 
     def callback_pose(self, data):
         self.state['pose'] = data
@@ -82,12 +83,14 @@ class Krock(RospyAgent, Supervisor):
                   lateral_freq=0,
                   manual_mode=True)
 
-    def act(self, world, *args, **kwargs):
+    def act(self, sim, world, *args, **kwargs):
         self.move(gait=1,
                   frontal_freq=1.0,
                   lateral_freq=0,
                   manual_mode=True)
-        pass
 
-    # def die(self):
-    #     self.reset_simulation()
+
+    def die(self, sim, world, *args, **kwargs):
+        # TODO this call should be decopled from the world
+        self.subscribers['frontal_camera'].unregister()
+        world.reanimate()

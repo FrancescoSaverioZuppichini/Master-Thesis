@@ -14,6 +14,11 @@ class OutOfMap(SimulationCallback):
 
         pose = agent.state['pose']
         pos = pose.pose.position
+        ori = pose.pose.orientation
+        #
+        # if ori.w < 0:
+        #     raise SimulationException('Upside down.')
+
         x, y, z = pos.x, pos.y, pos.z
 
         def check_if_inside(to_check, bounds):

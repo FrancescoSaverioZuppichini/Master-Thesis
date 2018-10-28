@@ -46,8 +46,10 @@ b = range(N_SIM)
 
 start = time.time()
 print('')
+
+a = create_agent()
+
 for iter, _ in enumerate(b):
-    a = create_agent()
     sim(world=w,
         agent=a)
     end = time.time() - start
