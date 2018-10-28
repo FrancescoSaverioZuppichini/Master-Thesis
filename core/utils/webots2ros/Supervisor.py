@@ -174,27 +174,40 @@ class Supervisor:
 
         return res
 
+    def remove_field(self, field):
+        service = self.name + '/supervisor/field/remove'
+
+        remove_field = self.get_service(service, field_remove)
+        res = remove_field(field, -1)
+
+        return res
+
 class Field(Supervisor):
     WEBOTS_TYPE_TO_ROS = {
         'SFInt32': field_get_int32,
+        'SFString' : field_get_string,
         'MFFloat': field_get_float,
         'SFBool': field_get_bool,
         'SFRotation': field_get_rotation,
         'SFVec3f': field_get_vec3f,
-        'SFFloat': field_get_float
+        'SFFloat': field_get_float,
+        'MFNode': field_get_node
     }
 
     WEBOTS_TYPE_TO_URL = {
         'SFInt32': 'get_int32',
+        'SFString': 'get_string',
         'MFFloat': 'get_float',
         'SFBool': 'get_bool',
         'SFRotation': 'get_rotation',
         'SFFloat': 'get_float',
-        'SFVec3f': 'get_vec3f'
+        'SFVec3f': 'get_vec3f',
+        'MFNode': 'get_node'
     }
 
     def __init__(self, field, node):
         super().__init__()
+        self.id = field.field
         self.field = field
         self.node = node
 
@@ -219,12 +232,14 @@ class Field(Supervisor):
         service = self.node.name + '/supervisor/field/{}'.format(url)
         req = self.get_service(service, ros_type)
         value = req(self.field.field, index)
+
         return value
 
 
 class Node(Supervisor):
     def __init__(self, node):
         super().__init__()
+        self.id = node.node
         self.node = node
 
     @classmethod
@@ -248,17 +263,29 @@ class Node(Supervisor):
 
         return field
 
-# #
-# s = Supervisor()
-# s.name = '/krock'
-# s.get_world_node()
-# s.get_robot_node()
-# print(s.get_robot_position())
+    def __setitem__(self, key, value):
+        if isinstance(key, Field): key = key.id
+        service = self.name + '/supervisor/field/import_node_from_string'
+        req = self.get_service(service, field_import_node_from_string)
+        res = req(key, -1, value)
+
+        return res
+
+    def __delitem__(self, key):
+        self.remove_field(key.id)
+
+s = Supervisor()
+s.name = '/krock'
+s.get_world_node()
+s.get_robot_node()
+node = Node.from_def('/krock','ROBOT')
+
+# get a field from that node
+print(node['name'][0])
+h = node['children']
 #
-# print(s.reset_simulation())
-# time.sleep(5)
-# s = Supervisor()
-# s.name = '/krock'
-# s.get_world_node()
-# s.get_robot_node()
-# print(s.get_robot_position())
+# node[h] = 'DEF IMU InertialUnit { \
+#       name "IMU" \
+#     }'
+
+del node[h]
