@@ -12,10 +12,9 @@ class BasicSimulation(Simulation):
         agent.spawn(world)
 
     def loop(self, world, agent, *args, **kwargs):
-        agent.act(world)
+        agent.act(self, world)
         agent.sleep()
 
     def on_finish(self, sim, world, agent, *args, **kwargs):
         agent.stop()
-        agent.die()
-        world.die()
+        agent.die(self, world)
