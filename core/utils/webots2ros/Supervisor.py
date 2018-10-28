@@ -38,75 +38,87 @@ class Supervisor:
     or it can be instantiated to be used and shared/
     """
     name = None
+    verbose = True
 
     @staticmethod
     def get_service(service, type):
-        # rospy.wait_for_service(service, timeout=None)
+        rospy.wait_for_service(service, timeout=None)
+        res = rospy.ServiceProxy(service, type)
+        return res
+
+    @staticmethod
+    def call_service(url, type, *args, **kwargs):
         res = None
         try:
-            res = rospy.ServiceProxy(service, type)
+            service = Supervisor.get_service(url, type)
+            res = service(*args, **kwargs)
         except rospy.ServiceException as e:
-            rospy.logerr(e)
+            if Supervisor.verbose: print(url, e)
         finally:
             return res
 
+    def retry_service(self, func, *args, **kwargs):
+        res = None
+        while res == None:
+            res = func(*args, **kwargs)
+            time.sleep(0.01)
+
+        return res
+
     def get_world_node(self):
         service = self.name + '/supervisor/get_root'
-        world = self.get_service(service, get_uint64)
-        self.world = world()
+        # world = self.call_service(service, get_uint64)
+        self.world = self.call_service(service, get_uint64)
         return self.world
 
     def load_world(self, world_name):
         service = self.name + '/supervisor/world_load'
-        set_world = self.get_service(service, set_string)
-        res = set_world(world_name)
+        res = self.call_service(service, set_string, world_name)
         return res
 
-    def reload_world(self):
-        service = self.name + '/supervisor/world_reload'
-        res = self.get_service(service, get_uint64)
-        return res
 
     def reset_simulation(self):
         service = self.name + '/supervisor/simulation_reset'
 
-        req_res = self.get_service(service, get_bool)
-        res = req_res()
+        res = self.call_service(service, get_bool)
+
+        return res
+
+    def set_simulation_mode(self, mode):
+        service = self.name + '/supervisor/simulation_set_mode'
+
+        res = self.call_service(service, set_int, mode)
 
         return res
 
     def reset_simulation_physics(self):
         service = self.name + '/supervisor/simulation_reset_physics'
 
-        req_res = self.get_service(service, get_bool)
-        res = req_res()
+        res = self.call_service(service, get_bool)
 
         return res
 
     def reset_node_physics(self, node):
-        service = self.name + '/supervisor/node/restart_controller'
+        service = self.name + '/supervisor/node/reset_physics'
 
-        req_res = self.get_service(service, node_reset_functions)
-        res = req_res(node.value)
+        res = self.call_service(service, node_reset_functions, node.value)
 
         return res
 
     def get_robot_node(self):
         service = self.name + '/supervisor/get_self'
-        res = self.get_service(service, get_uint64)
-        self.robot_node = res()
+        self.robot_node = self.call_service(service, get_uint64)
+
         return self.robot_node
 
     def get_robot_position(self):
         service = self.name + '/supervisor/node/get_position'
-        req_pos = self.get_service(service, node_get_position)
-        pos = req_pos(self.robot_node.value)
+        pos = self.call_service(service, node_get_position, self.robot_node.value)
         return pos
 
     def get_robot_orientation(self):
         service = self.name + '/supervisor/node/get_orientation'
-        req_orient = self.get_service(service, node_get_orientation)
-        orient = req_orient(self.robot_node.value)
+        orient = self.call_service(service, node_get_orientation, self.robot_node.value)
         return orient
 
     def set_robot_position(self, x, y, z):
@@ -136,49 +148,42 @@ class Supervisor:
     def restart_robot(self):
         service = self.name + '/supervisor/node/restart_controller'
 
-        req_res = self.get_service(service, node_reset_functions)
-
-        res = req_res(self.robot_node.value)
+        res = self.call_service(service, node_reset_functions, self.robot_node.value)
 
         return res
 
     def enable_front_camera(self, enable=1):
         service = self.name + '/front_camera/enable'
 
-        request_enable = self.get_service(service, set_int)
-        res = request_enable(enable)
+        res = self.call_service(service, set_int, enable)
 
         return res
 
     def simulation_set_mode(self, mode):
         service = self.name + '/supervisor/supervisor_simulation_set_mode'
 
-        req_mode = self.get_service(service, set_int)
-        res = req_mode(mode)
+        res = self.call_service(service, set_int, mode)
 
         return res
 
     def simulation_get_mode(self):
         service = self.name + '/supervisor/supervisor_simulation_get_mode'
 
-        get_mode = self.get_service(service, get_int)
-        res = get_mode()
+        res = self.call_service(service, get_int)
 
         return res
 
     def remove_node(self, node):
         service = self.name + '/supervisor/node/remove'
 
-        remove_node = self.get_service(service, node_remove)
-        res = remove_node(node)
+        res = self.call_service(service, node_remove, node)
 
         return res
 
     def remove_field(self, field):
         service = self.name + '/supervisor/field/remove'
 
-        remove_field = self.get_service(service, field_remove)
-        res = remove_field(field, -1)
+        res = self.call_service(service, field_remove, field, -1)
 
         return res
 
@@ -214,8 +219,8 @@ class Field(Supervisor):
     @property
     def get_type(self):
         service = self.node.name + '/supervisor/field/get_type_name'
-        req = self.get_service(service, field_get_type_name)
-        type_name = req(self.field.field)
+        type_name = self.call_service(service, field_get_type_name, self.field.field)
+        # type_name = req(self.field.field)
 
         return type_name, self.WEBOTS_TYPE_TO_ROS[type_name.name]
 
@@ -230,8 +235,9 @@ class Field(Supervisor):
         # url = self.get_type_url(wb_type.name)
         url = self.WEBOTS_TYPE_TO_URL[wb_type.name]
         service = self.node.name + '/supervisor/field/{}'.format(url)
-        req = self.get_service(service, ros_type)
-        value = req(self.field.field, index)
+
+        value = self.call_service(service, ros_type, self.field.field, index)
+        # value = req(self.field.field, index)
 
         return value
 
@@ -245,8 +251,8 @@ class Node(Supervisor):
     @classmethod
     def from_def(cls, base: str, name: str):
         service = base + '/supervisor/get_from_def'
-        req = cls.get_service(service, supervisor_get_from_def)
-        node = req(name)
+        node = cls.call_service(service, supervisor_get_from_def, name)
+        # node = req(name)
 
         node = cls(node)
         node.name = base
@@ -255,8 +261,8 @@ class Node(Supervisor):
 
     def __getitem__(self, key):
         service = self.name + '/supervisor/node/get_field'
-        req = self.get_service(service, node_get_field)
-        wb_field = req(self.node.node, key)
+        wb_field = self.call_service(service, node_get_field, self.node.node, key)
+        # wb_field = req(self.node.node, key)
 
         field = Field(wb_field, self)
         field.name = self.name
@@ -267,38 +273,11 @@ class Node(Supervisor):
         if isinstance(key, Field): key = key.id
 
         service = self.name + '/supervisor/field/import_node_from_string'
-        req = self.get_service(service, field_import_node_from_string)
-        res = req(key, -1, value)
+        res = self.call_service(service, field_import_node_from_string, key, -1, value)
+        # res = req(key, -1, value)
 
         return res
 
     def __delitem__(self, key):
         self.remove_field(key.id)
 
-
-if __name__ == "__main__":
-    s = Supervisor()
-    s.name = '/krock'
-    s.get_world_node()
-    s.get_robot_node()
-    node = Node.from_def('/krock','ROBOT')
-
-    h = node['children']
-
-    for _ in range(7):
-    #
-        del node[h]
-    with open('../../webots/children', 'r') as f:
-        node[h] = f.read()
-
-    # s.reset_simulation()
-    s.restart_robot()
-    s.enable_front_camera()
-# node[h] =    'DEF GPS_FGIRDLE GPS { \
-#       name "gps_fgirdle" \
-#     } \
-#     DEF IMU InertialUnit { \
-#       name "IMU" \
-#     }'
-
-# del node[h]

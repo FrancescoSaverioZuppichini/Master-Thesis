@@ -10,13 +10,16 @@ class WebotsWorld(World, Supervisor):
     name = '/krock'
 
     def __call__(self, *args, **kwargs):
-        # self.load_world(str(self.path))
-        # time.sleep(10)
-        self.reset_simulation_physics()
+        self.load_world(str(self.path))
+        time.sleep(10)
+        self.get_world_node()
+        self.get_robot_node()
+
         self.grid = Node.from_def(self.name, 'EL_GRID')
         self.terrain = Node.from_def(self.name, 'TERRAIN')
 
-        self.translation =self.terrain['translation'][0].value
+        # self.enable_front_camera()
+        self.translation = self.terrain['translation'][0].value
 
         self.x_dim = self.grid['xDimension'][0].value
 
@@ -30,6 +33,29 @@ class WebotsWorld(World, Supervisor):
 
         self.x = (self.translation.x, self.x + self.translation.x)
         self.y = (self.translation.z, self.y + self.translation.z)
+
+
+    def die(self):
+        self.get_world_node()
+        self.get_robot_node()
+
+        node = Node.from_def('/krock', 'ROBOT')
+
+        h = node['children']
+
+        for _ in range(7):
+            #
+            del node[h]
+        with open('./webots/children', 'r') as f:
+            node[h] = f.read()
+        print('done')
+
+        self.retry_service(self.restart_robot)
+
+        self.retry_service(self.enable_front_camera)
+
+        self.grid = Node.from_def(self.name, 'EL_GRID')
+        self.terrain = Node.from_def(self.name, 'TERRAIN')
 
     @property
     def random_position(self):

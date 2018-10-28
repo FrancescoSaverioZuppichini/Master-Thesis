@@ -17,7 +17,7 @@ parser.add_argument('-w',
                     '--world',
                     type=str,
                     help='The path to the world file',
-                    default=BASIC,
+                    default=QUARRY,
                     required=False)
 parser.add_argument('-e',
                     '--engine',
@@ -35,7 +35,7 @@ parser.add_argument('-t',
                     '--time',
                     type=float,
                     help='Maximum time per simulation',
-                    default=10)
+                    default=20)
 parser.add_argument('-r',
                     '--robot',
                     type=str,
