@@ -265,6 +265,7 @@ class Node(Supervisor):
 
     def __setitem__(self, key, value):
         if isinstance(key, Field): key = key.id
+
         service = self.name + '/supervisor/field/import_node_from_string'
         req = self.get_service(service, field_import_node_from_string)
         res = req(key, -1, value)
@@ -274,18 +275,30 @@ class Node(Supervisor):
     def __delitem__(self, key):
         self.remove_field(key.id)
 
-s = Supervisor()
-s.name = '/krock'
-s.get_world_node()
-s.get_robot_node()
-node = Node.from_def('/krock','ROBOT')
 
-# get a field from that node
-print(node['name'][0])
-h = node['children']
-#
-# node[h] = 'DEF IMU InertialUnit { \
+if __name__ == "__main__":
+    s = Supervisor()
+    s.name = '/krock'
+    s.get_world_node()
+    s.get_robot_node()
+    node = Node.from_def('/krock','ROBOT')
+
+    h = node['children']
+
+    for _ in range(7):
+    #
+        del node[h]
+    with open('../../webots/children', 'r') as f:
+        node[h] = f.read()
+
+    # s.reset_simulation()
+    s.restart_robot()
+    s.enable_front_camera()
+# node[h] =    'DEF GPS_FGIRDLE GPS { \
+#       name "gps_fgirdle" \
+#     } \
+#     DEF IMU InertialUnit { \
 #       name "IMU" \
 #     }'
 
-del node[h]
+# del node[h]
