@@ -90,5 +90,3 @@ class Krock(RospyAgent, Supervisor):
                   manual_mode=True)
 
 
-    def die(self, sim, world, *args, **kwargs):
-        [sub.unregister() for sub in self.subscribers.values()]
