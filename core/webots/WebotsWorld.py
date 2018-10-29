@@ -3,7 +3,7 @@ import time
 
 from world import World
 from utils.webots2ros import *
-from geometry_msgs.msg import Point, Pose, Quaternion, Twist, Wrench, PoseStamped, TwistStamped
+from geometry_msgs.msg import Pose
 from tf import transformations
 
 class WebotsWorld(World, Supervisor):
@@ -12,7 +12,6 @@ class WebotsWorld(World, Supervisor):
     def __call__(self, *args, **kwargs):
         # TODO check the world name and load if different
         self.load_world(str(self.path))
-        # time.sleep(10)
 
         self.get_world_node()
         self.get_robot_node()
@@ -48,8 +47,6 @@ class WebotsWorld(World, Supervisor):
         # remove all children from node ROBOT
         for _ in range(7):
             del node[h]
-        # open the original children tree
-        # with open('./webots/children', 'r') as f:
         node[h] = self.children
         # restart the simulation and enable the camera
         self.retry_service(self.restart_robot)
