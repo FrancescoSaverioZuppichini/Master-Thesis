@@ -57,8 +57,8 @@ class Krock(RospyAgent, Supervisor):
         self.state['torques_feedback'] = data
 
     def callbacks_frontal_camera(self, data):
-        # self.state['frontal_camera'] = data
-        pass
+        self.state['frontal_camera'] = data
+        # pass
 
     def move(self, gait, frontal_freq, lateral_freq, manual_mode=False):
         mode = int(manual_mode)
@@ -91,6 +91,4 @@ class Krock(RospyAgent, Supervisor):
 
 
     def die(self, sim, world, *args, **kwargs):
-        # TODO this call should be decopled from the world
-        self.subscribers['frontal_camera'].unregister()
-        world.reanimate()
+        [sub.unregister() for sub in self.subscribers.values()]

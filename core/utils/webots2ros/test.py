@@ -1,11 +1,4 @@
-import sys
-import rospy
-import time
-import numpy as np
-import math
-from geometry_msgs.msg import Quaternion, Vector3
-from webots_ros.srv import *
-from agent.krock import Krock
+from webots.krock import Krock
 from utils.webots2ros.Supervisor import *
 
 rospy.init_node("traversability_simulation")
