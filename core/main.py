@@ -17,18 +17,18 @@ WORLD = args.world
 
 rospy.init_node("traversability_simulation")
 
-# rospy.on_shutdown(lambda : print('Bye'))
-
+# TODO the robot should be selected based on the parser
 w = WebotsWorld(file_path=WORLD)
 w()
 
+# TODO the robot should be selected based on the parser
 def create_agent():
     krock = Krock()
     krock.add_callback(RosBagSaver('./data',
                                    topics=['pose']))
     krock()
-    return krock
 
+    return krock
 
 sim = BasicSimulation(name=args.robot)
 sim.add_callbacks([Alarm(stop_after_s=SIM_TIME),
@@ -44,6 +44,7 @@ print('')
 for iter, _ in enumerate(b):
     if iter % 5 == 0: w.reanimate()
     a = create_agent()
+
     sim(world=w,
         agent=a)
     end = time.time() - start

@@ -13,14 +13,17 @@ class RosBagSaver(AgentCallback):
         self.cache = {}
         self.max_size = max_size
         self.size = 0
-        self.tr = threading.Thread(target=self.store)
         self.workers = workers
 
     def on_state_change(self, key, value):
         store = True
+
         if self.topics != None: store = key in self.topics
+
         if key not in self.cache: self.cache[key] = []
+
         if store: self.cache[key].append(value)
+
         self.size += 1
 
         if self.size == self.max_size: self.store()
@@ -41,9 +44,7 @@ class RosBagSaver(AgentCallback):
         data = self.cache.items()
 
         stage = th.map(self.write, data, workers=self.workers)
-        res = list(stage)
-
-        print(res)
+        files_list = list(stage)
 
         rospy.loginfo('Wrote bag file to disk.')
         # clear cache
@@ -51,7 +52,4 @@ class RosBagSaver(AgentCallback):
         self.size = 0
 
     def on_shut_down(self):
-        self.tr.start()
-        self.tr.join()
-        self.tr = threading.Thread(target=self.store)
-        # self.bag.close()
+        self.store()

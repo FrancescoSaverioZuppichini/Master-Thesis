@@ -8,9 +8,8 @@ from agent import Agent
 
 class Simulation(Callbackable, SimulationCallback):
     """
-    Basic Simulation interface. A simulation holds the main logic to run
-    an agent, or multiple ones, into a world. It maintains a infinite loop
-    until something happens. It can be stop by raising a SimulationException
+     Basic Simulation interface. A simulation holds the main logic to run
+    an agent, or multiple ones, into a world. It maintains an infinite loop until something happens. It can be stopped by raising a SimulationException
     or to manually set the should_stop field to False.
     Before, during and after the main loop it fires event that can be subscribed
     using the SimulationCallback class.
@@ -24,7 +23,7 @@ class Simulation(Callbackable, SimulationCallback):
 
     def __call__(self, world: World, agent: Agent, *args, **kwargs):
         """
-        When called the simulation start and continue to loop until it is stopped
+        When called the simulation starts and continue to loop until it is stopped
         :param world:
         :param agent:
         :param args:
@@ -39,7 +38,7 @@ class Simulation(Callbackable, SimulationCallback):
     def run(self, world: World, agent: Agent, *args, **kwargs):
         """
         Main routine. Inside this function the simulation should move the agent
-        around the world according to the agent internal implementation.
+        around the world according to the agent's internal implementation.
         :param world:
         :param agent:
         :param args:

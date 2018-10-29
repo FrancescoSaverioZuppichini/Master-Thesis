@@ -6,8 +6,7 @@ from simulation import Simulation
 
 class Agent(Callbackable, AgentCallback):
     """
-    Basic Agent interface. An agent is an entity that interacts with a world,
-    and environment.
+    Basic Agent interface. An agent is an entity that interacts with a world.
     It is defined by the action it can do. This interfaces exposes some basic
     interaction such as 'move'.
     # TODO I should add a Brain that decide how to act based on the enviroment
@@ -28,9 +27,19 @@ class Agent(Callbackable, AgentCallback):
     # TODO what about pass the world param?
     def move(self, *args, **kwargs):
         """
-        This function moves the agent in the world. It depends on the
-        internet implementation and the simulator used. However, it should be
-        as genere as possible.
+        A generic function to move the agent in the world. Use it to implement your own logic. E.g
+
+        ```
+        class MyAgent(Agent):
+            def move(self, action, *args, **kwargs):
+                if action == 'forward':
+                    self.wheels[0].spin
+                    self.wheels[1].spin
+                elif action == 'left':
+                    self.wheels[0].stop
+                    self.wheels[1].spin
+                ...
+        ```
         :param args:
         :param kwargs:
         :return:
@@ -64,12 +73,22 @@ class Agent(Callbackable, AgentCallback):
 
     def die(self, sim: Simulation, world: World, *args, **kwargs):
         """
-        This function kill the agent.
+         This function kill the agent. This should be implemented,
+         hook to the simulation instead
+
+        :param sim:
+        :param world:
+        :param args:
+        :param kwargs:
         :return:
         """
         self.notify('on_shut_down')
 
 class AgentState(dict):
+    """
+    The knapsack of an agent. It notify the Agent when something
+    it is updated using the 'on_state_change' event. Use it wisely.
+    """
     def __init__(self, agent: Agent):
         super().__init__()
         self.agent = agent

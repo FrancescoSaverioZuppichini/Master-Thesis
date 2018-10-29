@@ -58,7 +58,6 @@ class Krock(RospyAgent, Supervisor):
 
     def callbacks_frontal_camera(self, data):
         self.state['frontal_camera'] = data
-        # pass
 
     def move(self, gait, frontal_freq, lateral_freq, manual_mode=False):
         mode = int(manual_mode)
@@ -76,6 +75,8 @@ class Krock(RospyAgent, Supervisor):
                                    y=pos.orientation.z,
                                    z=pos.orientation.y,
                                    w=pos.orientation.w)
+
+        self.reset_node_physics(self.robot_node.value)
 
     def stop(self):
         self.move(gait=1,
