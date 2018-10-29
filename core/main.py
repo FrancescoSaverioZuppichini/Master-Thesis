@@ -24,7 +24,7 @@ w()
 
 def create_agent():
     krock = Krock()
-    krock.add_callback(RosBagSaver('./data/{}.bag'.format(time.time()),
+    krock.add_callback(RosBagSaver('./data',
                                    topics=['pose']))
     krock()
     return krock
@@ -43,10 +43,9 @@ print('')
 
 for iter, _ in enumerate(b):
     if iter % 5 == 0: w.reanimate()
-
     a = create_agent()
-
     sim(world=w,
         agent=a)
     end = time.time() - start
-    print('Iter={:} Error={:} Elapsed={:.4f}'.format(str(iter), sim.history['error', -1], end))
+
+    rospy.loginfo('Iter={:} Error={:} Elapsed={:.2f}'.format(str(iter), sim.history['error', -1], end))
