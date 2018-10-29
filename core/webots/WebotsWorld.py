@@ -11,7 +11,7 @@ class WebotsWorld(World, Supervisor):
 
     def __call__(self, *args, **kwargs):
         # TODO check the world name and load if different
-        # self.load_world(str(self.path))
+        self.load_world(str(self.path))
         # time.sleep(10)
 
         self.get_world_node()
@@ -34,8 +34,6 @@ class WebotsWorld(World, Supervisor):
         # also add the translation
         self.x = (self.translation.x, self.x + self.translation.x)
         self.y = (self.translation.z, self.y + self.translation.z)
-
-        self.retry_service(self.enable_front_camera)
 
         with open('./webots/children', 'r') as f:
             self.children = f.read()

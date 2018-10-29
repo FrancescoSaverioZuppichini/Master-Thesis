@@ -47,9 +47,14 @@ args = parser.parse_args()
 art = text2art('Traversability Simulator')
 print(art)
 
+if args.engine == 'webots':
+    print('The simulation will try re-connect to webots if something crashed. '
+          'Errors will be printed while re-connecting.')
+    print('')
+
 header = list(args.__dict__.keys())
 rows = [list(args.__dict__.values())]
 print(tabulate.tabulate(rows, header))
-
+print('')
 # with open('./krock.txt', 'r') as f:
 #     print(f.read())
