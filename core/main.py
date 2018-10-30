@@ -26,6 +26,9 @@ def create_agent():
     krock = Krock()
     krock.add_callback(RosBagSaver('./data',
                                    topics=['pose']))
+
+    # krock.add_callback(RosBagSaver('./data/{}.bag'.format(time.time()),
+    #                                topics=['pose']))
     krock()
 
     return krock

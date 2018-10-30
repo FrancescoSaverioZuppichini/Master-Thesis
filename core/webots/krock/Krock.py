@@ -76,7 +76,7 @@ class Krock(RospyAgent, Supervisor):
                                    z=pos.orientation.y,
                                    w=pos.orientation.w)
 
-        self.reset_node_physics(self.robot_node.value)
+        self.reset_node_physics(self.robot_node)
 
     def stop(self):
         self.move(gait=1,
