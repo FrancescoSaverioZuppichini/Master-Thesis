@@ -28,6 +28,8 @@
 ```
 
 ## How to run the simulation
+TO REVIEW
+
 Be sure that webots is running!
 
 ### On local machine
