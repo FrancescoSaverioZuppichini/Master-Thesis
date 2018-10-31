@@ -17,25 +17,27 @@ services:
       dockerfile: ./docker/Dockerfile
       context: .
     network_mode: host
+    volumes:
+      - ./data/
     command: /bin/bash -c "./start.sh"
     # in case you want to expose some devices, e.g. joystick
     #devices:
       #- /dev/input/js0
-  webots:
-    command: bash
-    image: 'webots'
-    environment:
-      - "DISPLAY=${DISPLAY}"
-      - "QT_X11_NO_MITSHM=1"
-      - "ROS_IP=127.0.0.1"
-      - "ROS_MASTER_URI=http://127.0.0.1:11311"
-      - "XAUTHORITY=~/.Xauthority"
-      - "LIBGL_DEBUG=verbose"
-      - "NVIDIA_VISIBLE_DEVICES=all"
-    volumes:
-      - /tmp/.X11-unix:/tmp/.X11-unix
-    network_mode: host
-    build:
-      dockerfile: ./docker/Dockerfile-webots
-      context: .
-    command: /bin/bash -c "webots --mode=fast --stdout"
+#  webots:
+#    command: bash
+#    image: 'webots'
+#    environment:
+#      - "DISPLAY=${DISPLAY}"
+#      - "QT_X11_NO_MITSHM=1"
+#      - "ROS_IP=127.0.0.1"
+#      - "ROS_MASTER_URI=http://127.0.0.1:11311"
+#      - "XAUTHORITY=~/.Xauthority"
+#      - "LIBGL_DEBUG=verbose"
+#      - "NVIDIA_VISIBLE_DEVICES=all"
+#    volumes:
+#      - /tmp/.X11-unix:/tmp/.X11-unix
+#    network_mode: host
+#    build:
+#      dockerfile: ./docker/Dockerfile-webots
+#      context: .
+#    command: /bin/bash -c "webots --mode=fast --stdout"

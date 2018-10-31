@@ -1,6 +1,5 @@
-tqdm==4.25.0
 numpy==1.15.1
-tabulate==0.8.2
 art==2.3
-deprecation==2.0.6
+tabulate==0.8.2
+pypeln==0.1.4
 tf==1.0.0
