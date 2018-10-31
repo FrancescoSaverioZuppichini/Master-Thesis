@@ -23,9 +23,34 @@
 ├── utils # utils code
     ...
 │   ├── webots2ros # package to easily call webots using ROS
-├── webots # package to use Webots in the current framework
+├── webots # package to use Webots in the current framework in cointains our krock
 └── world # World package
 ```
+
+## How to run the simulation
+Be sure that webots is running!
+
+### On local machine
+Just run
+
+```python
+python3 main.py 
+```
+
+If you need help
+```python
+python3 main.py --help
+```
+
+### Docker
+First build everything, it may take a while
+```python
+docker-compose build 
+```
+
+```python3 docker-compose up
+```
+
 ## How to create a simulation pipeline
 ### Getting started
 Let's see some code
