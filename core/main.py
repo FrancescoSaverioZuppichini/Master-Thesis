@@ -18,7 +18,7 @@ WORLD = args.world
 rospy.init_node("traversability_simulation")
 
 # TODO the robot should be selected based on the parser
-w = WebotsWorld(file_path=WORLD)
+w = WebotsWorld.from_file(WORLD)
 w()
 
 # TODO the robot should be selected based on the parser

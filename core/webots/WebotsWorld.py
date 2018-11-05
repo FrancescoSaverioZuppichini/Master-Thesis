@@ -1,17 +1,24 @@
 import numpy as np
 import time
+import cv2
+import matplotlib.pyplot as plt
 
 from world import World
 from utils.webots2ros import *
 from geometry_msgs.msg import Pose
 from tf import transformations
 
+from .utils import image2webots_terrain
+
 class WebotsWorld(World, Supervisor):
     name = '/krock'
 
+    def __init__(self, world_path):
+        self.world_path = world_path
+
     def __call__(self, *args, **kwargs):
         # TODO check the world name and load if different
-        self.load_world(str(self.path))
+        self.load_world(self.world_path)
 
         self.get_world_node()
         self.get_robot_node()
@@ -36,6 +43,25 @@ class WebotsWorld(World, Supervisor):
 
         with open('./webots/children', 'r') as f:
             self.children = f.read()
+
+    def plot_terrain(self, terrain):
+        imgplot = imshow(terrain)
+        plt.colorbar()
+        plt.show()
+
+    def from_file(cls, file_path):
+        return WebotsWorld(world_path=file_path)
+
+    def from_image(self, image_path, src_world, config):
+        image = cv2.imread(image_path, src_world, config)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+        self.from_numpy(image, src_world, config)
+
+    def from_numpy(self, image_np, src_world, config):
+        world_path = utils.image2webots_terrain(image_np, src_world, config)
+
+        return WebotsWorld(world_path)
 
     def reanimate(self):
         self.get_world_node()
