@@ -13,16 +13,24 @@ RUN cd root/catkin_ws/ \
 && . /opt/ros/melodic/setup.sh \
 && . ./devel/setup.sh \
 && export PYTHONPATH="${PYTHONPATH}:/usr/local/lib/python3.6/dist-packages": \
-&& catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3
+&& catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3 \
+&& pip3 install defusedxml
 
-RUN /bin/bash -c "echo '. /root/catkin_ws/devel/setup.bash' >> ~/.bashrc"
+RUN /bin/bash -c "echo 'source /opt/ros/melodic/setup.bash' >> ~/.bashrc"
+RUN /bin/bash -c "echo 'source /root/catkin_ws/devel/setup.bash' >> ~/.bashrc"
 
 ADD . /root/code
 WORKDIR /root/code
 
 RUN pip3 install -r requirements.txt
+#&& cp -R /opt/ros/melodic/lib/python3/. /usr/local/lib/python3.6/ \
+#&& cp -R /root/catkin_ws/devel/lib/python3/. /usr/local/lib/python3.6/
+
+#RUN ln -s /usr/local/lib/python3.6/ /opt/ros/melodic/lib/python3/
+#RUN ln -s /usr/local/lib/python3.6/ /root/catkin_ws/devel/lib/python3/
+
 RUN chmod 777 /root/code/start.sh
 SHELL [" ", "-c"]
-CMD ["./start.sh"]
-
-#CMD ["python", "main.py"]
+#CMD ['source /opt/ros/melodic/setup.bash && source /root/catkin_ws/devel/setup.bash']
+#CMD ["./start.sh"]
+#CMD

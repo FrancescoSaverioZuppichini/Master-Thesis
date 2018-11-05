@@ -2,4 +2,6 @@ numpy==1.15.1
 art==2.3
 tabulate==0.8.2
 pypeln==0.1.4
-tf==1.0.0
+opencv-python
+matplotlib
+defusedxml

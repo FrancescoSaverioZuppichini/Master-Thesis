@@ -1,0 +1,9 @@
+FROM zuppif/ros-melodic-python3:test
+
+RUN ln -s /usr/local/lib/python3.6/dist-packages /usr/local/lib/python3.6/site-packages
+
+RUN /bin/bash -c "echo 'source /opt/ros/melodic/setup.bash' >> ~/.bashrc"
+
+EXPOSE 11311
+
+RUN pip3 install defusedxml
