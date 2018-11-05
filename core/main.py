@@ -18,7 +18,14 @@ WORLD = args.world
 rospy.init_node("traversability_simulation")
 
 # TODO the robot should be selected based on the parser
-w = WebotsWorld.from_file(WORLD)
+w = WebotsWorld.from_image(
+    '/home/francesco/Documents/Master Thesis/core/webots/map_generation/bumps2.png',
+    '/home/francesco/Documents/krock-sim/krock/krock2_ros/worlds/krock2_camera.wbt',
+    { 'height' : 2,
+      'resolution' : 0.02},
+    output_path='/home/francesco/Documents/krock-sim/krock/krock2_ros/worlds/test.wbt')
+
+# w = WebotsWorld.from_file(WORLD)
 w()
 
 # TODO the robot should be selected based on the parser
