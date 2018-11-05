@@ -1,9 +1,17 @@
 import numpy as np
+import time
+import matplotlib.pyplot as plt
 
 from matplotlib.pyplot import imshow
 from tempfile import NamedTemporaryFile
 
-def image2webots_terrain(self, image, src_world, config, output_path=None):
+
+def plot_terrain(terrain):
+    imgplot = imshow(terrain)
+    plt.colorbar()
+    plt.show()
+
+def image2webots_terrain(image, src_world, config, output_path=None, verbose=True):
     if image.dtype == 'uint8':
         image = image / 256.
     if image.dtype == 'uint16':
@@ -15,10 +23,10 @@ def image2webots_terrain(self, image, src_world, config, output_path=None):
 
     terrain = image * height
 
-    if self.verbose: print('mod image type: ', terrain.dtype, ' height factor: ', height, ' max val (m): ',
+    if verbose: print('mod image type: ', terrain.dtype, ' height factor: ', height, ' max val (m): ',
                            np.amax(terrain), ' shape', terrain.shape)
 
-    if self.verbose: self.plot_terrain(terrain)
+    if verbose: plot_terrain(terrain)
 
     data = []
     l1 = l2 = -1
@@ -57,6 +65,8 @@ def image2webots_terrain(self, image, src_world, config, output_path=None):
 
     end = time.time()
 
-    if self.verbose: print('Wrote new world in {:.2f}s'.format((end - start)))
+    if verbose: print('Wrote new world in {:.2f}s'.format((end - start)))
 
     return output_path
+
+
