@@ -16,8 +16,8 @@ parser = argparse.ArgumentParser(description='Traversability Simulation')
 parser.add_argument('-w',
                     '--world',
                     type=str,
-                    help='The path to the world file',
-                    default=QUARRY,
+                    help='The path to the world file or an height map',
+                    default='./maps/holes3.png',
                     required=False)
 parser.add_argument('-e',
                     '--engine',
@@ -41,6 +41,16 @@ parser.add_argument('-r',
                     type=str,
                     help='Name of the robot. Available: krock',
                     default='krock')
+
+parser.add_argument('--maps',
+                    type=str,
+                    help='A directory with height maps',
+                    default=None)
+
+parser.add_argument('--save_dir',
+                    type=str,
+                    help='Where to store the simulation informations',
+                    default='./data')
 
 args = parser.parse_args()
 
