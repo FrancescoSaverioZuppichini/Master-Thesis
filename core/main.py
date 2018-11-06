@@ -33,7 +33,10 @@ if args.engine == 'webots':
             path.abspath('./webots/krock/krock.wbt'),
             {'height': 1,
              'resolution': 0.02},
-            output_path='/krock/krock2_ros/worlds/temp.wbt')
+            # output_path='/krock/krock2_ros/worlds/temp.wbt')
+            output_dir=path.abspath('./webots/krock/krock2_ros/worlds/'))
+
+
 
 if w == None:
     raise ValueError('No world created. Probably you selected a no supported engine. Run main.py --help')
@@ -43,14 +46,14 @@ if agent == None:
 w()
 
 
-def create_agent():
+def create_agent(w):
     krock = agent()
     krock.add_callback(RosBagSaver(args.save_dir,
                                    topics=['pose']))
 
     # krock.add_callback(RosBagSaver('./data/{}.bag'.format(time.time()),
     #                                topics=['pose']))
-    krock()
+    krock(w)
 
     return krock
 
@@ -68,7 +71,7 @@ print('')
 
 for iter, _ in enumerate(b):
     if (iter + 1) % 10 == 0: w.reanimate()
-    a = create_agent()
+    a = create_agent(w)
 
     sim(world=w,
         agent=a)

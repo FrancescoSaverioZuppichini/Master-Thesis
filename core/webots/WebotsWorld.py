@@ -24,7 +24,8 @@ class WebotsWorld(World, Supervisor):
     def __call__(self, *args, **kwargs):
         # TODO check the world name and load if different
         print(self.world_path)
-        self.load_world('/home/francesco/Documents/Master-Thesis/core/webots/' + self.world_path)
+        # self.load_world('/home/francesco/Documents/Master-Thesis/core/webots/' + self.world_path)
+        self.load_world( self.world_path)
 
         self.get_world_node()
         self.get_robot_node()
@@ -95,15 +96,20 @@ class WebotsWorld(World, Supervisor):
         return WebotsWorld(world_path=file_path)
 
     @classmethod
-    def from_image(cls, image_path, src_world, config, *args, **kwargs):
+    def from_image(cls, image_path, src_world, config, output_dir):
         image = cv2.imread(image_path)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-        return cls.from_numpy(image, src_world, config, *args, **kwargs)
+        filename_w_ext = os.path.basename(image_path)
+        filename, file_extension = os.path.splitext(filename_w_ext)
+
+        output_path = os.path.normpath(output_dir + '/' + filename + '.wbt')
+
+        return cls.from_numpy(image, src_world, config, output_path)
 
     @classmethod
-    def from_numpy(cls, image_np, src_world, config, *args, **kwargs):
-        world_path = image2webots_terrain(image_np, src_world, config, *args, **kwargs)
+    def from_numpy(cls, image_np, src_world, config, output_path):
+        world_path = image2webots_terrain(image_np, src_world, config, output_path)
 
         return WebotsWorld(world_path)
 
