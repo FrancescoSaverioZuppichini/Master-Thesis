@@ -14,6 +14,7 @@ class RospyAgent(Agent):
         self.rate = rospy.Rate(hz=10) if rate == None else rate
 
     def __call__(self, *args, **kwargs):
+        super().__call__(*args, **kwargs)
         self.subscribers = self.init_subscribers()
         self.publishers = self.init_publishers()
 

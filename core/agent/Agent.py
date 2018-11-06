@@ -15,6 +15,9 @@ class Agent(Callbackable, AgentCallback):
         self.state = AgentState(self)
         self.set_callbacks([self])
 
+    def __call__(self, world: World, *args, **kwargs):
+        self.world = world
+
     # TODO what about pass the world param?
     def spawn(self, world: World, pos=None, *args, **kwargs):
         """
@@ -95,4 +98,4 @@ class AgentState(dict):
 
     def __setitem__(self, key, value):
         super().__setitem__(key, value)
-        self.agent.notify('on_state_change', key, value)
+        self.agent.notify('on_state_change', self.agent, key, value)
