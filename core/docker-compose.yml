@@ -11,16 +11,16 @@ services:
       # - "ROS_HOSTNAME=krock"
       - "PYTHONUNBUFFERED=32"
       - "ROS_IP=0.0.0.0"
-      - "ROS_MASTER_URI=http://0.0.0.0:11311"
+      - "ROS_MASTER_URI"
       - "ROS_PYTHON_VERSION=3"
     # set this to link to your Dockerfile, this will build the image in case it is not present or you want to rebuild it
     build:
       dockerfile: ./docker/Dockerfile
       context: .
-#    network_mode: host
+    network_mode: host
 #    volumes:
 #      - ./data/
-    command: /bin/bash -c "./start.sh"
+#    command: /bin/bash -c
     # in case you want to expose some devices, e.g. joystick
     #devices:
       #- /dev/input/js0

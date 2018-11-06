@@ -7,7 +7,8 @@ RUN mkdir -p root/catkin_ws/src \
 && . /opt/ros/melodic/setup.sh \ 
 && catkin_make
 
-COPY ./resources/catkin_ws_src/webots_ros/ root/catkin_ws/src/webots_ros
+RUN git clone https://github.com/romarcg/krock-sim.git \
+&& cp -r krock-sim/catkin_ws_src/webots_ros/ root/catkin_ws/src/webots_ros
 
 RUN cd root/catkin_ws/ \
 && . /opt/ros/melodic/setup.sh \
@@ -23,14 +24,8 @@ ADD . /root/code
 WORKDIR /root/code
 
 RUN pip3 install -r requirements.txt
-#&& cp -R /opt/ros/melodic/lib/python3/. /usr/local/lib/python3.6/ \
-#&& cp -R /root/catkin_ws/devel/lib/python3/. /usr/local/lib/python3.6/
-
-#RUN ln -s /usr/local/lib/python3.6/ /opt/ros/melodic/lib/python3/
-#RUN ln -s /usr/local/lib/python3.6/ /root/catkin_ws/devel/lib/python3/
 
 RUN chmod 777 /root/code/start.sh
 SHELL [" ", "-c"]
 #CMD ['source /opt/ros/melodic/setup.bash && source /root/catkin_ws/devel/setup.bash']
 #CMD ["./start.sh"]
-#CMD
