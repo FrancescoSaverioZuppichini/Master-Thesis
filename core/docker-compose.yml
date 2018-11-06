@@ -18,33 +18,35 @@ services:
       dockerfile: ./docker/Dockerfile
       context: .
     network_mode: host
-#    volumes:
-#      - ./data/
+    volumes:
+      - ./data:/data
+      - ./webots/krock:/krock
+    #      - ./
 #    command: /bin/bash -c
     # in case you want to expose some devices, e.g. joystick
     #devices:
       #- /dev/input/js0
 
-  roscore:
-    command: bash
-    image: 'roscore'
-    environment:
-    # in case you want to be able to open X applications and use the GPU
-      #- "DISPLAY"
-      #- "QT_X11_NO_MITSHM=1"
-      # other environment sets, e.g. ROS
-      # - "ROS_HOSTNAME=krock"
-      - "PYTHONUNBUFFERED=32"
-      - "ROS_IP=0.0.0.0"
-    ports:
-      - "11311:11311"
-    network_mode: host
-    build:
-      dockerfile: ./docker/Dockerfile-roscore
-      context: .
-    volumes:
-      - ./data/
-    command:  /bin/bash -c "source /opt/ros/melodic/setup.bash && roscore"
+#  roscore:
+#    command: bash
+#    image: 'roscore'
+#    environment:
+#    # in case you want to be able to open X applications and use the GPU
+#      #- "DISPLAY"
+#      #- "QT_X11_NO_MITSHM=1"
+#      # other environment sets, e.g. ROS
+#      # - "ROS_HOSTNAME=krock"
+#      - "PYTHONUNBUFFERED=32"
+#      - "ROS_IP=0.0.0.0"
+#    ports:
+#      - "11311:11311"
+#    network_mode: host
+#    build:
+#      dockerfile: ./docker/Dockerfile-roscore
+#      context: .
+#    volumes:
+#      - ./data/
+#    command:  /bin/bash -c "source /opt/ros/melodic/setup.bash && roscore"
     # in case you want to expose some devices, e.g. joystick
     #devices:
       #- /dev/input/js0

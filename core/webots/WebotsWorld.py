@@ -2,6 +2,7 @@ import numpy as np
 import time
 import cv2
 import matplotlib.pyplot as plt
+import os
 
 from world import World
 from utils.webots2ros import *
@@ -11,6 +12,8 @@ from .utils import image2webots_terrain
 from matplotlib.pyplot import imshow
 
 from .utils import image2webots_terrain
+from os import path
+
 
 class WebotsWorld(World, Supervisor):
     name = '/krock'
@@ -21,7 +24,7 @@ class WebotsWorld(World, Supervisor):
     def __call__(self, *args, **kwargs):
         # TODO check the world name and load if different
         print(self.world_path)
-        self.load_world(self.world_path)
+        self.load_world('/home/francesco/Documents/Master-Thesis/core/webots/' + self.world_path)
 
         self.get_world_node()
         self.get_robot_node()
@@ -46,22 +49,6 @@ class WebotsWorld(World, Supervisor):
 
         with open('./webots/children', 'r') as f:
             self.children = f.read()
-    @classmethod
-    def from_file(cls, file_path):
-        return WebotsWorld(world_path=file_path)
-
-    @classmethod
-    def from_image(cls, image_path, src_world, config, *args, **kwargs):
-        image = cv2.imread(image_path)
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-        return cls.from_numpy(image, src_world, config, *args, **kwargs)
-
-    @classmethod
-    def from_numpy(cls, image_np, src_world, config, *args, **kwargs):
-        world_path = image2webots_terrain(image_np, src_world, config, *args, **kwargs)
-
-        return WebotsWorld(world_path)
 
     def reanimate(self):
         self.get_world_node()
@@ -90,7 +77,8 @@ class WebotsWorld(World, Supervisor):
         random_pose.position.x = rx
         random_pose.position.y = ry
         # to get the 2d index in 1d matrix x + width * y
-        idx = int(((rx + abs(self.translation.x)) // self.x_spac )+ (1600 * ((ry + abs(self.translation.z))// self.y_spac)))
+        idx = int(
+            ((rx + abs(self.translation.x)) // self.x_spac) + (1600 * ((ry + abs(self.translation.z)) // self.y_spac)))
 
         h = self.grid['height'][idx].value
 
@@ -102,4 +90,23 @@ class WebotsWorld(World, Supervisor):
         random_pose.orientation.w = qto[3]
         return random_pose
 
+    @classmethod
+    def from_file(cls, file_path):
+        return WebotsWorld(world_path=file_path)
 
+    @classmethod
+    def from_image(cls, image_path, src_world, config, *args, **kwargs):
+        image = cv2.imread(image_path)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+        return cls.from_numpy(image, src_world, config, *args, **kwargs)
+
+    @classmethod
+    def from_numpy(cls, image_np, src_world, config, *args, **kwargs):
+        world_path = image2webots_terrain(image_np, src_world, config, *args, **kwargs)
+
+        return WebotsWorld(world_path)
+
+    @classmethod
+    def from_dir(cls, dir):
+        files = os.listdir(dir)
