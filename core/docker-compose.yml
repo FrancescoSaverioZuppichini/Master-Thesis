@@ -18,8 +18,10 @@ services:
       dockerfile: ./docker/Dockerfile
       context: .
     network_mode: host
-#    volumes:
-#      - ./data/
+    volumes:
+      - ./data:/data
+      - ./webots/krock:/krock
+    #      - ./
 #    command: /bin/bash -c
     # in case you want to expose some devices, e.g. joystick
     #devices:
