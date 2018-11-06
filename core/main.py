@@ -21,9 +21,8 @@ rospy.init_node("traversability_simulation")
 w = WebotsWorld.from_image(
     '/home/francesco/Documents/Master Thesis/core/webots/map_generation/bumps2.png',
     '/home/francesco/Documents/krock-sim/krock/krock2_ros/worlds/krock2_camera.wbt',
-    { 'height' : 2,
-      'resolution' : 0.02},
-    output_path='/home/francesco/Documents/krock-sim/krock/krock2_ros/worlds/test.wbt')
+    { 'height' : 1,
+      'resolution' : 0.02})
 
 # w = WebotsWorld.from_file(WORLD)
 w()
@@ -52,7 +51,7 @@ start = time.time()
 print('')
 
 for iter, _ in enumerate(b):
-    if iter % 5 == 0: w.reanimate()
+    if iter % 10 == 0: w.reanimate()
     a = create_agent()
 
     sim(world=w,
