@@ -1,0 +1,6 @@
+65,66c65,66
+<   for (int i = 0; i < (4 * (mCamera->getWidth()) * (mCamera->getHeight())); ++i)
+<     image.data.push_back(colorImage[i]);
+---
+>   image.data.resize(4 * mCamera->getWidth() * mCamera->getHeight());
+>   memcpy(&image.data[0], colorImage, sizeof(char) * 4 * mCamera->getWidth() * mCamera->getHeight());
