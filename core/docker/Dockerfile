@@ -27,5 +27,3 @@ RUN pip3 install -r requirements.txt
 
 RUN chmod 777 /root/code/start.sh
 SHELL [" ", "-c"]
-#CMD ['source /opt/ros/melodic/setup.bash && source /root/catkin_ws/devel/setup.bash']
-#CMD ["./start.sh"]
