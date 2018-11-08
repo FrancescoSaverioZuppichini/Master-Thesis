@@ -11,7 +11,7 @@ def plot_terrain(terrain):
     plt.colorbar()
     plt.show()
 
-def image2webots_terrain(image, src_world, config, output_path=None, verbose=True):
+def image2webots_terrain(image, src_world, config, output_path=None, verbose=False):
     if image.dtype == 'uint8':
         image = image / 256.
     if image.dtype == 'uint16':

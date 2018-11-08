@@ -6,7 +6,7 @@ from os import path
 from agent.callbacks import *
 from webots.krock import Krock
 
-from simulation import BasicSimulation
+from simulation import BasicSimulation, Simulation
 from simulation.callbacks import *
 
 from world import World
@@ -20,30 +20,34 @@ WORLD = args.world
 
 rospy.init_node("traversability_simulation")
 
-w = None
-agent = None
+if  args.maps == None:  args.maps = [WORLD]
 
-# TODO main file is polluted. Create something like Topology .from_args that returns agent, world and sim
+agent = None
+worlds = []
+
+# TODO main file is polluted. Create something like Topology .from_args that returns agent, worlds and sim
 if args.engine == 'webots':
     if args.robot == 'krock':
         src_world = path.abspath('./webots/krock/krock.wbt')
         agent = Krock
-        w = WebotsWorld.from_image(
-            WORLD,
-            path.abspath('./webots/krock/krock.wbt'),
-            {'height': 1,
-             'resolution': 0.02},
-            # output_path='/krock/krock2_ros/worlds/temp.wbt')
-            output_dir=path.abspath('./webots/krock/krock2_ros/worlds/'))
 
+        for map in args.maps:
 
+            w = WebotsWorld.from_image(
+                map,
+                path.abspath('./webots/krock/krock.wbt'),
+                {'height': 1,
+                 'resolution': 0.02},
+                # output_path='/krock/krock2_ros/worlds/temp.wbt')
+                output_dir=path.abspath('./webots/krock/krock2_ros/worlds/'))
+
+            worlds.append(w)
 
 if w == None:
     raise ValueError('No world created. Probably you selected a no supported engine. Run main.py --help')
 
 if agent == None:
     raise ValueError('No agent created. Probably you selected a no supported agent. Run main.py --help')
-w()
 
 
 def create_agent(w):
@@ -60,8 +64,7 @@ def create_agent(w):
 
 # TODO check if robot fall upside down
 sim = BasicSimulation(name=args.robot)
-sim.add_callbacks([Alarm(stop_after_s=SIM_TIME),
-                   OutOfMap(x=w.x, y=w.y)
+sim.add_callbacks([Alarm(stop_after_s=SIM_TIME)
                    ])
 
 b = range(N_SIM)
@@ -69,12 +72,16 @@ b = range(N_SIM)
 start = time.time()
 print('')
 
-for iter, _ in enumerate(b):
-    if (iter + 1) % 10 == 0: w.reanimate()
-    a = create_agent(w)
+for w in worlds:
+    w()
+    # TODO these info should be taken directly from the current world
+    sim.add_callback(OutOfMap(x=w.x, y=w.y))
+    for iter, _ in enumerate(b):
+        if (iter + 1) % 10 == 0: w.reanimate()
+        a = create_agent(w)
 
-    sim(world=w,
-        agent=a)
-    end = time.time() - start
+        sim(world=w,
+            agent=a)
+        end = time.time() - start
 
-    rospy.loginfo('Iter={:} Error={:} Elapsed={:.2f}'.format(str(iter), sim.history['error', -1], end))
+        rospy.loginfo('Iter={:} Error={:} Elapsed={:.2f}'.format(str(iter), sim.history['error', -1], end))
