@@ -40,8 +40,8 @@ class RosBagSaver(AgentCallback):
         if store: self.cache[key].append(value)
 
         self.size = len(self.cache[key])
-
-        if self.size == self.max_size: self.store(agent)
+        # REVIEW: for now we want to store only in the end
+        # if self.size == self.max_size: self.store(agent)
 
     def write(self, data):
         key, values = data

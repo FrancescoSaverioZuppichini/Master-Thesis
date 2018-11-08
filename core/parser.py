@@ -1,5 +1,6 @@
 import argparse
 import tabulate
+import glob
 
 from art import *
 
@@ -11,6 +12,14 @@ class CheckEngine(argparse.Action):
         if values.lower() not in ['webots, gazebo']:
             raise ValueError("Engine should be one of: webouts, gazebo")
         setattr(namespace, self.dest, values)
+
+class ParseAndListFiles():
+    def __call__(self, values):
+        if values != None:
+            if not os.path.isdir(values):
+                raise ValueError("--maps should be a directory.")
+            values = glob.glob(values + '/*.png')
+        return values
 
 parser = argparse.ArgumentParser(description='Traversability Simulation')
 parser.add_argument('-w',
@@ -26,16 +35,17 @@ parser.add_argument('-e',
                          'Available: webots, gazebo. Default webots',
                     default='webots',
                     action=CheckEngine)
+
 parser.add_argument('-n',
                     '--n-sim',
                     type=int,
                     help="Number of simulation used.",
-                    default=100)
+                    default=4)
 parser.add_argument('-t',
                     '--time',
                     type=float,
-                    help='Maximum time per simulation',
-                    default=20)
+                    help='Maximum time per simulation per worl.',
+                    default=2)
 parser.add_argument('-r',
                     '--robot',
                     type=str,
@@ -45,17 +55,20 @@ parser.add_argument('-r',
 parser.add_argument('--maps',
                     type=str,
                     help='A directory with height maps',
-                    default=None)
+                    default=None,
+                    )
 
 parser.add_argument('--save_dir',
                     type=str,
                     help='Where to store the simulation informations',
-                    default='./data')
+                    default='/home/francesco/Desktop/carino/vaevictis/data/')
 
 args = parser.parse_args()
 
 art = text2art('Traversability Simulator')
 print(art)
+
+print(args.maps)
 
 if args.engine == 'webots':
     print('The simulation will try re-connect to webots if something crashed. '
@@ -66,5 +79,9 @@ header = list(args.__dict__.keys())
 rows = [list(args.__dict__.values())]
 print(tabulate.tabulate(rows, header))
 print('')
+
+args.maps = ParseAndListFiles()(args.maps)
+
+print(args.maps)
 # with open('./krock.txt', 'r') as f:
 #     print(f.read())
