@@ -5,8 +5,7 @@ from .SimulationCallback import SimulationCallback
 from ..errors import SimulationException
 # TODO an extractor function should be added to allow more flexibility into the agent state
 class OutOfMap(SimulationCallback):
-    def __init__(self, x, y, z=0, tol=-.01):
-        self.x, self.y, self.z = x, y, z
+    def __init__(self, tol=-.01):
         self.tol = tol
 
     def tick(self, sim, world, agent, *args, **kwargs):
@@ -18,6 +17,8 @@ class OutOfMap(SimulationCallback):
         #
         # if ori.w < 0:
         #     raise SimulationException('Upside down.')
+
+        self.x, self.y, self.z = world.x, world.y, world.z
 
         x, y, z = pos.x, pos.y, pos.z
 

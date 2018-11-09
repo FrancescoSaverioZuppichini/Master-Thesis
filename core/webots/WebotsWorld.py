@@ -21,14 +21,16 @@ class WebotsWorld(World, Supervisor):
     def __init__(self, world_path):
         self.world_path = world_path
 
+
     def __call__(self, *args, **kwargs):
         # TODO check the world name and load if different
         print(self.world_path)
         # self.load_world('/home/francesco/Documents/Master-Thesis/core/webots/' + self.world_path)
         self.load_world( self.world_path)
 
-        self.get_world_node()
-        self.get_robot_node()
+        self.retry_service(self.get_world_node)
+        self.retry_service(self.get_robot_node)
+        # self.retry_service(self.enable_front_camera)
 
         self.grid = Node.from_def(self.name, 'EL_GRID')
         self.terrain = Node.from_def(self.name, 'TERRAIN')
@@ -48,12 +50,13 @@ class WebotsWorld(World, Supervisor):
         self.x = (self.translation.x, self.x + self.translation.x)
         self.y = (self.translation.z, self.y + self.translation.z)
 
+        self.z = 0
+
         with open('./webots/children', 'r') as f:
             self.children = f.read()
 
     def reanimate(self):
-        self.get_world_node()
-        self.get_robot_node()
+
         # get the ROBOT node using the NODE API to make our life easier :)
         node = Node.from_def('/krock', 'ROBOT')
         # get the children field that cointas all the joints connections
@@ -63,10 +66,14 @@ class WebotsWorld(World, Supervisor):
             del node[h]
         node[h] = self.children
         # restart the simulation and enable the camera
+        self.retry_service(self.get_world_node)
         self.retry_service(self.restart_robot)
+        self.retry_service(self.get_robot_node)
         self.retry_service(self.enable_front_camera)
+
         # update references to GRID and TERRAIN
         self.grid = Node.from_def(self.name, 'EL_GRID')
+
         self.terrain = Node.from_def(self.name, 'TERRAIN')
 
     @property
@@ -90,6 +97,20 @@ class WebotsWorld(World, Supervisor):
         random_pose.orientation.z = qto[2]
         random_pose.orientation.w = qto[3]
         return random_pose
+
+    def spawn(self, agent, pos=None, *args, **kwargs):
+        pos = self.random_position if pos == None else pos
+
+        self.set_robot_position(x=pos.position.x,
+                                y=pos.position.z,
+                                z=pos.position.y)
+
+        self.set_robot_orientation(x=pos.orientation.x,
+                                   y=pos.orientation.z,
+                                   z=pos.orientation.y,
+                                   w=pos.orientation.w)
+
+        self.reset_node_physics(self.robot_node)
 
     @classmethod
     def from_file(cls, file_path):

@@ -53,18 +53,18 @@ if agent == None:
 def create_agent(w):
     krock = agent()
     krock.add_callback(RosBagSaver(args.save_dir,
-                                   topics=['pose']))
+                                   topics=['pose',
+    'frontal_camera'
+    ]))
 
-    # krock.add_callback(RosBagSaver('./data/{}.bag'.format(time.time()),
-    #                                topics=['pose']))
     krock(w)
 
     return krock
 
-
 # TODO check if robot fall upside down
 sim = BasicSimulation(name=args.robot)
-sim.add_callbacks([Alarm(stop_after_s=SIM_TIME)
+sim.add_callbacks([Alarm(stop_after_s=SIM_TIME),
+                   OutOfMap()
                    ])
 
 b = range(N_SIM)
@@ -72,16 +72,20 @@ b = range(N_SIM)
 start = time.time()
 print('')
 
-for w in worlds:
-    w()
-    # TODO these info should be taken directly from the current world
-    sim.add_callback(OutOfMap(x=w.x, y=w.y))
-    for iter, _ in enumerate(b):
-        if (iter + 1) % 10 == 0: w.reanimate()
-        a = create_agent(w)
+try:
+    for w in worlds:
+        w()
+        # TODO these info should be taken directly from the current world
+        for i, _ in enumerate(b):
+            if i % 10 == 0: w.reanimate()
+            a = create_agent(w)
 
-        sim(world=w,
-            agent=a)
-        end = time.time() - start
+            sim(world=w,
+                agent=a)
+            end = time.time() - start
 
-        rospy.loginfo('Iter={:} Error={:} Elapsed={:.2f}'.format(str(iter), sim.history['error', -1], end))
+            rospy.loginfo('Iter={:} Error={:} Elapsed={:.2f}'.format(str(i), sim.history['error', -1], end))
+except Exception as e:
+    sim.should_stop = True
+    print(e)
+    # rospy.signal_shutdown('KeyboardInterrupt')
