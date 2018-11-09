@@ -18,16 +18,6 @@ class Agent(Callbackable, AgentCallback):
     def __call__(self, world: World, *args, **kwargs):
         self.world = world
 
-    # TODO what about pass the world param?
-    def spawn(self, world: World, pos=None, *args, **kwargs):
-        """
-        Spawn the robot in the world.
-        :param pos:
-        :return:
-        """
-        pass
-
-    # TODO what about pass the world param?
     def move(self, *args, **kwargs):
         """
         A generic function to move the agent in the world. Use it to implement your own logic. E.g

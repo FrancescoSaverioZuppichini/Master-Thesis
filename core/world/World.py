@@ -1,5 +1,5 @@
 from pathlib import Path
-
+from agent import Agent
 
 class World():
     """
@@ -30,3 +30,11 @@ class World():
         :return:
         """
         return None
+
+    def spawn(self, agent: Agent):
+        """
+        Spawn the agent in the world. If needed
+        :param agent:
+        :return:
+        """
+        pass

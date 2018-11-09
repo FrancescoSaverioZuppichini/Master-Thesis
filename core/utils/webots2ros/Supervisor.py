@@ -53,7 +53,7 @@ class Supervisor:
             service = Supervisor.get_service(url, type)
             res = service(*args, **kwargs)
         except rospy.ServiceException as e:
-            if Supervisor.verbose: rospy.logwarn(url + str(e))
+            if Supervisor.verbose: rospy.logwarn(url + ' ' +  str(e))
         finally:
             return res
 
@@ -253,7 +253,6 @@ class Node(Supervisor):
         service = base + '/supervisor/get_from_def'
         node = cls.call_service(service, supervisor_get_from_def, name)
         # node = req(name)
-
         node = cls(node)
         node.name = base
 

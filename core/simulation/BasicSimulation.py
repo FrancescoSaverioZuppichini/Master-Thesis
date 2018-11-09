@@ -9,7 +9,7 @@ class BasicSimulation(Simulation):
     3) kills the agent when it is finished
     """
     def on_start(self, sim, world, agent, *args, **kwargs):
-        agent.spawn(world)
+        world.spawn(agent)
 
     def loop(self, world, agent, *args, **kwargs):
         agent.act(self, world)
@@ -17,4 +17,5 @@ class BasicSimulation(Simulation):
 
     def on_finish(self, sim, world, agent, *args, **kwargs):
         agent.stop()
+        agent.sleep()
         agent.die(self, world)

@@ -40,12 +40,12 @@ parser.add_argument('-n',
                     '--n-sim',
                     type=int,
                     help="Number of simulation used.",
-                    default=4)
+                    default=100)
 parser.add_argument('-t',
                     '--time',
                     type=float,
                     help='Maximum time per simulation per worl.',
-                    default=2)
+                    default=5)
 parser.add_argument('-r',
                     '--robot',
                     type=str,

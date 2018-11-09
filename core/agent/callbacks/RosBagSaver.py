@@ -3,6 +3,8 @@ import threading
 import rospy
 import time
 
+from os import path
+
 import pandas as pd
 
 from .AgentCallback import AgentCallback
@@ -11,13 +13,14 @@ from pypeln import thread as th
 class RosBagSaver(AgentCallback):
     FILENAME2MAP_PATH = './filename2map.csv'
 
-    def __init__(self, save_dir, topics=None, max_size=1024, workers=2):
+    def __init__(self, save_dir, topics=None, max_size=1024, workers=1):
         self.save_dir = save_dir
         self.topics = topics
         self.cache = {}
         self.max_size = max_size
         self.size = 0
         self.workers = workers
+        self.tr = threading.Thread(target=self.store, args=(self,))
 
     def create_or_update_filename2map(self, filename, map):
         new = pd.DataFrame({'filename': [filename], 'map' : [map] })
@@ -38,7 +41,6 @@ class RosBagSaver(AgentCallback):
         if key not in self.cache: self.cache[key] = []
 
         if store: self.cache[key].append(value)
-
         self.size = len(self.cache[key])
         # REVIEW: for now we want to store only in the end
         # if self.size == self.max_size: self.store(agent)
@@ -50,14 +52,19 @@ class RosBagSaver(AgentCallback):
 
         return True
 
-    def store(self, agent):
+    def store(self, context):
         data = self.cache.items()
-        file_name = self.save_dir + '/{}.bag'.format(time.time())
+        file_name = path.normpath(self.save_dir + '/{}.bag'.format(time.time()))
 
         self.bag = rosbag.Bag(file_name, 'w')
 
-        stage = th.map(self.write, data, workers=self.workers)
-        files_list = list(stage)
+        for key in self.cache.keys():
+            for value in self.cache[key]:
+                self.bag.write(key, value)
+
+        # self.write(data)
+        # stage = th.map(self.write, data, workers=self.workers)
+        # files_list = list(stage)
 
         self.bag.close()
 
@@ -66,7 +73,10 @@ class RosBagSaver(AgentCallback):
         self.cache = {}
         self.size = 0
 
-        self.create_or_update_filename2map(file_name, agent.world.world_path)
+        self.create_or_update_filename2map(file_name, context.agent.world.world_path)
 
     def on_shut_down(self):
-        self.store(self.agent)
+        # self.tr.start()
+        self.tr.start()
+        self.tr.join()
+        # self.store(self.agent)

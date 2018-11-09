@@ -12,7 +12,7 @@ from utils.webots2ros import Supervisor
 from cv_bridge import CvBridge
 
 
-class Krock(RospyAgent, Supervisor):
+class Krock(RospyAgent):
     BASE_TOPIC = '/krock'
     # pub
     GAIT_CHOOSER = '{}/gait_chooser'.format(BASE_TOPIC)
@@ -23,12 +23,8 @@ class Krock(RospyAgent, Supervisor):
     POSE_SUB = '{}/pose'.format(BASE_TOPIC)
     TOUCH_SENSOR = '{}/touch_sensors'.format(BASE_TOPIC)
     TORQUES_FEEDBACK = '{}/torques_feedback'.format(BASE_TOPIC)
-    FRONTAL_CAMERA = '{}/front_camera/image'.format(BASE_TOPIC)
+    FRONTAL_CAMERA = '{}/front_camera/image_throttle'.format(BASE_TOPIC)
 
-    def __init__(self):
-        super().__init__()
-        self.name = self.BASE_TOPIC
-        self.get_robot_node()
 
     def init_publishers(self):
         return {
@@ -65,23 +61,9 @@ class Krock(RospyAgent, Supervisor):
         msg = Float64ArrayStamped(data=[mode, gait, frontal_freq, lateral_freq])
         self.publishers['manual_control'].publish(msg)
 
-    def spawn(self, world, pos=None, *args, **kwargs):
-        pos = world.random_position if pos == None else pos
-
-        self.set_robot_position(x=pos.position.x,
-                                y=pos.position.z,
-                                z=pos.position.y)
-
-        self.set_robot_orientation(x=pos.orientation.x,
-                                   y=pos.orientation.z,
-                                   z=pos.orientation.y,
-                                   w=pos.orientation.w)
-
-        self.reset_node_physics(self.robot_node)
-
     def stop(self):
         self.move(gait=1,
-                  frontal_freq=0,
+                  frontal_freq=0.0,
                   lateral_freq=0,
                   manual_mode=True)
 
