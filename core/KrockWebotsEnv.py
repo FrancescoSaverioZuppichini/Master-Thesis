@@ -22,6 +22,11 @@ rospy.init_node("traversability_simulation")
 class KrockWebotsEnv(gym.Env):
     metadata = { 'render_modes' : ['human']}
 
+    GO_FORWARD = {
+        'frontal_freq': 1,
+        'lateral_freq': 0
+    }
+
     def __init__(self):
         self.w = WebotsWorld.from_file(
             path.abspath('/home/francesco/Documents/Master-Thesis/core/webots/krock/krock2_ros/worlds/krock2_camera.wbt'))
@@ -37,11 +42,11 @@ class KrockWebotsEnv(gym.Env):
 
         self.observation_space = spaces.Dict({
             'sensors': spaces.Dict({
-                'position': spaces.Box(low=-5, high=5, shape=(3,)),
-                'orientation': spaces.Box(low=-1, high=1, shape=(3,)),
+                'position': spaces.Box(low=-5, high=5, shape=(3,), dtype=np.float),
+                'orientation': spaces.Box(low=-1, high=1, shape=(3,), dtype=np.float),
                 'front_cam': spaces.Tuple((
-                    spaces.Box(low=0, high=1, shape=(600, 800, 3)),
-                    spaces.Box(low=0, high=1, shape=(600, 800, 3))
+                    spaces.Box(low=0, high=1, shape=(600, 800, 3), dtype=np.int),
+                    spaces.Box(low=0, high=1, shape=(600, 800, 3), dtype=np.int)
                 )),
             })
         })
@@ -55,6 +60,7 @@ class KrockWebotsEnv(gym.Env):
     def reset(self):
         self.w.spawn(self.krock)
         self.krock.stop()
+        return self.make_obs_from_agent_state(self.krock)
 
     def make_obs_from_agent_state(self, agent):
         pose = agent.state['pose'].pose
@@ -65,6 +71,7 @@ class KrockWebotsEnv(gym.Env):
         if 'frontal_camera' in agent.state:
             front_cam_msg = agent.state['frontal_camera']
             front_cam = self.bridge.imgmsg_to_cv2(front_cam_msg, "bgr8")
+            front_cam = cv2.cvtColor(front_cam, cv2.COLOR_RGB2GRAY)
 
         obs = {
             'sensors': {
@@ -83,30 +90,24 @@ class KrockWebotsEnv(gym.Env):
                         manual_mode=True)
 
         self.krock.sleep()
+        self.krock.stop()
 
         obs = self.make_obs_from_agent_state(self.krock)
 
         self.last_frame = obs['sensors']['front_cam']
 
-        return obs, 0,  self.done, {}
+        return obs, 0, self.done, {}
 
     @property
-    def is_out_of_map(self):
-        is_out_of_map = False
-
-        try:
-            self.out_of_map.tick(None, self.w, self.krock)
-        except SimulationException:
-            is_out_of_map = True
-
-        return is_out_of_map
+    def is_inside(self):
+        return OutOfMap.is_inside(self.w, self.krock)
 
     def is_get_stuck(self):
         return False
 
     @property
     def done(self):
-        return self.is_out_of_map
+        return not self.is_inside
 
     def render(self, mode='human'):
         if self.last_frame is not None:
@@ -116,17 +117,13 @@ class KrockWebotsEnv(gym.Env):
 
 env = KrockWebotsEnv()
 
-GO_FORWARD = {
-            'frontal_freq': 1,
-            'lateral_freq': 0
-}
-
 for _ in range(100):
-    env.reset()
+    print(env.reset())
+
     for _ in range(100000):
         env.render()
         # action = env.action_space.sample()
-        obs, r, done, _ = env.step(GO_FORWARD)
+        obs, r, done, _ = env.step(env.GO_FORWARD)
 
         if done:
             break
