@@ -2,7 +2,6 @@ from protocols import Callbackable
 from .callbacks import AgentCallback
 
 from world import World
-from simulation import Simulation
 
 class Agent(Callbackable, AgentCallback):
     """
@@ -39,7 +38,7 @@ class Agent(Callbackable, AgentCallback):
         """
         pass
 
-    def act(self, sim: Simulation, world: World, *args, **kwargs):
+    def act(self, sim, world: World, *args, **kwargs):
         """
         This function should do something based on the world the agent
         is in. Ideally it should move it based on some input.
@@ -64,7 +63,7 @@ class Agent(Callbackable, AgentCallback):
         """
         pass
 
-    def die(self, sim: Simulation, world: World, *args, **kwargs):
+    def die(self, sim, world: World, *args, **kwargs):
         """
          This function kill the agent. This should be implemented,
          hook to the simulation instead

@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import os
 
 from world import World
-from utils.webots2ros import *
+from utils.webots2ros import Supervisor, Node
 from geometry_msgs.msg import Pose
 from tf import transformations
 from .utils import image2webots_terrain
@@ -30,6 +30,8 @@ class WebotsWorld(World, Supervisor):
 
         self.retry_service(self.get_world_node)
         self.retry_service(self.get_robot_node)
+        self.retry_service(self.enable_front_camera)
+
         # self.retry_service(self.enable_front_camera)
 
         self.grid = Node.from_def(self.name, 'EL_GRID')
@@ -52,7 +54,7 @@ class WebotsWorld(World, Supervisor):
 
         self.z = 0
 
-        with open('./webots/children', 'r') as f:
+        with open(path.abspath('./children'), 'r') as f:
             self.children = f.read()
 
     def reanimate(self):
