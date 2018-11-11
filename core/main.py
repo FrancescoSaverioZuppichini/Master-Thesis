@@ -20,7 +20,7 @@ WORLD = args.world
 
 rospy.init_node("traversability_simulation")
 
-if  args.maps == None:  args.maps = [WORLD]
+if args.maps == None:  args.maps = [WORLD]
 
 agent = None
 worlds = []
@@ -32,7 +32,6 @@ if args.engine == 'webots':
         agent = Krock
 
         for map in args.maps:
-
             w = WebotsWorld.from_image(
                 map,
                 path.abspath('./webots/krock/krock.wbt'),
@@ -54,12 +53,13 @@ def create_agent(w):
     krock = agent()
     krock.add_callback(RosBagSaver(args.save_dir,
                                    topics=['pose',
-    'frontal_camera'
-    ]))
+                                           'frontal_camera'
+                                           ]))
 
     krock(w)
 
     return krock
+
 
 # TODO check if robot fall upside down
 sim = BasicSimulation(name=args.robot)
