@@ -14,7 +14,7 @@ services:
       - "ROS_MASTER_URI=http://127.0.0.1:11311"
     # set this to link to your Dockerfile, this will build the image in case it is not present or you want to rebuild it
     build:
-      dockerfile: ./docker/Dockerfile
+      dockerfile: ./docker/Dockerfile-webots
       context: .
     network_mode: host
     volumes:
