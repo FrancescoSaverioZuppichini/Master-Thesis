@@ -1,12 +1,15 @@
 import rospy
 import time
 
+from os import path
+
 from agent.callbacks import *
 from webots.krock import Krock
 
 from simulation import BasicSimulation
 from simulation.callbacks import *
 
+from world import World
 from webots import *
 
 from parser import args
@@ -17,27 +20,49 @@ WORLD = args.world
 
 rospy.init_node("traversability_simulation")
 
-# TODO the robot should be selected based on the parser
-w = WebotsWorld(file_path=WORLD)
+w = None
+agent = None
+
+# TODO main file is polluted. Create something like Topology .from_args that returns agent, world and sim
+if args.engine == 'webots':
+    if args.robot == 'krock':
+        src_world = path.abspath('./webots/krock/krock.wbt')
+        agent = Krock
+        w = WebotsWorld.from_image(
+            WORLD,
+            path.abspath('./webots/krock/krock.wbt'),
+            {'height': 1,
+             'resolution': 0.02},
+            # output_path='/krock/krock2_ros/worlds/temp.wbt')
+            output_dir=path.abspath('./webots/krock/krock2_ros/worlds/'))
+
+
+
+if w == None:
+    raise ValueError('No world created. Probably you selected a no supported engine. Run main.py --help')
+
+if agent == None:
+    raise ValueError('No agent created. Probably you selected a no supported agent. Run main.py --help')
 w()
 
-# TODO the robot should be selected based on the parser
-def create_agent():
-    krock = Krock()
-    krock.add_callback(RosBagSaver('./data',
+
+def create_agent(w):
+    krock = agent()
+    krock.add_callback(RosBagSaver(args.save_dir,
                                    topics=['pose']))
 
     # krock.add_callback(RosBagSaver('./data/{}.bag'.format(time.time()),
     #                                topics=['pose']))
-    krock()
+    krock(w)
 
     return krock
 
+
+# TODO check if robot fall upside down
 sim = BasicSimulation(name=args.robot)
 sim.add_callbacks([Alarm(stop_after_s=SIM_TIME),
                    OutOfMap(x=w.x, y=w.y)
                    ])
-
 
 b = range(N_SIM)
 
@@ -45,8 +70,8 @@ start = time.time()
 print('')
 
 for iter, _ in enumerate(b):
-    if iter % 5 == 0: w.reanimate()
-    a = create_agent()
+    if (iter + 1) % 10 == 0: w.reanimate()
+    a = create_agent(w)
 
     sim(world=w,
         agent=a)
