@@ -1,5 +1,9 @@
 FROM zuppif/ros-melodic-python3:test
 
+# change this based on your location
+ENV TZ=America/Los_Angeles
+ENV DEBIAN_FRONTEND noninteractive
+
 RUN ln -s /usr/local/lib/python3.6/dist-packages /usr/local/lib/python3.6/site-packages
 
 RUN mkdir -p root/catkin_ws/src \
@@ -21,6 +25,17 @@ ADD . /root/code
 WORKDIR /root/code
 
 RUN pip3 install -r requirements.txt
+
+# webots
+COPY ./resources/src /root/src
+RUN apt-get -y update && apt-get install -y  gedit gdebi
+RUN apt-get -y update && yes | gdebi /root/src/webots_2018b_amd64.deb
+
+LABEL com.nvidia.volumes.needed="nvidia_driver"
+ENV PATH /usr/local/nvidia/bin:${PATH}
+ENV LD_LIBRARY_PATH /usr/local/nvidia/lib:/usr/local/nvidia/lib64:${LD_LIBRARY_PATH}
+
+
 RUN chmod 777 /root/code/start.sh
 SHELL [" ", "-c"]
 CMD ["./start.sh"]

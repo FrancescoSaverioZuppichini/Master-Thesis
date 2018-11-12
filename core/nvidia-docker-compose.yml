@@ -1,0 +1,26 @@
+services:
+  krock:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+    command: /bin/bash
+    devices:
+    - /dev/nvidia0
+    - /dev/nvidiactl
+    - /dev/nvidia-uvm
+    - /dev/nvidia-uvm-tools
+    environment:
+    - DISPLAY
+    - QT_X11_NO_MITSHM=1
+    - PYTHONUNBUFFERED=32
+    - ROS_IP=127.0.0.1
+    - ROS_MASTER_URI=http://127.0.0.1:11311
+    image: krock
+    network_mode: host
+    volumes:
+    - ./data/
+    - nvidia_driver_410.73:/usr/local/nvidia:ro
+version: '3'
+volumes:
+  nvidia_driver_410.73:
+    external: true
