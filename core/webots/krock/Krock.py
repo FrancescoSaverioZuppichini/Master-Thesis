@@ -10,7 +10,7 @@ from agent import RospyAgent
 from utils.webots2ros import Supervisor
 
 from cv_bridge import CvBridge
-import time
+
 
 class Krock(RospyAgent, Supervisor):
     BASE_TOPIC = '/krock'
@@ -43,7 +43,8 @@ class Krock(RospyAgent, Supervisor):
         return {
             'pose': rospy.Subscriber(self.POSE_SUB, PoseStamped, self.callback_pose),
             'touch_sensor': rospy.Subscriber(self.TOUCH_SENSOR, Float64ArrayStamped, self.callback_touch_sensors),
-            'toques_feedback': rospy.Subscriber(self.TORQUES_FEEDBACK, Float64ArrayStamped, self.callback_torques_feedback),
+            'toques_feedback': rospy.Subscriber(self.TORQUES_FEEDBACK, Float64ArrayStamped,
+                                                self.callback_torques_feedback),
             'frontal_camera': rospy.Subscriber(self.FRONTAL_CAMERA, Image, self.callbacks_frontal_camera)
         }
 
@@ -89,5 +90,3 @@ class Krock(RospyAgent, Supervisor):
                   frontal_freq=1.0,
                   lateral_freq=0,
                   manual_mode=True)
-
-
