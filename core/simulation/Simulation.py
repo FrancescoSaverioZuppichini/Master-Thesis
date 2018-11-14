@@ -35,7 +35,7 @@ class Simulation(Callbackable, SimulationCallback):
         self.run(world, agent, *args, **kwargs)
         self.notify('on_finish', self, world, agent)
 
-    def run(self, world: World, agent: Agent, n=None, *args, **kwargs):
+    def run(self, world: World, agent: Agent, n=None, until=lambda x: True, *args, **kwargs):
         """
         Main routine. Inside this function the simulation should move the agent
         around the world according to the agent's internal implementation.
@@ -46,12 +46,15 @@ class Simulation(Callbackable, SimulationCallback):
         :return:
         """
         self.history.new_epoch()
+        self.world = world
+        self.agent = agent
         i = 0
-        while not self.should_stop:
+        while not self.should_stop and not until(self):
             try:
                 self.loop(world, agent, i, *args, **kwargs)
                 self.notify('tick', self, world, agent)
                 i += 1
+
                 if n != None:
                     self.should_stop = i == n
             except SimulationException  as e:

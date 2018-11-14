@@ -54,7 +54,7 @@ class WebotsWorld(World, Supervisor):
 
         self.z = 0
 
-        with open(path.abspath('./children'), 'r') as f:
+        with open(path.abspath('./webots/children'), 'r') as f:
             self.children = f.read()
 
     def reanimate(self):
