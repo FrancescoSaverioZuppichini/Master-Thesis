@@ -12,11 +12,8 @@ from webots.WebotsWorld import WebotsWorld
 from cv_bridge import CvBridge, CvBridgeError
 
 import cv2
-import matplotlib.pyplot as plt
 
-from simulation import SimulationException
-from simulation.callbacks import StopIfGetStuck, OutOfMap
-
+from simulation.conditions import  *
 import pprint
 
 rospy.init_node("traversability_simulation")
@@ -69,7 +66,7 @@ class KrockWebotsEnv(gym.Env):
 
         self.last_frame = None
 
-        self.done = IfOne([IsInside(), IsNotStuck()])
+        self.done = IfOneFalseOf([IsInside(), IsNotStuck()])
 
     def reset(self):
         self.world.spawn(self.agent)

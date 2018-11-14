@@ -8,6 +8,7 @@ from webots.krock import Krock
 
 from simulation import BasicSimulation, Simulation
 from simulation.callbacks import *
+from simulation.conditions import *
 
 from world import World
 from webots import *
@@ -30,6 +31,7 @@ if args.engine == 'webots':
     if args.robot == 'krock':
         src_world = path.abspath('./webots/krock/krock.wbt')
         agent = Krock
+
 
         for map in args.maps:
             w = WebotsWorld.from_image(
@@ -63,9 +65,7 @@ def create_agent(w):
 
 # TODO check if robot fall upside down
 sim = BasicSimulation(name=args.robot)
-sim.add_callbacks([Alarm(stop_after_s=SIM_TIME),
-                   OutOfMap()
-                   ])
+sim.add_callbacks([Alarm(stop_after_s=SIM_TIME)])
 
 b = range(N_SIM)
 
@@ -76,12 +76,14 @@ try:
     for w in worlds:
         w()
         # TODO these info should be taken directly from the current world
+        cond = IfOneFalseOf([IsNotStuck(), IsInside()])
         for i, _ in enumerate(b):
             if i % 10 == 0: w.reanimate()
             a = create_agent(w)
 
             sim(world=w,
-                agent=a)
+                agent=a,
+                until=cond)
             end = time.time() - start
 
             rospy.loginfo('Iter={:} Error={:} Elapsed={:.2f}'.format(str(i), sim.history['error', -1], end))
