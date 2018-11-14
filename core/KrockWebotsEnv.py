@@ -21,50 +21,24 @@ import pprint
 
 rospy.init_node("traversability_simulation")
 
-class Condition():
-    def __call__(self, *args, **kwargs):
-        pass
-
-class IsInBound(Condition):
-    def __init__(self, tol=-0.1):
-        super().__init__()
-        self.tol = tol
-
-    def check_if_inside(self, to_check, bounds):
-        lower, upper = bounds
-        # TODO bad raising in if statement
-        if to_check - self.tol <= lower:
-            return False
-        # upper bound
-        elif to_check + self.tol >= upper:
-            return False
-
-        return True
-
-    def __call__(self, env, *args, **kwargs):
-        pose = agent.state['pose']
-        pos = pose.pose.position
-
-
 
 class KrockWebotsEnv(gym.Env):
-    metadata = { 'render_modes' : ['human']}
+    metadata = {'render_modes': ['human']}
 
     GO_FORWARD = {
         'frontal_freq': 1,
         'lateral_freq': 0
     }
 
-
     def __init__(self):
         self.world = WebotsWorld.from_file(
             path.abspath('/home/francesco/Documents/Master-Thesis/core/webots/krock/krock2_ros/worlds/bumps3.wbt'))
         self.world()
 
-        self.krock = Krock()
-        self.krock(self.world)
+        self.agent = Krock()
+        self.agent(self.world)
 
-        self.action_space =  spaces.Dict({
+        self.action_space = spaces.Dict({
             'frontal_freq': spaces.Box(low=-1.0, high=1.0, shape=(), dtype=np.float),
             'lateral_freq': spaces.Box(low=-1.0, high=1.0, shape=(), dtype=np.float)
         })
@@ -72,13 +46,13 @@ class KrockWebotsEnv(gym.Env):
         self.observation_space = spaces.Dict({
             'sensors': spaces.Dict({
                 'position': spaces.Dict({
-                    'x' : spaces.Box(low=self.world.x[0], high=self.world.x[1], shape=(1,), dtype=np.float),
+                    'x': spaces.Box(low=self.world.x[0], high=self.world.x[1], shape=(1,), dtype=np.float),
                     'y': spaces.Box(low=self.world.y[0], high=self.world.y[1], shape=(1,), dtype=np.float),
                     'z': spaces.Box(low=-0, high=self.world.z, shape=(1,), dtype=np.float),
 
                 }),
                 'orientation': spaces.Dict({
-                    'x' : spaces.Box(low=-1, high=1, shape=(1,), dtype=np.float),
+                    'x': spaces.Box(low=-1, high=1, shape=(1,), dtype=np.float),
                     'y': spaces.Box(low=-1, high=1, shape=(1,), dtype=np.float),
                     'z': spaces.Box(low=-1, high=1, shape=(1,), dtype=np.float),
                     'w': spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float),
@@ -95,13 +69,12 @@ class KrockWebotsEnv(gym.Env):
 
         self.last_frame = None
 
-        self.out_of_map = OutOfMap()
-        self.get_stuck = StopIfGetStuck(25, tol=0.02)
+        self.done = IfOne([IsInside(), IsNotStuck()])
 
     def reset(self):
-        self.world.spawn(self.krock)
-        self.krock.stop()
-        return self.make_obs_from_agent_state(self.krock)
+        self.world.spawn(self.agent)
+        self.agent.stop()
+        return self.make_obs_from_agent_state(self.agent)
 
     def make_obs_from_agent_state(self, agent):
         pose = agent.state['pose'].pose
@@ -116,20 +89,20 @@ class KrockWebotsEnv(gym.Env):
             front_cam = cv2.cvtColor(front_cam, cv2.COLOR_RGB2GRAY)
 
         obs = {
-        'sensors': {
-            'position': {
-                'x' : pose.position.x,
-                'y':  pose.position.y,
-                'z' : pose.position.z
-            },
-            'orientation': {
-                'x' : pose.orientation.x,
-                'y':  pose.orientation.y,
-                'z' : pose.orientation.z,
-                'w': pose.orientation.w
+            'sensors': {
+                'position': {
+                    'x': pose.position.x,
+                    'y': pose.position.y,
+                    'z': pose.position.z
+                },
+                'orientation': {
+                    'x': pose.orientation.x,
+                    'y': pose.orientation.y,
+                    'z': pose.orientation.z,
+                    'w': pose.orientation.w
 
-            },
-            'front_cam': front_cam
+                },
+                'front_cam': front_cam
             }
         }
 
@@ -142,43 +115,19 @@ class KrockWebotsEnv(gym.Env):
         :param action:
         :return:
         """
-        self.krock.move(gait=1,
+        self.agent.move(gait=1,
                         frontal_freq=action['frontal_freq'],
                         lateral_freq=action['lateral_freq'],
                         manual_mode=True)
 
-        self.krock.sleep()
-        self.krock.stop()
+        self.agent.sleep()
+        self.agent.stop()
 
-        obs = self.make_obs_from_agent_state(self.krock)
+        obs = self.make_obs_from_agent_state(self.agent)
         # the last frame will be used in the `.render` function
         self.last_frame = obs['sensors']['front_cam']
 
-        return obs, 0, self.done, {}
-
-    @property
-    def is_inside(self):
-        return OutOfMap.is_inside(self.world, self.krock)
-
-    @property
-    def is_get_stuck(self):
-         stuck = False
-
-         try:
-             self.get_stuck.tick(None, self.world, self.krock)
-         except SimulationException as  e:
-             print(e)
-             stuck = True
-
-         return stuck
-
-    @property
-    def done(self):
-
-        stuck = self.is_get_stuck
-        inside = self.is_inside
-
-        return stuck or not inside
+        return obs, 0, self.done(self), {}
 
     def render(self, mode='human'):
         if self.last_frame is not None:
@@ -189,14 +138,15 @@ class KrockWebotsEnv(gym.Env):
 env = KrockWebotsEnv()
 obs = env.observation_space
 
-for _ in range(100):
+for _ in range(1):
     env.reset()
 
-    for _ in range(100000):
+    for _ in range(1000):
         env.render()
         # action = env.action_space.sample()
         obs, r, done, _ = env.step(env.GO_FORWARD)
-        pprint.pprint(obs)
+        # pprint.pprint(obs)
+        print(done)
         if done:
             break
 
