@@ -14,8 +14,8 @@ class Agent(Callbackable, AgentCallback):
         self.state = AgentState(self)
         self.set_callbacks([self])
 
-    def __call__(self, world: World, *args, **kwargs):
-        self.world = world
+    def __call__(self,  *args, **kwargs):
+        pass
 
     def move(self, *args, **kwargs):
         """
@@ -38,7 +38,7 @@ class Agent(Callbackable, AgentCallback):
         """
         pass
 
-    def act(self, sim, world: World, *args, **kwargs):
+    def act(self, env, *args, **kwargs):
         """
         This function should do something based on the world the agent
         is in. Ideally it should move it based on some input.
@@ -63,7 +63,7 @@ class Agent(Callbackable, AgentCallback):
         """
         pass
 
-    def die(self, sim, world: World, *args, **kwargs):
+    def die(self, env, *args, **kwargs):
         """
          This function kill the agent. This should be implemented,
          hook to the simulation instead
@@ -75,6 +75,8 @@ class Agent(Callbackable, AgentCallback):
         :return:
         """
         self.notify('on_shut_down')
+        # self.state = AgentState(self)
+
 
 class AgentState(dict):
     """

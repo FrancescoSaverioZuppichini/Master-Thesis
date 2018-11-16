@@ -17,70 +17,51 @@ rospy.init_node("traversability_simulation")
 if args.maps == None:  args.maps = [WORLD]
 
 agent = None
-worlds = []
 
 # TODO main file is polluted. Create something like Topology .from_args that returns agent, worlds and sim
-if args.engine == 'webots':
-    if args.robot == 'krock':
-        src_world = path.abspath('./webots/krock/krock.wbt')
-        agent = Krock
 
-        for map in args.maps:
-            w = WebotsWorld.from_image(
+def make_env(map):
+    env = None
+    if args.engine == 'webots':
+        if args.robot == 'krock':
+            src_world = path.abspath('./webots/krock/krock.wbt')
+
+            env = KrockWebotsEnv.from_image(
                 map,
                 path.abspath('./webots/krock/krock.wbt'),
                 {'height': 1,
                  'resolution': 0.02},
-                # output_path='/krock/krock2_ros/worlds/temp.wbt')
-                output_dir=path.abspath('./webots/krock/krock2_ros/worlds/'))
+                output_dir=path.abspath('./webots/krock/krock2_ros/worlds/'),
+                agent_callbacks=[RosBagSaver(args.save_dir, topics=['pose'])]
+            )
 
-            worlds.append(w)
+    return env
 
-if w == None:
-    raise ValueError('No world created. Probably you selected a no supported engine. Run main.py --help')
-
-if agent == None:
-    raise ValueError('No agent created. Probably you selected a no supported agent. Run main.py --help')
-
-
-def create_agent(w):
-    krock = agent()
-    krock.add_callback(RosBagSaver(args.save_dir,
-                                   topics=['pose',
-                                           'frontal_camera']))
-
-    krock(w)
-
-    return krock
-
-N_SIM = 10
+N_SIM = 1000
 
 b = range(N_SIM)
 
 start = time.time()
 print('')
+print(len(args.maps))
 
-# try:
-for w in worlds:
-    w()
+for map in args.maps:
+    env = make_env(map)
 
     for i in range(N_SIM):
-        a = create_agent(w)
-
-        env = KrockWebotsEnv(agent=a, world=w, stop=IfOneFalseOf([IsNotStuck(n_last=50), IsInside()]))
         # TODO as always the reanimation breaks something
         # if i % 20 == 0:
         #     rospy.loginfo('Reanimate robot')
         #     w.reanimate()
+        env.reset()
 
-        obs = env.reset()
-
-        for _ in range(500):
+        for i in range(200):
             env.render()
             obs, r, done, _ = env.step(env.GO_FORWARD)
             if done: break
-        a.die(env, w)
-
+        print('Done after {}'.format(i))
+        # we want to store at each spawn
+        env.agent.die(env)
 
 
     end = time.time() - start

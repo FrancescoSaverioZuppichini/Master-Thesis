@@ -52,8 +52,9 @@ class Supervisor:
         try:
             service = Supervisor.get_service(url, type)
             res = service(*args, **kwargs)
-        except rospy.ServiceException as e:
+        except Exception:
             if Supervisor.verbose: rospy.logwarn(url + ' ' +  str(e))
+
         finally:
             return res
 

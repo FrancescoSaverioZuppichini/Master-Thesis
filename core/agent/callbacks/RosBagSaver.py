@@ -75,10 +75,12 @@ class RosBagSaver(AgentCallback):
         self.cache = {}
         self.size = 0
 
-        self.create_or_update_filename2map(file_name, context.agent.world.world_path)
+        # self.create_or_update_filename2map(file_name, context.world.world_path)
 
     def on_shut_down(self):
         # self.tr.start()
         self.tr.start()
         self.tr.join()
+        self.tr = threading.Thread(target=self.store, args=(self,))
+
         # self.store(self.agent)
