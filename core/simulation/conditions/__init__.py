@@ -65,5 +65,5 @@ class IsNotStuck(Condition):
         std = np.std(self.history)
 
         if (std < self.tol).any(): return False
-
+        print(std)
         return True

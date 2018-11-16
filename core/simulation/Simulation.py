@@ -35,7 +35,7 @@ class Simulation(Callbackable, SimulationCallback):
         self.run(world, agent, *args, **kwargs)
         self.notify('on_finish', self, world, agent)
 
-    def run(self, world: World, agent: Agent, n=None, until=lambda x: True, *args, **kwargs):
+    def run(self, world: World, agent: Agent, n=None, stop=lambda x: True, *args, **kwargs):
         """
         Main routine. Inside this function the simulation should move the agent
         around the world according to the agent's internal implementation.
@@ -49,7 +49,7 @@ class Simulation(Callbackable, SimulationCallback):
         self.world = world
         self.agent = agent
         i = 0
-        while not self.should_stop and not until(self):
+        while not self.should_stop and not stop(self):
             try:
                 self.loop(world, agent, i, *args, **kwargs)
                 self.notify('tick', self, world, agent)

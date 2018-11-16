@@ -16,10 +16,11 @@ import cv2
 from simulation.conditions import  *
 import pprint
 
-rospy.init_node("traversability_simulation")
+class SimulationEnv(gym.Env):
+    def __init__(self, world, agent, stop):
+        self.world, self.agent, self.stop = world, agent, stop
 
-
-class KrockWebotsEnv(gym.Env):
+class KrockWebotsEnv(SimulationEnv):
     metadata = {'render_modes': ['human']}
 
     GO_FORWARD = {
@@ -27,13 +28,13 @@ class KrockWebotsEnv(gym.Env):
         'lateral_freq': 0
     }
 
-    def __init__(self):
-        self.world = WebotsWorld.from_file(
-            path.abspath('/home/francesco/Documents/Master-Thesis/core/webots/krock/krock2_ros/worlds/bumps3.wbt'))
-        self.world()
+    STOP = {
+        'frontal_freq': 1,
+        'lateral_freq': 0
+    }
 
-        self.agent = Krock()
-        self.agent(self.world)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
         self.action_space = spaces.Dict({
             'frontal_freq': spaces.Box(low=-1.0, high=1.0, shape=(), dtype=np.float),
@@ -66,16 +67,14 @@ class KrockWebotsEnv(gym.Env):
 
         self.last_frame = None
 
-        self.done = IfOneFalseOf([IsInside(), IsNotStuck()])
-
-    def reset(self):
-        self.world.spawn(self.agent)
-        self.agent.stop()
-        return self.make_obs_from_agent_state(self.agent)
-
     def make_obs_from_agent_state(self, agent):
+        """
+        Convert the ROS msg store in the agent state to the correct JSON
+        representation according to the observation space
+        :param agent:
+        :return:
+        """
         pose = agent.state['pose'].pose
-        parse_pose = lambda p: [p.x, p.y, p.z]
 
         front_cam = None
 
@@ -118,33 +117,42 @@ class KrockWebotsEnv(gym.Env):
                         manual_mode=True)
 
         self.agent.sleep()
-        self.agent.stop()
+        # self.agent.stop()
 
         obs = self.make_obs_from_agent_state(self.agent)
         # the last frame will be used in the `.render` function
         self.last_frame = obs['sensors']['front_cam']
 
-        return obs, 0, self.done(self), {}
+        done = self.stop(self)
+
+        return obs, 0, done, {}
 
     def render(self, mode='human'):
-        if self.last_frame is not None:
-            cv2.imshow('env', self.last_frame)
-            cv2.waitKey(1)
+        if mode == 'human':
+            if self.last_frame is not None:
+                cv2.imshow('env', self.last_frame)
+                cv2.waitKey(1)
 
 
-env = KrockWebotsEnv()
-obs = env.observation_space
+    def reset(self, hard=True):
+        self.agent.stop()
+        if hard:
+            self.world.spawn(self.agent)
+        return self.make_obs_from_agent_state(self.agent)
 
-for _ in range(1):
-    env.reset()
-
-    for _ in range(1000):
-        env.render()
+# Example
+# env = KrockWebotsEnv()
+# obs = env.observation_space
+#
+# for _ in range(1):
+#     env.reset()
+#
+#     for _ in range(1000):
+#         env.render()
         # action = env.action_space.sample()
-        obs, r, done, _ = env.step(env.GO_FORWARD)
+#         obs, r, done, _ = env.step(env.GO_FORWARD)
         # pprint.pprint(obs)
-        print(done)
-        if done:
-            break
-
-env.reset()
+#         if done:
+#             break
+#
+# env.reset()

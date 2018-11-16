@@ -49,6 +49,9 @@ def image2webots_terrain(image, src_world, config, output_path=None, verbose=Fal
 
     start = time.time()
 
+    # take it down to zero
+    terrain_flatted -= np.max(terrain_flatted)
+
     if not output_path:
         f = NamedTemporaryFile(mode='w')
         output_path = f.name
