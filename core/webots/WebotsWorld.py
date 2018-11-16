@@ -60,7 +60,7 @@ class WebotsWorld(World, Supervisor):
     def reanimate(self):
 
         # get the ROBOT node using the NODE API to make our life easier :)
-        node = Node.from_def('/krock', 'ROBOT')
+        node = Node.from_def(self.name, 'ROBOT')
         # get the children field that cointas all the joints connections
         h = node['children']
         # remove all children from node ROBOT

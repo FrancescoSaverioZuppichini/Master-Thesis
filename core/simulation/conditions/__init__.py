@@ -11,6 +11,7 @@ class IfOneFalseOf(Condition):
 
     def __call__(self, env, *args, **kwargs):
         conds = [cond(env) for cond in self.conditions]
+
         return (False in conds)
 
 
@@ -19,7 +20,7 @@ class IsInside(Condition):
         self.tol = tol
 
     def __call__(self, env, *args, **kwargs):
-        world, agent = env.world, env.agent
+        world, agent = env, env.agent
 
         return self.is_inside(world, agent)
 
@@ -41,10 +42,13 @@ class IsInside(Condition):
 
             return True
 
-        has_not_fall = world.z + z >= tol
+        # has_not_fall = world.z + z >= tol
+        has_not_fall = True
 
         is_inside_x = check_if_inside(x, world.x)
         is_inside_y = check_if_inside(y, world.y)
+
+        print(x,y)
 
         return is_inside_x and is_inside_y and has_not_fall
 
@@ -64,6 +68,4 @@ class IsNotStuck(Condition):
 
         std = np.std(self.history)
 
-        if (std < self.tol).any(): return False
-        print(std)
-        return True
+        return not (std < self.tol).any()

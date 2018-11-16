@@ -14,13 +14,16 @@ from cv_bridge import CvBridge, CvBridgeError
 import cv2
 
 from simulation.conditions import  *
+
+from webots.WebotsEnv import WebotsEnv
+
 import pprint
 
 class SimulationEnv(gym.Env):
     def __init__(self, world, agent, stop):
         self.world, self.agent, self.stop = world, agent, stop
 
-class KrockWebotsEnv(SimulationEnv):
+class KrockWebotsEnv(WebotsEnv, Krock):
     metadata = {'render_modes': ['human']}
 
     GO_FORWARD = {
@@ -29,12 +32,16 @@ class KrockWebotsEnv(SimulationEnv):
     }
 
     STOP = {
-        'frontal_freq': 1,
+        'frontal_freq': 0,
         'lateral_freq': 0
     }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, world_path, agent_callbacks=[], *args, **kwargs):
+        super().__init__(world_path, *args, **kwargs)
+
+        self.agent = Krock()
+        self.agent.add_callbacks(agent_callbacks)
+        self.agent()
 
         self.action_space = spaces.Dict({
             'frontal_freq': spaces.Box(low=-1.0, high=1.0, shape=(), dtype=np.float),
@@ -44,9 +51,9 @@ class KrockWebotsEnv(SimulationEnv):
         self.observation_space = spaces.Dict({
             'sensors': spaces.Dict({
                 'position': spaces.Dict({
-                    'x': spaces.Box(low=self.world.x[0], high=self.world.x[1], shape=(1,), dtype=np.float),
-                    'y': spaces.Box(low=self.world.y[0], high=self.world.y[1], shape=(1,), dtype=np.float),
-                    'z': spaces.Box(low=-0, high=self.world.z, shape=(1,), dtype=np.float),
+                    'x': spaces.Box(low=self.x[0], high=self.x[1], shape=(1,), dtype=np.float),
+                    'y': spaces.Box(low=self.y[0], high=self.y[1], shape=(1,), dtype=np.float),
+                    'z': spaces.Box(low=-0, high=self.z, shape=(1,), dtype=np.float),
 
                 }),
                 'orientation': spaces.Dict({
@@ -66,6 +73,10 @@ class KrockWebotsEnv(SimulationEnv):
         self.bridge = CvBridge()
 
         self.last_frame = None
+
+    def __call__(self, *args, **kwargs):
+        super()()
+
 
     def make_obs_from_agent_state(self, agent):
         """
@@ -123,7 +134,9 @@ class KrockWebotsEnv(SimulationEnv):
         # the last frame will be used in the `.render` function
         self.last_frame = obs['sensors']['front_cam']
 
-        done = self.stop(self)
+        done = False
+
+        if self.should_stop != None: done = self.should_stop(self)
 
         return obs, 0, done, {}
 
@@ -137,22 +150,10 @@ class KrockWebotsEnv(SimulationEnv):
     def reset(self, hard=True):
         self.agent.stop()
         if hard:
-            self.world.spawn(self.agent)
-        return self.make_obs_from_agent_state(self.agent)
+            self.agent()
+            self.spawn(self.agent)
+            self.agent.sleep()
 
-# Example
-# env = KrockWebotsEnv()
-# obs = env.observation_space
-#
-# for _ in range(1):
-#     env.reset()
-#
-#     for _ in range(1000):
-#         env.render()
-        # action = env.action_space.sample()
-#         obs, r, done, _ = env.step(env.GO_FORWARD)
-        # pprint.pprint(obs)
-#         if done:
-#             break
-#
-# env.reset()
+        self.should_stop = IfOneFalseOf([IsNotStuck(n_last=50), IsInside()])
+
+        return self.make_obs_from_agent_state(self.agent)
