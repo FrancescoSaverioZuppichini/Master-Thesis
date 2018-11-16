@@ -39,8 +39,8 @@ parser.add_argument('-e',
 parser.add_argument('-n',
                     '--n-sim',
                     type=int,
-                    help="Number of simulation used.",
-                    default=100)
+                    help="Number of run for each map",
+                    default=10)
 parser.add_argument('-t',
                     '--time',
                     type=float,

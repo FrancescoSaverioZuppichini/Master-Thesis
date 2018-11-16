@@ -6,14 +6,14 @@ from os import path
 from agent.callbacks import *
 from webots.krock import Krock
 
-from simulation import BasicSimulation, Simulation
-from simulation.callbacks import *
 from simulation.conditions import *
 
-from world import World
+from KrockWebotsEnv import KrockWebotsEnv
 from webots import *
 
 from parser import args
+
+import pprint
 
 N_SIM = args.n_sim
 SIM_TIME = args.time
@@ -31,7 +31,6 @@ if args.engine == 'webots':
     if args.robot == 'krock':
         src_world = path.abspath('./webots/krock/krock.wbt')
         agent = Krock
-
 
         for map in args.maps:
             w = WebotsWorld.from_image(
@@ -55,39 +54,45 @@ def create_agent(w):
     krock = agent()
     krock.add_callback(RosBagSaver(args.save_dir,
                                    topics=['pose',
-                                           'frontal_camera'
-                                           ]))
+                                           'frontal_camera']))
 
     krock(w)
 
     return krock
 
-
-# TODO check if robot fall upside down
-sim = BasicSimulation(name=args.robot)
-sim.add_callbacks([Alarm(stop_after_s=SIM_TIME)])
+N_SIM = 10
 
 b = range(N_SIM)
 
 start = time.time()
 print('')
 
-try:
-    for w in worlds:
-        w()
-        # TODO these info should be taken directly from the current world
-        cond = IfOneFalseOf([IsNotStuck(), IsInside()])
-        for i, _ in enumerate(b):
-            if i % 10 == 0: w.reanimate()
-            a = create_agent(w)
+# try:
+for w in worlds:
+    w()
 
-            sim(world=w,
-                agent=a,
-                until=cond)
-            end = time.time() - start
+    for i in range(N_SIM):
+        a = create_agent(w)
 
-            rospy.loginfo('Iter={:} Error={:} Elapsed={:.2f}'.format(str(i), sim.history['error', -1], end))
-except Exception as e:
-    sim.should_stop = True
-    print(e)
-    # rospy.signal_shutdown('KeyboardInterrupt')
+        env = KrockWebotsEnv(agent=a, world=w, stop=IfOneFalseOf([IsNotStuck(n_last=50), IsInside()]))
+        # TODO as always the reanimation breaks something
+        # if i % 20 == 0:
+        #     rospy.loginfo('Reanimate robot')
+        #     w.reanimate()
+
+        obs = env.reset()
+
+        for _ in range(500):
+            env.render()
+            obs, r, done, _ = env.step(env.GO_FORWARD)
+            if done: break
+        a.die(env, w)
+
+
+
+    end = time.time() - start
+
+    rospy.loginfo('Iter={:} Elapsed={:.2f}'.format(str(i), end))
+# except Exception as e:
+#     print(e)
+#     # rospy.signal_shutdown('KeyboardInterrupt')
