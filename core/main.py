@@ -1,19 +1,12 @@
-import rospy
-import time
-
-from os import path
-
 from agent.callbacks import *
 from webots.krock import Krock
 
 from simulation.conditions import *
 
-from KrockWebotsEnv import KrockWebotsEnv
+from webots.krock.KrockWebotsEnv import KrockWebotsEnv
 from webots import *
 
 from parser import args
-
-import pprint
 
 N_SIM = args.n_sim
 SIM_TIME = args.time

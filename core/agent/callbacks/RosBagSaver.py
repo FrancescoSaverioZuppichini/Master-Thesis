@@ -10,6 +10,8 @@ import pandas as pd
 from .AgentCallback import AgentCallback
 from pypeln import thread as th
 
+# REVIEW: probably store all topic in the bag is not the best idea due to the fact that
+# if we want to just load one topic we are forced to load them all!
 class RosBagSaver(AgentCallback):
     FILENAME2MAP_PATH = './filename2map.csv'
 
