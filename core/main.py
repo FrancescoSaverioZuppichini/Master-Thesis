@@ -27,10 +27,10 @@ def make_env(map):
 
             env = KrockWebotsEnv.from_image(
                 map,
-                path.abspath('./webots/krock/krock.wbt'),
+                path.abspath('./env/webots/krock/krock.wbt'),
                 {'height': 1,
                  'resolution': 0.02},
-                output_dir=path.abspath('./webots/krock/krock2_ros/worlds/'),
+                output_dir=path.abspath('./env/webots/krock/krock2_ros/worlds/'),
                 agent_callbacks=[RosBagSaver(bag_save_path, topics=['pose'])]
             )
 
