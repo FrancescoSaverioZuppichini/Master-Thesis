@@ -61,7 +61,7 @@ for map in args.maps:
             if done: break
         print('Done after {}'.format(i))
         # we want to store at each spawn
-        env.agent.store()
+        env.agent.die(env)
 
 
     end = time.time() - start
