@@ -1,10 +1,8 @@
+
+from os import makedirs
+
 from agent.callbacks import *
-from webots.krock import Krock
-
-from simulation.conditions import *
-
-from webots.krock.KrockWebotsEnv import KrockWebotsEnv
-from webots import *
+from env.webots.krock.KrockWebotsEnv import KrockWebotsEnv
 
 from parser import args
 
@@ -18,13 +16,14 @@ if args.maps == None:  args.maps = [WORLD]
 
 agent = None
 
-# TODO main file is polluted. Create something like Topology .from_args that returns agent, worlds and sim
-
+# TODO main file is polluted. Create something like Topology .from_args that returns the correct env
 def make_env(map):
     env = None
     if args.engine == 'webots':
         if args.robot == 'krock':
-            src_world = path.abspath('./webots/krock/krock.wbt')
+            map_name, _ = path.splitext(path.basename(map))
+            bag_save_path = path.normpath(args.save_dir + '/' + map_name)
+            makedirs(bag_save_path, exist_ok=True)
 
             env = KrockWebotsEnv.from_image(
                 map,
@@ -32,18 +31,19 @@ def make_env(map):
                 {'height': 1,
                  'resolution': 0.02},
                 output_dir=path.abspath('./webots/krock/krock2_ros/worlds/'),
-                agent_callbacks=[RosBagSaver(args.save_dir, topics=['pose'])]
+                agent_callbacks=[RosBagSaver(bag_save_path, topics=['pose'])]
             )
 
     return env
 
-N_SIM = 1000
+N_SIM = 10
 
 b = range(N_SIM)
 
 start = time.time()
+
 print('')
-print(len(args.maps))
+rospy.loginfo('Simulation starting with {} maps'.format(len(args.maps)))
 
 for map in args.maps:
     env = make_env(map)
@@ -61,12 +61,9 @@ for map in args.maps:
             if done: break
         print('Done after {}'.format(i))
         # we want to store at each spawn
-        env.agent.die(env)
+        env.agent.store()
 
 
     end = time.time() - start
 
-    rospy.loginfo('Iter={:} Elapsed={:.2f}'.format(str(i), end))
-# except Exception as e:
-#     print(e)
-#     # rospy.signal_shutdown('KeyboardInterrupt')
+rospy.loginfo('Iter={:} Elapsed={:.2f}'.format(str(i), end))
