@@ -13,7 +13,6 @@ from pypeln import thread as th
 # REVIEW: probably store all topic in the bag is not the best idea due to the fact that
 # if we want to just load one topic we are forced to load them all!
 class RosBagSaver(AgentCallback):
-    FILENAME2MAP_PATH = './filename2map.csv'
 
     def __init__(self, save_dir, topics=None, max_size=1024, workers=1):
         self.save_dir = save_dir
@@ -23,16 +22,6 @@ class RosBagSaver(AgentCallback):
         self.size = 0
         self.workers = workers
         self.tr = threading.Thread(target=self.store, args=(self,))
-
-    def create_or_update_filename2map(self, filename, map):
-        new = pd.DataFrame({'filename': [filename], 'map' : [map] })
-
-        try:
-            old = pd.read_csv(self.FILENAME2MAP_PATH)
-            old = pd.concat([old,new], sort=False, join_axes=[new.columns], ignore_index=True)
-        except FileNotFoundError:
-            old = new
-        old.to_csv(self.FILENAME2MAP_PATH)
 
     def on_state_change(self, agent, key, value):
         self.agent = agent
@@ -51,7 +40,6 @@ class RosBagSaver(AgentCallback):
         key, values = data
         for value in values:
             self.bag.write(key, value)
-
         return True
 
     def store(self, context):
@@ -75,12 +63,9 @@ class RosBagSaver(AgentCallback):
         self.cache = {}
         self.size = 0
 
-        # self.create_or_update_filename2map(file_name, context.world.world_path)
 
     def on_shut_down(self):
-        # self.tr.start()
         self.tr.start()
         self.tr.join()
         self.tr = threading.Thread(target=self.store, args=(self,))
 
-        # self.store(self.agent)
