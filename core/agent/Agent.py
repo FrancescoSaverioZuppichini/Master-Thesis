@@ -1,8 +1,6 @@
 from protocols import Callbackable
 from .callbacks import AgentCallback
 
-from world import World
-
 class Agent(Callbackable, AgentCallback):
     """
     Basic Agent interface. An agent is an entity that interacts with a world.
