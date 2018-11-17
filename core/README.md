@@ -52,7 +52,7 @@
 A notebook version of this file can be found in `example.ipynb`
 
 ## Webots + Krock
-![alt text](https://raw.githubusercontent.com/FrancescoSaverioZuppichini/Master-Thesis/gym/resources/images/krock.jpg")
+![alt text](https://raw.githubusercontent.com/FrancescoSaverioZuppichini/Master-Thesis/master/resources/images/krock.jpg)
 
 In order to run the Krock robot using Webots we provide a [gym](https://gym.openai.com/) env. If you know gym, then you are good to go. It follows a **basic example** (API could change)
 
