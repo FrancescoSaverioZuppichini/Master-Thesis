@@ -1,16 +1,8 @@
-import rospy
-import time
 
-from os import path
+from os import makedirs
 
 from agent.callbacks import *
-from webots.krock import Krock
-
-from simulation import BasicSimulation
-from simulation.callbacks import *
-
-from world import World
-from webots import *
+from env.webots.krock.KrockWebotsEnv import KrockWebotsEnv
 
 from parser import args
 
@@ -20,61 +12,58 @@ WORLD = args.world
 
 rospy.init_node("traversability_simulation")
 
-w = None
+if args.maps == None:  args.maps = [WORLD]
+
 agent = None
 
-# TODO main file is polluted. Create something like Topology .from_args that returns agent, world and sim
-if args.engine == 'webots':
-    if args.robot == 'krock':
-        src_world = path.abspath('./webots/krock/krock.wbt')
-        agent = Krock
-        w = WebotsWorld.from_image(
-            WORLD,
-            path.abspath('./webots/krock/krock.wbt'),
-            {'height': 1,
-             'resolution': 0.02},
-            # output_path='/krock/krock2_ros/worlds/temp.wbt')
-            output_dir=path.abspath('./webots/krock/krock2_ros/worlds/'))
+# TODO main file is polluted. Create something like Topology .from_args that returns the correct env
+def make_env(map):
+    env = None
+    if args.engine == 'webots':
+        if args.robot == 'krock':
+            map_name, _ = path.splitext(path.basename(map))
+            bag_save_path = path.normpath(args.save_dir + '/' + map_name)
+            makedirs(bag_save_path, exist_ok=True)
 
+            env = KrockWebotsEnv.from_image(
+                map,
+                path.abspath('./env/webots/krock/krock.wbt'),
+                {'height': 1,
+                 'resolution': 0.02},
+                output_dir=path.abspath('./env/webots/krock/krock2_ros/worlds/'),
+                agent_callbacks=[RosBagSaver(bag_save_path, topics=['pose'])]
+            )
 
+    return env
 
-if w == None:
-    raise ValueError('No world created. Probably you selected a no supported engine. Run main.py --help')
-
-if agent == None:
-    raise ValueError('No agent created. Probably you selected a no supported agent. Run main.py --help')
-w()
-
-
-def create_agent(w):
-    krock = agent()
-    krock.add_callback(RosBagSaver(args.save_dir,
-                                   topics=['pose']))
-
-    # krock.add_callback(RosBagSaver('./data/{}.bag'.format(time.time()),
-    #                                topics=['pose']))
-    krock(w)
-
-    return krock
-
-
-# TODO check if robot fall upside down
-sim = BasicSimulation(name=args.robot)
-sim.add_callbacks([Alarm(stop_after_s=SIM_TIME),
-                   OutOfMap(x=w.x, y=w.y)
-                   ])
+N_SIM = 10
 
 b = range(N_SIM)
 
 start = time.time()
+
 print('')
+rospy.loginfo('Simulation starting with {} maps'.format(len(args.maps)))
 
-for iter, _ in enumerate(b):
-    if (iter + 1) % 10 == 0: w.reanimate()
-    a = create_agent(w)
+for map in args.maps:
+    env = make_env(map)
 
-    sim(world=w,
-        agent=a)
+    for i in range(N_SIM):
+        # TODO as always the reanimation breaks something
+        # if i % 20 == 0:
+        #     rospy.loginfo('Reanimate robot')
+        #     w.reanimate()
+        env.reset()
+
+        for i in range(200):
+            env.render()
+            obs, r, done, _ = env.step(env.GO_FORWARD)
+            if done: break
+        print('Done after {}'.format(i))
+        # we want to store at each spawn
+        env.agent.store()
+
+
     end = time.time() - start
 
-    rospy.loginfo('Iter={:} Error={:} Elapsed={:.2f}'.format(str(iter), sim.history['error', -1], end))
+rospy.loginfo('Iter={:} Elapsed={:.2f}'.format(str(i), end))

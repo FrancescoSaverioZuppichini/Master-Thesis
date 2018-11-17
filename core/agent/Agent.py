@@ -1,9 +1,6 @@
 from protocols import Callbackable
 from .callbacks import AgentCallback
 
-from world import World
-from simulation import Simulation
-
 class Agent(Callbackable, AgentCallback):
     """
     Basic Agent interface. An agent is an entity that interacts with a world.
@@ -15,19 +12,9 @@ class Agent(Callbackable, AgentCallback):
         self.state = AgentState(self)
         self.set_callbacks([self])
 
-    def __call__(self, world: World, *args, **kwargs):
-        self.world = world
-
-    # TODO what about pass the world param?
-    def spawn(self, world: World, pos=None, *args, **kwargs):
-        """
-        Spawn the robot in the world.
-        :param pos:
-        :return:
-        """
+    def __call__(self,  *args, **kwargs):
         pass
 
-    # TODO what about pass the world param?
     def move(self, *args, **kwargs):
         """
         A generic function to move the agent in the world. Use it to implement your own logic. E.g
@@ -49,7 +36,7 @@ class Agent(Callbackable, AgentCallback):
         """
         pass
 
-    def act(self, sim: Simulation, world: World, *args, **kwargs):
+    def act(self, env, *args, **kwargs):
         """
         This function should do something based on the world the agent
         is in. Ideally it should move it based on some input.
@@ -74,7 +61,7 @@ class Agent(Callbackable, AgentCallback):
         """
         pass
 
-    def die(self, sim: Simulation, world: World, *args, **kwargs):
+    def die(self, env, *args, **kwargs):
         """
          This function kill the agent. This should be implemented,
          hook to the simulation instead
@@ -86,6 +73,8 @@ class Agent(Callbackable, AgentCallback):
         :return:
         """
         self.notify('on_shut_down')
+        # self.state = AgentState(self)
+
 
 class AgentState(dict):
     """
