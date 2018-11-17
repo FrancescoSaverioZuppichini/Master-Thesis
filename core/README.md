@@ -159,7 +159,7 @@ print(env.observation_space)
     Dict(sensors:Dict(front_cam:Tuple(Box(600, 800, 3), Box(600, 800, 3)), orientation:Dict(w:Box(1,), x:Box(1,), y:Box(1,), z:Box(1,)), position:Dict(x:Box(1,), y:Box(1,), z:Box(1,))))
 
 
-Perfect a random action is even esier
+Select a random action is even esier
 
 
 ```python
@@ -214,9 +214,6 @@ a() # init
 a.act(env) # do something
 a.die(env) # RIP, clean up (e.g store stuff empty the state)
 ```
-
-    I am moving!
-
 
 You need to first create the agent class and then call it to correctly initialise everything. You can think of it like a *lazy* loader.
 
