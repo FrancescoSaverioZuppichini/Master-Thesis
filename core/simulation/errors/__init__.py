@@ -1,2 +1,0 @@
-class SimulationException(Exception):
-    pass

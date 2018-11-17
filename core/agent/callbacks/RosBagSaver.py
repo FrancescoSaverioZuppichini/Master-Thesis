@@ -3,31 +3,25 @@ import threading
 import rospy
 import time
 
+from os import path
+
 import pandas as pd
 
 from .AgentCallback import AgentCallback
 from pypeln import thread as th
 
+# REVIEW: probably store all topic in the bag is not the best idea due to the fact that
+# if we want to just load one topic we are forced to load them all!
 class RosBagSaver(AgentCallback):
-    FILENAME2MAP_PATH = './filename2map.csv'
 
-    def __init__(self, save_dir, topics=None, max_size=1024, workers=2):
+    def __init__(self, save_dir, topics=None, max_size=1024, workers=1):
         self.save_dir = save_dir
         self.topics = topics
         self.cache = {}
         self.max_size = max_size
         self.size = 0
         self.workers = workers
-
-    def create_or_update_filename2map(self, filename, map):
-        new = pd.DataFrame({'filename': [filename], 'map' : [map] })
-
-        try:
-            old = pd.read_csv(self.FILENAME2MAP_PATH)
-            old = pd.concat([old,new], sort=False, join_axes=[new.columns], ignore_index=True)
-        except FileNotFoundError:
-            old = new
-        old.to_csv(self.FILENAME2MAP_PATH)
+        self.tr = threading.Thread(target=self.store, args=(self,))
 
     def on_state_change(self, agent, key, value):
         self.agent = agent
@@ -38,26 +32,29 @@ class RosBagSaver(AgentCallback):
         if key not in self.cache: self.cache[key] = []
 
         if store: self.cache[key].append(value)
-
         self.size = len(self.cache[key])
-
-        if self.size == self.max_size: self.store(agent)
+        # REVIEW: for now we want to store only in the end
+        # if self.size == self.max_size: self.store(agent)
 
     def write(self, data):
         key, values = data
         for value in values:
             self.bag.write(key, value)
-
         return True
 
-    def store(self, agent):
+    def store(self, context):
         data = self.cache.items()
-        file_name = self.save_dir + '/{}.bag'.format(time.time())
+        file_name = path.normpath(self.save_dir + '/{}.bag'.format(time.time()))
 
         self.bag = rosbag.Bag(file_name, 'w')
 
-        stage = th.map(self.write, data, workers=self.workers)
-        files_list = list(stage)
+        for key in self.cache.keys():
+            for value in self.cache[key]:
+                self.bag.write(key, value)
+
+        # self.write(data)
+        # stage = th.map(self.write, data, workers=self.workers)
+        # files_list = list(stage)
 
         self.bag.close()
 
@@ -66,7 +63,9 @@ class RosBagSaver(AgentCallback):
         self.cache = {}
         self.size = 0
 
-        self.create_or_update_filename2map(file_name, agent.world.world_path)
 
     def on_shut_down(self):
-        self.store(self.agent)
+        self.tr.start()
+        self.tr.join()
+        self.tr = threading.Thread(target=self.store, args=(self,))
+
