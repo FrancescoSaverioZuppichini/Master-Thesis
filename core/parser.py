@@ -26,7 +26,7 @@ parser.add_argument('-w',
                     '--world',
                     type=str,
                     help='The path to the world file or an height map',
-                    default='./maps/holes3.png',
+                    default='./maps/flat.png',
                     required=False)
 parser.add_argument('-e',
                     '--engine',
