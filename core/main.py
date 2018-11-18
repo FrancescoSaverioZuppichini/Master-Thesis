@@ -4,7 +4,10 @@ from os import makedirs
 from agent.callbacks import *
 from env.webots.krock.KrockWebotsEnv import KrockWebotsEnv
 
+from geometry_msgs.msg import Pose
+
 from parser import args
+from tf import transformations
 
 N_SIM = args.n_sim
 SIM_TIME = args.time
@@ -41,6 +44,7 @@ N_SIM = 10
 b = range(N_SIM)
 
 start = time.time()
+
 
 print('')
 rospy.loginfo('Simulation starting with {} maps'.format(len(args.maps)))
