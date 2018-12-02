@@ -153,3 +153,5 @@ fabric.properties
 *.bag
 # webots stuff
 *.deb
+
+resources/traversability_estimation
