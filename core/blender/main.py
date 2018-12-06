@@ -23,7 +23,9 @@ bpy.context.scene.render.engine = 'CYCLES'
 bpy.context.scene.cycles.feature_set = 'EXPERIMENTAL'
 bpy.context.scene.cycles.device = 'GPU'
 
-bpy.data.objects.remove(bpy.data.objects['Cube'], True)
+krock = bpy.data.objects['Cube']
+krock.name = 'krock'
+krock.scale = [0.2, 0.2, 0.2]
 
 if MAP_KEY not in bpy.data.objects:
     bpy.ops.mesh.primitive_grid_add(x_subdivisions=513, y_subdivisions=513)
@@ -124,7 +126,7 @@ def file2pose(file):
                    [orientation.w, orientation.x, orientation.y, orientation.z]]
 
 
-camera.rotation_mode = 'QUATERNION'
+# camera.rotation_mode = 'QUATERNION'
 
 camera = bpy.data.cameras['Camera']
 camera.lens_unit = 'FOV'
@@ -137,48 +139,6 @@ scene.render.resolution_x = 640
 scene.render.resolution_y = 480
 camera = bpy.data.objects['Camera']
 
-import tf
-import rospy
-
-
-def tf_broadcaster_callback(msg):
-    # Calculations for blender frame. With respect to ROS
-    # Blende's y = ROS' z,
-    # Blende's z = ROS' y
-
-    b_matrix_t = tf.transformations.translation_matrix((msg.pose.position.x, msg.pose.position.y, msg.pose.position.z))
-    b_matrix_r = tf.transformations.quaternion_matrix([msg.pose.orientation.x,
-                                                       msg.pose.orientation.y,
-                                                       msg.pose.orientation.z,
-                                                       msg.pose.orientation.w])
-    body_tr = np.matmul(b_matrix_t, b_matrix_r)
-
-    c_matrix_t = tf.transformations.translation_matrix((0.16, 0, 0))
-    c_matrix_r = tf.transformations.quaternion_matrix([0, 0, 0, 1])
-    camera_tr = np.matmul(c_matrix_t, c_matrix_r)
-
-    world_camera_tr = np.matmul(body_tr, camera_tr)
-    # print("ROS+++++++++", body_tr)
-    # print("ROS+++++++++", camera_tr)
-    # print("ROS+++++++++", world_camera_tr)
-
-    b_matrix_t = tf.transformations.translation_matrix((msg.pose.position.x, msg.pose.position.z, msg.pose.position.y))
-    b_matrix_r = tf.transformations.quaternion_matrix([msg.pose.orientation.x,
-                                                       msg.pose.orientation.z,
-                                                       msg.pose.orientation.y,
-                                                       msg.pose.orientation.w])
-    body_tr = np.matmul(b_matrix_t, b_matrix_r)
-
-    c_matrix_t = tf.transformations.translation_matrix((0.16, 0, 0))
-    c_matrix_r = tf.transformations.quaternion_matrix([0, 0, 0, 1])
-    camera_tr = np.matmul(c_matrix_t, c_matrix_r)
-
-    world_camera_tr = np.matmul(body_tr, camera_tr)
-    print("BLENDER+++++++++", body_tr)
-    print("BLENDER+++++++++", camera_tr)
-    print("BLENDER+++++++++", world_camera_tr)
-
-    return world_camera_tr
 
 # bag = rosbag.Bag(files[1])
 # for topic, msg, t in bag.read_messages(topics=['pose']):
@@ -197,27 +157,11 @@ def tf_broadcaster_callback(msg):
 #         bpy.ops.render.render(use_viewport = True, write_still=True)
 #     break
 
-pose = PoseStamped()
 
-pose.pose.position.x = 1.1
-pose.pose.position.y = 0.4
-pose.pose.position.z = -0.16
+camera.parent = krock
 
-pose.pose.orientation.x = 5.331
-pose.pose.orientation.y = 0.99
-pose.pose.orientation.z = 0
-pose.pose.orientation.w = -0.26
+krock.location = [1.0, 0.33, -0.165]
+krock.rotation_mode = 'QUATERNION'
+krock.rotation_quaternion = [-0.267, 0.00000001, 0.99, 0.0001]
 
-msg = pose
-world_camera_tr = tf_broadcaster_callback(msg)
-
-point = np.array([0,0,0,0 ])
-
-pos = world_camera_tr @ point
-
-print(pos)
-quaternion = [-0.28111561, 0.09863647, -0.01838357, 0.99495371]
-
-camera = bpy.data.objects['Camera']
-camera.location = [pos[0], pos[1], pos[2]]
-camera.rotation_quaternion = quaternion
+camera.location = [0.16, 0, 0]
