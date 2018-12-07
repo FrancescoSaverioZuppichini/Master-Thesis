@@ -58,6 +58,7 @@ def bags2csv(files):
     csv = list(stage)
 
     return csv
+
 BAG_FOLDER = '/home/francesco/Desktop/carino/vaevictis/data/'
 files = glob.glob(BAG_FOLDER + '/*/**.bag')
 
