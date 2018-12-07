@@ -12,14 +12,9 @@ from os import path
 import matplotlib.pyplot as plt
 from cv_bridge import CvBridge, CvBridgeError
 from pypeln import thread as th
-
+from utils import *
 WORKERS = 16
 
-def filename2map(filename):
-    dirs, _ = path.split(filename)
-    map_name = path.basename(dirs)
-
-    return map_name
 
 def bag2df(file_name):
     df = None
