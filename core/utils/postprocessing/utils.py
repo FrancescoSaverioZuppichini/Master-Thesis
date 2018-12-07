@@ -7,7 +7,9 @@ import pandas as pd
 # numpy
 import numpy as np
 import math
+from os import path
 
+import dateutil
 # skelearn
 import sklearn.pipeline
 import sklearn.dummy
@@ -33,7 +35,7 @@ advancement_th = 0.10  # threshold in meters use to generate the training datase
 # .15m/s is the current linear velocity (assuming a forward no steering control)
 # ergo, ideal_displacement = .15m/s x (timewindow in seconds)
 
-debug = 0  # debug level for extra logging and intermedia plots, 0 no debuggin -- 3 shows everyhing
+debug = 3  # debug level for extra logging and intermedia plots, 0 no debuggin -- 3 shows everyhing
            #
 
 multiprocessing = False # if True, we use jobs to generate dataset/calculate the traversability/ plot over a full map
@@ -46,6 +48,12 @@ sim_hm_mx_y = 5.0  # this will help to pass from sim coordinates to screen coord
 
 
 height_scale_factor = 1.0 # for learning heightmaps it was 0 - 1.0; if heighmaps are higher, change accordingly
+
+def filename2map(filename):
+    dirs, _ = path.split(filename)
+    map_name = path.basename(dirs)
+
+    return map_name
 
 def read_image(heightmap_png):
     # reads an image takint into account the scalling and the bitdepth
@@ -99,7 +107,9 @@ def hmpatch_only_corners(x,y,alpha,edge,scale=1):
     return corners
 
 def show(sample,hm):
-    patch=hmpatch(hm,sample["hm_x"],sample["hm_y"],np.rad2deg(sample["S_RCO_G"]),patch_size,scale=1)[0] # make sure to extract the patch from the correct heightmap
+    O_W_KEY = 'pose__pose_orientation_w'
+
+    patch=hmpatch(hm,sample["hm_x"],sample["hm_y"],np.rad2deg(sample[O_W_KEY]),patch_size,scale=1)[0] # make sure to extract the patch from the correct heightmap
     patch=patch-patch[patch.shape[0]//2,patch.shape[1]//2]
     fig,ax1=plt.subplots(figsize=(7,7))
     ax1.imshow(patch/height_scale_factor,cmap="coolwarm",vmin=-0.1,vmax=+0.1)
@@ -110,18 +120,31 @@ def show(sample,hm):
 
 def generate_single_dataset_cnn(input_csv, heightmap_png):
     hm = read_image(heightmap_png)
-    df = pd.read_csv(input_csv).set_index("TIMESTAMP")
+    df = pd.read_csv(input_csv)
+
+    df[df.columns[0]] = df[df.columns[0]].apply(lambda x : dateutil.parser.parse(x).timestamp())
+    df[df.columns[0]] -= min(df[df.columns[0]])
+
+    print(df[df.columns[0]][0])
+    df = df.set_index(df.columns[0])
     df.columns = df.columns.map(str.strip)  # strip spaces
+
+    P_X_KEY = 'pose__pose_position_x'
+    P_Y_KEY = 'pose__pose_position_y'
+
+    O_W_KEY = 'pose__pose_orientation_w'
+
     if debug > 1:
-        plt.figure();
-        df.plot.scatter(x="S_RCP_X", y="S_RCP_Y")
+        plt.figure()
+        df.plot.scatter(x=P_X_KEY, y=P_Y_KEY)
+
 
     # % Convert xy to hm coords
     df["hm_x"] = df.apply(
-        lambda r: toScreenFrame(r["S_RCP_X"], r["S_RCP_Y"], sim_hm_mx_x, -sim_hm_mx_x, sim_hm_mx_y, -sim_hm_mx_y)[0] *
+        lambda r: toScreenFrame(r[P_X_KEY], r[P_Y_KEY], sim_hm_mx_x, -sim_hm_mx_x, sim_hm_mx_y, -sim_hm_mx_y)[0] *
                   hm.shape[1], axis=1)
     df["hm_y"] = df.apply(
-        lambda r: toScreenFrame(r["S_RCP_X"], r["S_RCP_Y"], sim_hm_mx_x, -sim_hm_mx_x, sim_hm_mx_y, -sim_hm_mx_y)[1] *
+        lambda r: toScreenFrame(r[P_X_KEY], r[P_Y_KEY], sim_hm_mx_x, -sim_hm_mx_x, sim_hm_mx_y, -sim_hm_mx_y)[1] *
                   hm.shape[0], axis=1)
 
     # % Plot trajectory
@@ -134,19 +157,19 @@ def generate_single_dataset_cnn(input_csv, heightmap_png):
     # % Plot angles
     # import numpy as np
     if debug > 1:
-        plt.figure();
-        np.rad2deg(df["S_RCO_G"]).plot()
+        plt.figure()
+        np.rad2deg(df[O_W_KEY]).plot()
 
     # %
     # Unit vector of robot orientation
-    df["S_oX"] = np.cos(df["S_RCO_G"])
-    df["S_oY"] = np.sin(df["S_RCO_G"])
+    df["S_oX"] = np.cos(df[O_W_KEY])
+    df["S_oY"] = np.sin(df[O_W_KEY])
     assert (np.allclose(1, np.linalg.norm(df[["S_oX", "S_oY"]], axis=1)))
 
     # dX, dY, distance at 10 timesteps in the future
     dt = time_window
-    df["S_dX"] = df.rolling(window=(dt + 1))["S_RCP_X"].apply(lambda x: x[-1] - x[0]).shift(-dt)
-    df["S_dY"] = df.rolling(window=(dt + 1))["S_RCP_Y"].apply(lambda x: x[-1] - x[0]).shift(-dt)
+    df["S_dX"] = df.rolling(window=(dt + 1))[P_X_KEY].apply(lambda x: x[-1] - x[0]).shift(-dt)
+    df["S_dY"] = df.rolling(window=(dt + 1))[P_Y_KEY].apply(lambda x: x[-1] - x[0]).shift(-dt)
     df["S_d"] = np.linalg.norm(df[["S_dX", "S_dY"]], axis=1)
     if debug > 1:
         plt.figure();
@@ -164,11 +187,11 @@ def generate_single_dataset_cnn(input_csv, heightmap_png):
     dff = dff.loc[dff.index <= 18].dropna()  # drop also the last two seconds (if run is 20s, < 18)
 
     # drop the frames where the robot is upside down (orientation alpha angle [euler's angles]) to avoid false positives
-    dff = dff.loc[dff.S_RCO_A >= -2.0].dropna()
-    dff = dff.loc[dff.S_RCO_A <= 2.0].dropna()
-
-    dff = dff.loc[dff.S_RCO_B >= -2.0].dropna()
-    dff = dff.loc[dff.S_RCO_B <= 2.0].dropna()
+    # dff = dff.loc[dff.S_RCO_A >= -2.0].dropna()
+    # dff = dff.loc[dff.S_RCO_A <= 2.0].dropna()
+    #
+    # dff = dff.loc[dff.S_RCO_B >= -2.0].dropna()
+    # dff = dff.loc[dff.S_RCO_B <= 2.0].dropna()
 
     # % Visualize the data
     if debug > 2:
