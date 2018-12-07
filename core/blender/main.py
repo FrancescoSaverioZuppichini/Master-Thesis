@@ -162,6 +162,6 @@ camera.parent = krock
 
 krock.location = [1.0, 0.33, -0.165]
 krock.rotation_mode = 'QUATERNION'
-krock.rotation_quaternion = [-0.267, 0.00000001, 0.99, 0.0001]
+krock.rotation_quaternion = [0.98, 0.14, -0.0, -0.03]
 
 camera.location = [0.16, 0, 0]
