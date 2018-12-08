@@ -10,6 +10,8 @@ import math
 from os import path
 
 import dateutil
+
+from tf.transformations import euler_from_quaternion
 # skelearn
 import sklearn.pipeline
 import sklearn.dummy
@@ -35,7 +37,7 @@ advancement_th = 0.10  # threshold in meters use to generate the training datase
 # .15m/s is the current linear velocity (assuming a forward no steering control)
 # ergo, ideal_displacement = .15m/s x (timewindow in seconds)
 
-debug = 3  # debug level for extra logging and intermedia plots, 0 no debuggin -- 3 shows everyhing
+debug = 1  # debug level for extra logging and intermedia plots, 0 no debuggin -- 3 shows everyhing
            #
 
 multiprocessing = False # if True, we use jobs to generate dataset/calculate the traversability/ plot over a full map
@@ -49,11 +51,37 @@ sim_hm_mx_y = 5.0  # this will help to pass from sim coordinates to screen coord
 
 height_scale_factor = 1.0 # for learning heightmaps it was 0 - 1.0; if heighmaps are higher, change accordingly
 
+
+
 def filename2map(filename):
     dirs, _ = path.split(filename)
     map_name = path.basename(dirs)
 
     return map_name
+
+def df_convert2timestamp(df):
+    df[df.columns[0]] = df[df.columns[0]].apply(lambda x: dateutil.parser.parse(x).timestamp())
+    df[df.columns[0]] -= min(df[df.columns[0]])
+
+    return df
+
+def df_convert_quaterion2euler(df):
+
+    def convert(row):
+        quaternion = [row['pose__pose_orientation_w'],
+                      row['pose__pose_orientation_x'],
+                      row['pose__pose_orientation_y'],
+                      row['pose__pose_orientation_z']]
+
+
+        euler = euler_from_quaternion(quaternion)
+
+        return pd.Series([*euler])
+
+    df[['pose__pose_e_orientation_x', 'pose__pose_e_orientation_y', 'pose__pose_e_orientation_z']] = df.apply(convert, axis=1)
+
+    return df
+
 
 def read_image(heightmap_png):
     # reads an image takint into account the scalling and the bitdepth
@@ -118,26 +146,21 @@ def show(sample,hm):
     plt.close(fig)
 
 
-def generate_single_dataset_cnn(input_csv, heightmap_png):
+def generate_single_dataset_cnn(df, heightmap_png):
     hm = read_image(heightmap_png)
-    df = pd.read_csv(input_csv)
 
-    df[df.columns[0]] = df[df.columns[0]].apply(lambda x : dateutil.parser.parse(x).timestamp())
-    df[df.columns[0]] -= min(df[df.columns[0]])
-
-    print(df[df.columns[0]][0])
     df = df.set_index(df.columns[0])
     df.columns = df.columns.map(str.strip)  # strip spaces
 
     P_X_KEY = 'pose__pose_position_x'
     P_Y_KEY = 'pose__pose_position_y'
 
-    O_W_KEY = 'pose__pose_orientation_w'
+    O_W_KEY = 'pose__pose_e_orientation_z'
 
     if debug > 1:
         plt.figure()
         df.plot.scatter(x=P_X_KEY, y=P_Y_KEY)
-
+        plt.show()
 
     # % Convert xy to hm coords
     df["hm_x"] = df.apply(
@@ -153,12 +176,14 @@ def generate_single_dataset_cnn(input_csv, heightmap_png):
         ax.imshow(hm / height_scale_factor)
         ax.plot(df["hm_x"], df["hm_y"], '-y')
         ax.plot(df["hm_x"].iloc[0], df["hm_y"].iloc[0], 'oy')
+        plt.show()
 
     # % Plot angles
     # import numpy as np
     if debug > 1:
         plt.figure()
         np.rad2deg(df[O_W_KEY]).plot()
+        plt.show()
 
     # %
     # Unit vector of robot orientation
@@ -168,11 +193,11 @@ def generate_single_dataset_cnn(input_csv, heightmap_png):
 
     # dX, dY, distance at 10 timesteps in the future
     dt = time_window
-    df["S_dX"] = df.rolling(window=(dt + 1))[P_X_KEY].apply(lambda x: x[-1] - x[0]).shift(-dt)
-    df["S_dY"] = df.rolling(window=(dt + 1))[P_Y_KEY].apply(lambda x: x[-1] - x[0]).shift(-dt)
+    df["S_dX"] = df.rolling(window=(dt + 1))[P_X_KEY].apply(lambda x: x[-1] - x[0], raw=True).shift(-dt)
+    df["S_dY"] = df.rolling(window=(dt + 1))[P_Y_KEY].apply(lambda x: x[-1] - x[0], raw=True).shift(-dt)
     df["S_d"] = np.linalg.norm(df[["S_dX", "S_dY"]], axis=1)
     if debug > 1:
-        plt.figure();
+        plt.figure()
         df["S_d"].plot()
 
     # % Project dX, dY on current direction
