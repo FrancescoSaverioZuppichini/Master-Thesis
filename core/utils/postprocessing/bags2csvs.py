@@ -27,10 +27,6 @@ def bags2dfs(files):
     data = list(stage)
     return data
 
-def dfs2df(dfs):
-    df = pd.concat([df for df in dfs])
-    return df
-
 def files2bags(files):
     for file in files:
         bag = rosbag.Bag(file)
