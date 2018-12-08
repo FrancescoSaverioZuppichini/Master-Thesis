@@ -10,6 +10,7 @@ import math
 from os import path
 
 import dateutil
+from pypeln import thread as th
 
 from tf.transformations import euler_from_quaternion
 # skelearn
@@ -51,7 +52,14 @@ sim_hm_mx_y = 5.0  # this will help to pass from sim coordinates to screen coord
 
 height_scale_factor = 1.0 # for learning heightmaps it was 0 - 1.0; if heighmaps are higher, change accordingly
 
+def csvs2dfs(files):
+    stage = th.map(pd.read_csv, files)
+    data = list(stage)
+    return data
 
+def dfs2df(dfs):
+    df = pd.concat([df for df in dfs])
+    return df
 
 def filename2map(filename):
     dirs, _ = path.split(filename)
