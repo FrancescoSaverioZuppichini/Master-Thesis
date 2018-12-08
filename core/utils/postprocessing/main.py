@@ -1,22 +1,12 @@
 import glob
 
-import matplotlib.pyplot as plt
+from config import Config
+from bags2csvs import bags2csvs
+from csvs2dataset import csvs2dataset
 
-from utils import *
-
-DATA_FOLDER = '/home/francesco/Desktop/carino/vaevictis/data/'
-files = glob.glob(DATA_FOLDER + '/bumps1/**.csv')
-
-
-
-map_name = filename2map(files[0])
-map_path = '/home/francesco/Documents/Master-Thesis/core/maps/{}.png'.format(map_name)
+bags = glob.glob(Config.BAG_FOLDER + '/*/**.bag')
+bags2csvs(bags)
 
 
-for file in files:
-    df = pd.read_csv(file)
-    df = df_convert2timestamp(df)
-    df = df_convert_quaterion2euler(df)
-
-    df, hm = generate_single_dataset_cnn(df, map_path)
-    df.to_csv('./test.csv')
+csvs = glob.glob(Config.CSV_FOLDER + '/*/**.csv')
+csvs2dataset(csvs)

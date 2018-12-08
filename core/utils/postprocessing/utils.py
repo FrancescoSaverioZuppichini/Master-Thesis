@@ -37,7 +37,7 @@ advancement_th = 0.10  # threshold in meters use to generate the training datase
 # .15m/s is the current linear velocity (assuming a forward no steering control)
 # ergo, ideal_displacement = .15m/s x (timewindow in seconds)
 
-debug = 1  # debug level for extra logging and intermedia plots, 0 no debuggin -- 3 shows everyhing
+debug = 0  # debug level for extra logging and intermedia plots, 0 no debuggin -- 3 shows everyhing
            #
 
 multiprocessing = False # if True, we use jobs to generate dataset/calculate the traversability/ plot over a full map
@@ -59,7 +59,7 @@ def filename2map(filename):
 
     return map_name
 
-def df_convert2timestamp(df):
+def df_convert_date2timestamp(df):
     df[df.columns[0]] = df[df.columns[0]].apply(lambda x: dateutil.parser.parse(x).timestamp())
     df[df.columns[0]] -= min(df[df.columns[0]])
 
