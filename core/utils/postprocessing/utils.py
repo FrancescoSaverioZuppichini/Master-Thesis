@@ -11,6 +11,7 @@ from os import path
 
 import dateutil
 from pypeln import thread as th
+from .config import Config
 
 from tf.transformations import euler_from_quaternion
 # skelearn
@@ -51,6 +52,17 @@ sim_hm_mx_y = 5.0  # this will help to pass from sim coordinates to screen coord
 
 
 height_scale_factor = 1.0 # for learning heightmaps it was 0 - 1.0; if heighmaps are higher, change accordingly
+
+def file2df_map(file):
+    df = pd.read_csv(file)
+    map_name = filename2map(file)
+    map = read_image(Config.MAPS_FOLDER + map_name + '.png')
+    return df, map
+
+def files2dfs_maps(files):
+    stage = th.map(file2df_map, files)
+    data = list(stage)
+    return data
 
 def csvs2dfs(files):
     stage = th.map(pd.read_csv, files)
@@ -143,7 +155,7 @@ def hmpatch_only_corners(x,y,alpha,edge,scale=1):
     return corners
 
 def show(sample,hm):
-    O_W_KEY = 'pose__pose_orientation_w'
+    O_W_KEY = 'pose__pose_e_orientation_z'
 
     patch=hmpatch(hm,sample["hm_x"],sample["hm_y"],np.rad2deg(sample[O_W_KEY]),patch_size,scale=1)[0] # make sure to extract the patch from the correct heightmap
     patch=patch-patch[patch.shape[0]//2,patch.shape[1]//2]
