@@ -46,8 +46,8 @@ multiprocessing = False # if True, we use jobs to generate dataset/calculate the
 
 multiprocessing_hm = np.zeros((100,100)) # a temporal way to initialize a shared image
 
-sim_hm_mx_x = 5.0  # heightmap dimmensions (m) used in the simulation for generating training data
-sim_hm_mx_y = 5.0  # this will help to pass from sim coordinates to screen coordinates when generating datasets
+sim_hm_mx_x = 5.13  # heightmap dimmensions (m) used in the simulation for generating training data
+sim_hm_mx_y = 5.13  # this will help to pass from sim coordinates to screen coordinates when generating datasets
                    # usually is a 10m by 10m map, so from -5 to 5
 
 
@@ -232,11 +232,11 @@ def generate_single_dataset_cnn(df, heightmap_png):
     dff = dff.loc[dff.index <= 18].dropna()  # drop also the last two seconds (if run is 20s, < 18)
 
     # drop the frames where the robot is upside down (orientation alpha angle [euler's angles]) to avoid false positives
-    # dff = dff.loc[dff.S_RCO_A >= -2.0].dropna()
-    # dff = dff.loc[dff.S_RCO_A <= 2.0].dropna()
-    #
-    # dff = dff.loc[dff.S_RCO_B >= -2.0].dropna()
-    # dff = dff.loc[dff.S_RCO_B <= 2.0].dropna()
+    dff = dff.loc[dff['pose__pose_e_orientation_x'] >= -2.0].dropna()
+    dff = dff.loc[dff['pose__pose_e_orientation_x'] <= 2.0].dropna()
+
+    dff = dff.loc[dff['pose__pose_e_orientation_y'] >= -2.0].dropna()
+    dff = dff.loc[dff['pose__pose_e_orientation_y'] <= 2.0].dropna()
 
     # % Visualize the data
     if debug > 2:
