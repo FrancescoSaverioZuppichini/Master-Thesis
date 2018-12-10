@@ -11,7 +11,7 @@ from os import path
 
 import dateutil
 from pypeln import thread as th
-from .config import Config
+from config import Config
 
 from tf.transformations import euler_from_quaternion
 # skelearn
@@ -27,14 +27,14 @@ time_window = 75  # Ideally: each row in the csv is about 0.01 segs, so 50 is ab
 # A preferred way of counting would be in time instead of windows.
 
 #
-patch_size = 60  # for extracting patchs from the heightmap for training, eval and testing datasets
+patch_size = 80  # for extracting patchs from the heightmap for training, eval and testing datasets
 # Pioneer is about 50cm long x 47cm wide x 40cm height
 # heightmaps are render with a 2cm per pixel resolution; 513x513px --> 10x10m ~1m maxheight
 
 patch_size_training = patch_size  # with 30 we resize to this for training the cnn, it will allow us to deal with small maps
 
 #
-advancement_th = 0.10  # threshold in meters use to generate the training dataset, i.e. when a patch is traversed
+advancement_th = 0.05  # threshold in meters use to generate the training dataset, i.e. when a patch is traversed
 # this has to be set according to the pioneer velocity and its ideal displacement (flat land)
 # .15m/s is the current linear velocity (assuming a forward no steering control)
 # ergo, ideal_displacement = .15m/s x (timewindow in seconds)
