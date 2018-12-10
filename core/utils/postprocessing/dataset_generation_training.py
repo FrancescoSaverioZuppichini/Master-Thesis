@@ -84,8 +84,8 @@ multiprocessing = False  # if True, we use jobs to generate dataset/calculate th
 
 multiprocessing_hm = np.zeros((100, 100))  # a temporal way to initialize a shared image
 
-sim_hm_mx_x = 5.0  # heightmap dimmensions (m) used in the simulation for generating training data
-sim_hm_mx_y = 5.0  # this will help to pass from sim coordinates to screen coordinates when generating datasets
+sim_hm_mx_x = 5.13  # heightmap dimmensions (m) used in the simulation for generating training data
+sim_hm_mx_y = 5.13 # this will help to pass from sim coordinates to screen coordinates when generating datasets
 # usually is a 10m by 10m map, so from -5 to 5
 
 
