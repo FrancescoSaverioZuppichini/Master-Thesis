@@ -85,18 +85,46 @@ def df_convert_date2timestamp(df):
 
     return df
 
+def df_add_dist_velocity(df):
+    def get_pose(row):
+        return (row['pose__pose_position_x'], row['pose__pose_position_y'])
+
+    dists = []
+    vels = []
+
+    for i in range(1, len(df)):
+        p1 = get_pose(df.iloc[i - 1])
+        p2 = get_pose(df.iloc[i])
+
+        t1 = df.iloc[i - 1]['Unnamed: 0']
+        t2 = df.iloc[i]['Unnamed: 0']
+
+        dist = np.sqrt((p2[0] - p1[0]) ** 2 + (p2[1] - p1[1]) ** 2)
+        vel = dist / (t2 - t1)
+
+        dists.append(dist)
+        vels.append(vel)
+
+    dists.append(None)
+    vels.append(None)
+
+    df['distance'] = dists
+    df['velocity'] = dists
+
+    return df
+
 def df_convert_quaterion2euler(df):
 
     def convert(row):
-        quaternion = [row['pose__pose_orientation_w'],
-                      row['pose__pose_orientation_x'],
+        quaternion = [row['pose__pose_orientation_x'],
                       row['pose__pose_orientation_y'],
-                      row['pose__pose_orientation_z']]
+                      row['pose__pose_orientation_z'],
+                      row['pose__pose_orientation_w']]
 
 
         euler = euler_from_quaternion(quaternion)
 
-        return pd.Series([*euler])
+        return pd.Series(euler)
 
     df[['pose__pose_e_orientation_x', 'pose__pose_e_orientation_y', 'pose__pose_e_orientation_z']] = df.apply(convert, axis=1)
 
@@ -226,6 +254,7 @@ def generate_single_dataset_cnn(df, heightmap_png):
     # set the label using a threshold value
     df["label"] = df["advancement"] > advancement_th
 
+    dff = df
     # % Filter data
     # skip the first two seconds and any row with nans (i.e. end of the dataset)
     dff = df.loc[df.index >= 2].dropna()
