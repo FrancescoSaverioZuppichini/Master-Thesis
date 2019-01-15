@@ -9,6 +9,7 @@ def csv2dataset(file_path):
     map_path = '{}/{}.png'.format(Config.MAPS_FOLDER, map_name)
     df = pd.read_csv(file_path)
     df = df_convert_date2timestamp(df)
+    df = df_add_dist_velocity(df)
     df = df_convert_quaterion2euler(df)
     df, hm = generate_single_dataset_cnn(df, map_path)
 
