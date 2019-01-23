@@ -45,7 +45,6 @@ class WebotsEnv(gym.Env, Supervisor):
         # also add the translation
         self.x = (self.translation.x, self.x + self.translation.x)
         self.y = (self.translation.z, self.y + self.translation.z)
-
         self.z = 0
 
         with open(path.abspath('./env/webots/children'), 'r') as f:

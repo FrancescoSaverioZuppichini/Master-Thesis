@@ -10,7 +10,6 @@ from env.conditions import  *
 
 from env.webots.WebotsEnv import WebotsEnv
 
-
 class KrockWebotsEnv(WebotsEnv):
     metadata = {'render_modes': ['human']}
 
@@ -106,6 +105,7 @@ class KrockWebotsEnv(WebotsEnv):
         :param action:
         :return:
         """
+        # TODO here we can decouple the logic of the agent by just passing action
         self.agent.move(gait=1,
                         frontal_freq=action['frontal_freq'],
                         lateral_freq=action['lateral_freq'],
