@@ -34,7 +34,7 @@ patch_size = 80  # for extracting patchs from the heightmap for training, eval a
 patch_size_training = patch_size  # with 30 we resize to this for training the cnn, it will allow us to deal with small maps
 
 #
-advancement_th = 0.05  # threshold in meters use to generate the training dataset, i.e. when a patch is traversed
+advancement_th = 0.035  # threshold in meters use to generate the training dataset, i.e. when a patch is traversed
 # this has to be set according to the pioneer velocity and its ideal displacement (flat land)
 # .15m/s is the current linear velocity (assuming a forward no steering control)
 # ergo, ideal_displacement = .15m/s x (timewindow in seconds)
@@ -109,7 +109,7 @@ def df_add_dist_velocity(df):
     vels.append(None)
 
     df['distance'] = dists
-    df['velocity'] = dists
+    df['velocity'] = vels
 
     return df
 
@@ -235,8 +235,8 @@ def generate_single_dataset_cnn(df, heightmap_png):
 
     # %
     # Unit vector of robot orientation
-    df["S_oX"] = np.cos(df[O_W_KEY])
-    df["S_oY"] = np.sin(df[O_W_KEY])
+    df["S_oX"] = np.abs(np.cos(df[O_W_KEY]))
+    df["S_oY"] = np.abs(np.sin(df[O_W_KEY]))
     assert (np.allclose(1, np.linalg.norm(df[["S_oX", "S_oY"]], axis=1)))
 
     # dX, dY, distance at 10 timesteps in the future
@@ -249,12 +249,10 @@ def generate_single_dataset_cnn(df, heightmap_png):
         df["S_d"].plot()
 
     # % Project dX, dY on current direction
-    df["advancement"] = np.einsum('ij,ij->i', df[["S_dX", "S_dY"]], df[["S_oX", "S_oY"]])  # row-wise dot product
+    df["advancement"] =  np.einsum('ij,ij->i', df[["S_dX", "S_dY"]], df[["S_oX", "S_oY"]])  # row-wise dot product
 
     # set the label using a threshold value
     df["label"] = df["advancement"] > advancement_th
-
-    dff = df
     # % Filter data
     # skip the first two seconds and any row with nans (i.e. end of the dataset)
     dff = df.loc[df.index >= 2].dropna()
