@@ -22,7 +22,7 @@ import sklearn.metrics.regression
 from sklearn.metrics import auc, roc_curve
 import skimage.transform
 # Each csv contains 20s of simulation from gazebo: pioneer on heightmap
-time_window = 75  # Ideally: each row in the csv is about 0.01 segs, so 50 is about .50 s in the future, 100 1. s
+time_window = 100  # Ideally: each row in the csv is about 0.01 segs, so 50 is about .50 s in the future, 100 1. s
 # However: sometimes due to the simulation load, each row is about 0.02 segs.
 # A preferred way of counting would be in time instead of windows.
 
@@ -34,7 +34,7 @@ patch_size = 80  # for extracting patchs from the heightmap for training, eval a
 patch_size_training = patch_size  # with 30 we resize to this for training the cnn, it will allow us to deal with small maps
 
 #
-advancement_th = 0.035  # threshold in meters use to generate the training dataset, i.e. when a patch is traversed
+advancement_th = 0.10  # threshold in meters use to generate the training dataset, i.e. when a patch is traversed
 # this has to be set according to the pioneer velocity and its ideal displacement (flat land)
 # .15m/s is the current linear velocity (assuming a forward no steering control)
 # ergo, ideal_displacement = .15m/s x (timewindow in seconds)
@@ -85,9 +85,10 @@ def df_convert_date2timestamp(df):
 
     return df
 
-def df_add_dist_velocity(df):
-    def get_pose(row):
+def get_pose(row):
         return (row['pose__pose_position_x'], row['pose__pose_position_y'])
+
+def df_add_dist_velocity(df):
 
     dists = []
     vels = []
@@ -95,7 +96,6 @@ def df_add_dist_velocity(df):
     for i in range(1, len(df)):
         p1 = get_pose(df.iloc[i - 1])
         p2 = get_pose(df.iloc[i])
-
         t1 = df.iloc[i - 1]['Unnamed: 0']
         t2 = df.iloc[i]['Unnamed: 0']
 
@@ -193,6 +193,18 @@ def show(sample,hm):
     plt.show()
     plt.close(fig)
 
+def add_euler_distance(df):
+    df_shifted = df.shift(-time_window)
+    adv = []
+
+    for i in range(len(df)):
+        p0 = get_pose(df.iloc[i])
+        p1 = get_pose(df_shifted.iloc[i])
+
+        d = np.linalg.norm(np.array(p0) - np.array(p1))
+        adv.append(d)
+
+    return adv
 
 def generate_single_dataset_cnn(df, heightmap_png):
     hm = read_image(heightmap_png)
@@ -202,7 +214,7 @@ def generate_single_dataset_cnn(df, heightmap_png):
 
     P_X_KEY = 'pose__pose_position_x'
     P_Y_KEY = 'pose__pose_position_y'
-
+    P_Z_KEY = 'pose__pose_position_z'
     O_W_KEY = 'pose__pose_e_orientation_z'
 
     if debug > 1:
@@ -235,12 +247,13 @@ def generate_single_dataset_cnn(df, heightmap_png):
 
     # %
     # Unit vector of robot orientation
-    df["S_oX"] = np.abs(np.cos(df[O_W_KEY]))
-    df["S_oY"] = np.abs(np.sin(df[O_W_KEY]))
+    df["S_oX"] = np.cos(df[O_W_KEY].values)
+    df["S_oY"] = np.sin(df[O_W_KEY].values)
     assert (np.allclose(1, np.linalg.norm(df[["S_oX", "S_oY"]], axis=1)))
 
     # dX, dY, distance at 10 timesteps in the future
     dt = time_window
+
     df["S_dX"] = df.rolling(window=(dt + 1))[P_X_KEY].apply(lambda x: x[-1] - x[0], raw=True).shift(-dt)
     df["S_dY"] = df.rolling(window=(dt + 1))[P_Y_KEY].apply(lambda x: x[-1] - x[0], raw=True).shift(-dt)
     df["S_d"] = np.linalg.norm(df[["S_dX", "S_dY"]], axis=1)
@@ -248,7 +261,11 @@ def generate_single_dataset_cnn(df, heightmap_png):
         plt.figure()
         df["S_d"].plot()
 
+    # df["advancement"] = df.rolling(window=(dt + 1))[P_X_KEY].apply(lambda x: x[-1] - x[0], raw=True).shift(-dt)
+    # df["S_dY"] = df.rolling(window=(dt + 1))[P_Y_KEY].apply(lambda x: x[-1] - x[0], raw=True).shift(-dt)
     # % Project dX, dY on current direction
+    pose_df = df[[P_X_KEY, P_Y_KEY]].copy().reset_index()
+    # df["advancement"] = add_euler_distance(df)
     df["advancement"] =  np.einsum('ij,ij->i', df[["S_dX", "S_dY"]], df[["S_oX", "S_oY"]])  # row-wise dot product
 
     # set the label using a threshold value
