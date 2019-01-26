@@ -61,7 +61,7 @@ parser.add_argument('--maps',
 parser.add_argument('--save_dir',
                     type=str,
                     help='Where to store the simulation informations',
-                    default='/home/francesco/Desktop/carino/vaevictis/data/')
+                    default='/home/francesco/Desktop/carino/vaevictis/data/bags/')
 
 args = parser.parse_args()
 
