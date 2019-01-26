@@ -42,8 +42,7 @@ class RosBagSaver(AgentCallback):
             self.bag.write(key, value)
         return True
 
-    def store(self, context):
-        data = self.cache.items()
+    def store(self, ctx):
         file_name = path.normpath(self.save_dir + '/{}.bag'.format(time.time()))
 
         self.bag = rosbag.Bag(file_name, 'w')

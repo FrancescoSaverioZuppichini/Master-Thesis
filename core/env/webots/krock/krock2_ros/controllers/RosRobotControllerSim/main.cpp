@@ -9,6 +9,7 @@
 #include <sstream>
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
 #include "GaitControl.hpp"
 #include "robotSim.hpp"
 
@@ -45,6 +46,10 @@ extern "C" {
   int wb_robot_cleanup();
 }
 
+bool essentiallyEqual(float a, float b, float epsilon)
+{
+    return fabs(a - b) <= ( (fabs(a) > fabs(b) ? fabs(b) : fabs(a)) * epsilon);
+}
 
 using namespace std;
 using namespace webots;
@@ -191,6 +196,8 @@ void RosKrock::setSpawnPoseCallback(const geometry_msgs::PoseStamped::ConstPtr& 
     orientationField = node_robot->getField("rotation");
 
     const double translationValues [3]= {msg->pose.position.x,msg->pose.position.y,msg->pose.position.z};
+    // ROS has quaternions, webots has VRLM rotations
+    // TODO: convert from quaternions to VRLM rotations before setting
     const double orientationValues [4]= {msg->pose.orientation.x,msg->pose.orientation.y,msg->pose.orientation.z,msg->pose.orientation.w};
 
     ROS_INFO ("New spawn pose received. T [%f,%f,%f] R [%f,%f,%f,%f]",translationValues[0],translationValues[1],translationValues[2],orientationValues [0],orientationValues [1],orientationValues [2],orientationValues [3]);
@@ -456,18 +463,24 @@ int RosKrock::step(int duration){
         translationField = node_robot->getField("translation");
         const double* translationValues = translationField->getSFVec3f();
         pose_krock.pose.position.x = translationValues[0];
-        pose_krock.pose.position.y = translationValues[2];
+        pose_krock.pose.position.y = -translationValues[2];
         pose_krock.pose.position.z = translationValues[1];
 
         // Orientation in webots is also diffferent:
         // x,y,z  are in m and tw is aan angle in rad equivalent to yaw
         orientationField = node_robot->getField("rotation");
         const double* orientationValues = orientationField->getSFRotation();
-        pose_krock.pose.orientation.x = orientationValues[0];
-        pose_krock.pose.orientation.y = orientationValues[1];
-        pose_krock.pose.orientation.z = orientationValues[2];
-        pose_krock.pose.orientation.w = orientationValues[3];
-
+        double sum_rot = std::pow(double(orientationValues[0]),2) + std::pow(double(orientationValues[1]),2) + std::pow(double(orientationValues[2]),2);
+        if ( essentiallyEqual(sum_rot, 1.0, 0.00001) ) {
+          double a = orientationValues[3];
+          pose_krock.pose.orientation.x = sin(a/2)*orientationValues[0];
+          pose_krock.pose.orientation.y = sin(a/2)*-orientationValues[2];
+          pose_krock.pose.orientation.z = sin(a/2)*orientationValues[1];
+          pose_krock.pose.orientation.w = cos(a/2);
+        }
+        else{
+          cout << "Robot orientation is not normalized: "<< sum_rot << endl;
+        }
         //cout << translationValues[0] << translationValues[1] << translationValues[2] << orientationValues[0] << orientationValues[1] << orientationValues[2]<< orientationValues[3] << endl;
 
         // Populating torques feedback message
