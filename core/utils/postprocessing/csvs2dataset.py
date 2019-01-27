@@ -10,6 +10,7 @@ from config import Config
 from pypeln import thread as th
 import matplotlib.pyplot as plt
 import cv2
+import time
 
 P_X_KEY = 'pose__pose_position_x'
 P_Y_KEY = 'pose__pose_position_y'
@@ -28,7 +29,7 @@ def df_add_hm_coords(df, hm, sim_hm_mx_x, sim_hm_mx_y):
     return df
 
 def df_add_advancement(df, dt):
-    df = df.set_index(df.columns[0])
+    # df = df.set_index(df.columns[0])
 
     df["S_oX"] = np.cos(df[O_W_E_KEY].values)
     df["S_oY"] = np.sin(df[O_W_E_KEY].values)
@@ -78,7 +79,7 @@ def df2paths(data):
             patch = hmpatch(hm,row["hm_x"],row["hm_y"],np.rad2deg(row[O_W_E_KEY]),Config.PATCH_SIZE,scale=1)[0]
             patch = patch-patch[patch.shape[0]//2,patch.shape[1]//2]
 
-            cv2.imwrite('{}/images/{}/{}.png'.format(out_dir, row['label'], i), (patch * 255).astype(np.uint8))
+            cv2.imwrite('{}/images/{}/{}.png'.format(out_dir, row['label'], time.time()), (patch * 255).astype(np.uint8))
 
 
     # df_new = pd.DataFrame(data={'name': img_names, 'label': img_labels})
@@ -91,26 +92,19 @@ def dfs2paths(data):
     data = list(stage)
     return data
 
-def csv2paths(file_path):
-    map_name = filename2map(file_path)
-    map_path = '{}/{}.png'.format(Config.MAPS_FOLDER, map_name)
-    hm = read_image(map_path)
-    df = pd.read_csv(file_path)
-    return df2paths((df, hm, file_path))
 
-def csvs2paths(files):
-    stage = th.map(csv2paths, files, workers=Config.WORKERS)
-    data = list(stage)
-    return data
+def csvs2paths(data):
+    stage = th.map(df2paths, data, workers=Config.WORKERS)
 
-def csv2dataset(file_path):
+    return stage
+
+def csv2dataset(data):
+    df, map_name, file_path = data
     map_name = filename2map(file_path)
     map_path = '{}/{}.png'.format(Config.MAPS_FOLDER, map_name)
     hm  = read_image(map_path)
-
-    df = pd.read_csv(file_path)
     df = df_convert_date2timestamp(df)
-    df = df_add_dist_velocity(df)
+    # df = df_add_dist_velocity(df)
     df = df_convert_quaterion2euler(df)
     df = df_add_hm_coords(df, hm, 5.13, 5.13)
     df = df_add_advancement(df, Config.TIME_WINDOW)
@@ -123,14 +117,13 @@ def csv2dataset(file_path):
 
         return path.normpath('{}/{}/{}'.format(Config.DATASET_FOLDER, map_name, path.splitext(file_name)[0] + '.csv'))
 
-    file_path = make_path(file_path)
-    os.makedirs(path.dirname(file_path), exist_ok=True)
-    df.to_csv(file_path)
+    # file_path = make_path(file_path)
+    # os.makedirs(path.dirname(file_path), exist_ok=True)
+    # df.to_csv(file_path)
 
     return df, hm, file_path
 
-def csvs2dataset(files):
-    stage = th.map(csv2dataset, files, workers=Config.WORKERS)
-    data = list(stage)
-    return data
+def csvs2dataset(data):
+    stage = th.map(csv2dataset, data, workers=Config.WORKERS)
+    return stage
 

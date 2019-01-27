@@ -6,7 +6,7 @@ class Config:
     IMAGES_DATASET_FOLDER = '/home/francesco/Desktop/carino/vaevictis/data/images-dataset/'
     MAPS_FOLDER = '/home/francesco/Documents/Master-Thesis/core/maps/'
     PATCH_SIZE = 80
-    ADVANCEMENT_TH = 0.9
+    ADVANCEMENT_TH = 0.09
     TIME_WINDOW = 100
     HEIGHT_SCALE_FACTOR = 1
     SKIP_EVERY = 10
