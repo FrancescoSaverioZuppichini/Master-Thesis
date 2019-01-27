@@ -93,7 +93,22 @@ def show(sample,hm, config):
     ax1.set_title("advancement: {:.4f}, x={:.0f}, y={:.0f}".format(sample["advancement"], sample["hm_x"],sample["hm_y"]))
 
     ax2.imshow(hm)
-    rect = patches.Rectangle((sample["hm_x"],sample["hm_y"]), 50, 50, linewidth=1, edgecolor='r', facecolor='none')
+    rect = patches.Rectangle((sample["hm_x"] - config.PATCH_SIZE/2,sample["hm_y"] - config.PATCH_SIZE/2), config.PATCH_SIZE, config.PATCH_SIZE, linewidth=1, edgecolor='r', facecolor='none')
     ax2.add_patch(rect)
+
+    plt.show()
+
+def show_trajectory(samples,hm):
+    cmap = plt.cm.get_cmap('Spectral')
+    O_W_KEY = 'pose__pose_e_orientation_z'
+    fig, ax = plt.subplots(figsize=(8, 8))
+    ax.imshow(hm)
+
+    for i, sample in samples:
+        if i % 100 == 0:
+            rect = patches.Rectangle((sample["hm_x"],sample["hm_y"]), 10, 10, linewidth=1, edgecolor='none',
+                                     facecolor=cmap(sample['advancement'] / 0.16),
+                                     alpha=0.6)
+            ax.add_patch(rect)
 
     plt.show()
