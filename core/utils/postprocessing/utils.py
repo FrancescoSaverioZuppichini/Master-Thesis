@@ -52,9 +52,12 @@ def filename2map(filename):
     return map_name
 
 def df_convert_date2timestamp(df):
-    df[df.columns[0]] = df[df.columns[0]].apply(lambda x: dateutil.parser.parse(x).timestamp())
+    df = df.reset_index()
+
+    df[df.columns[0]] = df[df.columns[0]].apply(lambda x: dateutil.parser.parse(str(x)).timestamp())
     df[df.columns[0]] -= min(df[df.columns[0]])
 
+    df = df.set_index(df.columns[0])
     return df
 
 def get_pose(row):
@@ -68,8 +71,8 @@ def df_add_dist_velocity(df):
     for i in range(1, len(df)):
         p1 = get_pose(df.iloc[i - 1])
         p2 = get_pose(df.iloc[i])
-        t1 = df.iloc[i - 1]['Unnamed: 0']
-        t2 = df.iloc[i]['Unnamed: 0']
+        t1 = df.iloc[i - 1]['index']
+        t2 = df.iloc[i]['index']
 
         dist = np.sqrt((p2[0] - p1[0]) ** 2 + (p2[1] - p1[1]) ** 2)
         vel = dist / (t2 - t1)
