@@ -63,22 +63,28 @@ def df_add_label(df, advancement_th):
 def df2paths(data):
     df, hm, file_path = data
     dirs, name = path.split(file_path)
+    name, _ = os.path.splitext(name)
 
-    out_dir = Config.IMAGES_DATASET_FOLDER + name
+    # out_dir ='{}/{}/{}'.format( Config.IMAGES_DATASET_FOLDER, path.basename(dirs), name)
+    out_dir = Config.IMAGES_DATASET_FOLDER
 
     os.makedirs(out_dir, exist_ok=True)
     os.makedirs(out_dir + '/images', exist_ok=True)
 
-    for i, row in df.iterrows():
-        patch = hmpatch(hm,row["hm_x"],row["hm_y"],np.rad2deg(row[O_W_E_KEY]),Config.PATCH_SIZE,scale=1)[0]
-        patch = patch-patch[patch.shape[0]//2,patch.shape[1]//2]
+    img_names, img_labels = [], []
 
-        cv2.imwrite('{}/images/{}.png'.format(out_dir, i), (patch * 255).astype(np.uint8))
+    for idx, (i, row) in enumerate(df.iterrows()):
+        if idx % Config.SKIP_EVERY == 0:
+            patch = hmpatch(hm,row["hm_x"],row["hm_y"],np.rad2deg(row[O_W_E_KEY]),Config.PATCH_SIZE,scale=1)[0]
+            patch = patch-patch[patch.shape[0]//2,patch.shape[1]//2]
 
-    df_new = df['label']
+            cv2.imwrite('{}/images/{}/{}.png'.format(out_dir, row['label'], i), (patch * 255).astype(np.uint8))
 
-    df_new.to_csv(out_dir + '/meta.csv')
-    return df_new
+
+    # df_new = pd.DataFrame(data={'name': img_names, 'label': img_labels})
+
+    # df_new.to_csv(out_dir + '/meta.csv')
+    # return df_new
 
 def dfs2paths(data):
     stage = th.map(df2paths, data, workers=Config.WORKERS)
@@ -89,9 +95,11 @@ def csv2paths(file_path):
     map_name = filename2map(file_path)
     map_path = '{}/{}.png'.format(Config.MAPS_FOLDER, map_name)
     hm = read_image(map_path)
+    df = pd.read_csv(file_path)
+    return df2paths((df, hm, file_path))
 
 def csvs2paths(files):
-    stage = th.map(csv2dataset, files, workers=Config.WORKERS)
+    stage = th.map(csv2paths, files, workers=Config.WORKERS)
     data = list(stage)
     return data
 
