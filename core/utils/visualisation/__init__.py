@@ -1,10 +1,16 @@
 import matplotlib
 import cv2
 import numpy as np
+from mpl_toolkits.mplot3d import Axes3D
 
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.colors as mcolors
+import matplotlib.patches as patches
+
+
+from utils.postprocessing.utils import hmpatch
+
+MAPS_DIR = '/home/francesco/Documents/Master-Thesis/core/maps/'
 
 def create_trace_world(df, res=0.1):
     x = df.pose__pose_position_x
@@ -12,6 +18,7 @@ def create_trace_world(df, res=0.1):
 
     X = np.arange(-5, 5, res)
     Y = np.arange(-5, 5, res)
+
     world = np.zeros((X.shape[0], Y.shape[0]))
 
     for x_, y_ in zip(x, y):
@@ -24,12 +31,18 @@ def create_trace_world(df, res=0.1):
 
     return world, X, Y
 
+def show_trace(df, map_name):
+    img = cv2.imread('{}/{}.png'.format(MAPS_DIR, map_name))
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-def create2dtrace(world):
+    fig, ax = plt.subplots()
+    print(img.shape)
+    ax.imshow(img, extent=[0, img.shape[0], 0, img.shape[1]])
+    ax.plot((df.pose__pose_position_x) * 100,  (df.pose__pose_position_y) * 100, '--', linewidth=1, color='firebrick')
 
+def create2dtrace(world, map_name):
     fig = plt.figure()
 
-    plt.rcParams['figure.figsize'] = [8, 5]
     plt.imshow(world * 255)
     plt.show()
 
@@ -37,11 +50,12 @@ def create2dtrace(world):
 def create3dtrace(world, X, Y, map_name):
 
     Xm, Ym = np.meshgrid(X, Y)
-    Z = cv2.imread('/home/francesco/Documents/Master-Thesis/core/maps/{}.png'.format(map_name))
+    Z = cv2.imread('{}/{}.png'.format(MAPS_DIR, map_name))
     Z = cv2.cvtColor(Z, cv2.COLOR_BGR2GRAY)
     Z = Z / 255
-    Z = cv2.resize(Z, Xm.shape, cv2.INTER_CUBIC)
+    Z = cv2.resize(Z, Xm.shape)
 
+    plt.imshow(Z)
     # fourth dimention - colormap
     # create colormap according to x-value (can use any 50x50 array)
     color_dimension = world  # change to desired fourth dimension
@@ -54,4 +68,32 @@ def create3dtrace(world, X, Y, map_name):
     fig = plt.figure()
     ax = Axes3D(fig)
     ax.plot_surface(Xm, Ym, Z, facecolors=fcolors, linewidth=0.1)
+    plt.show()
+
+
+def show_advancement(df, hm, config):
+    print("Slow")
+    for i, sample in df.sort_values("advancement").head(20).iterrows():
+        show(sample, hm, config)
+
+    print("Fast")
+    for i, sample in df.sort_values("advancement").tail(20).iterrows():
+        show(sample, hm, config)
+
+def show(sample,hm, config):
+    O_W_KEY = 'pose__pose_e_orientation_z'
+
+    patch=hmpatch(hm,sample["hm_x"],sample["hm_y"],np.rad2deg(sample[O_W_KEY]),config.PATCH_SIZE,scale=1)[0] # make sure to extract the patch from the correct heightmap
+    patch=patch-patch[patch.shape[0]//2,patch.shape[1]//2]
+    fig = plt.figure(figsize=(16,16))
+    ax1 = plt.subplot(2, 1, 1)
+    ax2 = plt.subplot(2, 1, 2)
+
+    ax1.imshow(patch/config.HEIGHT_SCALE_FACTOR)
+    ax1.set_title("advancement: {:.4f}, x={:.0f}, y={:.0f}".format(sample["advancement"], sample["hm_x"],sample["hm_y"]))
+
+    ax2.imshow(hm)
+    rect = patches.Rectangle((sample["hm_x"],sample["hm_y"]), 50, 50, linewidth=1, edgecolor='r', facecolor='none')
+    ax2.add_patch(rect)
+
     plt.show()
