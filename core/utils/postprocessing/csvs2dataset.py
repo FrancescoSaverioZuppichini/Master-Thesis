@@ -55,6 +55,10 @@ def df_clean_by_dropping(df):
     df = df.loc[df['pose__pose_e_orientation_y'] >= -2.0].dropna()
     df = df.loc[df['pose__pose_e_orientation_y'] <= 2.0].dropna()
 
+    df = df.loc[(df[P_Y_KEY] < 5.1) & (df[P_Y_KEY] > -5.1)].dropna()
+    df = df.loc[(df[P_Y_KEY] < 5.1) & (df[P_Y_KEY] > -5.1)].dropna()
+
+
     return df
 
 def df_add_label(df, advancement_th):
@@ -71,6 +75,8 @@ def df2paths(data):
 
     os.makedirs(out_dir, exist_ok=True)
     os.makedirs(out_dir + '/images', exist_ok=True)
+    os.makedirs(out_dir + '/images/True', exist_ok=True)
+    os.makedirs(out_dir + '/images/False', exist_ok=True)
 
     img_names, img_labels = [], []
 
@@ -117,9 +123,9 @@ def csv2dataset(data):
 
         return path.normpath('{}/{}/{}'.format(Config.DATASET_FOLDER, map_name, path.splitext(file_name)[0] + '.csv'))
 
-    # file_path = make_path(file_path)
-    # os.makedirs(path.dirname(file_path), exist_ok=True)
-    # df.to_csv(file_path)
+    file_path = make_path(file_path)
+    os.makedirs(path.dirname(file_path), exist_ok=True)
+    df.to_csv(file_path)
 
     return df, hm, file_path
 
