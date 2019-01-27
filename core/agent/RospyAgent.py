@@ -27,7 +27,7 @@ class RospyAgent(Agent):
     def sleep(self):
         self.rate.sleep()
 
-    def die(self, sim, *args, **kwargs):
+    def die(self, env, *args, **kwargs):
         [sub.unregister() for sub in self.subscribers.values()]
-        super().die(sim)
+        super().die(env)
 
