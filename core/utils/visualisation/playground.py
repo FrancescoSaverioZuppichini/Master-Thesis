@@ -1,6 +1,6 @@
 import pandas as pd
 
-from utils.visualisation import show_advancement
+from utils.visualisation import show_advancement, show_trajectory
 
 from utils.postprocessing.utils import read_image
 from utils.postprocessing.config import Config
@@ -9,3 +9,5 @@ df = pd.read_csv('/home/francesco/Desktop/carino/vaevictis/data/dataset/bars1/15
 hm = read_image('/home/francesco/Desktop/carino/vaevictis/data/maps/bars1.png')
 
 show_advancement(df, hm, Config)
+#
+# show_trajectory(df.iterrows(), hm)
