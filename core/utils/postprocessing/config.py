@@ -9,3 +9,4 @@ class Config:
     ADVANCEMENT_TH = 0.9
     TIME_WINDOW = 100
     HEIGHT_SCALE_FACTOR = 1
+    SKIP_EVERY = 10

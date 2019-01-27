@@ -11,7 +11,10 @@ from os import path
 
 import dateutil
 from pypeln import thread as th
-from config import Config
+try:
+    from .config import Config
+except ImportError:
+    from config import Config
 
 from tf.transformations import euler_from_quaternion
 # skelearn
