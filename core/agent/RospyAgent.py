@@ -6,7 +6,7 @@ from .Agent import Agent
 class RospyAgent(Agent):
     """
     ROS agent. This class adds some features to the basic Agent interface.
-    I allows to initialize subscribers and publisher and keep a organize
+    It allows to initialize subscribers and publisher and keep a organize
     reference to them into a dictionary.
     """
     def __init__(self, rate=None):

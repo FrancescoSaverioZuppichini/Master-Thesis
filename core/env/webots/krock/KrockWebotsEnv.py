@@ -28,8 +28,7 @@ class KrockWebotsEnv(WebotsEnv):
     def __init__(self, world_path, agent_callbacks=[], *args, **kwargs):
         super().__init__(world_path, *args, **kwargs)
 
-        self.agent = Krock()
-        self.agent.add_callbacks(agent_callbacks)
+        self.agent = Krock().add_callbacks(agent_callbacks)
 
         self.action_space = spaces.Dict({
             'frontal_freq': spaces.Box(low=-1.0, high=1.0, shape=(), dtype=np.float),
