@@ -10,6 +10,7 @@ from config import Config
 from pypeln import thread as th
 import matplotlib.pyplot as plt
 import cv2
+import time
 
 P_X_KEY = 'pose__pose_position_x'
 P_Y_KEY = 'pose__pose_position_y'
@@ -28,7 +29,7 @@ def df_add_hm_coords(df, hm, sim_hm_mx_x, sim_hm_mx_y):
     return df
 
 def df_add_advancement(df, dt):
-    df = df.set_index(df.columns[0])
+    # df = df.set_index(df.columns[0])
 
     df["S_oX"] = np.cos(df[O_W_E_KEY].values)
     df["S_oY"] = np.sin(df[O_W_E_KEY].values)
@@ -54,55 +55,62 @@ def df_clean_by_dropping(df):
     df = df.loc[df['pose__pose_e_orientation_y'] >= -2.0].dropna()
     df = df.loc[df['pose__pose_e_orientation_y'] <= 2.0].dropna()
 
+    df = df.loc[(df[P_Y_KEY] < 5.1) & (df[P_Y_KEY] > -5.1)].dropna()
+    df = df.loc[(df[P_Y_KEY] < 5.1) & (df[P_Y_KEY] > -5.1)].dropna()
+
+
     return df
 
 def df_add_label(df, advancement_th):
     df["label"] = df["advancement"] > advancement_th
     return df
 
-def df2paths(data):
+def traversability_df2paths(data):
     df, hm, file_path = data
     dirs, name = path.split(file_path)
+    name, _ = os.path.splitext(name)
 
-    out_dir = Config.IMAGES_DATASET_FOLDER + name
+    # out_dir ='{}/{}/{}'.format( Config.IMAGES_DATASET_FOLDER, path.basename(dirs), name)
+    out_dir = Config.IMAGES_DATASET_FOLDER
 
     os.makedirs(out_dir, exist_ok=True)
     os.makedirs(out_dir + '/images', exist_ok=True)
+    os.makedirs(out_dir + '/images/True', exist_ok=True)
+    os.makedirs(out_dir + '/images/False', exist_ok=True)
 
-    for i, row in df.iterrows():
-        patch = hmpatch(hm,row["hm_x"],row["hm_y"],np.rad2deg(row[O_W_E_KEY]),Config.PATCH_SIZE,scale=1)[0]
-        patch = patch-patch[patch.shape[0]//2,patch.shape[1]//2]
+    img_names, img_labels = [], []
 
-        cv2.imwrite('{}/images/{}.png'.format(out_dir, i), (patch * 255).astype(np.uint8))
+    for idx, (i, row) in enumerate(df.iterrows()):
+        if idx % Config.SKIP_EVERY == 0:
+            patch = hmpatch(hm,row["hm_x"],row["hm_y"],np.rad2deg(row[O_W_E_KEY]),Config.PATCH_SIZE,scale=1)[0]
+            patch = patch-patch[patch.shape[0]//2,patch.shape[1]//2]
+            patch = (patch * 255).astype(np.uint8)
+            cv2.imwrite('{}/images/{}/{}.png'.format(out_dir, row['label'], time.time()), patch)
 
-    df_new = df['label']
 
-    df_new.to_csv(out_dir + '/meta.csv')
-    return df_new
+    # df_new = pd.DataFrame(data={'name': img_names, 'label': img_labels})
+
+    # df_new.to_csv(out_dir + '/meta.csv')
+    # return df_new
 
 def dfs2paths(data):
-    stage = th.map(df2paths, data, workers=Config.WORKERS)
+    stage = th.map(traversability_df2paths, data, workers=Config.WORKERS)
     data = list(stage)
     return data
 
-def csv2paths(file_path):
-    map_name = filename2map(file_path)
-    map_path = '{}/{}.png'.format(Config.MAPS_FOLDER, map_name)
-    hm = read_image(map_path)
 
-def csvs2paths(files):
-    stage = th.map(csv2dataset, files, workers=Config.WORKERS)
-    data = list(stage)
-    return data
+def traversability_dfs2paths(data):
+    stage = th.map(traversability_df2paths, data, workers=Config.WORKERS)
 
-def csv2dataset(file_path):
+    return stage
+
+def df2traversability_df(data):
+    df, map_name, file_path = data
     map_name = filename2map(file_path)
     map_path = '{}/{}.png'.format(Config.MAPS_FOLDER, map_name)
     hm  = read_image(map_path)
-
-    df = pd.read_csv(file_path)
     df = df_convert_date2timestamp(df)
-    df = df_add_dist_velocity(df)
+    # df = df_add_dist_velocity(df)
     df = df_convert_quaterion2euler(df)
     df = df_add_hm_coords(df, hm, 5.13, 5.13)
     df = df_add_advancement(df, Config.TIME_WINDOW)
@@ -121,8 +129,7 @@ def csv2dataset(file_path):
 
     return df, hm, file_path
 
-def csvs2dataset(files):
-    stage = th.map(csv2dataset, files, workers=Config.WORKERS)
-    data = list(stage)
-    return data
+def dfs2traversability_df(data):
+    stage = th.map(df2traversability_df, data, workers=Config.WORKERS)
+    return stage
 

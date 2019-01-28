@@ -21,11 +21,12 @@ def df2csv(data):
     file_path, df = data
     os.makedirs(path.dirname(file_path), exist_ok=True)
     df.to_csv(file_path)
+    return df
 
 def bags2dfs(files):
     stage = th.map(bag2df, files, workers=Config.WORKERS)
-    data = list(stage)
-    return data
+    # data = list(stage)
+    return stage
 
 def files2bags(files):
     for file in files:
@@ -33,18 +34,6 @@ def files2bags(files):
         yield bag
 
 def bags2csvs(files):
-    data = bags2dfs(files)
+    stage = bags2dfs(files)
 
-    def make_path(file_path):
-        splitted = file_path.split('/')
-        map_name, file_name = splitted[-2], splitted[-1]
-
-        return path.normpath('{}/{}/{}'.format(Config.CSV_FOLDER, map_name, path.splitext(file_name)[0] + '.csv'))
-
-    file_patches = [(make_path(file_path), df)  for df, _, file_path in data]
-
-    stage = th.map(df2csv, file_patches, workers=Config.WORKERS)
-
-    data = list(stage)
-
-    return data
+    return stage

@@ -39,8 +39,6 @@ def make_env(map):
 
     return env
 
-N_SIM = 10
-
 b = range(N_SIM)
 
 start = time.time()
