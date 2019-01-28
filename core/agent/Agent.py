@@ -15,13 +15,13 @@ class Agent(Callbackable, AgentCallback):
     def __call__(self,  *args, **kwargs):
         pass
 
-    def move(self, *args, **kwargs):
+    def act(self, env, action, *args, **kwargs):
         """
-        A generic function to move the agent in the world. Use it to implement your own logic. E.g
-
-        ```
+        This function should do something based on the world the agent
+        is in. Ideally it should move it based on some input. For example:
+         ```
         class MyAgent(Agent):
-            def move(self, action, *args, **kwargs):
+            def act(self, action, *args, **kwargs):
                 if action == 'forward':
                     self.wheels[0].spin
                     self.wheels[1].spin
@@ -30,26 +30,10 @@ class Agent(Callbackable, AgentCallback):
                     self.wheels[1].spin
                 ...
         ```
+        :param env:
+        :param action:
         :param args:
         :param kwargs:
-        :return:
-        """
-        pass
-
-    def act(self, env, *args, **kwargs):
-        """
-        This function should do something based on the world the agent
-        is in. Ideally it should move it based on some input.
-        :param world:
-        :param args:
-        :param kwargs:
-        :return:
-        """
-        pass
-
-    def stop(self):
-        """
-        Stop the agent.
         :return:
         """
         pass
@@ -66,8 +50,7 @@ class Agent(Callbackable, AgentCallback):
          This function kill the agent. This should be implemented,
          hook to the simulation instead
 
-        :param sim:
-        :param world:
+        :param env:
         :param args:
         :param kwargs:
         :return:

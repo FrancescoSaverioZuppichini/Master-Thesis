@@ -15,23 +15,25 @@ class KrockWebotsEnv(WebotsEnv):
 
     GO_FORWARD = {
         'frontal_freq': 1,
-        'lateral_freq': 0
+        'lateral_freq': 0,
+        'gait': 1
     }
 
     STOP = {
         'frontal_freq': 0,
-        'lateral_freq': 0
+        'lateral_freq': 0,
+        'gait': 1
     }
 
     def __init__(self, world_path, agent_callbacks=[], *args, **kwargs):
         super().__init__(world_path, *args, **kwargs)
 
-        self.agent = Krock()
-        self.agent.add_callbacks(agent_callbacks)
+        self.agent = Krock().add_callbacks(agent_callbacks)
 
         self.action_space = spaces.Dict({
             'frontal_freq': spaces.Box(low=-1.0, high=1.0, shape=(), dtype=np.float),
-            'lateral_freq': spaces.Box(low=-1.0, high=1.0, shape=(), dtype=np.float)
+            'lateral_freq': spaces.Box(low=-1.0, high=1.0, shape=(), dtype=np.float),
+            'gait': spaces.Discrete(2)
         })
 
         self.observation_space = spaces.Dict({
@@ -106,10 +108,7 @@ class KrockWebotsEnv(WebotsEnv):
         :return:
         """
         # TODO here we can decouple the logic of the agent by just passing action
-        self.agent.move(gait=1,
-                        frontal_freq=action['frontal_freq'],
-                        lateral_freq=action['lateral_freq'],
-                        manual_mode=True)
+        self.agent.act(action)
 
         self.agent.sleep()
 
