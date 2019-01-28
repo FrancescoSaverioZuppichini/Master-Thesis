@@ -56,19 +56,9 @@ class Krock(RospyAgent):
     def callbacks_frontal_camera(self, data):
         self.state['frontal_camera'] = data
 
-    def move(self, gait, frontal_freq, lateral_freq, manual_mode=False):
-        mode = int(manual_mode)
-        msg = Float64ArrayStamped(data=[mode, gait, frontal_freq, lateral_freq])
+    def act(self, action, *args, **kwargs):
+        mode = int(True)
+        msg = Float64ArrayStamped(data=[mode, action['gait'],
+                                        action['frontal_freq'],
+                                        action['lateral_freq']])
         self.publishers['manual_control'].publish(msg)
-
-    def stop(self):
-        self.move(gait=1,
-                  frontal_freq=0.0,
-                  lateral_freq=0,
-                  manual_mode=True)
-
-    def act(self, sim, world, *args, **kwargs):
-        self.move(gait=1,
-                  frontal_freq=1.0,
-                  lateral_freq=0,
-                  manual_mode=True)
