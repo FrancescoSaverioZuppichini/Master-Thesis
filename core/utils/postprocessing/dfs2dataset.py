@@ -79,14 +79,18 @@ def traversability_df2paths(data):
     os.makedirs(out_dir + '/images/False', exist_ok=True)
 
     img_names, img_labels = [], []
-
+    df = df.reset_index()
+    #
+    df = df.loc[list(range(0, len(df), Config.SKIP_EVERY)), :]
+    df = df.set_index(df.columns[0])
+    #
+    # df = df.sample(frac=0.05)
     for idx, (i, row) in enumerate(df.iterrows()):
-        if idx % Config.SKIP_EVERY == 0:
-            patch = hmpatch(hm,row["hm_x"],row["hm_y"],np.rad2deg(row[O_W_E_KEY]),Config.PATCH_SIZE,scale=1)[0]
-            patch = patch-patch[patch.shape[0]//2,patch.shape[1]//2]
-            patch = (patch * 255).astype(np.uint8)
-            cv2.imwrite('{}/images/{}/{}.png'.format(out_dir, row['label'], time.time()), patch)
-
+        patch = hmpatch(hm,row["hm_x"],row["hm_y"],np.rad2deg(row[O_W_E_KEY]),Config.PATCH_SIZE,scale=1)[0]
+        # patch = patch-patch[patch.shape[0]//2,patch.shape[1]//2]
+        patch = (patch * 255).astype(np.uint8)
+        cv2.imwrite('{}/images/{}/{}-{}.png'.format(out_dir, row['label'], i, time.time()), patch)
+        # print('.')
 
     # df_new = pd.DataFrame(data={'name': img_names, 'label': img_labels})
 
