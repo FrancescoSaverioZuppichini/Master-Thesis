@@ -65,7 +65,7 @@ def df_add_label(df, advancement_th):
     df["label"] = df["advancement"] > advancement_th
     return df
 
-def df2paths(data):
+def traversability_df2paths(data):
     df, hm, file_path = data
     dirs, name = path.split(file_path)
     name, _ = os.path.splitext(name)
@@ -84,8 +84,8 @@ def df2paths(data):
         if idx % Config.SKIP_EVERY == 0:
             patch = hmpatch(hm,row["hm_x"],row["hm_y"],np.rad2deg(row[O_W_E_KEY]),Config.PATCH_SIZE,scale=1)[0]
             patch = patch-patch[patch.shape[0]//2,patch.shape[1]//2]
-
-            cv2.imwrite('{}/images/{}/{}.png'.format(out_dir, row['label'], time.time()), (patch * 255).astype(np.uint8))
+            patch = (patch * 255).astype(np.uint8)
+            cv2.imwrite('{}/images/{}/{}.png'.format(out_dir, row['label'], time.time()), patch)
 
 
     # df_new = pd.DataFrame(data={'name': img_names, 'label': img_labels})
@@ -94,17 +94,17 @@ def df2paths(data):
     # return df_new
 
 def dfs2paths(data):
-    stage = th.map(df2paths, data, workers=Config.WORKERS)
+    stage = th.map(traversability_df2paths, data, workers=Config.WORKERS)
     data = list(stage)
     return data
 
 
-def csvs2paths(data):
-    stage = th.map(df2paths, data, workers=Config.WORKERS)
+def traversability_dfs2paths(data):
+    stage = th.map(traversability_df2paths, data, workers=Config.WORKERS)
 
     return stage
 
-def csv2dataset(data):
+def df2traversability_df(data):
     df, map_name, file_path = data
     map_name = filename2map(file_path)
     map_path = '{}/{}.png'.format(Config.MAPS_FOLDER, map_name)
@@ -129,7 +129,7 @@ def csv2dataset(data):
 
     return df, hm, file_path
 
-def csvs2dataset(data):
-    stage = th.map(csv2dataset, data, workers=Config.WORKERS)
+def dfs2traversability_df(data):
+    stage = th.map(df2traversability_df, data, workers=Config.WORKERS)
     return stage
 
