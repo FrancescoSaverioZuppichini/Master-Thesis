@@ -236,7 +236,7 @@ class TraversabilityResnet(nn.Module):
         self.gate = nn.Sequential(
             conv_layer(in_channel, 64, kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(64),
-            nn.ReLU(inplace=True),
+            nn.LeakyReLU(inplace=True),
             nn.MaxPool2d(kernel_size=2)
         )
 
@@ -245,11 +245,11 @@ class TraversabilityResnet(nn.Module):
             ResNetLayer(64, 128, depth=blocks[1], block=block, conv_layer=conv_layer, *args, **kwargs),
             ResNetLayer(128, 256, depth=blocks[2], block=block, conv_layer=conv_layer, *args, **kwargs),
             ResNetLayer(256, 512, depth=blocks[3], block=block, conv_layer=conv_layer, *args, **kwargs),
-            nn.AvgPool2d(5, stride=1)
+            nn.AvgPool2d(5)
         )
 
         self.decoder = nn.Sequential(
-                                     nn.Linear(512, 2))
+                                     nn.Linear(512 * block.expansion, 2))
 
         ResNet.initialise(self.modules())
 
@@ -260,15 +260,3 @@ class TraversabilityResnet(nn.Module):
         x = self.decoder(x)
 
         return x
-        #
-        # # model = ResNet(BasicBlock, [2,  4, 6,])
-        # model = resnet34(pretrained=False)
-        #
-        # model.conv1 = nn.Conv2d(1, 64, kernel_size=3, stride=1, padding=1,
-        #                                bias=False)
-        #
-        # # we have to change the tail of resnet to
-        # model.fc = tail(type='long')
-        #
-        # return model
-
