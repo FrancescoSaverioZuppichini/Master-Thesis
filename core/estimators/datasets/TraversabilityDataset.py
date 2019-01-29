@@ -4,7 +4,7 @@ from torch.utils.data import RandomSampler
 from torchvision.transforms import Compose, Resize, ToTensor, Grayscale
 from torchvision.datasets import ImageFolder
 
-from utils.postprocessing.config import Config
+# from utils.postprocessing.config import Config
 
 import matplotlib.pyplot as plt
 
@@ -12,11 +12,11 @@ TRAIN_SIZE = 0.8
 TEST_SIZE = 0.2
 BATCH_SIZE = 64
 N_WORKERS = 16
-transform = Compose([Grayscale(), Resize((80, 80)), ToTensor()])
+transform = Compose([Grayscale(), ToTensor()])
 
 def get_dataloaders():
 
-    ds = ImageFolder(root=Config.IMAGES_DATASET_FOLDER + '/images', transform=transform)
+    ds = ImageFolder(root='/home/francesco/Documents/' + '/images', transform=transform)
 
     train_size = int(len(ds) * TRAIN_SIZE)
 

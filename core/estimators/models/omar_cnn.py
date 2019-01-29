@@ -8,7 +8,7 @@ def conv_block(in_channels, out_channels):
                                    kernel_size=3,
                                    padding=1),
                          nn.BatchNorm2d(out_channels),
-                         nn.ReLU())
+                         nn.ELU())
 
 class OmarCNN(nn.Module):
     def __init__(self):
@@ -19,7 +19,8 @@ class OmarCNN(nn.Module):
                                      conv_block(5, 5))
 
         self.decoder = nn.Sequential(nn.Linear(40 * 40 * 5, 128),
-                                     nn.ReLU(),
+                                     nn.ELU(),
+                                     nn.Dropout(),
                                      nn.Linear(128, 2))
 
     def forward(self, x):
