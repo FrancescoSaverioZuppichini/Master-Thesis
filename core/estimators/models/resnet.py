@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 
+from torchvision import models
 
 class Conv2dSame(torch.nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, bias=True, stride=1, *args, **kwargs):
@@ -238,7 +239,7 @@ class TraversabilityResnet(nn.Module):
             nn.MaxPool2d(kernel_size=2)
         )
 
-        self.encoder = nn.Sequential(
+        self.layers = nn.Sequential(
             ResNetLayer(64, 64, depth=blocks[0], block=block, conv_layer=conv_layer, *args, **kwargs),
             ResNetLayer(64, 128, depth=blocks[1], block=block, conv_layer=conv_layer, *args, **kwargs),
             ResNetLayer(128, 256, depth=blocks[2], block=block, conv_layer=conv_layer, *args, **kwargs),
@@ -247,16 +248,70 @@ class TraversabilityResnet(nn.Module):
         )
 
         self.decoder = nn.Sequential(
-            nn.Linear(512 * block.expansion, 2))
+            nn.Linear(512 * block.expansion, 128),
+            nn.LeakyReLU(),
+            nn.Dropout(),
+            nn.Linear(128, 2))
 
         ResNet.initialise(self.modules())
 
     def forward(self, x):
         x = self.gate(x)
-        x = self.encoder(x)
+        x = self.layers(x)
         x = x.view(x.size(0), -1)
         x = self.decoder(x)
 
         return x
 
 # resnet-tiny = [1, 2, 3, 2]
+
+def resnet18(in_channel, block=BasicBlock, resnet=ResNet, pretrained=False, *args, **kwargs):
+    model = resnet(in_channel, [2, 2, 2, 2], block, *args, **kwargs)
+
+    if pretrained:
+        print('loading pretrained weights...')
+        restore(models.resnet18(True), model)
+
+    return model
+
+def resnet34(in_channel, block=BasicBlock, pretrained=False, **kwargs):
+    model = ResNet(in_channel, [3, 4, 6, 3], block, **kwargs)
+
+    if pretrained:
+        print('loading pretrained weights...')
+        restore(models.resnet34(True), model)
+
+    return model
+
+def resnet50(in_channel, block=Bottleneck, **kwargs):
+    model = ResNet(in_channel, [3, 4, 6, 3], block, **kwargs)
+
+    return model
+
+def resnet101(in_channel, block=Bottleneck, **kwargs):
+    model = ResNet(in_channel, [3, 4, 23, 3], block, **kwargs)
+
+    return model
+
+def resnet152(in_channel, block=Bottleneck, pretrained=False, **kwargs):
+
+    model = ResNet(in_channel, [3, 8, 36, 3], block, **kwargs)
+
+    return model
+
+def restore(source, target):
+    pre_trained_layers = [source.layer1, source.layer2, source.layer3, source.layer4]
+
+    for i,pre_trained_layer in enumerate(pre_trained_layers):
+        layer = target.layers[i]
+        p_t_convs = [m for m in  pre_trained_layer.modules() if isinstance(m, nn.Conv2d)]
+        p_t_bns = [m for m in  pre_trained_layer.modules() if isinstance(m, nn.BatchNorm2d)]
+
+        convs = [m for m in layer.modules() if isinstance(m, nn.Conv2d)]
+        bns = [m for m in layer.modules() if isinstance(m, nn.BatchNorm2d)]
+
+        for p_t_conv, conv in zip(p_t_convs, convs):
+            conv.load_state_dict(p_t_conv.state_dict())
+
+        for p_t_bn, bn in zip(p_t_bns, bns):
+            bn.load_state_dict(p_t_bn.state_dict())
