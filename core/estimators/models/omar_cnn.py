@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from torchvision.models import resnet34, resnet18, ResNet
+
 
 def conv_block(in_channels, out_channels):
     return nn.Sequential(nn.Conv2d(in_channels,
@@ -10,7 +10,12 @@ def conv_block(in_channels, out_channels):
                          nn.BatchNorm2d(out_channels),
                          nn.ELU())
 
+
 class OmarCNN(nn.Module):
+    """
+    From original paper https://arxiv.org/abs/1709.05368
+    """
+
     def __init__(self):
         super().__init__()
         self.encoder = nn.Sequential(conv_block(1, 5),
@@ -20,7 +25,7 @@ class OmarCNN(nn.Module):
 
         self.decoder = nn.Sequential(nn.Linear(40 * 40 * 5, 128),
                                      nn.ELU(),
-                                     nn.Dropout(),
+                                     nn.Dropout(0.2),
                                      nn.Linear(128, 2))
 
     def forward(self, x):
