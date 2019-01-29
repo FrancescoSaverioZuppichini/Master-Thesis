@@ -20,7 +20,10 @@ torch.manual_seed(0)
 if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
 
 # model = OmarCNN()
-model = TraversabilityResnet(1, block=BasicBlock, blocks=[1, 2, 3, 2], preactivated=True)
+model = TraversabilityResnet(1, block=BasicBlock, blocks=[1, 2, 3, 2],
+                             preactivated=False)
+
+# model = resnet18(1, resnet=TraversabilityResnet, pretrained=True)
 
 criterion = CrossEntropyFlat()
 
@@ -29,16 +32,17 @@ train_dl, test_dl = get_dataloaders()
 data = DataBunch(train_dl=train_dl, valid_dl=test_dl)
 
 params = {'epoches': 20,
-          'lr': 0.0005,
+          'lr': 0.0001,
           'batch_size': 128,
-          'preactivated': True,
-          'model': 'resnet-tiny',
+          'preactivated': False,
+          'model': 'resnet-tiny-long-tail',
           'dataset': 'tiny',
           'resize': '80'}
 
 print(model)
 experiment = Experiment(api_key="8THqoAxomFyzBgzkStlY95MOf",
-                        project_name="master-thesis", workspace="francescosaveriozuppichini")
+                        project_name="master-thesis",
+                        workspace="francescosaveriozuppichini")
 
 experiment.log_parameters(params)
 
