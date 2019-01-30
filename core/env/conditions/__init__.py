@@ -33,7 +33,7 @@ class IsInside(Condition):
 
         def check_if_inside(to_check, bounds):
             lower, upper = bounds
-            # TODO BUG HERE 
+            # TODO BUG HERE
             # if to_check - tol <= lower:
             #     return False
             # upper bound
