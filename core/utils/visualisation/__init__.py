@@ -7,10 +7,18 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import matplotlib.patches as patches
 
+from os import path
 
 from utils.postprocessing.utils import hmpatch
 
 MAPS_DIR = '/home/francesco/Documents/Master-Thesis/core/maps/'
+
+def file_name2hm(file_name):
+    map_name = path.basename(path.dirname(file_name))
+    hm = cv2.imread('{}/{}.png'.format(MAPS_DIR, map_name))
+    hm = cv2.cvtColor(hm, cv2.COLOR_BGR2GRAY)
+
+    return hm
 
 def create_trace_world(df, res=0.1):
     x = df.pose__pose_position_x
@@ -31,20 +39,18 @@ def create_trace_world(df, res=0.1):
 
     return world, X, Y
 
-def show_trace(df, map_name):
-    img = cv2.imread('{}/{}.png'.format(MAPS_DIR, map_name))
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
+def show_trace(df, hm):
     fig, ax = plt.subplots()
-    print(img.shape)
-    ax.imshow(img, extent=[0, img.shape[0], 0, img.shape[1]])
-    ax.plot((df.pose__pose_position_x) * 100,  (df.pose__pose_position_y) * 100, '--', linewidth=1, color='firebrick')
 
-def create2dtrace(world, map_name):
-    fig = plt.figure()
+    ax.imshow(hm)
+    ax.plot(df.hm_x,  df.hm_y, '--', linewidth=1, color='firebrick')
 
-    plt.imshow(world * 255)
-    plt.show()
+def show_traces(dfs, hm):
+    fig, ax = plt.subplots()
+
+    ax.imshow(hm)
+    for df in dfs:
+        ax.plot(df.hm_x, df.hm_y, '--', linewidth=1, color='firebrick')
 
 
 def create3dtrace(world, X, Y, map_name):

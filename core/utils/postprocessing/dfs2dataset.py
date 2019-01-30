@@ -96,10 +96,10 @@ def traversability_df2paths(data):
         cv2.imwrite('{}/{}/{}-{}.png'.format(out_dir, row['label'], i, time.time()), patch)
         # print('.')
 
-    # df_new = pd.DataFrame(data={'name': img_names, 'label': img_labels})
+    df_new = pd.DataFrame(data={'name': img_names, 'label': img_labels})
 
-    # df_new.to_csv(out_dir + '/meta.csv')
-    # return df_new
+    df_new.to_csv(out_dir + '/meta.csv')
+    return df_new
 
 def dfs2paths(data):
     stage = th.map(traversability_df2paths, data, workers=Config.WORKERS)
@@ -131,10 +131,10 @@ def df2traversability_df(data):
 
         return path.normpath('{}/{}/{}'.format(Config.DATASET_FOLDER, map_name, path.splitext(file_name)[0] + '.csv'))
 
-    # file_path = make_path(file_path)
-    # os.makedirs(path.dirname(file_path), exist_ok=True)
-    # df.to_csv(file_path)
-
+    file_path = make_path(file_path)
+    os.makedirs(path.dirname(file_path), exist_ok=True)
+    df.to_csv(file_path)
+    print(file_path)
     return df, hm, file_path
 
 def dfs2traversability_df(data):
