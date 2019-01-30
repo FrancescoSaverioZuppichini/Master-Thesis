@@ -52,12 +52,12 @@ for map in args.maps:
 
     for i in range(N_SIM):
         # TODO as always the reanimation breaks something
-        # if i % 20 == 0:
-        #     rospy.loginfo('Reanimate robot')
-        #     w.reanimate()
+        if i % 20 == 0:
+            rospy.loginfo('Reanimate robot')
+            env.reanimate()
         env.reset()
 
-        for i in range(200):
+        for i in range(int(args.time)):
             env.render()
             obs, r, done, _ = env.step(env.GO_FORWARD)
             if done: break

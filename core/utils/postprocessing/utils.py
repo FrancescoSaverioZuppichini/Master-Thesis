@@ -131,10 +131,17 @@ def read_image(heightmap_png):
 def toScreenFrame (s_x, s_y, x_max, x_min, y_max, y_min):
     # from simulation frame x right, y up, z out of the screen
     # to x right , y down, ignoring z
-    xs = s_x + x_max
-    ys = -s_y + y_max
-    xs = xs/(x_max-x_min)
-    ys = ys/(y_max-y_min)
+    # xs = s_x + x_max
+    # ys = -s_y + y_max
+    # xs = xs/(x_max-x_min)
+    # ys = ys/(y_max-y_min)
+    xs = s_x + x_min
+    ys = s_y + y_min
+
+    xs *= 100 / 2
+    ys *= 100 / 2
+
+
     return xs, ys
 
 def hmpatch(hm,x,y,alpha,edge,scale=1):
@@ -163,4 +170,3 @@ def hmpatch_only_corners(x,y,alpha,edge,scale=1):
     corners=tf(np.array([[0,0],[1,0],[1,1],[0,1],[0.5,0.5]])*edge)
     #patch = skimage.transform.warp(hm, tf,output_shape=(edge,edge),mode="edge")
     return corners
-
