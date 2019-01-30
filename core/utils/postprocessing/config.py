@@ -4,7 +4,7 @@ class Config:
     CSV_FOLDER = '/home/francesco/Desktop/data/csv/'
     DATASET_FOLDER = '/home/francesco/Desktop/data/dataset/'
     IMAGES_DATASET_FOLDER = '/home/francesco/Desktop/data/dataset/images-medium-h-center/'
-    MAPS_FOLDER = '/home/francesco/Documents/Master-Thesis/core/maps/'
+    MAPS_FOLDER = '/home/francesco/Desktop/data/maps/'
     PATCH_SIZE = 80
     ADVANCEMENT_TH = 0.09
     TIME_WINDOW = 100
