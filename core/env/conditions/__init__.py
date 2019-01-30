@@ -33,11 +33,11 @@ class IsInside(Condition):
 
         def check_if_inside(to_check, bounds):
             lower, upper = bounds
-            # TODO BUG HERE
-            # if to_check - tol <= lower:
-            #     return False
+            # TODO bad raising in if statement
+            if to_check - tol <= lower:
+                return False
             # upper bound
-            if to_check + tol >= upper:
+            elif to_check + tol >= upper:
                 return False
 
             return True
@@ -46,9 +46,9 @@ class IsInside(Condition):
         has_not_fall = True
 
         is_inside_x = check_if_inside(x, world.x)
-        is_inside_y = check_if_inside(y, world.y)
+        is_inside_y = check_if_inside(-1 * y, world.y)
 
-        print('is_inside_x={}, is_inside_y={}, ({}{})'.format(is_inside_x, is_inside_y, x, y))
+        # print('is_inside_x={}, is_inside_y={}, ({}{})'.format(is_inside_x, is_inside_y, x, y))
         return is_inside_x and is_inside_y and has_not_fall
 
 
