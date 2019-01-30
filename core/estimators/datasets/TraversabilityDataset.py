@@ -12,13 +12,13 @@ N_WORKERS = 16
 transform = Compose([Grayscale(), ToTensor()])
 
 
-def get_dataloaders():
+def get_dataloaders(root):
     """
     Get train and test dataloader. Due to the specific task,
     we cannot apply data-augmentation (vlip, hflip, gamma...)
     :return: train and test dataloaders
     """
-    ds = ImageFolder(root='/home/francesco/Desktop/data/images-dataset' + '/images-tiny',
+    ds = ImageFolder(root=root,
                      transform=transform)
 
     train_size = int(len(ds) * TRAIN_SIZE)

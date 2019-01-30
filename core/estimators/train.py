@@ -20,24 +20,29 @@ torch.manual_seed(0)
 if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
 
 # model = OmarCNN()
-model = TraversabilityResnet(1, block=BasicBlock, blocks=[1, 2, 3, 2],
-                             preactivated=False)
+model = TraversabilityResnet(1, block=BasicBlock, blocks=[2, 2, 2, 2],
+                             preactivated=False).cuda()
+
 
 # model = resnet18(1, resnet=TraversabilityResnet, pretrained=True)
+#
+# model.layers.requires_grad = False
 
 criterion = CrossEntropyFlat()
 
-train_dl, test_dl = get_dataloaders()
+train_dl, test_dl = get_dataloaders('/home/francesco/Desktop/data/dataset/images-medium-h-center')
 
 data = DataBunch(train_dl=train_dl, valid_dl=test_dl)
 
 params = {'epoches': 20,
           'lr': 0.0001,
           'batch_size': 128,
-          'preactivated': False,
-          'model': 'resnet-tiny-long-tail',
-          'dataset': 'tiny',
+          'model': 'resnet18-pretrained=False',
+          'dataset': 'medium-h-center',
           'resize': '80'}
+
+print("train size={}, val size ={}".format(len(train_dl) * params['batch_size'], len(test_dl) * params['batch_size']))
+
 
 print(model)
 experiment = Experiment(api_key="8THqoAxomFyzBgzkStlY95MOf",
