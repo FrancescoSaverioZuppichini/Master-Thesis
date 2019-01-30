@@ -65,24 +65,34 @@ class BasicBlock(nn.Module):
     def __init__(self, in_planes, out_planes, stride=1, conv_layer=nn.Conv2d, *args, **kwargs):
         super().__init__()
 
-        self.shortcut = None
+        self.in_planes, self.out_planes, self.conv_layer, self.stride = in_planes, out_planes, conv_layer, stride
 
-        self.block = nn.Sequential(
-            conv_block(in_planes, out_planes, conv_layer, stride=stride, *args, **kwargs),
+        self.block = self.blocks(in_planes, out_planes, conv_layer, stride=stride, *args, **kwargs)
+
+        self.shortcut = self.get_shortcut()
+
+    @property
+    def expanded(self):
+        return self.out_planes * self.expansion
+
+    def get_shortcut(self):
+        return nn.Sequential(
+            self.conv_layer(self.in_planes, self.out_planes, kernel_size=1,
+                       stride=self.stride, bias=False),
+            nn.BatchNorm2d(self.out_planes),
+        )
+
+    def blocks(self, in_planes, out_planes, conv_layer, stride, *args, **kwargs):
+        return nn.Sequential(
+            conv_block(self.in_planes, out_planes, conv_layer, stride=stride, *args, **kwargs),
             conv_block(out_planes, out_planes, conv_layer, *args, **kwargs),
         )
 
-        if in_planes != out_planes:
-            self.shortcut = nn.Sequential(
-                conv_layer(in_planes, out_planes, kernel_size=1,
-                           stride=stride, bias=False),
-                nn.BatchNorm2d(out_planes),
-            )
 
     def forward(self, x):
         residual = x
 
-        if self.shortcut is not None:
+        if self.in_planes != self.expanded:
             residual = self.shortcut(residual)
 
         out = self.block(x)
@@ -91,42 +101,15 @@ class BasicBlock(nn.Module):
 
         return out
 
-
-class Bottleneck(nn.Module):
+class Bottleneck(BasicBlock):
     expansion = 4
 
-    def __init__(self, in_planes, out_planes, stride=1, conv_layer=nn.Conv2d, *args, **kwargs):
-        super().__init__()
-
-        assert in_planes % self.expansion == 0
-
-        self.shortcut = None
-        self.expanded = out_planes * self.expansion
-
-        self.block = nn.Sequential(
+    def blocks(self, in_planes, out_planes, conv_layer, stride, *args, **kwargs):
+        return nn.Sequential(
             conv_block(in_planes, out_planes, conv_layer, kernel_size=1),
             conv_block(out_planes, out_planes, conv_layer, kernel_size=3, stride=stride),
             conv_block(out_planes, self.expanded, conv_layer, kernel_size=1),
         )
-
-        if in_planes != self.expanded:
-            self.shortcut = nn.Sequential(
-                conv_layer(in_planes, self.expanded, kernel_size=1,
-                           stride=stride, bias=False),
-                nn.BatchNorm2d(self.expanded),
-            )
-
-    def forward(self, x):
-        residual = x
-
-        if self.shortcut is not None:
-            residual = self.shortcut(residual)
-
-        out = self.block(x)
-
-        out.add_(residual)
-
-        return out
 
 
 class BasicBlockSE(BasicBlock):
@@ -248,10 +231,11 @@ class TraversabilityResnet(nn.Module):
         )
 
         self.decoder = nn.Sequential(
-            nn.Linear(512 * block.expansion, 128),
-            nn.LeakyReLU(),
-            nn.Dropout(),
-            nn.Linear(128, 2))
+            nn.Linear(512 * block.expansion, 2),
+            # nn.LeakyReLU(),
+            # nn.Dropout(),
+            # nn.Linear(128, 2)
+        )
 
         ResNet.initialise(self.modules())
 

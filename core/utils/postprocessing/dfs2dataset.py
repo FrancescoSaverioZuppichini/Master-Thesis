@@ -11,6 +11,7 @@ from pypeln import thread as th
 import matplotlib.pyplot as plt
 import cv2
 import time
+from math import floor
 
 P_X_KEY = 'pose__pose_position_x'
 P_Y_KEY = 'pose__pose_position_y'
@@ -74,9 +75,8 @@ def traversability_df2paths(data):
     out_dir = Config.IMAGES_DATASET_FOLDER
 
     os.makedirs(out_dir, exist_ok=True)
-    os.makedirs(out_dir + '/images', exist_ok=True)
-    os.makedirs(out_dir + '/images/True', exist_ok=True)
-    os.makedirs(out_dir + '/images/False', exist_ok=True)
+    os.makedirs(out_dir + '/True', exist_ok=True)
+    os.makedirs(out_dir + '/False', exist_ok=True)
 
     img_names, img_labels = [], []
     df = df.reset_index()
@@ -87,9 +87,13 @@ def traversability_df2paths(data):
     # df = df.sample(frac=0.05)
     for idx, (i, row) in enumerate(df.iterrows()):
         patch = hmpatch(hm,row["hm_x"],row["hm_y"],np.rad2deg(row[O_W_E_KEY]),Config.PATCH_SIZE,scale=1)[0]
-        # patch = patch-patch[patch.shape[0]//2,patch.shape[1]//2]
+        patch = patch-patch[patch.shape[0]//2,patch.shape[1]//2]
+        if Config.CENTER_H_PATCH:
+            to_hm = lambda x: min(int(x), hm.shape[0] - 1)
+            z_hm = hm[to_hm(row["hm_x"])][to_hm(row["hm_y"])]
+            patch -= z_hm
         patch = (patch * 255).astype(np.uint8)
-        cv2.imwrite('{}/images/{}/{}-{}.png'.format(out_dir, row['label'], i, time.time()), patch)
+        cv2.imwrite('{}/{}/{}-{}.png'.format(out_dir, row['label'], i, time.time()), patch)
         # print('.')
 
     # df_new = pd.DataFrame(data={'name': img_names, 'label': img_labels})
@@ -127,9 +131,9 @@ def df2traversability_df(data):
 
         return path.normpath('{}/{}/{}'.format(Config.DATASET_FOLDER, map_name, path.splitext(file_name)[0] + '.csv'))
 
-    file_path = make_path(file_path)
-    os.makedirs(path.dirname(file_path), exist_ok=True)
-    df.to_csv(file_path)
+    # file_path = make_path(file_path)
+    # os.makedirs(path.dirname(file_path), exist_ok=True)
+    # df.to_csv(file_path)
 
     return df, hm, file_path
 
