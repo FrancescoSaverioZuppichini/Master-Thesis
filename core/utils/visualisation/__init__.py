@@ -45,6 +45,14 @@ def show_trace(df, hm):
     ax.imshow(hm)
     ax.plot(df.hm_x,  df.hm_y, '--', linewidth=1, color='firebrick')
 
+def show_naked_trace(df):
+    fig = plt.figure()
+    plt.plot(df.hm_x,  df.hm_y, '--', linewidth=1, color='firebrick')
+
+def show_naked_traces(dfs):
+    fig = plt.figure()
+    for df in dfs:
+        plt.plot(df.hm_x,  df.hm_y, '--', linewidth=1, color='firebrick')
 def show_traces(dfs, hm):
     fig, ax = plt.subplots()
 
@@ -54,7 +62,6 @@ def show_traces(dfs, hm):
 
 
 def create3dtrace(world, X, Y, map_name):
-
     Xm, Ym = np.meshgrid(X, Y)
     Z = cv2.imread('{}/{}.png'.format(MAPS_DIR, map_name))
     Z = cv2.cvtColor(Z, cv2.COLOR_BGR2GRAY)
@@ -75,7 +82,6 @@ def create3dtrace(world, X, Y, map_name):
     ax = Axes3D(fig)
     ax.plot_surface(Xm, Ym, Z, facecolors=fcolors, linewidth=0.1)
     plt.show()
-
 
 def show_advancement(df, hm, config):
     print("Slow")
