@@ -25,7 +25,6 @@ def df2csv(data):
 
 def bags2dfs(files):
     stage = th.map(bag2df, files, workers=Config.WORKERS)
-    # data = list(stage)
     return stage
 
 def files2bags(files):

@@ -69,7 +69,7 @@ class BasicBlock(nn.Module):
 
         self.block = self.blocks(in_planes, out_planes, conv_layer, stride=stride, *args, **kwargs)
 
-        self.shortcut = self.get_shortcut()
+        self.shortcut = self.get_shortcut() if self.in_planes != self.expanded else None
 
     @property
     def expanded(self):
@@ -92,7 +92,7 @@ class BasicBlock(nn.Module):
     def forward(self, x):
         residual = x
 
-        if self.in_planes != self.expanded:
+        if self.shortcut is not None:
             residual = self.shortcut(residual)
 
         out = self.block(x)
