@@ -29,6 +29,7 @@ class KrockWebotsEnv(WebotsEnv):
         super().__init__(world_path, *args, **kwargs)
 
         self.agent = Krock().add_callbacks(agent_callbacks)
+        self.done = False
 
         self.action_space = spaces.Dict({
             'frontal_freq': spaces.Box(low=-1.0, high=1.0, shape=(), dtype=np.float),
@@ -61,6 +62,7 @@ class KrockWebotsEnv(WebotsEnv):
         self.bridge = CvBridge()
 
         self.last_frame = None
+        self.should_stop = False
 
 
     def make_obs_from_agent_state(self, agent):
@@ -74,7 +76,7 @@ class KrockWebotsEnv(WebotsEnv):
 
         front_cam = None
 
-        # due to ros lag, it may happened that we have to still receive a camera img
+        # due to ros lag, it may happen that we still have to receive the camera img
         if 'frontal_camera' in agent.state:
             front_cam_msg = agent.state['frontal_camera']
             front_cam = self.bridge.imgmsg_to_cv2(front_cam_msg, "bgr8")
@@ -107,7 +109,6 @@ class KrockWebotsEnv(WebotsEnv):
         :param action:
         :return:
         """
-        # TODO here we can decouple the logic of the agent by just passing action
         self.agent.act(action)
 
         self.agent.sleep()
@@ -116,11 +117,7 @@ class KrockWebotsEnv(WebotsEnv):
         # The last frame will be used in the `.render` function
         self.last_frame = obs['sensors']['front_cam']
 
-        done = False
-
-        if self.should_stop != None: done = self.should_stop(self)
-
-        return obs, 0, done, {}
+        return obs, 0, self.done, {}
 
     def render(self, mode='human'):
         if mode == 'human':
@@ -135,6 +132,6 @@ class KrockWebotsEnv(WebotsEnv):
         self.agent()
         self.agent.sleep()
         # Reinitialise the stopping conditions
-        self.should_stop = IfOneFalseOf([IsNotStuck(n_last=50), IsInside()])
+        self.done = IfOneFalseOf([IsNotStuck(n_last=50), IsInside()])
 
         return self.make_obs_from_agent_state(self.agent)
