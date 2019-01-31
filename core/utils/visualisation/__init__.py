@@ -83,13 +83,13 @@ def create3dtrace(world, X, Y, map_name):
     ax.plot_surface(Xm, Ym, Z, facecolors=fcolors, linewidth=0.1)
     plt.show()
 
-def show_advancement(df, hm, config):
+def show_advancement(df, hm, config, n=10):
     print("Slow")
-    for i, sample in df.sort_values("advancement").head(20).iterrows():
+    for i, sample in df.sort_values("advancement").head(n).iterrows():
         show(sample, hm, config)
 
     print("Fast")
-    for i, sample in df.sort_values("advancement").tail(20).iterrows():
+    for i, sample in df.sort_values("advancement").tail(n).iterrows():
         show(sample, hm, config)
 
 def show(sample,hm, config):
