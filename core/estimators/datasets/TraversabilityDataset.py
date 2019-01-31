@@ -32,7 +32,7 @@ def get_dataloaders(train_root, test_root, val_size=0.2, *args, **kwargs):
 
     val_dl = DataLoader(val_ds, *args, **kwargs)
 
-    test_ds = ImageFolder(root=train_root,
+    test_ds = ImageFolder(root=test_root,
                      transform=transform)
 
     test_dl = DataLoader(test_ds, *args, **kwargs)

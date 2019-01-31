@@ -27,7 +27,7 @@ print(env.x, env.y)
 
 while True:
     env.reset()
-    for _ in range(50):
+    for _ in range(200):
         obs, r, done, _ = env.step(env.GO_FORWARD)
         pprint.pprint(obs)
         if done: break

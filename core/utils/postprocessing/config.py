@@ -1,9 +1,10 @@
 class Config:
     WORKERS = 16
-    BAG_FOLDER = '/home/francesco/Desktop/data/bags/'
-    CSV_FOLDER = '/home/francesco/Desktop/data/csvs/'
-    DATASET_FOLDER = '/home/francesco/Desktop/data/dataset/new-medium'
-    MAPS_FOLDER = '/home/francesco/Desktop/data/maps/'
+    BASE_DIR = '/home/francesco/Desktop/data/test/'
+    BAG_FOLDER = BASE_DIR + 'bags/'
+    CSV_FOLDER = BASE_DIR + 'csvs/'
+    DATASET_FOLDER = BASE_DIR + '/dataset/new-medium'
+    MAPS_FOLDER = BASE_DIR + '/maps/'
     PATCH_SIZE = 80
     ADVANCEMENT_TH = 0.095
     TIME_WINDOW = 100

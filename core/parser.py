@@ -63,6 +63,12 @@ parser.add_argument('--save_dir',
                     help='Where to store the simulation informations',
                     default='/home/francesco/Desktop/carino/vaevictis/data/bags/')
 
+parser.add_argument('-h',
+                    '--height',
+                    type=float,
+                    help='The height scaling factor to apply to the height map',
+                    default=1.0)
+
 args = parser.parse_args()
 
 art = text2art('Traversability Simulator')
