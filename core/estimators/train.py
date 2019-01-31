@@ -66,13 +66,16 @@ learner = Learner(data=data,
                   loss_func=criterion,
                   metrics=[accuracy])
 
-with experiment.train():
-    # learner.fit(epochs=params['epoches'], lr=params['lr'])
-    learner.fit(epochs=4, lr=params['lr'])
-    model.layers.requires_grad = True
-    learner.fit(epochs=10, lr=params['lr']/10)
+try:
+    with experiment.train():
+        # learner.fit(epochs=params['epoches'], lr=params['lr'])
+        learner.fit(epochs=4, lr=params['lr'])
+        model.layers.requires_grad = True
+        learner.fit(epochs=4, lr=params['lr']/10)
 
-learner.save(params['model'])
+    learner.save(params['model'])
 
+except KeyboardInterrupt:
+    pass
 with experiment.test():
     print(learner.validate(data.test_dl, metrics=[accuracy]))

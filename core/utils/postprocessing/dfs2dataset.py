@@ -73,15 +73,8 @@ def traversability_df2paths(data):
 
     out_dir = Config.DATASET_FOLDER
 
-    os.makedirs(out_dir, exist_ok=True)
     os.makedirs(out_dir + '/True', exist_ok=True)
     os.makedirs(out_dir + '/False', exist_ok=True)
-    # reset the index to int so we can take only on row every Config.SKIP_EVERY
-    # since the stored rate was really high, 250hz, we will end up with lots of almost
-    # identical paths
-    df = df.reset_index()
-    df = df.loc[list(range(0, len(df), Config.SKIP_EVERY)), :]
-    df = df.set_index(df.columns[0])
 
     for idx, (i, row) in enumerate(df.iterrows()):
         patch = hmpatch(hm,row["hm_x"],row["hm_y"],np.rad2deg(row[O_W_E_KEY]),Config.PATCH_SIZE,scale=1)[0]
@@ -109,22 +102,33 @@ def df2traversability_df(data):
     map_path = '{}/{}.png'.format(Config.MAPS_FOLDER, map_name)
     hm  = read_image(map_path)
     # df = df_add_dist_velocity(df)
+    # Config.TIME_WINDOW //= Config.SKIP_EVERY
     df = df_convert_date2timestamp(df)
     df = df_convert_quaterion2euler(df)
-    df = df_add_hm_coords(df, hm)
-    df = df_add_advancement(df, Config.TIME_WINDOW)
-    df = df_add_label(df, Config.ADVANCEMENT_TH)
     df = df_clean_by_dropping(df, hm.shape[0] * RESOLUTION, hm.shape[1] * RESOLUTION)
+    if len(df) > 0:
 
-    def make_path(file_path):
-        splitted = file_path.split('/')
-        map_name, file_name = splitted[-2], splitted[-1]
+        # # reset the index to int so we can take only on row every Config.SKIP_EVERY
+        # # since the stored rate was really high, 250hz, we will end up with lots of almost
+        # # identical paths
+        df = df.reset_index()
+        df = df.loc[list(range(0, len(df), Config.SKIP_EVERY)), :]
+        df = df.set_index(df.columns[0])
 
-        return path.normpath('{}/{}/{}'.format(Config.CSV_FOLDER, map_name, path.splitext(file_name)[0] + '.csv'))
-    # TODO add flag to decide if store the csv or not
-    file_path = make_path(file_path)
-    os.makedirs(path.dirname(file_path), exist_ok=True)
-    df.to_csv(file_path)
+        df = df_add_hm_coords(df, hm)
+        df = df_add_advancement(df, Config.TIME_WINDOW // Config.SKIP_EVERY)
+
+        df = df_add_label(df, Config.ADVANCEMENT_TH)
+
+        def make_path(file_path):
+            splitted = file_path.split('/')
+            map_name, file_name = splitted[-2], splitted[-1]
+
+            return path.normpath('{}/{}/{}'.format(Config.CSV_FOLDER, map_name, path.splitext(file_name)[0] + '.csv'))
+        # TODO add flag to decide if store the csv or not
+        file_path = make_path(file_path)
+        os.makedirs(path.dirname(file_path), exist_ok=True)
+        df.to_csv(file_path)
 
     return df, hm, file_path
 

@@ -4,6 +4,9 @@ from tqdm import tqdm
 from bags2csvs import *
 from dfs2dataset import *
 from config import Config
+import time
+
+start = time.time()
 
 bags = glob.glob(Config.BAG_FOLDER + '/**/*.bag')
 
@@ -12,3 +15,6 @@ stage = dfs2traversability_df(stage)
 stage = traversability_dfs2paths(stage)
 
 result = list(tqdm(stage))
+
+print('processed {} bags file in {:.2f}'.format(len(bags),
+                                                time.time() - start))
