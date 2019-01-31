@@ -144,6 +144,17 @@ def toScreenFrame (s_x, s_y, x_max, x_min, y_max, y_min):
 
     return xs, ys
 
+
+def to_hm_coordinates(row, hm, res, tr=[0, 0]):
+    x, y = row['pose__pose_position_x'], row['pose__pose_position_y']
+    x_max, y_max = hm.shape[0] * res, hm.shape[1] * res
+    x_min, y_min = tr
+
+    xs = x + x_min
+    ys = -y + y_min
+
+    return pd.Series([xs / res, ys / res])
+
 def hmpatch(hm,x,y,alpha,edge,scale=1):
     # Cutout a patch from the image, centered on (x,y), rotated by alpha
     # degrees (0 means bottom in hm remains bottom in patch, 90 means bottom in hm becomes right in patch),
