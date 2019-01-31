@@ -49,12 +49,10 @@ rospy.loginfo('Simulation starting with {} maps'.format(len(args.maps)))
 
 for map in args.maps:
     env = make_env(map)
-
     for i in range(N_SIM):
-        # TODO as always the reanimation breaks something
-        if i % 20 == 0:
-            rospy.loginfo('Reanimate robot')
-            env.reanimate()
+        # if i % 20 == 0:
+        #     rospy.loginfo('Reanimate robot')
+        #     env.reanimate()
         env.reset()
 
         for i in range(int(args.time)):

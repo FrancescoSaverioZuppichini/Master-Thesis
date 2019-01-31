@@ -128,23 +128,6 @@ def read_image(heightmap_png):
     hm = hm * Config.HEIGHT_SCALE_FACTOR #scaled to proper factor (mostly for testing, for training is 1.0)
     return hm
 
-def toScreenFrame (s_x, s_y, x_max, x_min, y_max, y_min):
-    # from simulation frame x right, y up, z out of the screen
-    # to x right , y down, ignoring z
-    # xs = s_x + x_max
-    # ys = -s_y + y_max
-    # xs = xs/(x_max-x_min)
-    # ys = ys/(y_max-y_min)
-    xs = s_x + x_min
-    ys = s_y + y_min
-
-    xs *= 100 / 2
-    ys *= 100 / 2
-
-
-    return xs, ys
-
-
 def to_hm_coordinates(row, hm, res, tr=[0, 0]):
     x, y = row['pose__pose_position_x'], row['pose__pose_position_y']
     x_max, y_max = hm.shape[0] * res, hm.shape[1] * res

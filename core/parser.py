@@ -44,8 +44,8 @@ parser.add_argument('-n',
 parser.add_argument('-t',
                     '--time',
                     type=float,
-                    help='Maximum time per simulation per worl.',
-                    default=5)
+                    help='Maximum time per simulation per world.',
+                    default=200)
 parser.add_argument('-r',
                     '--robot',
                     type=str,
@@ -63,7 +63,7 @@ parser.add_argument('--save_dir',
                     help='Where to store the simulation informations',
                     default='/home/francesco/Desktop/carino/vaevictis/data/bags/')
 
-parser.add_argument('-h',
+parser.add_argument(
                     '--height',
                     type=float,
                     help='The height scaling factor to apply to the height map',
