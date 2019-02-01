@@ -10,11 +10,13 @@ start = time.time()
 
 bags = glob.glob(Config.BAG_FOLDER + '/**/*.bag')
 
+print('starting with {} bags'.format(len(bags)))
+
 stage = bags2dfs(bags)
 stage = dfs2traversability_df(stage)
 stage = traversability_dfs2paths(stage)
 
 result = list(tqdm(stage))
 
-print('processed {} bags file in {:.2f}'.format(len(bags),
+print('processed {} bags file in {:.2f}s'.format(len(bags),
                                                 time.time() - start))
