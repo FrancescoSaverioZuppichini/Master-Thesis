@@ -14,6 +14,7 @@ print('starting with {} bags'.format(len(bags)))
 
 stage = bags2dfs(bags)
 stage = dfs2traversability_df(stage)
+# TODO typo! path -> patch!!!!
 stage = traversability_dfs2paths(stage)
 
 result = list(tqdm(stage))
