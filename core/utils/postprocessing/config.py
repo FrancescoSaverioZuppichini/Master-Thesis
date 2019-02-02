@@ -9,6 +9,6 @@ class Config:
     ADVANCEMENT_TH = 0.09
     TIME_WINDOW = 100
     DATASET_FOLDER = '/home/francesco/Desktop/data/test/' + 'dataset/{}-{}-{}'.format(100, PATCH_SIZE, ADVANCEMENT_TH) # 100 = n sims
-    HEIGHT_SCALE_FACTOR = 1
+    HEIGHT_SCALE_FACTOR = 5
     SKIP_EVERY = 25
     CENTER_H_PATCH = True
