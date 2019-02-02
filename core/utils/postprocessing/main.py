@@ -14,10 +14,9 @@ print('starting with {} bags'.format(len(bags)))
 
 stage = bags2dfs(bags)
 stage = dfs2traversability_df(stage)
-# TODO typo! path -> patch!!!!
-stage = traversability_dfs2paths(stage)
+stage = traversability_dfs2patches(stage)
 
-result = list(tqdm(stage))
+result = list(tqdm(stage, total=len(bags)))
 
 print('processed {} bags file in {:.2f}s'.format(len(bags),
                                                 time.time() - start))
