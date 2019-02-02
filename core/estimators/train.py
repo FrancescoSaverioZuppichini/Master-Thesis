@@ -18,7 +18,7 @@ torch.backends.cudnn.benchmark = True
 torch.backends.cudnn.deterministic = True
 torch.manual_seed(0)
 
-params = {'epoches': 100,
+params = {'epoches': 12,
           'lr': 0.0001,
           'batch_size': 128,
           'model': 'resnet18-pretrained',
@@ -72,7 +72,7 @@ try:
         # learner.fit(epochs=params['epoches'], lr=params['lr'])
         learner.fit(epochs=2, lr=params['lr'])
         model.layers.requires_grad = True
-        learner.fit(epochs=2, lr=params['lr']/10)
+        learner.fit(epochs=10, lr=params['lr']/10)
     #
 except:
     pass
