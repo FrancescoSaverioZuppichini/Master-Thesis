@@ -1,6 +1,6 @@
 class Config:
     WORKERS = 16
-    BASE_DIR = '/home/francesco/Desktop/data/train/'
+    BASE_DIR = '/home/francesco/Desktop/carino/vaevictis/data/train/'
     # BASE_DIR = '/home/francesco/Desktop/carino/vaevictis/data/test/'
     BAG_FOLDER = BASE_DIR + 'bags/'
     CSV_FOLDER = BASE_DIR + 'csvs/'

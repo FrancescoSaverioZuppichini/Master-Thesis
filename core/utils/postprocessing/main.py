@@ -10,7 +10,7 @@ start = time.time()
 
 bags = glob.glob(Config.BAG_FOLDER + '/**/*.bag')
 
-print('starting with {} bags'.format(len(bags)))
+print('starting with {} bags in {}'.format(len(bags), Config.BAG_FOLDER))
 
 stage = bags2dfs(bags)
 stage = dfs2traversability_df(stage)
