@@ -1,6 +1,5 @@
 import torch
-from torch.utils.data import DataLoader, random_split
-from torch.utils.data import RandomSampler
+from torch.utils.data import DataLoader, random_split, RandomSampler
 from torchvision.transforms import Compose, Resize, ToTensor, Grayscale, RandomVerticalFlip, RandomHorizontalFlip
 from torchvision.datasets import ImageFolder
 
@@ -8,10 +7,12 @@ TRAIN_SIZE = 0.8
 TEST_SIZE = 0.2
 BATCH_SIZE = 128
 
-transform = Compose([Grayscale(), ToTensor()])
+
+def get_transform(size):
+    return Compose([Grayscale(), Resize((size, size)), ToTensor()])
 
 
-def get_dataloaders(train_root, test_root, val_size=0.2, *args, **kwargs):
+def get_dataloaders(train_root, test_root, val_size=0.2, num_samples=None, transform=None, *args, **kwargs):
     """
     Get train and test dataloader. Due to the specific task,
     we cannot apply data-augmentation (vlip, hflip, gamma...).
@@ -26,10 +27,14 @@ def get_dataloaders(train_root, test_root, val_size=0.2, *args, **kwargs):
 
     train_ds, val_ds = random_split(ds, [train_size, len(ds) - train_size])
 
+    # if num_samples is not None:
+    #     train_dl = DataLoader(train_ds,
+    #                           sampler=RandomSampler(train_ds, replacement=True, num_samples=len(train_ds) // num_samples),
+    #                           *args, **kwargs)
+    # else:
     train_dl = DataLoader(train_ds,
                           shuffle=True,
                           *args, **kwargs)
-
     val_dl = DataLoader(val_ds, *args, **kwargs)
 
     test_ds = ImageFolder(root=test_root,

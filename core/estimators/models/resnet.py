@@ -172,12 +172,12 @@ class ResNetLayer(nn.Module):
         return out
 
 
-class ResNet(nn.Module):
+class ResNetEncoder(nn.Module):
     def __init__(self, in_channel, blocks, block=BasicBlock, conv_layer=nn.Conv2d, *args, **kwargs):
         super().__init__()
 
         self.gate = nn.Sequential(
-            conv_layer(in_channel, 64, kernel_size=7, stride=2, padding=3, ),
+            conv_layer(in_channel, 64, kernel_size=7, stride=2, padding=3, bias=False),
             nn.BatchNorm2d(64),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
@@ -203,49 +203,44 @@ class ResNet(nn.Module):
                 nn.init.constant_(m.bias, 0)
 
     def forward(self, x):
-        trace = []
 
         x = self.gate(x)
-        x = self.layers(x)
+
+        for layer in self.layers:
+            x = layer(x)
 
         return x
 
-
-class TraversabilityResnet(nn.Module):
-    def __init__(self, in_channel, blocks, block=BasicBlock, conv_layer=nn.Conv2d, *args, **kwargs):
+class ResnetDecoder(nn.Module):
+    def __init__(self, in_features, n_classes):
         super().__init__()
-
-        self.gate = nn.Sequential(
-            conv_layer(in_channel, 64, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(64),
-            nn.LeakyReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=2)
-        )
-
-        self.layers = nn.Sequential(
-            ResNetLayer(64, 64, depth=blocks[0], block=block, conv_layer=conv_layer, *args, **kwargs),
-            ResNetLayer(64, 128, depth=blocks[1], block=block, conv_layer=conv_layer, *args, **kwargs),
-            ResNetLayer(128, 256, depth=blocks[2], block=block, conv_layer=conv_layer, *args, **kwargs),
-            ResNetLayer(256, 512, depth=blocks[3], block=block, conv_layer=conv_layer, *args, **kwargs),
-            nn.AvgPool2d(5)
-        )
-
-        self.decoder = nn.Sequential(
-            nn.Linear(512 * block.expansion, 2),
-            # nn.LeakyReLU(),
-            # nn.Dropout(),
-            # nn.Linear(128, 2)
-        )
-
-        ResNet.initialise(self.modules())
+        self.avg = nn.AdaptiveAvgPool2d((1, 1))
+        self.decoder = nn.Linear(in_features, n_classes)
 
     def forward(self, x):
-        x = self.gate(x)
-        x = self.layers(x)
+        x = self.avg(x)
         x = x.view(x.size(0), -1)
         x = self.decoder(x)
-
         return x
+
+class ResNet(nn.Module):
+    def __init__(self, in_channel, blocks, block=BasicBlock, conv_layer=nn.Conv2d, n_classes=1000, *args, **kwargs):
+        super().__init__()
+        self.encoder = ResNetEncoder(in_channel, blocks, block=BasicBlock, conv_layer=nn.Conv2d, *args, **kwargs)
+        self.decoder = ResnetDecoder(512 * block.expansion, n_classes)
+
+    def forward(self, x):
+        return self.decoder(self.encoder(x))
+
+class TinyResnet(ResNet):
+    def __init__(self,in_channel, blocks, block=BasicBlock, conv_layer=nn.Conv2d, n_classes=1000, *args, **kwargs):
+        super().__init__(in_channel, blocks, block=BasicBlock, conv_layer=nn.Conv2d, n_classes=1000, *args, **kwargs)
+        self.encoder.gate = nn.Sequential(
+            conv_layer(in_channel, 64, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.BatchNorm2d(64),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=2)
+        )
 
 # resnet-tiny = [1, 2, 3, 2]
 
@@ -258,8 +253,8 @@ def resnet18(in_channel, block=BasicBlock, resnet=ResNet, pretrained=False, *arg
 
     return model
 
-def resnet34(in_channel, block=BasicBlock, pretrained=False, **kwargs):
-    model = ResNet(in_channel, [3, 4, 6, 3], block, **kwargs)
+def resnet34(in_channel, block=BasicBlock, pretrained=False, resnet=ResNet, **kwargs):
+    model = resnet(in_channel, [3, 4, 6, 3], block, **kwargs)
 
     if pretrained:
         print('loading pretrained weights...')
@@ -299,3 +294,8 @@ def restore(source, target):
 
         for p_t_bn, bn in zip(p_t_bns, bns):
             bn.load_state_dict(p_t_bn.state_dict())
+
+
+# resnet = ResNet(1, [2,2,2,2])
+#
+# print(resnet)

@@ -3,11 +3,14 @@ from comet_ml import Experiment
 import torch
 import torch.nn as nn
 
-from fastai.train import Learner, DataBunch, LearnerCallback, Recorder, MixedPrecision
+from fastai.train import Learner, DataBunch, \
+    ReduceLROnPlateauCallback, \
+    EarlyStoppingCallback, \
+    SaveModelCallback
 from fastai.metrics import accuracy
 from fastai.layers import CrossEntropyFlat
 
-from datasets.TraversabilityDataset import get_dataloaders
+from datasets.TraversabilityDataset import get_dataloaders, get_transform
 
 from models.resnet import *
 from models.omar_cnn import OmarCNN
@@ -18,22 +21,24 @@ torch.backends.cudnn.benchmark = True
 torch.backends.cudnn.deterministic = True
 torch.manual_seed(0)
 
-params = {'epoches': 12,
-          'lr': 0.0001,
+params = {'epochs': 20,
+          'lr': 0.001,
           'batch_size': 128,
-          'model': 'resnet18-pretrained',
+          'model': 'tiny-resnet34',
           'dataset': '100-80-0.09',
-          'resize': '80'}
+          'sampler': 'None',
+          'callbacks': '[ReduceLROnPlateauCallback]',
+          'resize': 64}
 
 if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
 
 # model = OmarCNN()
 # model = TraversabilityResnet(1, block=BasicBlock, blocks=[2, 2, 2, 2],
-#                              preactivated=False).cuda()
+#                              preactivated=False)
 
 
-model = resnet18(1, resnet=TraversabilityResnet, pretrained=True)
-model.layers.requires_grad = False
+model = resnet34(1, resnet=TinyResnet, n_classes=2)
+# model.layers.requires_grad = False
 
 print(model)
 
@@ -42,6 +47,7 @@ criterion = CrossEntropyFlat()
 train_dl, val_dl, test_dl = get_dataloaders(train_root='/home/francesco/Desktop/data/train/dataset/new-medium',
                                     test_root='/home/francesco/Desktop/data/test/dataset/{}'.format(params['dataset']),
                                     val_size=0.15,
+                                    transform=get_transform(params['resize']),
                                     batch_size=params['batch_size'],
                                     num_workers=16,
                                     pin_memory=True)
@@ -66,20 +72,34 @@ learner = Learner(data=data,
                   model_dir='/home/francesco/Desktop/carino/vaevictis/data/',
                   loss_func=criterion,
                   metrics=[accuracy])
-#
-try:
-    with experiment.train():
-        # learner.fit(epochs=params['epoches'], lr=params['lr'])
-        learner.fit(epochs=2, lr=params['lr'])
-        model.layers.requires_grad = True
-        learner.fit(epochs=10, lr=params['lr']/10)
-    #
-except:
-    pass
 
-learner.save(params['model'])
+model_name = '{}-{}-{}-{}'.format(params['model'], params['dataset'], params['lr'],  params['resize'])
+
+# try:
+#     with experiment.train():
+#         learner.fit(epochs=params['epochs'], lr=params['lr'], callbacks=[
+#             ReduceLROnPlateauCallback(learn=learner, patience=1),
+#             EarlyStoppingCallback(learn=learner, patience=2),
+#             SaveModelCallback(learn=learner, name=model_name)])
+#         # learner.fit(epochs=4, lr=params['lr'], callbacks=[ReduceLROnPlateauCallback(learn=learner, patience=1)])
+#         # model.layers.requires_grad = True
+#         # learner.fit(epochs=10, lr=params['lr'], callbacks=[ReduceLROnPlateauCallback(learn=learner, patience=1)])
+#     #
+# except:
+#     pass
+#
+#
+# with experiment.test():
+#     loss, acc = learner.validate(data.test_dl, metrics=[accuracy])
+#     print(loss, acc)
+#     experiment.log_metric("accuracy", acc.item())
+
+learner = learner.load(model_name)
+
+# learner.model = model
+# learner.save('{}-{}-{}-{}'.format(params['model'], params['dataset'], params['lr'],  params['resize']))
 
 with experiment.test():
     loss, acc = learner.validate(data.test_dl, metrics=[accuracy])
     print(loss, acc)
-    experiment.log_metric("accuracy", acc.item())
+    experiment.log_metric("accuracy-best-val-loss", acc.item())

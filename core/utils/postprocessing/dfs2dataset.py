@@ -66,7 +66,7 @@ def df_add_label(df, advancement_th):
     df["label"] = df["advancement"] > advancement_th
     return df
 
-def traversability_df2paths(data):
+def traversability_df2patches(data):
     df, hm, file_path = data
     dirs, name = path.split(file_path)
     name, _ = os.path.splitext(name)
@@ -85,14 +85,14 @@ def traversability_df2paths(data):
 
     return data
 
-def dfs2paths(data):
-    stage = th.map(traversability_df2paths, data, workers=Config.WORKERS)
+def dfs2patches(data):
+    stage = th.map(traversability_df2patches, data, workers=Config.WORKERS)
     data = list(stage)
     return data
 
 
-def traversability_dfs2paths(data):
-    stage = th.map(traversability_df2paths, data, workers=Config.WORKERS)
+def traversability_dfs2patches(data):
+    stage = th.map(traversability_df2patches, data, workers=Config.WORKERS)
 
     return stage
 
