@@ -15,27 +15,30 @@ from datasets.TraversabilityDataset import get_dataloaders, get_transform
 from models.resnet import *
 from models.omar_cnn import OmarCNN
 
+from models.custom_resnet import TraversabilityResNet
 import matplotlib.pyplot as plt
 
 torch.backends.cudnn.benchmark = True
 torch.backends.cudnn.deterministic = True
 torch.manual_seed(0)
 
-params = {'epochs': 100,
-          'lr': 0.001,
+params = {'epochs': 50,
+          'lr': 0.0001,
           'batch_size': 128,
-          'model': 'tiny-resnet34',
+          'model': 'resnet34-se-512-preactivation',
           'dataset': '100-100-0.09',
           'sampler': 10000,
+          'samper_type': 'sample',
           'callbacks': '[ReduceLROnPlateauCallback]',
           'data-aug': None,
-          'resize': 64}
+          'resize': 224}
 
 if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
 
 # model = OmarCNN()
 
-model = resnet34(1, n_classes=2, resnet=TinyResnet)
+model = TraversabilityResNet.resnet34(1, n_classes=2)
+# model = resnet34(1, n_classes=2, resnet=TinyResnet)
 # model.encoder.layers.requires_grad = False
 
 summary(model.cuda(), (1, params['resize'], params['resize']))

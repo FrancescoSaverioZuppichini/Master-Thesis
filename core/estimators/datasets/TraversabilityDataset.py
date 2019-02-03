@@ -4,6 +4,8 @@ from torch.utils.data import DataLoader, random_split, RandomSampler
 from torchvision.transforms import Compose, Resize, ToTensor, Grayscale, RandomVerticalFlip, RandomHorizontalFlip
 from torchvision.datasets import ImageFolder
 
+random.seed(0)
+
 TRAIN_SIZE = 0.8
 TEST_SIZE = 0.2
 BATCH_SIZE = 128
@@ -22,7 +24,7 @@ def get_transform(size):
 
 def get_dataloaders(train_root, test_root, val_size=0.2, num_samples=None, transform=None, *args, **kwargs):
     """
-    Get train and test dataloader. Due to the specific task,
+    Get train, val and test dataloader. Due to the specific task,
     we cannot apply data-augmentation (vlip, hflip, gamma...).
     The test set is composed entirely by maps never seen by
     the model in the train set.

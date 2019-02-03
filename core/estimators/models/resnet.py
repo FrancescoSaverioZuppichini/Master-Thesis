@@ -173,7 +173,7 @@ class ResNetLayer(nn.Module):
 
 
 class ResNetEncoder(nn.Module):
-    def __init__(self, in_channel, blocks, block=BasicBlock, conv_layer=nn.Conv2d, *args, **kwargs):
+    def __init__(self, in_channel, blocks, block=BasicBlock, blocks_sizes=None, conv_layer=nn.Conv2d, *args, **kwargs):
         super().__init__()
 
         self.gate = nn.Sequential(
@@ -183,15 +183,20 @@ class ResNetEncoder(nn.Module):
             nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         )
 
-        self.layers = nn.ModuleList([
-            ResNetLayer(64, 64, depth=blocks[0], block=block, conv_layer=conv_layer, *args, **kwargs),
-            ResNetLayer(64, 128, depth=blocks[1], block=block, conv_layer=conv_layer, *args, **kwargs),
-            ResNetLayer(128, 256, depth=blocks[2], block=block, conv_layer=conv_layer, *args, **kwargs),
-            ResNetLayer(256, 512, depth=blocks[3], block=block, conv_layer=conv_layer, *args, **kwargs),
+        if type(block) is not list: block = [block] * len(self.blocks_sizes)
 
+        if blocks_sizes is None: blocks_sizes = self.blocks_sizes
+
+        self.layers = nn.ModuleList([
+            ResNetLayer(in_c, out_c, epth=blocks[i], block=block[i], conv_layer=conv_layer, *args, **kwargs)
+            for i, (in_c, out_c) in enumerate(blocks_sizes)
         ])
 
         self.initialise(self.modules())
+
+    @property
+    def blocks_sizes(self):
+        return [(64, 64), (64, 128), (128, 256), (256, 512)]
 
     @staticmethod
     def initialise(modules):
@@ -232,15 +237,6 @@ class ResNet(nn.Module):
     def forward(self, x):
         return self.decoder(self.encoder(x))
 
-class TinyResnet(ResNet):
-    def __init__(self,in_channel, blocks, block=BasicBlock, conv_layer=nn.Conv2d, n_classes=1000, *args, **kwargs):
-        super().__init__(in_channel, blocks, block=BasicBlock, conv_layer=nn.Conv2d, n_classes=1000, *args, **kwargs)
-        self.encoder.gate = nn.Sequential(
-            conv_layer(in_channel, 64, kernel_size=3, stride=1, padding=1, bias=False),
-            nn.BatchNorm2d(64),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=2)
-        )
 
 # resnet-tiny = [1, 2, 3, 2]
 
