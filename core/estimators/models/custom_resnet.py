@@ -1,26 +1,15 @@
 import torch.nn as nn
 from models.resnet import *
 
-
-class TraversabilityResNetEncoder(ResNetEncoder):
-    def __init__(self, in_channel, blocks, block=BasicBlock, conv_layer=nn.Conv2d, *args, **kwargs):
-        super().__init__(in_channel, blocks, block=BasicBlock, conv_layer=nn.Conv2d, *args, **kwargs)
-
-        self.layers[-1] = ResNetLayer(256, 512, depth=blocks[3], block=BasicBlockSE, conv_layer=conv_layer, *args, **kwargs)
-
-
-        self.initialise(self.modules())
-
-class TraversabilityResNet(ResNet):
-    def __init__(self,in_channel, blocks, block=BasicBlock, conv_layer=nn.Conv2d, n_classes=1000, *args, **kwargs):
-        super().__init__(in_channel, blocks, block=BasicBlock, conv_layer=nn.Conv2d, n_classes=1000, *args, **kwargs)
-        self.encoder = TraversabilityResNetEncoder(in_channel, blocks, block=BasicBlock, conv_layer=nn.Conv2d,  preactivated=True, *args, **kwargs)
-
-    @classmethod
-    def resnet34(cls, in_channel, *args, **kwargs):
-        return cls(in_channel, blocks=[3, 4, 6, 3], *args, **kwargs)
-
 class MicroResnet(ResNet):
+    def __init__(self, in_channel, blocks, block=BasicBlock, conv_layer=nn.Conv2d, n_classes=1000, *args, **kwargs):
+        super().__init__(in_channel, blocks, block=block, conv_layer=nn.Conv2d, n_classes=n_classes, *args, **kwargs)
+        self.encoder.gate = nn.Sequential(
+            conv_layer(in_channel, 64, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.BatchNorm2d(64),
+            nn.LeakyReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=2)
+        )
 
     @classmethod
     def micro(cls, in_channel, *args, **kwargs):

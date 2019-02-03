@@ -179,7 +179,7 @@ class ResNetEncoder(nn.Module):
         self.gate = nn.Sequential(
             conv_layer(in_channel, 64, kernel_size=7, stride=2, padding=3, bias=False),
             nn.BatchNorm2d(64),
-            nn.ReLU(inplace=True),
+            nn.LeakyReLU(inplace=True),
             nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         )
 
@@ -188,7 +188,7 @@ class ResNetEncoder(nn.Module):
         if blocks_sizes is None: blocks_sizes = self.blocks_sizes
 
         self.layers = nn.ModuleList([
-            ResNetLayer(in_c, out_c, epth=blocks[i], block=block[i], conv_layer=conv_layer, *args, **kwargs)
+            ResNetLayer(in_c, out_c, depth=blocks[i], block=block[i], conv_layer=conv_layer, *args, **kwargs)
             for i, (in_c, out_c) in enumerate(blocks_sizes)
         ])
 
@@ -231,8 +231,8 @@ class ResnetDecoder(nn.Module):
 class ResNet(nn.Module):
     def __init__(self, in_channel, blocks, block=BasicBlock, conv_layer=nn.Conv2d, n_classes=1000, *args, **kwargs):
         super().__init__()
-        self.encoder = ResNetEncoder(in_channel, blocks, block=BasicBlock, conv_layer=nn.Conv2d, *args, **kwargs)
-        self.decoder = ResnetDecoder(512 * block.expansion, n_classes)
+        self.encoder = ResNetEncoder(in_channel, blocks, block=block, conv_layer=conv_layer, *args, **kwargs)
+        self.decoder = ResnetDecoder(512 * block[-1].expansion, n_classes)
 
     def forward(self, x):
         return self.decoder(self.encoder(x))

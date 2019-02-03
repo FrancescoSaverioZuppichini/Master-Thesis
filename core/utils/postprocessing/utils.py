@@ -53,8 +53,8 @@ def filename2map(filename):
 
 def df_convert_date2timestamp(df):
     df = df.reset_index()
-    df['timestamp'] = df[df.columns[0]]
     df[df.columns[0]] = df[df.columns[0]].apply(lambda x: dateutil.parser.parse(str(x)).timestamp())
+    df['timestamp'] = df[df.columns[0]]
     df[df.columns[0]] -= min(df[df.columns[0]])
 
     df = df.set_index(df.columns[0])
