@@ -24,20 +24,18 @@ torch.manual_seed(0)
 params = {'epochs': 100,
           'lr': 0.001,
           'batch_size': 128,
-          'model': 'omar-dropout=0.2',
+          'model': 'tiny-resnet34',
           'dataset': '100-100-0.09',
-          'sampler': '10000',
+          'sampler': 10000,
           'callbacks': '[ReduceLROnPlateauCallback]',
-          'resize': 100}
+          'data-aug': None,
+          'resize': 64}
 
 if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
 
-model = OmarCNN()
-# model = TraversabilityResnet(1, block=BasicBlock, blocks=[2, 2, 2, 2],
-#                              preactivated=False)
+# model = OmarCNN()
 
-
-# model = resnet34(1, n_classes=2)
+model = resnet34(1, n_classes=2, resnet=TinyResnet)
 # model.encoder.layers.requires_grad = False
 
 summary(model.cuda(), (1, params['resize'], params['resize']))
@@ -49,7 +47,7 @@ train_dl, val_dl, test_dl = get_dataloaders(train_root='/home/francesco/Desktop/
                                     val_size=0.15,
                                     transform=get_transform(params['resize']),
                                     batch_size=params['batch_size'],
-                                    num_samples=10000,
+                                    num_samples=params['sampler'],
                                     num_workers=16,
                                     pin_memory=True)
 

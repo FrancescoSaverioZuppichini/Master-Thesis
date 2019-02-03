@@ -1,3 +1,4 @@
+import random
 import torch
 from torch.utils.data import DataLoader, random_split, RandomSampler
 from torchvision.transforms import Compose, Resize, ToTensor, Grayscale, RandomVerticalFlip, RandomHorizontalFlip
@@ -7,6 +8,13 @@ TRAIN_SIZE = 0.8
 TEST_SIZE = 0.2
 BATCH_SIZE = 128
 
+
+class SampleSampler(RandomSampler):
+    def __iter__(self):
+        n = len(self.data_source)
+        if self.replacement:
+            return iter(random.sample(range(n), self.num_samples))
+        return iter(torch.randperm(n).tolist())
 
 def get_transform(size):
     return Compose([Grayscale(), Resize((size, size)), ToTensor()])
@@ -29,7 +37,7 @@ def get_dataloaders(train_root, test_root, val_size=0.2, num_samples=None, trans
 
     if num_samples is not None:
         train_dl = DataLoader(train_ds,
-                              sampler=RandomSampler(train_ds, replacement=True, num_samples=num_samples),
+                              sampler=SampleSampler(train_ds, replacement=True, num_samples=num_samples),
                               *args, **kwargs)
     else:
         train_dl = DataLoader(train_ds,
