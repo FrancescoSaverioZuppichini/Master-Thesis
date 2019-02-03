@@ -1,6 +1,7 @@
 from comet_ml import Experiment
 
 import torch
+from torchsummary import summary
 
 from fastai.train import Learner, DataBunch, \
     ReduceLROnPlateauCallback, \
@@ -20,14 +21,14 @@ torch.backends.cudnn.benchmark = True
 torch.backends.cudnn.deterministic = True
 torch.manual_seed(0)
 
-params = {'epochs': 50,
+params = {'epochs': 100,
           'lr': 0.001,
           'batch_size': 128,
-          'model': 'omar',
+          'model': 'omar-dropout=0.2',
           'dataset': '100-100-0.09',
-          'sampler': 'None',
+          'sampler': '10000',
           'callbacks': '[ReduceLROnPlateauCallback]',
-          'resize': 32}
+          'resize': 100}
 
 if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
 
@@ -36,10 +37,10 @@ model = OmarCNN()
 #                              preactivated=False)
 
 
-# model = resnet34(1, resnet=TinyResnet, n_classes=2)
-# model.layers.requires_grad = False
+# model = resnet34(1, n_classes=2)
+# model.encoder.layers.requires_grad = False
 
-print(model)
+summary(model.cuda(), (1, params['resize'], params['resize']))
 
 criterion = CrossEntropyFlat()
 
@@ -48,6 +49,7 @@ train_dl, val_dl, test_dl = get_dataloaders(train_root='/home/francesco/Desktop/
                                     val_size=0.15,
                                     transform=get_transform(params['resize']),
                                     batch_size=params['batch_size'],
+                                    num_samples=10000,
                                     num_workers=16,
                                     pin_memory=True)
 
@@ -72,28 +74,31 @@ learner = Learner(data=data,
                   loss_func=criterion,
                   metrics=[accuracy])
 
-model_name_loss = '{}-{}-{}-{}-loss'.format(params['model'], params['dataset'], params['lr'],  params['resize'])
 model_name_acc = '{}-{}-{}-{}-accuracy'.format(params['model'], params['dataset'], params['lr'],  params['resize'])
+model_name_loss = '{}-{}-{}-{}-loss'.format(params['model'], params['dataset'], params['lr'],  params['resize'])
 
-try:
-    with experiment.train():
-        learner.fit(epochs=params['epochs'], lr=params['lr'], callbacks=[
-            ReduceLROnPlateauCallback(learn=learner, patience=2),
+callbacks = [
+            ReduceLROnPlateauCallback(learn=learner, patience=3),
             EarlyStoppingCallback(learn=learner, patience=5),
             SaveModelCallback(learn=learner, name=model_name_acc, monitor='accuracy'),
-            SaveModelCallback(learn=learner, name=model_name_loss),
-        ]) # SaveModelCallback load the best model after training!
-        # learner.fit(epochs=4, lr=params['lr'], callbacks=[ReduceLROnPlateauCallback(learn=learner, patience=1)])
-        # model.layers.requires_grad = True
-        # learner.fit(epochs=10, lr=params['lr'], callbacks=[ReduceLROnPlateauCallback(learn=learner, patience=1)])
-except:
+            SaveModelCallback(learn=learner, name=model_name_loss)]
+try:
+    with experiment.train():
+        learner.fit(epochs=params['epochs'], lr=params['lr'], callbacks=callbacks) # SaveModelCallback load the best model after training!
+        # learner.fit(epochs=4, lr=params['lr'], callbacks=callbacks)
+        # model.encoder.layers.requires_grad = True
+        # learner.fit(epochs=10, lr=params['lr']/10, callbacks=callbacks)
+except Exception as e:
+    print(e)
     pass
 
+learner = learner.load(model_name_loss)
 
 with experiment.test():
     loss, acc = learner.validate(data.test_dl, metrics=[accuracy])
     print(loss, acc)
     experiment.log_metric("accuracy", acc.item())
+    experiment.log_metric("test_loss", loss)
 
 learner = learner.load(model_name_acc)
 
