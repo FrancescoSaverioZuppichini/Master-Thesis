@@ -27,14 +27,14 @@ def get_dataloaders(train_root, test_root, val_size=0.2, num_samples=None, trans
 
     train_ds, val_ds = random_split(ds, [train_size, len(ds) - train_size])
 
-    # if num_samples is not None:
-    #     train_dl = DataLoader(train_ds,
-    #                           sampler=RandomSampler(train_ds, replacement=True, num_samples=len(train_ds) // num_samples),
-    #                           *args, **kwargs)
-    # else:
-    train_dl = DataLoader(train_ds,
-                          shuffle=True,
-                          *args, **kwargs)
+    if num_samples is not None:
+        train_dl = DataLoader(train_ds,
+                              sampler=RandomSampler(train_ds, replacement=True, num_samples=num_samples),
+                              *args, **kwargs)
+    else:
+        train_dl = DataLoader(train_ds,
+                              shuffle=True,
+                              *args, **kwargs)
     val_dl = DataLoader(val_ds, *args, **kwargs)
 
     test_ds = ImageFolder(root=test_root,

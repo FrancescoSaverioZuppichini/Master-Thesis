@@ -282,7 +282,7 @@ def restore(source, target):
     pre_trained_layers = [source.layer1, source.layer2, source.layer3, source.layer4]
 
     for i,pre_trained_layer in enumerate(pre_trained_layers):
-        layer = target.layers[i]
+        layer = target.encoder.layers[i]
         p_t_convs = [m for m in  pre_trained_layer.modules() if isinstance(m, nn.Conv2d)]
         p_t_bns = [m for m in  pre_trained_layer.modules() if isinstance(m, nn.BatchNorm2d)]
 

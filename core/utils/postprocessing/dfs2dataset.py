@@ -76,6 +76,13 @@ def traversability_df2patches(data):
     os.makedirs(out_dir + '/True', exist_ok=True)
     os.makedirs(out_dir + '/False', exist_ok=True)
 
+    # reset the index to int so we can take only on row every Config.SKIP_EVERY
+    # since the stored rate was really high, 250hz, we will end up with lots of almost
+    # identical paths
+    df = df.reset_index()
+    df = df.loc[list(range(0, len(df), Config.SKIP_EVERY)), :]
+    df = df.set_index(df.columns[0])
+
     for idx, (i, row) in enumerate(df.iterrows()):
         patch = hmpatch(hm,row["hm_x"],row["hm_y"],np.rad2deg(row[O_W_E_KEY]),Config.PATCH_SIZE,scale=1)[0]
         # center the z of the path to the robot z
@@ -108,15 +115,9 @@ def df2traversability_df(data):
     df = df_clean_by_dropping(df, hm.shape[0] * RESOLUTION, hm.shape[1] * RESOLUTION)
     if len(df) > 0:
 
-        # # reset the index to int so we can take only on row every Config.SKIP_EVERY
-        # # since the stored rate was really high, 250hz, we will end up with lots of almost
-        # # identical paths
-        df = df.reset_index()
-        df = df.loc[list(range(0, len(df), Config.SKIP_EVERY)), :]
-        df = df.set_index(df.columns[0])
-
         df = df_add_hm_coords(df, hm)
-        df = df_add_advancement(df, Config.TIME_WINDOW // Config.SKIP_EVERY)
+        # df = df_add_advancement(df, Config.TIME_WINDOW // Config.SKIP_EVERY)
+        df = df_add_advancement(df, Config.TIME_WINDOW)
 
         df = df_add_label(df, Config.ADVANCEMENT_TH)
 
