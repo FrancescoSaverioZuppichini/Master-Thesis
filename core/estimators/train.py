@@ -80,7 +80,7 @@ model_name_loss = '{}-{}-{}-{}-loss'.format(params['model'], params['dataset'], 
 
 callbacks = [
             ReduceLROnPlateauCallback(learn=learner, patience=3),
-            EarlyStoppingCallback(learn=learner, patience=5),
+            EarlyStoppingCallback(learn=learner, patience=4),
             SaveModelCallback(learn=learner, name=model_name_acc, monitor='accuracy'),
             SaveModelCallback(learn=learner, name=model_name_loss)]
 try:
