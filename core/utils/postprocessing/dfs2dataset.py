@@ -88,7 +88,7 @@ def traversability_df2patches(data):
         # center the z of the path to the robot z
         patch = patch - patch[patch.shape[0] // 2, patch.shape[1] // 2]
         patch = (patch * 255).astype(np.uint8)
-        cv2.imwrite('{}/{}/{}-{}.png'.format(out_dir, row['label'], i, time.time()), patch)
+        cv2.imwrite('{}/{}/{}.png'.format(out_dir, row['label'], row['timestamp']), patch)
 
     return data
 
