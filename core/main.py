@@ -50,9 +50,9 @@ rospy.loginfo('Simulation starting with {} maps'.format(len(args.maps)))
 for map in args.maps:
     env = make_env(map)
     for i in range(N_SIM):
-        # if i % 20 == 0:
-        #     rospy.loginfo('Reanimate robot')
-        #     env.reanimate()
+        if i % 5 == 0:
+            rospy.loginfo('Reanimate robot')
+            env.reanimate()
         env.reset()
 
         for i in range(int(args.time)):
@@ -60,9 +60,8 @@ for map in args.maps:
             obs, r, done, _ = env.step(env.GO_FORWARD)
             if done: break
         print('Done after {}'.format(i))
-        # we want to store at each spawn
+        # we want to store after each each spawn
         env.agent.die(env)
-
 
     end = time.time() - start
 

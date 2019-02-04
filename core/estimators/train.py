@@ -25,21 +25,22 @@ torch.manual_seed(0)
 params = {'epochs': 50,
           'lr': 0.001,
           'batch_size': 128,
-          'model': 'micro-resnet-se-512-preactivation',
+          'model': 'micro-resnet#1',
           'dataset': '100-100-0.09',
-          'sampler': None,
+          'sampler': 100000,
           'samper_type': 'sample',
           'callbacks': '[ReduceLROnPlateauCallback]',
           'data-aug': None,
-          'resize': 64}
+          'resize': 100 }
 
 if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
 
 # model = OmarCNN()
-model = MicroResnet.micro(1, n_classes=2, block=[BasicBlock, BasicBlock, BasicBlock, BasicBlockSE], preactivated=True)
+model = MicroResnet.micro(1, n_classes=2, block=[BasicBlock, BasicBlock, BasicBlock, BasicBlock])
 # model = TraversabilityResNet.resnet34(1, n_classes=2)
 # model = resnet34(1, n_classes=2, resnet=TinyResnet)
 # model.encoder.layers.requires_grad = False
+# print(model)
 summary(model.cuda(), (1, params['resize'], params['resize']))
 
 criterion = CrossEntropyFlat()
@@ -79,7 +80,7 @@ model_name_loss = '{}-{}-{}-{}-loss'.format(params['model'], params['dataset'], 
 
 callbacks = [
             ReduceLROnPlateauCallback(learn=learner, patience=3),
-            EarlyStoppingCallback(learn=learner, patience=4),
+            EarlyStoppingCallback(learn=learner, patience=5),
             SaveModelCallback(learn=learner, name=model_name_acc, monitor='accuracy'),
             SaveModelCallback(learn=learner, name=model_name_loss)]
 try:
