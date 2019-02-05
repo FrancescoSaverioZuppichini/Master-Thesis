@@ -13,6 +13,10 @@ from cv_bridge import CvBridge
 
 
 class Krock(RospyAgent):
+    """
+    Krock Agent. This class exposes the ROS API to command the krock robot and
+    it stores the received data from the ROS subscribers.
+    """
     BASE_TOPIC = '/krock'
     # pub
     GAIT_CHOOSER = '{}/gait_chooser'.format(BASE_TOPIC)

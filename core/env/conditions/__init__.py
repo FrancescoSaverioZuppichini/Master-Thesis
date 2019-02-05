@@ -10,9 +10,9 @@ class IfOneFalseOf(Condition):
         self.conditions = conditions
 
     def __call__(self, env, *args, **kwargs):
-        conds = [cond(env) for cond in self.conditions]
+        conditionss = [cond(env) for cond in self.conditions]
 
-        return (False in conds)
+        return (False in conditionss)
 
 
 class IsInside(Condition):
@@ -41,7 +41,7 @@ class IsInside(Condition):
                 return False
 
             return True
-
+        # TODO this should be also checked
         # has_not_fall = world.z + z >= tol
         has_not_fall = True
 
@@ -49,7 +49,6 @@ class IsInside(Condition):
         # ROS return an upside y
         is_inside_y = check_if_inside(- y, world.y)
 
-        # print('is_inside_x={}, is_inside_y={}, ({}{})'.format(is_inside_x, is_inside_y, x, y))
         return is_inside_x and is_inside_y and has_not_fall
 
 

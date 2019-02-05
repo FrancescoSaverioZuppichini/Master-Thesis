@@ -11,6 +11,9 @@ from env.conditions import  *
 from env.webots.WebotsEnv import WebotsEnv
 
 class KrockWebotsEnv(WebotsEnv):
+    """
+    This class represent the Krock robot in the Webots Simulator.
+    """
     metadata = {'render_modes': ['human']}
 
     GO_FORWARD = {
@@ -25,8 +28,10 @@ class KrockWebotsEnv(WebotsEnv):
         'gait': 1
     }
 
+    ROBOT_CHILDREN_FILE = './env/webots/krock/children'
+
     def __init__(self, world_path, agent_callbacks=[], *args, **kwargs):
-        super().__init__(world_path, *args, **kwargs)
+        super().__init__(world_path, children_path=self.ROBOT_CHILDREN_FILE, *args, **kwargs)
 
         self.agent = Krock()
         self.agent.add_callbacks(agent_callbacks)
@@ -66,7 +71,7 @@ class KrockWebotsEnv(WebotsEnv):
 
     def make_obs_from_agent_state(self, agent):
         """
-        Convert the ROS msg store in the agent state to the correct JSON
+        Convert the ROS msg stored in the agent state to the correct JSON
         representation according to the observation space
         :param agent:
         :return:

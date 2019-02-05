@@ -21,7 +21,7 @@ class WebotsEnv(gym.Env, Supervisor):
     name = '/krock'
     N_CHILDREN = 7
 
-    def __init__(self, world_path, load_world=True, children_path='./env/webots/children', *args, **kwargs):
+    def __init__(self, world_path, load_world=True, children_path=None, *args, **kwargs):
         self.world_path, self.children_path = world_path, children_path
 
         if load_world: self.load_world( self.world_path)
