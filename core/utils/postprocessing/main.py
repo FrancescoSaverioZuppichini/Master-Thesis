@@ -6,17 +6,26 @@ from dfs2dataset import *
 from config import Config
 import time
 
-start = time.time()
+class TraversabilityPipeplime():
 
-bags = glob.glob(Config.BAG_FOLDER + '/**/*.bag')
+    def __call__(self, bags, *args, **kwargs):
+        start = time.time()
 
-print('starting with {} bags in {}'.format(len(bags), Config.BAG_FOLDER))
+        print('starting with {} bags'.format(len(bags)))
 
-stage = bags2dfs(bags)
-stage = dfs2traversability_df(stage)
-stage = traversability_dfs2patches(stage)
+        stage = bags2dfs(bags)
+        stage = dfs2traversability_df(stage)
+        stage = traversability_dfs2patches(stage)
 
-result = list(x for x in tqdm(stage, total=len(bags)))
+        result = list(x for x in tqdm(stage, total=len(bags)))
 
-print('processed {} bags file in {:.2f}s'.format(len(bags),
-                                                time.time() - start))
+        print('processed {} bags file in {:.2f}s'.format(len(bags),
+                                                        time.time() - start))
+
+        return result
+
+if __name__ == '__main__':
+    bags = glob.glob(Config.BAG_FOLDER + '/**/*.bag')
+    tr_pip = TraversabilityPipeplime()
+    tr_pip(bags)
+

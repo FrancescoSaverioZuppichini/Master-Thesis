@@ -27,7 +27,6 @@ def make_env(map):
             map_name, _ = path.splitext(path.basename(map))
             bag_save_path = path.normpath(args.save_dir + '/' + map_name)
             makedirs(bag_save_path, exist_ok=True)
-            # TODO decouple WebotsEnv and Agent
             env = KrockWebotsEnv.from_image(
                 map,
                 path.abspath('./env/webots/krock/krock.wbt'),

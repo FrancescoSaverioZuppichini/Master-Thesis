@@ -17,12 +17,6 @@ except ImportError:
     from config import Config
 
 from tf.transformations import euler_from_quaternion
-# skelearn
-import sklearn.pipeline
-import sklearn.dummy
-import sklearn.preprocessing
-import sklearn.metrics.regression
-from sklearn.metrics import auc, roc_curve
 import skimage.transform
 
 def file2df_map(file):
