@@ -7,8 +7,9 @@ from config import Config
 import time
 
 class TraversabilityPipeplime():
+    def __call__(self, bags_dir, *args, **kwargs):
+        bags = glob.glob(bags_dir + '/**/*.bag')
 
-    def __call__(self, bags, *args, **kwargs):
         start = time.time()
 
         print('starting with {} bags'.format(len(bags)))
@@ -25,7 +26,6 @@ class TraversabilityPipeplime():
         return result
 
 if __name__ == '__main__':
-    bags = glob.glob(Config.BAG_FOLDER + '/**/*.bag')
-    tr_pip = TraversabilityPipeplime()
+    tr_pip = TraversabilityPipeplime(Config.BAG_FOLDER)
     tr_pip(bags)
 
