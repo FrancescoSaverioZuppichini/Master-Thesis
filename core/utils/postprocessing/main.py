@@ -16,7 +16,7 @@ stage = bags2dfs(bags)
 stage = dfs2traversability_df(stage)
 stage = traversability_dfs2patches(stage)
 
-result = list(tqdm(stage, total=len(bags)))
+result = list(x for x in tqdm(stage, total=len(bags)))
 
 print('processed {} bags file in {:.2f}s'.format(len(bags),
                                                 time.time() - start))

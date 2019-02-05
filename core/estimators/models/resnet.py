@@ -229,6 +229,9 @@ class ResnetDecoder(nn.Module):
         return x
 
 class ResNet(nn.Module):
+    """
+    ResNet https://arxiv.org/pdf/1512.03385.pdf
+    """
     def __init__(self, in_channel, blocks, block=BasicBlock, conv_layer=nn.Conv2d, n_classes=1000, *args, **kwargs):
         super().__init__()
         self.encoder = ResNetEncoder(in_channel, blocks, block=block, conv_layer=conv_layer, *args, **kwargs)
