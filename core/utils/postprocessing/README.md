@@ -16,8 +16,10 @@ The pipeline does the follow
 - from the dataframes it creates a path and store it in `<OUTPUT_DIR>/<LABEL>/<DATAFRAME_TIME_STAMP>-<CURRENT_TIME>.png`
 
 ### Usage
+
 You can import it as a python module
-```
+
+```python
 from utils.postprocessing import PostProcessingPipeline
 
 p_p_pip = PostProcessingPipeline()

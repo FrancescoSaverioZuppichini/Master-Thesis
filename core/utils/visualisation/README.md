@@ -3,7 +3,8 @@
 This package contains functions to generate meaningful plots to better understand the data gather from the simulation
 
 ## Example
-```
+
+```python
 import pandas as pd
 
 from utils.visualisation import show_advancement, show_trajectory
