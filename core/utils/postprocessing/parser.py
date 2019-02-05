@@ -1,5 +1,5 @@
 import argparse
-
+# TODO add it
 parser = argparse.ArgumentParser(description='Traversability Simulation')
 parser.add_argument('-i',
                     '--bags',

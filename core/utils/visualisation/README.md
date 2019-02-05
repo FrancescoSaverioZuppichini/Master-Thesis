@@ -1,3 +1,9 @@
+# Visualisation
+
+This package contains functions to generate meaningful plots to better understand the data gather from the simulation
+
+## Example
+```
 import pandas as pd
 
 from utils.visualisation import show_advancement, show_trajectory
@@ -11,3 +17,7 @@ hm = read_image('/home/francesco/Desktop/carino/vaevictis/data/maps/bars1.png')
 show_advancement(df, hm, Config)
 
 show_trajectory(df.iterrows(), hm)
+```
+
+## TODO
+- [ ] add pictures to the README

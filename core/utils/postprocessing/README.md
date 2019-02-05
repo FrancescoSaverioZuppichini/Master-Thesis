@@ -15,10 +15,18 @@ The pipeline does the follow
     - label each row
 - from the dataframes it creates a path and store it in `<OUTPUT_DIR>/<LABEL>/<DATAFRAME_TIME_STAMP>-<CURRENT_TIME>.png`
 
-
 ### Usage
-Edit `config.py` with the correct path to the bags file and the outputs folder that you desire. 
-Then run `main.py` to create the paths from the bag files.
+You can import it as a python module
+```
+from utils.postprocessing import PostProcessingPipeline
+
+p_p_pip = PostProcessingPipeline()
+p_p_pip('./bags')
+
+```
+
+Or you can run `main.py` directly. You will need to change  `config.py` with the correct path to the bags file and the outputs folder that you desire.
 
 TODO
+- [x] create a whole class to do everything in one shot
 - [ ] command line
