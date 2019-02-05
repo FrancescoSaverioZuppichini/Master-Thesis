@@ -15,22 +15,54 @@ from os import path
 
 
 class WebotsEnv(gym.Env, Supervisor):
+    """
+    Generic Webots environment.
+    """
     name = '/krock'
+    N_CHILDREN = 7
 
-    def __init__(self, world_path, load_world=True,*args, **kwargs):
-        self.world_path = world_path
-        # TODO refactor
-        print(self.world_path)
-        # self.load_world('/home/francesco/Documents/Master-Thesis/core/webots/' + self.world_path)
+    def __init__(self, world_path, load_world=True, children_path='./env/webots/children', *args, **kwargs):
+        self.world_path, self.children_path = world_path, children_path
+
         if load_world: self.load_world( self.world_path)
 
+        self.get_services()
+        self.grid, self.terrain = self.get_grid(), self.get_terrain()
+        self.compute_world_info()
+
+    def get_services(self, restart=False):
+        """
+        Initialize services, we are using the `.retry_service` since somethings
+        Webots takes some time to make them available
+        :return:
+        """
         self.retry_service(self.get_world_node)
         self.retry_service(self.get_robot_node)
+        if restart: self.retry_service(self.restart_robot)
         self.retry_service(self.enable_front_camera)
 
-        self.grid = Node.from_def(self.name, 'EL_GRID')
-        self.terrain = Node.from_def(self.name, 'TERRAIN')
 
+    def get_grid(self):
+        return Node.from_def(self.name, 'EL_GRID')
+
+    def get_terrain(self):
+        return Node.from_def(self.name, 'TERRAIN')
+
+    @property
+    def children(self):
+        """
+        Read the robot body and store it. This is needed to
+        'reanimate' the robot if it sustained damage
+        :return:
+        """
+        with open(path.abspath(self.children_path), 'r') as f:
+            return f.read()
+
+    def compute_world_info(self):
+        """
+        Get and store the terrain information.
+        :return:
+        """
         self.translation = self.terrain['translation'][0].value
 
         self.x_dim = self.grid['xDimension'][0].value
@@ -47,27 +79,19 @@ class WebotsEnv(gym.Env, Supervisor):
         self.y = (self.translation.z, self.y + self.translation.z)
         self.z = 0
 
-        with open(path.abspath('./env/webots/children'), 'r') as f:
-            self.children = f.read()
-
     def reanimate(self):
         # get the ROBOT node using the NODE API to make our life easier :)
         node = Node.from_def('/krock', 'ROBOT')
         # get the children field that cointas all the joints connections
         h = node['children']
         # remove all children from node ROBOT
-        for _ in range(7):
+        for _ in range(self.N_CHILDREN):
             del node[h]
         node[h] = self.children
         # restart the simulation and enable the camera
-        self.retry_service(self.get_world_node)
-        self.retry_service(self.restart_robot)
-        self.retry_service(self.get_robot_node)
-        self.retry_service(self.enable_front_camera)
+        self.get_services(restart=True)
         # update references to GRID and TERRAIN
-        self.grid = Node.from_def(self.name, 'EL_GRID')
-
-        self.terrain = Node.from_def(self.name, 'TERRAIN')
+        self.grid, self.terrain = self.get_grid(), self.get_terrain()
 
     @property
     def random_position(self):
@@ -78,6 +102,7 @@ class WebotsEnv(gym.Env, Supervisor):
         random_pose.position.x = rx
         random_pose.position.y = ry
         # to get the 2d index in 1d matrix x + width * y
+        # BUG where does 1600 come from?
         idx = int(
             ((rx + abs(self.translation.x)) // self.x_spac) + (1600 * ((ry + abs(self.translation.z)) // self.y_spac)))
 
