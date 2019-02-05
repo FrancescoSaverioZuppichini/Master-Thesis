@@ -307,6 +307,20 @@ a()
 The files will be stored everytime `agent.die()` il called. A new thread is always spawned to avoid blocking
 
 
-```python
 
-```
+## TODO
+- [x] Create simulation pipeline
+    - [x] generate the world from a map
+    - [x] spawn the robot at a random location
+    - [x] move the robot and stores the data
+    - [x] stop the simulation if the robot fall down
+- [x] Create postprocessing pipeline
+    - [x] convert bag files to dataframes
+    - [x] label them by using the advancement
+    - [x] create the patches
+- [x] Create estimator pipeline
+    - [ ] choose the best architecture
+    - [x] train the model
+    - [x] use comet to store the results
+    - [ ] evaluate on all the tests maps
+  
