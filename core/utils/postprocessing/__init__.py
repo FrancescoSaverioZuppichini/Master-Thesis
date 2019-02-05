@@ -1,9 +1,10 @@
 import glob
+import time
+
 from tqdm import tqdm
 
 from bags2csvs import *
 from dfs2dataset import *
-import time
 
 class PostProcessingPipeline():
     def __call__(self, bags_dir, *args, **kwargs):

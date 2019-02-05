@@ -1,4 +1,7 @@
 class Callbackable():
+    """
+    A protocol implementing a basic observer pattern.
+    """
     def set_callbacks(self, callbacks):
         self.callbacks = callbacks
         return self

@@ -323,4 +323,3 @@ The files will be stored everytime `agent.die()` il called. A new thread is alwa
     - [x] train the model
     - [x] use comet to store the results
     - [ ] evaluate on all the tests maps
-  
