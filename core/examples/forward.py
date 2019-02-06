@@ -1,6 +1,6 @@
 import rospy
 import pprint
-
+import numpy as np
 from env.webots.krock import Krock, KrockWebotsEnv
 
 WORLD_PATH = '/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock2_ros/worlds/holes1.wbt'
@@ -16,7 +16,14 @@ rospy.init_node("traversability_simulation")
 #      'resolution': 0.02},
 #     output_dir='/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock2_ros/worlds/')
 
-env = KrockWebotsEnv.from_file(WORLD_PATH)
+flat = np.zeros((513, 513))
+
+env = KrockWebotsEnv.from_numpy(flat, '/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock.wbt',
+    {'height': 1,
+     'resolution': 0.02},
+    output_dir='/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock2_ros/worlds/')
+
+# env = KrockWebotsEnv.from_file(WORLD_PATH)
 # spawn the robot at a random location
 init_obs = env.reset()
 
