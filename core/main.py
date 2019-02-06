@@ -27,7 +27,7 @@ def make_env(map):
 
     if args.engine == 'webots':
         if args.robot == 'krock':
-            makedirs(bags_dir, exist_ok=True)
+            makedirs(bags_map_dir, exist_ok=True)
             env = KrockWebotsEnv.from_image(
                 map,
                 path.abspath('./env/webots/krock/krock.wbt'),
