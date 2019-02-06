@@ -1,4 +1,4 @@
-from . import SimulationPipeline
+from simulation import SimulationPipeline
 from .parser import parser
 
 if __name__ == '__main__':
