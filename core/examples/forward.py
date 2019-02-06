@@ -12,7 +12,7 @@ rospy.init_node("traversability_simulation")
 env = KrockWebotsEnv.from_image(
     MAP,
     '/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock.wbt',
-    {'height': 5,
+    {'height': 10,
      'resolution': 0.02},
     output_dir='/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock2_ros/worlds/')
 
