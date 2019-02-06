@@ -3,4 +3,4 @@ from .parser import parser
 
 if __name__ == '__main__':
     sim_pip = SimulationPipeline()
-    sim_pip(parser.args)
+    print(sim_pip(parser.args))
