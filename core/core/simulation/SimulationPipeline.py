@@ -3,7 +3,7 @@ import rospy
 from os import makedirs
 
 from core.agent.callbacks import *
-from ..env.webots.krock.KrockWebotsEnv import KrockWebotsEnv
+from core.env.webots.krock.KrockWebotsEnv import KrockWebotsEnv
 
 def make_env(map):
     agent = None
