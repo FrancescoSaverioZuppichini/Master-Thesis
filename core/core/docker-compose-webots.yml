@@ -15,7 +15,7 @@ services:
     # set this to link to your Dockerfile, this will build the image in case it is not present or you want to rebuild it
     build:
       dockerfile: ./docker/Dockerfile-webots
-      context: .
+      context: ..
     network_mode: host
     volumes:
       - ./data/

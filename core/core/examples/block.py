@@ -1,4 +1,4 @@
-from agent.callbacks import *
+from core.agent.callbacks import *
 from env.webots.krock.KrockWebotsEnv import KrockWebotsEnv
 
 rospy.init_node("traversability_simulation")

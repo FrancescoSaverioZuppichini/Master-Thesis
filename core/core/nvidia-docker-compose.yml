@@ -1,7 +1,7 @@
 services:
   krock:
     build:
-      context: .
+      context: ..
       dockerfile: ./docker/Dockerfile
     command: /bin/bash
     devices:
