@@ -45,6 +45,28 @@ def filename2map(filename):
 
     return map_name
 
+def get_stats(data):
+    df, _, _ = data
+    return pd.DataFrame(data={'min': [df['advancement'].min()],
+                              'max': [df['advancement'].max()],
+                              'mean': [df['advancement'].mean()]})
+def dfs2advancement(dfs):
+    """
+    Merge and filter dfs in order to extract the advancement stats.
+    :param dfs:
+    :return:
+    """
+    stage = map(get_stats, dfs)
+    stat_dfs = list(stage)
+    stat_df = stat_dfs[0]
+
+    for df in stat_dfs:
+        stat_df = pd.concat([stat_df, df])
+
+    stat_df = stat_df.dropna()
+
+    return stat_df
+
 def df_convert_date2timestamp(df):
     df = df.reset_index()
     df[df.columns[0]] = df[df.columns[0]].apply(lambda x: dateutil.parser.parse(str(x)).timestamp())
