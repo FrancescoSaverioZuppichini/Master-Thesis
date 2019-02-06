@@ -104,7 +104,7 @@ class WebotsEnv(gym.Env, Supervisor):
         # to get the 2d index in 1d matrix x + width * y
         # BUG where does 1600 come from?
         idx = int(
-            ((rx + abs(self.translation.x)) // self.x_spac) + (int(self.x) * ((ry + abs(self.translation.z)) // self.y_spac)))
+            ((rx + abs(self.translation.x)) // self.x_spac) + (int(self.x_dim) * ((ry + abs(self.translation.z)) // self.y_spac)))
 
         h = self.grid['height'][idx].value
 
