@@ -9,19 +9,19 @@ N_STEPS = 4
 
 rospy.init_node("traversability_simulation")
 # create our env
-# env = KrockWebotsEnv.from_image(
-#     MAP,
-#     '/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock.wbt',
-#     {'height': 5,
-#      'resolution': 0.02},
-#     output_dir='/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock2_ros/worlds/')
-
-flat = np.zeros((513, 513))
-
-env = KrockWebotsEnv.from_numpy(flat, '/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock.wbt',
-    {'height': 1,
+env = KrockWebotsEnv.from_image(
+    MAP,
+    '/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock.wbt',
+    {'height': 5,
      'resolution': 0.02},
-    output_path='/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock2_ros/worlds/flat.wbt')
+    output_dir='/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock2_ros/worlds/')
+
+# flat = np.zeros((513, 513))
+#
+# env = KrockWebotsEnv.from_numpy(flat, '/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock.wbt',
+#     {'height': 1,
+#      'resolution': 0.02},
+#     output_path='/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock2_ros/worlds/flat.wbt')
 
 # env = KrockWebotsEnv.from_file(WORLD_PATH)
 # spawn the robot at a random location
