@@ -54,9 +54,9 @@ class SimulationPipeline():
             # TODO we should store the state in order to be faulty tolerant
 
             for i in range(N_SIM):
-                if i % 5 == 0:
-                    rospy.loginfo('Reanimate robot')
-                    env.reanimate()
+                # if i % 5 == 0:
+                #     rospy.loginfo('Reanimate robot')
+                #     env.reanimate()
 
                 env.reset()
                 for i in range(int(args.time)):
