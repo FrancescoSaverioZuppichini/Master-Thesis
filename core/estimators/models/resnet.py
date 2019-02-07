@@ -235,7 +235,7 @@ class ResNet(nn.Module):
     def __init__(self, in_channel, blocks, block=BasicBlock, conv_layer=nn.Conv2d, n_classes=1000, *args, **kwargs):
         super().__init__()
         self.encoder = ResNetEncoder(in_channel, blocks, block=block, conv_layer=conv_layer, *args, **kwargs)
-        self.decoder = ResnetDecoder(self.encoder.blocks_sizes[-1][0] * block[-1].expansion, n_classes)
+        self.decoder = ResnetDecoder(self.encoder.blocks_sizes[-1][1] * block[-1].expansion, n_classes)
 
     def forward(self, x):
         return self.decoder(self.encoder(x))
