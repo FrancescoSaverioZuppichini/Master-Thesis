@@ -12,7 +12,7 @@ def bag2df(file_name):
     df = None
     try:
         df = rosbag_pandas.bag_to_dataframe(file_name)
-    except TypeError:
+    except:
         print(file_name)
     map_name = filename2map(file_name)
     return (df, map_name, file_name)
