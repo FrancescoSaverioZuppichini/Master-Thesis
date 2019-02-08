@@ -53,6 +53,8 @@ if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
 # print(model)
 
 model = resnet34(True)
+model.conv1 = torch.nn.Conv2d(1, 64, kernel_size=7, stride=2, padding=3,
+                       bias=False)
 model.requires_grads = False
 model.fc = torch.nn.Linear(512, 2)
 
