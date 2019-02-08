@@ -27,7 +27,7 @@ torch.manual_seed(0)
 params = {'epochs': 50,
           'lr': 0.001,
           'batch_size': 128,
-          'model': 'microresnet#3-preactivate=True',
+          'model': 'omar',
           'dataset': '100-100-0.09-12-06-02-19',
           'test_dataset': '100-100-0.09',
           'sampler': None,
@@ -42,12 +42,12 @@ if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
 
 
 
-# model = OmarCNN()
-model = MicroResnet.micro(1,
-                          n_classes=2,
-                          block=[BasicBlock, BasicBlock, BasicBlock, BasicBlock],
-                          preactivated=True)
-# print(model)
+model = OmarCNN()
+# model = MicroResnet.micro(1,
+#                           n_classes=2,
+#                           block=[BasicBlock, BasicBlock, BasicBlock, BasicBlock],
+#                           preactivated=True)
+# # print(model)
 summary(model.cuda(), (1, params['resize'], params['resize']))
 
 criterion = CrossEntropyFlat()
