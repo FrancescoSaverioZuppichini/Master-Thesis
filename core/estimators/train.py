@@ -33,13 +33,13 @@ params = {'epochs': 100,
           'model': 'resnet34-pretrained',
           'dataset': '100-100-0.09-12-06-02-19',
           'test_dataset': '100-100-0.09-12-querry',
-          'sampler': 50000,
+          'sampler': None,
           'samper_type': 'sample',
           'callbacks': '[ReduceLROnPlateauCallback]',
           'data-aug': 'noise+dropout+coarse-dropout',
           'optim': 'adam',
           'info': 'remove',
-          'resize': 224 }
+          'resize': 100 }
 
 if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
 
