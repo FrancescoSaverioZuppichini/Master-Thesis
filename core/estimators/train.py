@@ -15,7 +15,7 @@ from fastai.layers import CrossEntropyFlat
 
 from datasets.TraversabilityDataset import get_dataloaders, get_transform, get_train_transform
 
-from models.resnet import *
+# from models.resnet import *
 from models.omar_cnn import OmarCNN
 
 from models.custom_resnet import *
