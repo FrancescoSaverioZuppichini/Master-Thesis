@@ -39,7 +39,7 @@ params = {'epochs': 100,
           'data-aug': 'noise+dropout+coarse-dropout',
           'optim': 'adam',
           'info': 'remove',
-          'resize': 100 }
+          'resize': 224 }
 
 if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
 
