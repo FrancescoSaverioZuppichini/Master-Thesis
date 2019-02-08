@@ -24,7 +24,7 @@ torch.backends.cudnn.benchmark = True
 torch.backends.cudnn.deterministic = True
 torch.manual_seed(0)
 
-params = {'epochs': 50,
+params = {'epochs': 100,
           'lr': 0.001,
           'batch_size': 128,
           'model': 'microresnet#3-preactivate=True',
@@ -87,8 +87,8 @@ learner = Learner(data=data,
 model_name_acc = '{}-{}-{}-{}-accuracy'.format(params['model'], params['dataset'], params['lr'],  params['resize'])
 model_name_loss = '{}-{}-{}-{}-loss'.format(params['model'], params['dataset'], params['lr'],  params['resize'])
 
-callbacks = [ReduceLROnPlateauCallback(learn=learner, patience=3),
-            EarlyStoppingCallback(learn=learner, patience=5),
+callbacks = [ReduceLROnPlateauCallback(learn=learner, patience=5),
+            EarlyStoppingCallback(learn=learner, patience=99),
             SaveModelCallback(learn=learner, name=model_name_acc, monitor='accuracy'),
             SaveModelCallback(learn=learner, name=model_name_loss)]
 try:
