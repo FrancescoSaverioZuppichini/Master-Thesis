@@ -42,11 +42,11 @@ if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
 
 
 
-# model = OmarCNN()
-model = MicroResnet.micro(1,
-                          n_classes=2,
-                          block=[BasicBlock, BasicBlock, BasicBlock, BasicBlock],
-                          preactivated=True)
+model = OmarCNN()
+# model = MicroResnet.micro(1,
+#                           n_classes=2,
+#                           block=[BasicBlock, BasicBlock, BasicBlock, BasicBlock],
+#                           preactivated=True)
 # print(model)
 summary(model.cuda(), (1, params['resize'], params['resize']))
 
