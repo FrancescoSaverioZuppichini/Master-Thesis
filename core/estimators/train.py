@@ -30,7 +30,7 @@ params = {'epochs': 50,
           'model': 'microresnet#3-preactivate=True',
           'dataset': '100-100-0.09-12-06-02-19',
           'test_dataset': '100-100-0.09-12-querry',
-          'sampler': None,
+          'sampler': 25000,
           'samper_type': 'sample',
           'callbacks': '[ReduceLROnPlateauCallback]',
           'data-aug': 'noise+dropout+coarse-dropout',
@@ -42,11 +42,11 @@ if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
 
 
 
-model = OmarCNN()
-# model = MicroResnet.micro(1,
-#                           n_classes=2,
-#                           block=[BasicBlock, BasicBlock, BasicBlock, BasicBlock],
-#                           preactivated=True)
+# model = OmarCNN()
+model = MicroResnet.micro(1,
+                          n_classes=2,
+                          block=[BasicBlock, BasicBlock, BasicBlock, BasicBlock],
+                          preactivated=True)
 # print(model)
 summary(model.cuda(), (1, params['resize'], params['resize']))
 
