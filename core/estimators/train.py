@@ -10,7 +10,7 @@ from fastai.train import Learner, DataBunch, \
 from fastai.metrics import accuracy
 from fastai.layers import CrossEntropyFlat
 
-from datasets.TraversabilityDataset import get_dataloaders, get_transform
+from datasets.TraversabilityDataset import get_dataloaders, get_transform, get_train_transform
 
 from models.resnet import *
 from models.omar_cnn import OmarCNN
@@ -29,14 +29,14 @@ params = {'epochs': 50,
           'batch_size': 128,
           'model': 'microresnet#3-preactivate=True',
           'dataset': '100-100-0.09-12-06-02-19',
-          'test_dataset': '100-100-0.09-12-querry',
+          'test_dataset': '100-100-0.09',
           'sampler': None,
           'samper_type': 'sample',
           'callbacks': '[ReduceLROnPlateauCallback]',
-          'data-aug': None,
-          'optim': 'optim',
-          'info': 'test as val',
-          'resize': 56 }
+          'data-aug': 'noise+dropout+coarse-dropout',
+          'optim': 'sgd',
+          'info': 'remove',
+          'resize': 100 }
 
 if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
 
@@ -56,8 +56,9 @@ train_dl, val_dl, test_dl = get_dataloaders(train_root='/home/francesco/Desktop/
                                     test_root='/home/francesco/Desktop/data/test/dataset/{}'.format(params['test_dataset']),
                                     val_size=0,
                                     transform=get_transform(params['resize']),
-                                    batch_size=params['batch_size'],
+                                    train_transform=get_train_transform(params['resize']),
                                     num_samples=params['sampler'],
+                                    batch_size=params['batch_size'],
                                     num_workers=16,
                                     pin_memory=True)
 
