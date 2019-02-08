@@ -18,7 +18,7 @@ from datasets.TraversabilityDataset import get_dataloaders, get_transform, get_t
 # from models.resnet import *
 from models.omar_cnn import OmarCNN
 
-from models.custom_resnet import *
+# from models.custom_resnet import *
 import matplotlib.pyplot as plt
 
 from functools import partial
