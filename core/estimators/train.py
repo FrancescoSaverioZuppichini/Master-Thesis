@@ -27,9 +27,9 @@ torch.manual_seed(0)
 params = {'epochs': 50,
           'lr': 0.001,
           'batch_size': 128,
-          'model': 'omar',
+          'model': 'microresnet#3-preactivate=True',
           'dataset': '100-100-0.09-12-06-02-19',
-          'test_dataset': '100-100-0.09',
+          'test_dataset': '100-100-0.09-12-querry',
           'sampler': None,
           'samper_type': 'sample',
           'callbacks': '[ReduceLROnPlateauCallback]',
@@ -47,7 +47,7 @@ model = OmarCNN()
 #                           n_classes=2,
 #                           block=[BasicBlock, BasicBlock, BasicBlock, BasicBlock],
 #                           preactivated=True)
-# # print(model)
+# print(model)
 summary(model.cuda(), (1, params['resize'], params['resize']))
 
 criterion = CrossEntropyFlat()
