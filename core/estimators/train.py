@@ -2,7 +2,7 @@ from comet_ml import Experiment
 
 import torch
 
-from torchvision.models import *
+# from torchvision.models import *
 
 from torchsummary import summary
 
@@ -15,10 +15,10 @@ from fastai.layers import CrossEntropyFlat
 
 from datasets.TraversabilityDataset import get_dataloaders, get_transform, get_train_transform
 
-# from models.resnet import *
+from models.resnet import *
 from models.omar_cnn import OmarCNN
 
-# from models.custom_resnet import *
+from models.custom_resnet import *
 import matplotlib.pyplot as plt
 
 from functools import partial
@@ -30,33 +30,33 @@ torch.manual_seed(0)
 params = {'epochs': 100,
           'lr': 0.001,
           'batch_size': 128,
-          'model': 'resnet34-pretrained',
+          'model': 'romar',
           'dataset': '100-100-0.09-12-06-02-19',
-          'test_dataset': '100-100-0.09-12-querry',
+          'test_dataset': '100-100-0.09',
           'sampler': None,
           'samper_type': 'sample',
           'callbacks': '[ReduceLROnPlateauCallback]',
           'data-aug': 'noise+dropout+coarse-dropout',
           'optim': 'adam',
           'info': 'remove',
-          'resize': 224 }
+          'resize': 100 }
 
 if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
 
 
 
 # model = OmarCNN()
-# model = MicroResnet.micro(1,
-#                           n_classes=2,
-#                           block=[BasicBlock, BasicBlock, BasicBlock, BasicBlock],
-#                           preactivated=True)
+model = MicroResnet.micro(1,
+                          n_classes=2,
+                          block=[BasicBlock, BasicBlock, BasicBlock, BasicBlock],
+                          preactivated=True)
 # print(model)
 
-model = resnet34(True)
-model.conv1 = torch.nn.Conv2d(1, 64, kernel_size=7, stride=2, padding=3,
-                       bias=False)
-model.requires_grads = False
-model.fc = torch.nn.Linear(512, 2)
+# model = resnet34(True)
+# model.conv1 = torch.nn.Conv2d(1, 64, kernel_size=7, stride=2, padding=3,
+#                        bias=False)
+# model.requires_grads = False
+# model.fc = torch.nn.Linear(512, 2)
 
 
 summary(model.cuda(), (1, params['resize'], params['resize']))
@@ -92,7 +92,7 @@ learner = Learner(data=data,
                   path='/home/francesco/Desktop/carino/vaevictis/data/',
                   model_dir='/home/francesco/Desktop/carino/vaevictis/data/',
                   loss_func=criterion,
-                  # opt_func= partial(torch.optim.SGD, momentum=0.95),
+                  opt_func= partial(torch.optim.SGD, momentum=0.95, weight_decay=1e-4),
                   metrics=[accuracy])
 
 model_name_acc = '{}-{}-{}-{}-accuracy'.format(params['model'], params['dataset'], params['lr'],  params['resize'])
@@ -104,9 +104,9 @@ callbacks = [ReduceLROnPlateauCallback(learn=learner, patience=5),
             SaveModelCallback(learn=learner, name=model_name_loss)]
 try:
     with experiment.train():
-        learner.fit(epochs=4, lr=0.001, callbacks=callbacks) # SaveModelCallback load the best model after training!
-        model.requires_grad = True
-        learner.fit(10, lr=0.0001, callbacks=callbacks) # SaveModelCallback load the best model after training!
+        learner.fit(epochs=20, lr=0.001, callbacks=callbacks) # SaveModelCallback load the best model after training!
+        # model.requires_grad = True
+        # learner.fit(10, lr=0.0001, callbacks=callbacks) # SaveModelCallback load the best model after training!
 
         # learner.fit(epochs=params['epochs'], lr=params['lr'], callbacks=callbacks) # SaveModelCallback load the best model after training!
 except Exception as e:
