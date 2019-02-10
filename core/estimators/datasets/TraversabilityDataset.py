@@ -93,14 +93,14 @@ def get_dataloaders(train_root, test_root, val_size=0.2, num_samples=None, trans
                               *args, **kwargs)
     else:
         train_dl = DataLoader(train_ds,
-                              shuffle=True,
+                              shuffle=False,
                               *args, **kwargs)
     val_dl = DataLoader(val_ds, *args, **kwargs)
 
     test_ds = ImageFolder(root=test_root,
                           transform=transform)
 
-    test_dl = DataLoader(test_ds, *args, **kwargs)
+    test_dl = DataLoader(test_ds, shuffle=True, *args, **kwargs)
 
     return train_dl, val_dl, test_dl
 
@@ -111,17 +111,18 @@ if __name__ == '__main__':
         test_root='/home/francesco/Desktop/data/test/dataset/{}'.format('100-100-0.09-12-querry'),
         val_size=0,
         train_transform=get_train_transform(100),
-        transform=get_transform(56),
+        transform=get_transform(100),
         batch_size=20,
         num_samples=None,
         num_workers=16,
         pin_memory=True)
 
-    for (x, y) in train_dl:
+    for (x, y) in test_dl:
         for i, img in enumerate(x):
             print(img.shape)
             img_n = img.cpu().numpy().squeeze()
             plt.imshow(img_n)
-            plt.imsave('./{}.png'.format(i), img_n)
+            # plt.show()
+            plt.imsave('./{}={}.png'.format(i, str(y[i].item())), img_n)
 
         break
