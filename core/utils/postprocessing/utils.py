@@ -15,7 +15,7 @@ try:
     from .config import Config
 except ImportError:
     from config import Config
-
+import cv2
 from tf.transformations import euler_from_quaternion
 # skelearn
 import sklearn.pipeline
@@ -114,18 +114,20 @@ def plt_trajectory(hm, df):
         plt.show()
 
 def read_image(heightmap_png):
-    # reads an image takint into account the scalling and the bitdepth
-    hm = skimage.io.imread(heightmap_png)
-    if hm.ndim > 2: #multiple channels
-        hm=skimage.color.rgb2gray(hm) #rgb2gray does the averaging and channel reduction
-    elif hm.ndim == 2: #already in one channel
-        #this is mostly for the images treated in matlab beforehand (one channel + grayscale + 16bit)
-        if hm.dtype == 'uint8':
-            divided = 255
-        if hm.dtype == 'uint16':
-            divided = 65535
-        hm=hm/divided
-    hm = hm * Config.HEIGHT_SCALE_FACTOR #scaled to proper factor (mostly for testing, for training is 1.0)
+    hm = cv2.imread(heightmap_png)
+    hm = cv2.cvtColor(hm, cv2.COLOR_BGR2GRAY)
+    # # reads an image takint into account the scalling and the bitdepth
+    # hm = skimage.io.imread(heightmap_png)
+    # if hm.ndim > 2: #multiple channels
+    #     hm=skimage.color.rgb2gray(hm) #rgb2gray does the averaging and channel reduction
+    # elif hm.ndim == 2: #already in one channel
+    #     #this is mostly for the images treated in matlab beforehand (one channel + grayscale + 16bit)
+    #     if hm.dtype == 'uint8':
+    #         divided = 255
+    #     if hm.dtype == 'uint16':
+    #         divided = 65535
+    #     hm=hm/divided
+    # hm = hm * Config.HEIGHT_SCALE_FACTOR #scaled to proper factor (mostly for testing, for training is 1.0)
     return hm
 
 def to_hm_coordinates(row, hm, res, tr=[0, 0]):
