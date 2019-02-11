@@ -58,12 +58,20 @@ class EveryNSampler(RandomSampler):
         return iter(torch.randperm(n).tolist())
 
 
+class CenterPatch():
+
+    def __call__(self, x):
+        x = x - x[x.shape[0] // 2, x.shape[1] // 2]
+
+        return x
+
+
 def get_transform(size):
-    return Compose([Grayscale(), Resize((size, size)), ToTensor()])
+    return Compose([Grayscale(), Resize((size, size)), ToTensor(), CenterPatch()])
 
 
 def get_train_transform(size):
-    return Compose([Grayscale(), Resize((size, size)), ImgaugWrapper(aug=aug), ToTensor()])
+    return Compose([Grayscale(), Resize((size, size)), ImgaugWrapper(aug=aug), ToTensor(), CenterPatch()])
 
 
 def get_dataloaders(train_root, test_root, val_size=0.2, num_samples=None, transform=None, train_transform=None, *args,
@@ -93,7 +101,7 @@ def get_dataloaders(train_root, test_root, val_size=0.2, num_samples=None, trans
                               *args, **kwargs)
     else:
         train_dl = DataLoader(train_ds,
-                              shuffle=False,
+                              shuffle=True,
                               *args, **kwargs)
     val_dl = DataLoader(val_ds, *args, **kwargs)
 

@@ -4,7 +4,6 @@ import glob
 
 from art import *
 
-QUARRY = '/home/francesco/Documents/krock-sim/krock/krock2_ros/map_generation/quarry.wbt'
 BASIC = '/home/francesco/Documents/krock-sim/krock/krock2_ros/worlds/krock2_camera.wbt'
 
 class CheckEngine(argparse.Action):
@@ -89,5 +88,3 @@ print('')
 args.maps = ParseAndListFiles()(args.maps)
 
 print(args.maps)
-# with open('./krock.txt', 'r') as f:
-#     print(f.read())

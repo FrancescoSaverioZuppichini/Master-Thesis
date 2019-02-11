@@ -86,7 +86,7 @@ def traversability_df2patches(data):
     for idx, (i, row) in enumerate(df.iterrows()):
         patch = hmpatch(hm,row["hm_x"],row["hm_y"],np.rad2deg(row[O_W_E_KEY]),Config.PATCH_SIZE,scale=1)[0]
         # center the z of the path to the robot z
-        patch = patch - patch[patch.shape[0] // 2, patch.shape[1] // 2]
+        # patch = patch - patch[patch.shape[0] // 2, patch.shape[1] // 2]
         patch = (patch * 255).astype(np.uint8)
         cv2.imwrite('{}/{}/{}.png'.format(out_dir, row['label'], row['timestamp']), patch)
 
@@ -105,31 +105,33 @@ def traversability_dfs2patches(data):
 
 def df2traversability_df(data):
     df, map_name, file_path = data
+
+    def make_path(file_path):
+        splitted = file_path.split('/')
+        map_name, file_name = splitted[-2], splitted[-1]
+        return path.normpath('{}/{}/{}'.format(Config.CSV_FOLDER, map_name, path.splitext(file_name)[0] + '.csv'))
+
     map_name = filename2map(file_path)
     map_path = '{}/{}.png'.format(Config.MAPS_FOLDER, map_name)
     hm  = read_image(map_path)
-    # df = df_add_dist_velocity(df)
-    # Config.TIME_WINDOW //= Config.SKIP_EVERY
-    df = df_convert_date2timestamp(df)
-    df = df_convert_quaterion2euler(df)
-    df = df_clean_by_dropping(df, hm.shape[0] * RESOLUTION, hm.shape[1] * RESOLUTION)
-    if len(df) > 0:
+    file_path = make_path(file_path)
 
-        df = df_add_hm_coords(df, hm)
-        # df = df_add_advancement(df, Config.TIME_WINDOW // Config.SKIP_EVERY)
-        df = df_add_advancement(df, Config.TIME_WINDOW)
+    if path.isfile(file_path):
+        print('file exist, loading...')
+        df = pd.read_csv(file_path)
+    else:
+        df = df_convert_date2timestamp(df)
+        df = df_convert_quaterion2euler(df)
+        df = df_clean_by_dropping(df, hm.shape[0] * RESOLUTION, hm.shape[1] * RESOLUTION)
+        if len(df) > 0:
+            df = df_add_hm_coords(df, hm)
+            # df = df_add_advancement(df, Config.TIME_WINDOW // Config.SKIP_EVERY)
+            df = df_add_advancement(df, Config.TIME_WINDOW)
+            df = df_add_label(df, Config.ADVANCEMENT_TH)
 
-        df = df_add_label(df, Config.ADVANCEMENT_TH)
-
-        def make_path(file_path):
-            splitted = file_path.split('/')
-            map_name, file_name = splitted[-2], splitted[-1]
-
-            return path.normpath('{}/{}/{}'.format(Config.CSV_FOLDER, map_name, path.splitext(file_name)[0] + '.csv'))
-        # TODO add flag to decide if store the csv or not
-        file_path = make_path(file_path)
-        os.makedirs(path.dirname(file_path), exist_ok=True)
-        df.to_csv(file_path)
+            # TODO add flag to decide if store the csv or not
+            os.makedirs(path.dirname(file_path), exist_ok=True)
+            df.to_csv(file_path)
 
     return df, hm, file_path
 
