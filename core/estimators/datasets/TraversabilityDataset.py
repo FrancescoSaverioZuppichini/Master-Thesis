@@ -64,7 +64,7 @@ class CenterAndScalePatch():
     def __init__(self, scale=1.0):
         self.scale = scale
 
-    def show_heatmap(self, tensor, title):
+    def show_heatmap(self, x, title):
         fig = plt.figure(figsize=(10, 10), dpi=100)
         plt.title(title)
         img_n = x.cpu().numpy().squeeze()
@@ -126,27 +126,3 @@ def get_dataloaders(train_root, test_root, val_size=0.2, num_samples=None, trans
     test_dl = DataLoader(test_ds, shuffle=False, *args, **kwargs)
 
     return train_dl, val_dl, test_dl
-
-
-if __name__ == '__main__':
-    train_dl, val_dl, test_dl = get_dataloaders(
-        train_root='/home/francesco/Desktop/data/train/dataset/{}'.format('100-50-0.09-25-correct'),
-        test_root='/home/francesco/Desktop/data/test/dataset/{}'.format('100-50-0.09-25-querry'),
-        val_size=0,
-        train_transform=get_train_transform(),
-        transform=get_transform(10),
-        batch_size=1,
-        num_samples=None,
-        num_workers=1,
-        pin_memory=True)
-
-    for (x, y) in test_dl:
-        for i, img in enumerate(x):
-            print(img.shape)
-            img_n = img.cpu().numpy().squeeze()
-            # plt.title('./{}={}.png'.format(i, str(y[i].item())))
-            # plt.imshow(img_n)
-            # plt.show()
-            # plt.imsave('./{}={}.png'.format(i, str(y[i].item())), img_n)
-
-        break

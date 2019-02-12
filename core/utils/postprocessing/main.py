@@ -1,30 +1,7 @@
 import glob
-from tqdm import tqdm
 
-from bags2csvs import *
-from dfs2dataset import *
 from config import Config
-import time
+from PostProcessingPipeline import PostProcessingPipeline
 
-
-class PostProcessingPipeline():
-    def __call__(self, bags):
-        start = time.time()
-
-
-        print('starting with {} bags in {}'.format(len(bags), Config.BAG_FOLDER))
-
-        stage = bags2dfs(bags)
-        stage = dfs2traversability_df(stage)
-        stage = traversability_dfs2patches(stage)
-
-        result = list(tqdm(stage, total=len(bags)))
-
-        print('processed {} bags file in {:.2f}s'.format(len(bags),
-                                                        time.time() - start))
-
-        return result
-
-if __name__ == '__main__':
-    post_p_pip = PostProcessingPipeline()
-    post_p_pip(bags = glob.glob(Config.BAG_FOLDER + '/**/*.bag'))
+post_p_pip = PostProcessingPipeline()
+post_p_pip(bags = glob.glob(Config.BAG_FOLDER + '/**/*.bag'))
