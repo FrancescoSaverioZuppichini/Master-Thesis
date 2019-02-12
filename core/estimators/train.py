@@ -31,7 +31,7 @@ params = {'epochs': 100,
           'lr': 0.001,
           'batch_size': 128,
           'model': 'omar',
-          'dataset': '100-100-0.09-25-correct',
+          'dataset': '100-50-0.09-25-correct',
           'test_dataset': '100-100-0.09-25-querry',
           'sampler': None,
           'samper_type': 'sample',
@@ -48,7 +48,7 @@ if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
 model = OmarCNN()
 # model = MicroResnet.micro(1,
 #                           n_classes=2,
-#                           block=[BasicBlock, BasicBlock, BasicBlock, BasicBlockSE],
+#                           block=[BasicBlock, BasicBlock, BasicBlock, BasicBlock],
 #                           preactivated=True)
 # print(model)
 
@@ -60,14 +60,14 @@ criterion = CrossEntropyFlat()
 train_dl, val_dl, test_dl = get_dataloaders(train_root='/home/francesco/Desktop/data/train/dataset/{}'.format(params['dataset']),
                                     test_root='/home/francesco/Desktop/data/test/dataset/{}'.format(params['test_dataset']),
                                     val_size=0.15,
-                                    transform=get_transform( scale=10),
-                                    train_transform=get_train_transform(),
+                                    transform=get_transform(params['resize'], scale=10),
+                                    train_transform=get_train_transform(params['resize']),
                                     num_samples=params['sampler'],
                                     batch_size=params['batch_size'],
                                     num_workers=16,
                                     pin_memory=True)
 
-data = DataBunch(train_dl=train_dl, valid_dl=test_dl, test_dl=test_dl)
+data = DataBunch(train_dl=train_dl, valid_dl=val_dl, test_dl=test_dl)
 
 print("train size={}, val size={}, test size={}".format(
     len(train_dl) * params['batch_size'],
@@ -92,8 +92,8 @@ learner = Learner(data=data,
 model_name_acc = '{}-{}-{}-{}-accuracy'.format(params['model'], params['dataset'], params['lr'],  params['resize'])
 model_name_loss = '{}-{}-{}-{}-loss'.format(params['model'], params['dataset'], params['lr'],  params['resize'])
 
-callbacks = [ReduceLROnPlateauCallback(learn=learner, patience=5),
-            EarlyStoppingCallback(learn=learner, patience=10),
+callbacks = [ReduceLROnPlateauCallback(learn=learner, patience=10),
+            EarlyStoppingCallback(learn=learner, patience=999),
             SaveModelCallback(learn=learner, name=model_name_acc, monitor='accuracy'),
             SaveModelCallback(learn=learner, name=model_name_loss)]
 try:

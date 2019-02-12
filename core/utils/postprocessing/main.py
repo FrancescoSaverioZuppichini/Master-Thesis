@@ -8,10 +8,9 @@ import time
 
 
 class PostProcessingPipeline():
-    def __call__(self, bags_dir):
+    def __call__(self, bags):
         start = time.time()
 
-        bags = glob.glob(Config.BAG_FOLDER + '/**/*.bag')
 
         print('starting with {} bags in {}'.format(len(bags), Config.BAG_FOLDER))
 
@@ -28,4 +27,4 @@ class PostProcessingPipeline():
 
 if __name__ == '__main__':
     post_p_pip = PostProcessingPipeline()
-    post_p_pip(Config.BAG_FOLDER)
+    post_p_pip(bags = glob.glob(Config.BAG_FOLDER + '/**/*.bag'))

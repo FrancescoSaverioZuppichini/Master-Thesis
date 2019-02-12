@@ -2,15 +2,20 @@ import random
 import torch
 
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 
+from imgaug import augmenters as iaa
 from torch.utils.data import DataLoader, random_split, RandomSampler
 from torchvision.transforms import *
 from torchvision.datasets import ImageFolder
 
-from imgaug import augmenters as iaa
-import seaborn as sns
+random.seed(0)
 
 class ImgaugWrapper():
+    """
+    Wrapper for imgaug
+    """
     def __init__(self, aug):
         self.aug = aug
 
@@ -23,7 +28,6 @@ class ImgaugWrapper():
 
         return x_aug.reshape((w, h, 1))
 
-
 aug = iaa.Sometimes(0.9,
                     iaa.SomeOf((2, 3),
                                [
@@ -34,15 +38,6 @@ aug = iaa.Sometimes(0.9,
 
                                ], random_order=True)
                     )
-
-import matplotlib.pyplot as plt
-
-random.seed(0)
-
-TRAIN_SIZE = 0.8
-TEST_SIZE = 0.2
-BATCH_SIZE = 128
-
 
 class SampleSampler(RandomSampler):
     def __iter__(self):
@@ -59,58 +54,49 @@ class EveryNSampler(RandomSampler):
 
 
 class CenterAndScalePatch():
+    """
+    This class is used to center in the middle and rescale a given
+    patch. We need to center the patch to the middle in order to
+    decouple the root position from the classification task. Also,
+    depending on the map, we need to multiply the patch by a scaling factor.
+    """
+
     def __init__(self, scale=1.0):
         self.scale = scale
 
-    def __call__(self, x):
-        # img_n = x.cpu().numpy().squeeze()
-        # plt.title('no')
-        # sns.heatmap(img_n)
-        # plt.show()
+    def show_heatmap(self, tensor, title):
+        fig = plt.figure(figsize=(10, 10), dpi=100)
+        plt.title(title)
+        img_n = x.cpu().numpy().squeeze()
+        sns.heatmap(img_n,
+                    annot=True,
+                    linewidths=.5,
+                    fmt='0.2f')
 
-        # fig = plt.figure(figsize=(10, 10), dpi=100)
-        # plt.title('original')
-        # img_n = x.cpu().numpy().squeeze()
-        # sns.heatmap(img_n,
-        #             annot=True,
-        #             linewidths=.5,
-        #             fmt='0.2f')
+    def __call__(self, x, debug=False):
+        if debug: self.show_heatmap(x, 'original')
 
         x = x.squeeze()
-        # print(x[x.shape[0] // 2, x.shape[1] // 2])
-        # center = x[x.shape[0] // 2, x.shape[1] // 2].item()
         x -= x[x.shape[0] // 2, x.shape[1] // 2].item()
         x = x.unsqueeze(0)
 
-
-        # fig = plt.figure(figsize=(10,10), dpi=100)
-        # plt.title('centered')
-        #
-        # img_n = x.cpu().numpy().squeeze()
-        # sns.heatmap(img_n,
-        #             annot=True,
-        #             linewidths=.5,
-        #             fmt='.2f')
-        # plt.show()
+        if debug: self.show_heatmap(x, 'center')
 
         return x * self.scale
 
 
-def get_transform(scale):
-    return Compose([Grayscale(), ToTensor(), CenterAndScalePatch(scale)])
+def get_transform(resize, scale):
+    return Compose([Grayscale(), Resize((resize, resize)), ToTensor(), CenterAndScalePatch(scale)])
 
 
-def get_train_transform():
-    return Compose([Grayscale(), ToTensor(), CenterAndScalePatch()])
+def get_train_transform(resize):
+    return Compose([Grayscale(), Resize((resize, resize)), ToTensor(), CenterAndScalePatch()])
 
 
 def get_dataloaders(train_root, test_root, val_size=0.2, num_samples=None, transform=None, train_transform=None, *args,
                     **kwargs):
     """
-    Get train, val and test dataloader. Due to the specific task,
-    we cannot apply data-augmentation (vlip, hflip, gamma...).
-    The test set is composed entirely by maps never seen by
-    the model in the train set.
+    Get train, val and test dataloader.
     :return: train, val and test dataloaders
     """
 
@@ -155,7 +141,6 @@ if __name__ == '__main__':
         pin_memory=True)
 
     for (x, y) in test_dl:
-        break
         for i, img in enumerate(x):
             print(img.shape)
             img_n = img.cpu().numpy().squeeze()
