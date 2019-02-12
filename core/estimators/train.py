@@ -31,15 +31,15 @@ params = {'epochs': 100,
           'lr': 0.001,
           'batch_size': 128,
           'model': 'omar',
-          'dataset': '100-50-0.09-25-correct',
-          'test_dataset': '100-50-0.09-25-querry',
+          'dataset': '100-100-0.09-25-correct',
+          'test_dataset': '100-100-0.09-25-querry',
           'sampler': None,
           'samper_type': 'sample',
           'callbacks': '[ReduceLROnPlateauCallback]',
           'data-aug': 'None',
           'optim': 'adam',
           'info': 'remove',
-          'resize': 50 }
+          'resize': 100 }
 
 if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
 
@@ -92,8 +92,8 @@ learner = Learner(data=data,
 model_name_acc = '{}-{}-{}-{}-accuracy'.format(params['model'], params['dataset'], params['lr'],  params['resize'])
 model_name_loss = '{}-{}-{}-{}-loss'.format(params['model'], params['dataset'], params['lr'],  params['resize'])
 
-callbacks = [ReduceLROnPlateauCallback(learn=learner, patience=3),
-            EarlyStoppingCallback(learn=learner, patience=5),
+callbacks = [ReduceLROnPlateauCallback(learn=learner, patience=5),
+            EarlyStoppingCallback(learn=learner, patience=10),
             SaveModelCallback(learn=learner, name=model_name_acc, monitor='accuracy'),
             SaveModelCallback(learn=learner, name=model_name_loss)]
 try:

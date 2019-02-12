@@ -8,7 +8,7 @@ from torchvision.transforms import *
 from torchvision.datasets import ImageFolder
 
 from imgaug import augmenters as iaa
-
+import seaborn as sns
 
 class ImgaugWrapper():
     def __init__(self, aug):
@@ -61,8 +61,38 @@ class EveryNSampler(RandomSampler):
 class CenterAndScalePatch():
     def __init__(self, scale=1.0):
         self.scale = scale
+
     def __call__(self, x):
-        # x = x - x[x.shape[0] // 2, x.shape[1] // 2]
+        # img_n = x.cpu().numpy().squeeze()
+        # plt.title('no')
+        # sns.heatmap(img_n)
+        # plt.show()
+
+        # fig = plt.figure(figsize=(10, 10), dpi=100)
+        # plt.title('original')
+        # img_n = x.cpu().numpy().squeeze()
+        # sns.heatmap(img_n,
+        #             annot=True,
+        #             linewidths=.5,
+        #             fmt='0.2f')
+
+        x = x.squeeze()
+        # print(x[x.shape[0] // 2, x.shape[1] // 2])
+        # center = x[x.shape[0] // 2, x.shape[1] // 2].item()
+        x -= x[x.shape[0] // 2, x.shape[1] // 2].item()
+        x = x.unsqueeze(0)
+
+
+        # fig = plt.figure(figsize=(10,10), dpi=100)
+        # plt.title('centered')
+        #
+        # img_n = x.cpu().numpy().squeeze()
+        # sns.heatmap(img_n,
+        #             annot=True,
+        #             linewidths=.5,
+        #             fmt='.2f')
+        # plt.show()
+
         return x * self.scale
 
 
@@ -107,29 +137,31 @@ def get_dataloaders(train_root, test_root, val_size=0.2, num_samples=None, trans
     test_ds = ImageFolder(root=test_root,
                           transform=transform)
 
-    test_dl = DataLoader(test_ds, shuffle=True, *args, **kwargs)
+    test_dl = DataLoader(test_ds, shuffle=False, *args, **kwargs)
 
     return train_dl, val_dl, test_dl
 
 
 if __name__ == '__main__':
     train_dl, val_dl, test_dl = get_dataloaders(
-        train_root='/home/francesco/Desktop/data/train/dataset/{}'.format('100-100-0.09-12-06-02-19'),
-        test_root='/home/francesco/Desktop/data/test/dataset/{}'.format('100-100-0.09-12-querry'),
+        train_root='/home/francesco/Desktop/data/train/dataset/{}'.format('100-50-0.09-25-correct'),
+        test_root='/home/francesco/Desktop/data/test/dataset/{}'.format('100-50-0.09-25-querry'),
         val_size=0,
-        train_transform=get_train_transform(100),
-        transform=get_transform(100),
-        batch_size=20,
+        train_transform=get_train_transform(),
+        transform=get_transform(10),
+        batch_size=1,
         num_samples=None,
-        num_workers=16,
+        num_workers=1,
         pin_memory=True)
 
     for (x, y) in test_dl:
+        break
         for i, img in enumerate(x):
             print(img.shape)
             img_n = img.cpu().numpy().squeeze()
-            plt.imshow(img_n)
+            # plt.title('./{}={}.png'.format(i, str(y[i].item())))
+            # plt.imshow(img_n)
             # plt.show()
-            plt.imsave('./{}={}.png'.format(i, str(y[i].item())), img_n)
+            # plt.imsave('./{}={}.png'.format(i, str(y[i].item())), img_n)
 
         break
