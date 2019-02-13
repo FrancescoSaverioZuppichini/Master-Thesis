@@ -10,12 +10,6 @@ from config import Config
 from pypeln import thread as th
 import matplotlib.pyplot as plt
 import cv2
-<<<<<<< HEAD
-=======
-import time
-from math import floor
-# from parser import args
->>>>>>> 6030c595b4996e69b58d503e238b917aa288baf7
 
 P_X_KEY = 'pose__pose_position_x'
 P_Y_KEY = 'pose__pose_position_y'
@@ -24,7 +18,6 @@ P_Z_KEY = 'pose__pose_position_z'
 O_W_E_KEY = 'pose__pose_e_orientation_z'
 
 RESOLUTION = 0.02
-<<<<<<< HEAD
 TRANSLATION = [5, 5]  # the map in webots is always shitted by 5,5
 
 
@@ -50,17 +43,6 @@ def df_add_advancement(df, dt):
     :param dt:
     :return:
     """
-=======
-TRANSLATION = [5,5]
-
-def df_add_hm_coords(df, hm):
-    # the map in webots is always shitted by 5,5
-    df[['hm_x','hm_y']] = df.apply(lambda x: to_hm_coordinates(x, hm, RESOLUTION, TRANSLATION),
-               axis=1)
-    return df
-
-def df_add_advancement(df, dt):
->>>>>>> 6030c595b4996e69b58d503e238b917aa288baf7
     # get out the cos and sin component from the euler's w angle
     df["S_oX"] = np.cos(df[O_W_E_KEY].values)
     df["S_oY"] = np.sin(df[O_W_E_KEY].values)
@@ -72,7 +54,6 @@ def df_add_advancement(df, dt):
     # compute euclidean distance
     df["S_d"] = np.linalg.norm(df[["S_dX", "S_dY"]], axis=1)
     # project x and y in the current line and compute the advancement
-<<<<<<< HEAD
     df["advancement"] = np.einsum('ij,ij->i', df[["S_dX", "S_dY"]], df[["S_oX", "S_oY"]])  # row-wise dot product
 
     return df
@@ -98,30 +79,11 @@ def df_clean_by_dropping(df, max_x, max_y):
     df = df.loc[df['pose__pose_e_orientation_y'] <= 2.0].dropna()
 
     # TODO we can use hm_x and hm_y instead!
-=======
-    df["advancement"] =  np.einsum('ij,ij->i', df[["S_dX", "S_dY"]], df[["S_oX", "S_oY"]])  # row-wise dot product
-
-    return df
-
-def df_clean_by_dropping(df, max_x, max_y):
-    # skip the first two seconds and any row with nans (i.e. end of the dataset)
-    df = df.loc[df.index >= 2].dropna()
-    df = df.loc[df.index <= 18].dropna()  # drop also the last two seconds (if run is 20s, < 18)
-
-    # drop the frames where the robot is upside down (orientation alpha angle [euler's angles]) to avoid false positives
-    df = df.loc[df['pose__pose_e_orientation_x'] >= -2.0].dropna()
-    df = df.loc[df['pose__pose_e_orientation_x'] <= 2.0].dropna()
-
-    df = df.loc[df['pose__pose_e_orientation_y'] >= -2.0].dropna()
-    df = df.loc[df['pose__pose_e_orientation_y'] <= 2.0].dropna()
-    # # TODO not sure if this is okay also for the querry map
->>>>>>> 6030c595b4996e69b58d503e238b917aa288baf7
     # df = df.loc[(df[P_Y_KEY] < max_x - 5) & (df[P_Y_KEY] > -5.1)].dropna()
     # df = df.loc[(df[P_Y_KEY] < max_y - 5) & (df[P_Y_KEY] > -5.1)].dropna()
 
     return df
 
-<<<<<<< HEAD
 
 def df_add_label(df, advancement_th):
     """
@@ -143,13 +105,6 @@ def traversability_df2patches(data):
     :param data:
     :return:
     """
-=======
-def df_add_label(df, advancement_th):
-    df["label"] = df["advancement"] > advancement_th
-    return df
-
-def traversability_df2patches(data):
->>>>>>> 6030c595b4996e69b58d503e238b917aa288baf7
     df, hm, file_path = data
     dirs, name = path.split(file_path)
     name, _ = os.path.splitext(name)
@@ -161,45 +116,32 @@ def traversability_df2patches(data):
 
     # reset the index to int so we can take only on row every Config.SKIP_EVERY
     # since the stored rate was really high, 250hz, we will end up with lots of almost
-<<<<<<< HEAD
     # identical patches
-=======
-    # identical paths
->>>>>>> 6030c595b4996e69b58d503e238b917aa288baf7
     df = df.reset_index()
     df = df.loc[list(range(0, len(df), Config.SKIP_EVERY)), :]
     df = df.set_index(df.columns[0])
 
     for idx, (i, row) in enumerate(df.iterrows()):
-<<<<<<< HEAD
         patch = hmpatch(hm, row["hm_x"], row["hm_y"], np.rad2deg(row[O_W_E_KEY]), Config.PATCH_SIZE, scale=1)[0]
-=======
-        patch = hmpatch(hm,row["hm_x"],row["hm_y"],np.rad2deg(row[O_W_E_KEY]),Config.PATCH_SIZE,scale=1)[0]
-        # center the z of the path to the robot z
-        patch = patch - patch[patch.shape[0] // 2, patch.shape[1] // 2]
->>>>>>> 6030c595b4996e69b58d503e238b917aa288baf7
         patch = (patch * 255).astype(np.uint8)
         cv2.imwrite('{}/{}/{}.png'.format(out_dir, row['label'], row['timestamp']), patch)
 
     return data
 
-<<<<<<< HEAD
+
+def dfs2patches(data):
+    stage = th.map(traversability_df2patches, data, workers=Config.WORKERS)
+    data = list(stage)
+    return data
+
 
 def traversability_dfs2patches(data):
     stage = th.map(traversability_df2patches, data, workers=Config.WORKERS)
+
     return stage
 
 
-def df2traversability_df(data, restore=True):
-    """
-    Convert the given dataframes to a traversability dataframe that is composed by
-    - index set to the time starting by zero
-    - rotation expressed in euler form
-    - advancement column
-    :param data: dataframe, name of the map and the file path
-    :param restore: if True, then if there is a .csv store in the file_path, it will be directly used
-    :return:
-    """
+def df2traversability_df(data):
     df, map_name, file_path = data
 
     def make_path(file_path):
@@ -212,16 +154,16 @@ def df2traversability_df(data, restore=True):
     hm = read_image(map_path)
     file_path = make_path(file_path)
 
-    if path.isfile(file_path) and restore:
+    if path.isfile(file_path):
         print('file exist, loading...')
-        df = pd.read_csv(file_path)  # load the already generated csv
+        df = pd.read_csv(file_path)
     else:
         df = df_convert_date2timestamp(df)
         df = df_convert_quaterion2euler(df)
         df = df_clean_by_dropping(df, hm.shape[0] * RESOLUTION, hm.shape[1] * RESOLUTION)
-
-        if len(df) > 0:  # it may happened that we remove all the rows from the df
+        if len(df) > 0:
             df = df_add_hm_coords(df, hm)
+            # df = df_add_advancement(df, Config.TIME_WINDOW // Config.SKIP_EVERY)
             df = df_add_advancement(df, Config.TIME_WINDOW)
             df = df_add_label(df, Config.ADVANCEMENT_TH)
 
@@ -235,49 +177,3 @@ def df2traversability_df(data, restore=True):
 def dfs2traversability_df(data):
     stage = th.map(df2traversability_df, data, workers=Config.WORKERS)
     return stage
-=======
-def dfs2patches(data):
-    stage = th.map(traversability_df2patches, data, workers=Config.WORKERS)
-    data = list(stage)
-    return data
-
-
-def traversability_dfs2patches(data):
-    stage = th.map(traversability_df2patches, data, workers=Config.WORKERS)
-
-    return stage
-
-def df2traversability_df(data):
-    df, map_name, file_path = data
-    map_name = filename2map(file_path)
-    map_path = '{}/{}.png'.format(Config.MAPS_FOLDER, map_name)
-    hm  = read_image(map_path)
-    # df = df_add_dist_velocity(df)
-    # Config.TIME_WINDOW //= Config.SKIP_EVERY
-    df = df_convert_date2timestamp(df)
-    df = df_convert_quaterion2euler(df)
-    df = df_clean_by_dropping(df, hm.shape[0] * RESOLUTION, hm.shape[1] * RESOLUTION)
-    if len(df) > 0:
-
-        df = df_add_hm_coords(df, hm)
-        # df = df_add_advancement(df, Config.TIME_WINDOW // Config.SKIP_EVERY)
-        df = df_add_advancement(df, Config.TIME_WINDOW)
-
-        df = df_add_label(df, Config.ADVANCEMENT_TH)
-
-        def make_path(file_path):
-            splitted = file_path.split('/')
-            map_name, file_name = splitted[-2], splitted[-1]
-
-            return path.normpath('{}/{}/{}'.format(Config.CSV_FOLDER, map_name, path.splitext(file_name)[0] + '.csv'))
-        # TODO add flag to decide if store the csv or not
-        file_path = make_path(file_path)
-        os.makedirs(path.dirname(file_path), exist_ok=True)
-        df.to_csv(file_path)
-
-    return df, hm, file_path
-
-def dfs2traversability_df(data):
-    stage = th.map(df2traversability_df, data, workers=Config.WORKERS)
-    return stage
->>>>>>> 6030c595b4996e69b58d503e238b917aa288baf7
