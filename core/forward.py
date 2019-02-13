@@ -24,9 +24,10 @@ print('Initial observations:')
 pprint.pprint(init_obs)
 
 print(env.x, env.y)
-initial_pose = [[0,0,0.1],[0,1,0,-1.57]]
+pose = [[0,0,0.1],[0,1,0,-1.57]]
+
 while True:
-    env.reset()
+    env.reset(pose=pose)
     for _ in range(200000):
         obs, r, done, _ = env.step(env.STOP)
         pprint.pprint(obs)
