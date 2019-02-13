@@ -85,25 +85,20 @@ class WebotsEnv(gym.Env, Supervisor):
 
         random_pose.position.z = h + 0.5
         qto = transformations.quaternion_from_euler(0, 0, 2 * np.pi * np.random.uniform(0, 1), axes='sxyz')
-        random_pose.orientation.x = qto[0]
-        random_pose.orientation.y = qto[1]
-        random_pose.orientation.z = qto[2]
-        random_pose.orientation.w = qto[3]
-        return random_pose
 
-    def spawn(self, agent, position=NOne, *args, **kwargs):
-        if type(pos) is list: pos = Pose
+        position = [rx, ry, h]
 
-        pos = self.random_position if pos == None else pos
+        return position, qto
 
-        self.set_robot_position(x=pos.position.x,
-                                y=pos.position.z,
-                                z=pos.position.y)
 
-        self.set_robot_orientation(x=pos.orientation.x,
-                                   y=pos.orientation.z,
-                                   z=pos.orientation.y,
-                                   w=pos.orientation.w)
+    def spawn(self, agent, pose=None, *args, **kwargs):
+        pose = self.random_position if pose == None else pose
+
+        position, orientation = pose
+
+        self.set_robot_position(*position)
+
+        self.set_robot_orientation(*orientation)
 
         self.reset_node_physics(self.robot_node)
 
