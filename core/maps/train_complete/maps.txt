@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 bars2.png
 bars3.png
 bumps1.png
@@ -8,19 +7,12 @@ bumps4.png
 bumps5.png
 bumps6.png
 custom1.png
-=======
-bars1.png
-bumps1.png
-bumps2.png
-bumps3.png
->>>>>>> 6030c595b4996e69b58d503e238b917aa288baf7
 holes1.png
 holes2.png
 holes3.png
 maps.txt
 rails1.png
 rails2.png
-<<<<<<< HEAD
 rails3.png
 rails4.png
 rails5.png
@@ -36,11 +28,3 @@ steps2.png
 steps3.png
 steps4.png
 steps5.png
-=======
-slope_rocks1.png
-slope_rocks2.png
-slope_rocks3.png
-steps1.png
-steps2.png
-steps3.png
->>>>>>> 6030c595b4996e69b58d503e238b917aa288baf7

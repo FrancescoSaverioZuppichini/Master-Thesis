@@ -30,6 +30,7 @@ torch.manual_seed(0)
 params = {'epochs': 100,
           'lr': 0.001,
           'batch_size': 128,
+<<<<<<< HEAD
           'model': 'omar',
           'dataset': '100-50-0.09-25-correct',
           'test_dataset': '100-100-0.09-25-querry',
@@ -37,6 +38,15 @@ params = {'epochs': 100,
           'samper_type': 'sample',
           'callbacks': '[ReduceLROnPlateauCallback]',
           'data-aug': 'None',
+=======
+          'model': 'romar',
+          'dataset': '100-100-0.09-12-06-02-19',
+          'test_dataset': '100-100-0.09',
+          'sampler': None,
+          'samper_type': 'sample',
+          'callbacks': '[ReduceLROnPlateauCallback]',
+          'data-aug': 'noise+dropout+coarse-dropout',
+>>>>>>> 6030c595b4996e69b58d503e238b917aa288baf7
           'optim': 'adam',
           'info': 'remove',
           'resize': 100 }
@@ -45,6 +55,7 @@ if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
 
 
 
+<<<<<<< HEAD
 model = OmarCNN()
 # model = MicroResnet.micro(1,
 #                           n_classes=2,
@@ -52,6 +63,21 @@ model = OmarCNN()
 #                           preactivated=True)
 # print(model)
 
+=======
+# model = OmarCNN()
+model = MicroResnet.micro(1,
+                          n_classes=2,
+                          block=[BasicBlock, BasicBlock, BasicBlock, BasicBlock],
+                          preactivated=True)
+# print(model)
+
+# model = resnet34(True)
+# model.conv1 = torch.nn.Conv2d(1, 64, kernel_size=7, stride=2, padding=3,
+#                        bias=False)
+# model.requires_grads = False
+# model.fc = torch.nn.Linear(512, 2)
+
+>>>>>>> 6030c595b4996e69b58d503e238b917aa288baf7
 
 summary(model.cuda(), (1, params['resize'], params['resize']))
 
@@ -59,15 +85,24 @@ criterion = CrossEntropyFlat()
 
 train_dl, val_dl, test_dl = get_dataloaders(train_root='/home/francesco/Desktop/data/train/dataset/{}'.format(params['dataset']),
                                     test_root='/home/francesco/Desktop/data/test/dataset/{}'.format(params['test_dataset']),
+<<<<<<< HEAD
                                     val_size=0.15,
                                     transform=get_transform(params['resize'], scale=10),
+=======
+                                    val_size=0,
+                                    transform=get_transform(params['resize']),
+>>>>>>> 6030c595b4996e69b58d503e238b917aa288baf7
                                     train_transform=get_train_transform(params['resize']),
                                     num_samples=params['sampler'],
                                     batch_size=params['batch_size'],
                                     num_workers=16,
                                     pin_memory=True)
 
+<<<<<<< HEAD
 data = DataBunch(train_dl=train_dl, valid_dl=val_dl, test_dl=test_dl)
+=======
+data = DataBunch(train_dl=train_dl, valid_dl=test_dl, test_dl=test_dl)
+>>>>>>> 6030c595b4996e69b58d503e238b917aa288baf7
 
 print("train size={}, val size={}, test size={}".format(
     len(train_dl) * params['batch_size'],
@@ -86,23 +121,40 @@ learner = Learner(data=data,
                   path='/home/francesco/Desktop/carino/vaevictis/data/',
                   model_dir='/home/francesco/Desktop/carino/vaevictis/data/',
                   loss_func=criterion,
+<<<<<<< HEAD
                   # opt_func= partial(torch.optim.SGD, momentum=0.95, weight_decay=1e-4),
+=======
+                  opt_func= partial(torch.optim.SGD, momentum=0.95, weight_decay=1e-4),
+>>>>>>> 6030c595b4996e69b58d503e238b917aa288baf7
                   metrics=[accuracy])
 
 model_name_acc = '{}-{}-{}-{}-accuracy'.format(params['model'], params['dataset'], params['lr'],  params['resize'])
 model_name_loss = '{}-{}-{}-{}-loss'.format(params['model'], params['dataset'], params['lr'],  params['resize'])
 
+<<<<<<< HEAD
 callbacks = [ReduceLROnPlateauCallback(learn=learner, patience=10),
             EarlyStoppingCallback(learn=learner, patience=999),
+=======
+callbacks = [ReduceLROnPlateauCallback(learn=learner, patience=5),
+            EarlyStoppingCallback(learn=learner, patience=99),
+>>>>>>> 6030c595b4996e69b58d503e238b917aa288baf7
             SaveModelCallback(learn=learner, name=model_name_acc, monitor='accuracy'),
             SaveModelCallback(learn=learner, name=model_name_loss)]
 try:
     with experiment.train():
+<<<<<<< HEAD
         # learner.fit(epochs=params['epochs'], lr=0.001, callbacks=callbacks) # SaveModelCallback load the best model after training!
         # model.requires_grad = True
         # learner.fit(10, lr=0.0001, callbacks=callbacks) # SaveModelCallback load the best model after training!
 
         learner.fit(epochs=params['epochs'], lr=params['lr'], callbacks=callbacks) # SaveModelCallback load the best model after training!
+=======
+        learner.fit(epochs=20, lr=0.001, callbacks=callbacks) # SaveModelCallback load the best model after training!
+        # model.requires_grad = True
+        # learner.fit(10, lr=0.0001, callbacks=callbacks) # SaveModelCallback load the best model after training!
+
+        # learner.fit(epochs=params['epochs'], lr=params['lr'], callbacks=callbacks) # SaveModelCallback load the best model after training!
+>>>>>>> 6030c595b4996e69b58d503e238b917aa288baf7
 except Exception as e:
     print(e)
     pass
