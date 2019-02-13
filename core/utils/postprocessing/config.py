@@ -4,21 +4,14 @@ class Config:
     # BASE_DIR = '/home/francesco/Desktop/carino/vaevictis/data/test/'
     BAG_FOLDER = BASE_DIR + 'bags/'
     CSV_FOLDER = BASE_DIR + 'csvs/'
-<<<<<<< HEAD
     MAPS_FOLDER = '/home/francesco/Documents/Master-Thesis/core/maps/train/'
-=======
-    MAPS_FOLDER = BASE_DIR + '/maps/'
->>>>>>> 6030c595b4996e69b58d503e238b917aa288baf7
+
     PATCH_SIZE = 100
     ADVANCEMENT_TH = 0.09
     TIME_WINDOW = 100
     HEIGHT_SCALE_FACTOR = 1
     SKIP_EVERY = 12
-<<<<<<< HEAD
-    DATASET_FOLDER = '/home/francesco/Desktop/data/train/' + 'dataset/{}-{}-{}-{}-correct'.format(100,
-=======
     DATASET_FOLDER = '/home/francesco/Desktop/data/train/' + 'dataset/{}-{}-{}-{}-no-trick-06-02-19'.format(100,
->>>>>>> 6030c595b4996e69b58d503e238b917aa288baf7
                                                                                          PATCH_SIZE,
                                                                                          ADVANCEMENT_TH,
                                                                                          SKIP_EVERY) # 100 = n sims

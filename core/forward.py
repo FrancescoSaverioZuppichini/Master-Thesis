@@ -4,7 +4,7 @@ import pprint
 from env.webots.krock import Krock, KrockWebotsEnv
 
 WORLD_PATH = '/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock2_ros/worlds/holes1.wbt'
-MAP = '/home/francesco/Desktop/querry-big.png'
+MAP = './maps/train/slope_rocks1.png'
 N_STEPS = 4
 
 rospy.init_node("traversability_simulation")
@@ -27,7 +27,7 @@ print(env.x, env.y)
 
 while True:
     env.reset()
-    for _ in range(200):
+    for _ in range(200000):
         obs, r, done, _ = env.step(env.GO_FORWARD)
         pprint.pprint(obs)
         if done: break

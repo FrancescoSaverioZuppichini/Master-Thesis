@@ -53,10 +53,7 @@ def show_naked_traces(dfs):
     fig = plt.figure()
     for df in dfs:
         plt.plot(df.hm_x,  df.hm_y, '--', linewidth=1, color='firebrick')
-<<<<<<< HEAD
 
-=======
->>>>>>> 6030c595b4996e69b58d503e238b917aa288baf7
 def show_traces(dfs, hm):
     fig, ax = plt.subplots()
 
