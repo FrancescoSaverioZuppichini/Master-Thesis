@@ -129,8 +129,8 @@ class KrockWebotsEnv(WebotsEnv):
                 cv2.waitKey(1)
 
 
-    def reset(self, pose=None, hard=True):
-        self.spawn(self.agent, pose=pose)
+    def reset(self, pose=None, hard=True, spawn=True):
+        if spawn: self.spawn(self.agent, pose=pose)
         # We need to re-initialise the agent since it may have lost the ROS connection
         self.agent()
         self.agent.sleep()

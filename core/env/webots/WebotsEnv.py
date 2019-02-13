@@ -92,7 +92,7 @@ class WebotsEnv(gym.Env, Supervisor):
 
 
     def spawn(self, agent, pose=None, *args, **kwargs):
-        pose = self.random_position if pose == None else pose
+        pose = self.random_position if pose is None else pose
 
         position, orientation = pose
 

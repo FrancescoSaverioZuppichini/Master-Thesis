@@ -142,7 +142,7 @@ class Supervisor:
 
         service = self.name + '/supervisor/field/set_rotation'
         set_rot = self.get_service(service, field_set_rotation)
-        rot_res = set_rot(field.field, 0, Quaternion(x, y, x, w))
+        rot_res = set_rot(field.field, 0, Quaternion(x, y, z, w))
 
         return rot_res
 
