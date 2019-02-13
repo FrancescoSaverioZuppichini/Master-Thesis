@@ -91,7 +91,9 @@ class WebotsEnv(gym.Env, Supervisor):
         random_pose.orientation.w = qto[3]
         return random_pose
 
-    def spawn(self, agent, pos=None, *args, **kwargs):
+    def spawn(self, agent, position=NOne, *args, **kwargs):
+        if type(pos) is list: pos = Pose
+
         pos = self.random_position if pos == None else pos
 
         self.set_robot_position(x=pos.position.x,
