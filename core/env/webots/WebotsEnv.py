@@ -86,9 +86,9 @@ class WebotsEnv(gym.Env, Supervisor):
         random_pose.position.z = h + 0.5
         qto = transformations.quaternion_from_euler(0, 0, 2 * np.pi * np.random.uniform(0, 1), axes='sxyz')
 
-        position = [rx, ry, h]
+        position = [rx, h + 0.5, ry]
 
-        return position, qto
+        return position, [qto[0], qto[2], qto[1], qto[3]]
 
 
     def spawn(self, agent, pose=None, *args, **kwargs):

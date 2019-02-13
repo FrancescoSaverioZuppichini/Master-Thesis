@@ -15,7 +15,7 @@ def make_env(map, args):
             makedirs(bags_map_dir, exist_ok=True)
             env = KrockWebotsEnv.from_image(
                 map,
-                path.abspath('./env/webots/krock/krock.wbt'),
+                path.abspath('./env/webots/krock/krock_no_tail.wbt'),
                 {'height': args.height,
                  'resolution': 0.02},
                 output_dir=path.abspath('./env/webots/krock/krock2_ros/worlds/'),
@@ -29,7 +29,7 @@ class SimulationPipeline():
     def __call__(self, args, **kwargs):
         rospy.init_node("traversability_simulation")
 
-
+        args.maps.reverse()
         if args.maps == None:  args.maps = [args.world]
 
         start = time.time()
@@ -41,10 +41,10 @@ class SimulationPipeline():
             env, _, bags_map_dir = make_env(map, args)
             # TODO we should store the state in order to be faulty tolerant
             for i in range(args.n_sim):
-                if i % 20 == 0:
-                    rospy.loginfo('Reanimate robot')
-                    env.reanimate()
-                env.reset()
+                # if i % 20 == 0:
+                #     rospy.loginfo('Reanimate robot')
+                #     env.reanimate()
+                env.reset(spawn=True)
                 for i in range(int(args.time)):
                     env.render()
                     obs, r, done, _ = env.step(env.GO_FORWARD)
