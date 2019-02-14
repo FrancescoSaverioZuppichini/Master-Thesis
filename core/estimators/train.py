@@ -31,7 +31,8 @@ params = {'epochs': 100,
           'lr': 0.001,
           'batch_size': 128,
           'model': 'omar',
-          'dataset': '100-50-0.09-25-correct',
+          'dataset': '100-100-0.09-12-no_tail',
+          'val_dataset': '100-100-0.09-12-no_tail',
           'test_dataset': '100-100-0.09-25-querry',
           'sampler': None,
           'samper_type': 'sample',
@@ -58,7 +59,8 @@ criterion = CrossEntropyFlat()
 
 train_dl, val_dl, test_dl = get_dataloaders(train_root='/home/francesco/Desktop/data/train/dataset/{}'.format(params['dataset']),
                                     test_root='/home/francesco/Desktop/data/test/dataset/{}'.format(params['test_dataset']),
-                                    val_size=0.15,
+                                    val_root='/home/francesco/Desktop/data/val/dataset/{}'.format(params['val_dataset']),
+                                    val_size=0,
                                     transform=get_transform(params['resize'], scale=10),
                                     train_transform=get_train_transform(params['resize']),
                                     num_samples=params['sampler'],
@@ -66,7 +68,7 @@ train_dl, val_dl, test_dl = get_dataloaders(train_root='/home/francesco/Desktop/
                                     num_workers=16,
                                     pin_memory=True)
 
-data = DataBunch(train_dl=train_dl, valid_dl=val_dl, test_dl=test_dl)
+data = DataBunch(train_dl=train_dl, valid_dl=test_dl, test_dl=test_dl)
 
 print("train size={}, val size={}, test size={}".format(
     len(train_dl) * params['batch_size'],

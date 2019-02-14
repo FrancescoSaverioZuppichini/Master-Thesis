@@ -8,14 +8,14 @@ import time
 
 
 class PostProcessingPipeline():
-    def __call__(self, bags, verbose=True):
+    def __call__(self, bags, verbose=True, patches=True):
         start = time.time()
 
         if verbose : print('starting with {} bags in {}'.format(len(bags), Config.BAG_FOLDER))
 
         stage = bags2dfs(bags)
         stage = dfs2traversability_df(stage)
-        stage = traversability_dfs2patches(stage)
+        if patches: stage = traversability_dfs2patches(stage)
 
         result = list(tqdm(stage, total=len(bags)))
 

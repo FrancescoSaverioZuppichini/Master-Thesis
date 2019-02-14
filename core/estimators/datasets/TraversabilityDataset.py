@@ -93,7 +93,7 @@ def get_train_transform(resize):
     return Compose([Grayscale(), Resize((resize, resize)), ToTensor(), CenterAndScalePatch()])
 
 
-def get_dataloaders(train_root, test_root, val_size=0.2, num_samples=None, transform=None, train_transform=None, *args,
+def get_dataloaders(train_root, test_root, val_root=None, val_size=0.2, num_samples=None, transform=None, train_transform=None, *args,
                     **kwargs):
     """
     Get train, val and test dataloader.
@@ -103,12 +103,17 @@ def get_dataloaders(train_root, test_root, val_size=0.2, num_samples=None, trans
     train_transform = transform if train_transform is None else train_transform
 
     print(train_transform)
-    ds = ImageFolder(root=train_root,
+    train_ds = ImageFolder(root=train_root,
                      transform=train_transform)
 
-    train_size = int(len(ds) * (1 - val_size))
+    train_size = int(len(train_ds) * (1 - val_size))
 
-    train_ds, val_ds = random_split(ds, [train_size, len(ds) - train_size])
+    if val_root is None: train_ds, val_ds = random_split(train_ds, [train_size, len(train_ds) - train_size])
+
+    else:
+        val_ds = ImageFolder(root=val_root,
+                               transform=transform)
+
 
     if num_samples is not None:
         train_dl = DataLoader(train_ds,

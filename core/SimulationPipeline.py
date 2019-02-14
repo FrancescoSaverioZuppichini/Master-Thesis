@@ -29,8 +29,7 @@ class SimulationPipeline():
     def __call__(self, args, **kwargs):
         rospy.init_node("traversability_simulation")
 
-        args.maps.reverse()
-        if args.maps == None:  args.maps = [args.world]
+        if args.maps is None:  args.maps = [args.world]
 
         start = time.time()
 

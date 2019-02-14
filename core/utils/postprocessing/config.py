@@ -1,17 +1,17 @@
 class Config:
     WORKERS = 16
-    BASE_DIR = '/home/francesco/Desktop/carino/vaevictis/data/train/'
+    BASE_DIR = '/home/francesco/Desktop/carino/vaevictis/data/train_no_tail/val/'
     # BASE_DIR = '/home/francesco/Desktop/carino/vaevictis/data/test/'
     BAG_FOLDER = BASE_DIR + 'bags/'
     CSV_FOLDER = BASE_DIR + 'csvs/'
-    MAPS_FOLDER = '/home/francesco/Documents/Master-Thesis/core/maps/train/'
+    MAPS_FOLDER = '/home/francesco/Documents/Master-Thesis/core/maps/val/'
 
     PATCH_SIZE = 100
     ADVANCEMENT_TH = 0.09
-    TIME_WINDOW = 100
+    TIME_WINDOW = 125
     HEIGHT_SCALE_FACTOR = 1
     SKIP_EVERY = 12
-    DATASET_FOLDER = '/home/francesco/Desktop/data/train/' + 'dataset/{}-{}-{}-{}-no-trick-06-02-19'.format(100,
+    DATASET_FOLDER = '/home/francesco/Desktop/data/val/' + 'dataset/{}-{}-{}-{}-no_tail'.format(100,
                                                                                          PATCH_SIZE,
                                                                                          ADVANCEMENT_TH,
                                                                                          SKIP_EVERY) # 100 = n sims
