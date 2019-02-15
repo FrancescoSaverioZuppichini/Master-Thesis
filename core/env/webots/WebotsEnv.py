@@ -69,6 +69,18 @@ class WebotsEnv(gym.Env, Supervisor):
 
         self.terrain = Node.from_def(self.name, 'TERRAIN')
 
+    def get_height(self, x, y):
+        # to get the 2d index in 1d matrix x + width * y
+        x = x + abs(self.translation.x) // self.x_spac
+        y = y + abs(self.translation.z) // self.y_spac
+
+
+        idx = int(x  + (self.x_dim * y))
+
+        h = self.grid['height'][idx].value
+
+        return h
+
     @property
     def random_position(self):
         rx = np.random.uniform(*self.x)
@@ -77,11 +89,7 @@ class WebotsEnv(gym.Env, Supervisor):
         random_pose = Pose()
         random_pose.position.x = rx
         random_pose.position.y = ry
-        # to get the 2d index in 1d matrix x + width * y
-        idx = int(
-            ((rx + abs(self.translation.x)) // self.x_spac) + (1600 * ((ry + abs(self.translation.z)) // self.y_spac)))
-
-        h = self.grid['height'][idx].value
+        h = self.get_height(rx, ry)
 
         random_pose.position.z = h + 0.5
         qto = transformations.quaternion_from_euler(0, 0, 2 * np.pi * np.random.uniform(0, 1), axes='sxyz')

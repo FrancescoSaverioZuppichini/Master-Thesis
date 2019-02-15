@@ -1,7 +1,10 @@
+import glob
+
 from os import makedirs
 from agent.callbacks import *
 from env.webots.krock.KrockWebotsEnv import KrockWebotsEnv
-import glob
+from env.spawn.SpawnStragety import FlatGroundSpawnStrategy
+from env.spawn import spawn_points2webots_pose
 
 def make_env(map, args):
     agent = None
@@ -38,12 +41,15 @@ class SimulationPipeline():
 
         for map in args.maps:
             env, _, bags_map_dir = make_env(map, args)
+            spawn_strategy = FlatGroundSpawnStrategy(map)
+            spawn_points = spawn_strategy(k=args.n_sim, tol=1e-2, size=45)
+
             # TODO we should store the state in order to be faulty tolerant
             for i in range(args.n_sim):
-                # if i % 20 == 0:
-                #     rospy.loginfo('Reanimate robot')
-                #     env.reanimate()
-                env.reset(spawn=True)
+                spawn_point = spawn_points[0]
+                if i < len(spawn_points): spawn_point = spawn_points[i]
+
+                env.reset(pose=spawn_points2webots_pose(spawn_point, env))
                 for i in range(int(args.time)):
                     env.render()
                     obs, r, done, _ = env.step(env.GO_FORWARD)
