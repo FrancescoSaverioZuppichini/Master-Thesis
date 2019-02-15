@@ -117,7 +117,7 @@ def get_dataloaders(train_root, test_root, val_root=None, val_size=0.2, num_samp
 
     if num_samples is not None:
         train_dl = DataLoader(train_ds,
-                              sampler=SampleSampler(train_ds, replacement=True, num_samples=num_samples),
+                              sampler=SampleSampler(train_ds, num_samples=num_samples),
                               *args, **kwargs)
     else:
         train_dl = DataLoader(train_ds,

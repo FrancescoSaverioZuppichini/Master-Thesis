@@ -170,7 +170,8 @@ def df2traversability_df(data):
             # TODO add flag to decide if store the csv or not
             os.makedirs(path.dirname(file_path), exist_ok=True)
             df.to_csv(file_path)
-
+        else:
+            print('{} contains 0 rows, dropping...'.format(file_path))
     return df, hm, file_path
 
 
