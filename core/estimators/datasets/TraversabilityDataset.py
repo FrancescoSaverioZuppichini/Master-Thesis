@@ -21,17 +21,24 @@ class ImgaugWrapper():
 
     def __call__(self, x):
         x = np.array(x)
-        w, h = x.shape
+        c, w, h = x.shape
         x = x.reshape((w, h))
+        #
+        # plt.title('original')
+        # plt.imshow(x)
+        # plt.show()
 
         x_aug = self.aug.augment_image(x)
 
-        return x_aug.reshape((w, h, 1))
+        #
+        # plt.title('x_aug')
+        # plt.imshow(x_aug)
+        # plt.show()
+        return torch.from_numpy(x_aug.reshape((1, w, h)))
 
 aug = iaa.Sometimes(0.9,
                     iaa.SomeOf((2, 3),
                                [
-                                   iaa.AdditiveGaussianNoise(scale=0.01 * 255),
                                    iaa.Dropout(p=(0, 0.2)),
                                    iaa.CoarseDropout((0.05, 0.1),
                                                      size_percent=(0.1, 0.25))
@@ -90,7 +97,7 @@ def get_transform(resize, scale):
 
 
 def get_train_transform(resize):
-    return Compose([Grayscale(), Resize((resize, resize)), ToTensor(), CenterAndScalePatch()])
+    return Compose([Grayscale(), Resize((resize, resize)), ToTensor(), ImgaugWrapper(aug), CenterAndScalePatch()])
 
 
 def get_dataloaders(train_root, test_root, val_root=None, val_size=0.2, num_samples=None, transform=None, train_transform=None, *args,
@@ -131,3 +138,22 @@ def get_dataloaders(train_root, test_root, val_root=None, val_size=0.2, num_samp
     test_dl = DataLoader(test_ds, shuffle=False, *args, **kwargs)
 
     return train_dl, val_dl, test_dl
+
+
+
+if __name__ == '__main__':
+    train_dl, val_dl, test_dl = get_dataloaders(
+        train_root='/home/francesco/Desktop/data/train/dataset/{}'.format('100-100-0.1-12-no_tail-spawn'),
+        test_root='/home/francesco/Desktop/data/test/dataset/{}'.format('100-50-0.09-25-querry'),
+        val_size=0.1,
+        train_transform=get_train_transform(100),
+        transform=get_transform(100, 10),
+        batch_size=2,
+        num_samples=None,
+        num_workers=1,
+        pin_memory=True)
+
+    for (x, y) in train_dl:
+        for i, img in enumerate(x):
+            break
+        break

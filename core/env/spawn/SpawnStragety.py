@@ -15,10 +15,13 @@ class FlatGroundSpawnStrategy():
       if  so the patch position is added to a buffer.
     Later on, the buffer is processed by a k-means in order to extract k spawn points.
     """
-    def __init__(self, hm_path, debug=False):
+    def __init__(self, hm_path, debug=False,  scale=1):
         self.hm = cv2.imread(hm_path)
         self.hm = cv2.cvtColor(self.hm, cv2.COLOR_BGR2GRAY)
+        self.hm  = self.hm .astype(np.float32)
         self.debug = debug
+        self.hm *= scale
+
     def center_patch(self, patch):
         w, h = patch.shape
         patch = patch.astype(np.float32)

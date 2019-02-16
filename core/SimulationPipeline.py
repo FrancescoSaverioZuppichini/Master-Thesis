@@ -41,7 +41,7 @@ class SimulationPipeline():
 
         for map in args.maps:
             env, _, bags_map_dir = make_env(map, args)
-            spawn_strategy = FlatGroundSpawnStrategy(map)
+            spawn_strategy = FlatGroundSpawnStrategy(map, scale=args.height)
             spawn_points = spawn_strategy(k=args.n_sim, tol=1e-2, size=45)
 
             # TODO we should store the state in order to be faulty tolerant

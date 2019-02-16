@@ -69,8 +69,8 @@ def df_clean_by_dropping(df, max_x, max_y):
     :param max_y:
     :return:
     """
-    df = df.loc[df.index >= 2].dropna()
-    df = df.loc[df.index <= 18].dropna()
+    df = df.loc[df.index >= 1].dropna()
+    df = df.loc[df.index <= 19].dropna()
 
     # robot upside down
     df = df.loc[df['pose__pose_e_orientation_x'] >= -2.0].dropna()
@@ -84,6 +84,19 @@ def df_clean_by_dropping(df, max_x, max_y):
 
     return df
 
+
+def df_clean_by_removing_outliers(df, hm):
+    offset = 25
+
+    index = df[(df['hm_y'] > (hm.shape[0] - offset)) | (df['hm_y'] < offset)
+               | (df['hm_x'] > (hm.shape[1] - offset)) | (df['hm_x'] < offset)
+               ].index
+
+    if len(index) > 0:
+        idx = index[0]
+        df = df.loc[0:idx]
+
+    return df
 
 def df_add_label(df, advancement_th):
     """
@@ -157,6 +170,9 @@ def df2traversability_df(data):
     if path.isfile(file_path):
         print('file exist, loading...')
         df = pd.read_csv(file_path)
+        print('removing outliers')
+        df = df_clean_by_removing_outliers(df, hm)
+
     else:
         df = df_convert_date2timestamp(df)
         df = df_convert_quaterion2euler(df)

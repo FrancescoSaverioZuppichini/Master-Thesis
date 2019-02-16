@@ -25,7 +25,7 @@ test_root = '/home/francesco/Desktop/data/test/dataset/100-100-0.09-12-querry'
 model_name = 'resnet34-100-100-0.09-12-06-02-19-0.0001-100-loss'
 
 test_ds = ImageFolder(root=test_root,
-                      transform=get_transform(100))
+                      transform=get_transform(100, 10))
 
 test_dl = DataLoader(test_ds, batch_size=128, num_workers=16)
 
