@@ -17,10 +17,6 @@ P_Z_KEY = 'pose__pose_position_z'
 
 O_W_E_KEY = 'pose__pose_e_orientation_z'
 
-RESOLUTION = 0.02
-TRANSLATION = [5, 5]  # the map in webots is always shitted by 5,5
-
-
 def df_add_hm_coords(df, hm):
     """
     Decorate the current dataframe with the robot's position
@@ -44,8 +40,8 @@ def df_add_advancement(df, dt):
     :return:
     """
     # get out the cos and sin component from the euler's w angle
-    df["S_oX"] = np.cos(df[O_W_E_KEY].values)
-    df["S_oY"] = np.sin(df[O_W_E_KEY].values)
+    df["S_oX"] = np.cos(df['pose__pose_e_orientation_z'].values)
+    df["S_oY"] = np.sin(df['pose__pose_e_orientation_z'].values)
 
     assert (np.allclose(1, np.linalg.norm(df[["S_oX", "S_oY"]], axis=1)))
     # look dt in the future and compute the distance for booth axis
@@ -137,7 +133,7 @@ def traversability_df2patches(data):
     df = df.set_index(df.columns[0])
 
     for idx, (i, row) in enumerate(df.iterrows()):
-        patch = hmpatch(hm, row["hm_x"], row["hm_y"], np.rad2deg(row[O_W_E_KEY]), Config.PATCH_SIZE, scale=1)[0]
+        patch = hmpatch(hm, row["hm_x"], row["hm_y"], np.rad2deg(row['pose__pose_e_orientation_z']), Config.PATCH_SIZE, scale=1)[0]
         patch = (patch * 255).astype(np.uint8)
         cv2.imwrite('{}/{}/{}.png'.format(out_dir, row['label'], row['timestamp']), patch)
 
@@ -180,7 +176,6 @@ def df2traversability_df(data):
         if len(df) > 0:
             df = df_add_hm_coords(df, hm)
             df = df_clean_by_removing_outliers(df, hm)
-            # df = df_add_advancement(df, Config.TIME_WINDOW // Config.SKIP_EVERY)
             df = df_add_advancement(df, Config.TIME_WINDOW)
             df = df_add_label(df, Config.ADVANCEMENT_TH)
 
