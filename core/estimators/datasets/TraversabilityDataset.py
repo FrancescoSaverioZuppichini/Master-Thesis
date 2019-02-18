@@ -102,7 +102,7 @@ def get_transform(resize, should_aug=None, scale=1):
     :param resize: size in pixel of the wanted final patch size
     :param should_aug: if True, dropout will be applied on the input
     :param scale: integer that is multiplied to the input
-    :return: 
+    :return:
     """
     transformations = [Grayscale(), Resize((resize, resize)), ToTensor()]
     if should_aug: transformations.append(ImgaugWrapper(aug))
