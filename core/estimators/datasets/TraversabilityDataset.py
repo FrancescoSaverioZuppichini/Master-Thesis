@@ -12,10 +12,12 @@ from torchvision.datasets import ImageFolder
 
 random.seed(0)
 
+
 class ImgaugWrapper():
     """
     Wrapper for imgaug
     """
+
     def __init__(self, aug):
         self.aug = aug
 
@@ -36,6 +38,7 @@ class ImgaugWrapper():
         # plt.show()
         return torch.from_numpy(x_aug.reshape((1, w, h)))
 
+
 aug = iaa.Sometimes(0.9,
                     iaa.SomeOf((2, 3),
                                [
@@ -45,6 +48,7 @@ aug = iaa.Sometimes(0.9,
 
                                ], random_order=True)
                     )
+
 
 class SampleSampler(RandomSampler):
     def __iter__(self):
@@ -92,35 +96,39 @@ class CenterAndScalePatch():
         return x * self.scale
 
 
-def get_transform(resize, scale):
-    return Compose([Grayscale(), Resize((resize, resize)), ToTensor(), CenterAndScalePatch(scale)])
+def get_transform(resize, should_aug=None, scale=1):
+    """
+    Return a `Compose` transformation to be applied to the input of the model
+    :param resize: size in pixel of the wanted final patch size
+    :param should_aug: if True, dropout will be applied on the input
+    :param scale: integer that is multiplied to the input
+    :return: 
+    """
+    transformations = [Grayscale(), Resize((resize, resize)), ToTensor()]
+    if should_aug: transformations.append(ImgaugWrapper(aug))
+    transformations.append(CenterAndScalePatch(scale=scale))
+    return Compose(transformations)
 
 
-def get_train_transform(resize):
-    return Compose([Grayscale(), Resize((resize, resize)), ToTensor(), ImgaugWrapper(aug), CenterAndScalePatch()])
-
-
-def get_dataloaders(train_root, test_root, val_root=None, val_size=0.2, num_samples=None, transform=None, train_transform=None, *args,
+def get_dataloaders(train_root, test_root, val_root=None, val_size=0.2, num_samples=None, train_transform=None,
+                    val_transform=None, test_transform=None, *args,
                     **kwargs):
     """
     Get train, val and test dataloader.
     :return: train, val and test dataloaders
     """
-
-    train_transform = transform if train_transform is None else train_transform
-
-    print(train_transform)
+    print(train_transform, val_transform, test_transform)
     train_ds = ImageFolder(root=train_root,
-                     transform=train_transform)
+                           transform=train_transform)
 
     train_size = int(len(train_ds) * (1 - val_size))
 
-    if val_root is None: train_ds, val_ds = random_split(train_ds, [train_size, len(train_ds) - train_size])
+    if val_root is None:
+        train_ds, val_ds = random_split(train_ds, [train_size, len(train_ds) - train_size])
 
     else:
         val_ds = ImageFolder(root=val_root,
-                               transform=transform)
-
+                             transform=val_transform)
 
     if num_samples is not None:
         train_dl = DataLoader(train_ds,
@@ -133,12 +141,11 @@ def get_dataloaders(train_root, test_root, val_root=None, val_size=0.2, num_samp
     val_dl = DataLoader(val_ds, *args, **kwargs)
 
     test_ds = ImageFolder(root=test_root,
-                          transform=transform)
+                          transform=test_transform)
 
     test_dl = DataLoader(test_ds, shuffle=False, *args, **kwargs)
 
     return train_dl, val_dl, test_dl
-
 
 
 if __name__ == '__main__':

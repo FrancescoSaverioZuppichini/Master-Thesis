@@ -170,8 +170,6 @@ def df2traversability_df(data):
     if path.isfile(file_path):
         print('file exist, loading...')
         df = pd.read_csv(file_path)
-        print('removing outliers')
-        df = df_clean_by_removing_outliers(df, hm)
 
     else:
         df = df_convert_date2timestamp(df)
@@ -179,6 +177,7 @@ def df2traversability_df(data):
         df = df_clean_by_dropping(df, hm.shape[0] * RESOLUTION, hm.shape[1] * RESOLUTION)
         if len(df) > 0:
             df = df_add_hm_coords(df, hm)
+            df = df_clean_by_removing_outliers(df, hm)
             # df = df_add_advancement(df, Config.TIME_WINDOW // Config.SKIP_EVERY)
             df = df_add_advancement(df, Config.TIME_WINDOW)
             df = df_add_label(df, Config.ADVANCEMENT_TH)
