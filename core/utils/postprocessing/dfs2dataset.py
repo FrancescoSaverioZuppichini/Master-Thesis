@@ -86,11 +86,13 @@ def df_clean_by_dropping(df, max_x, max_y):
 
 
 def df_clean_by_removing_outliers(df, hm):
-    offset = 25
+    offset = 10
 
     index = df[(df['hm_y'] > (hm.shape[0] - offset)) | (df['hm_y'] < offset)
                | (df['hm_x'] > (hm.shape[1] - offset)) | (df['hm_x'] < offset)
                ].index
+
+    print('removing {} outliers'.format(len(index)))
 
     if len(index) > 0:
         idx = index[0]
