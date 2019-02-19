@@ -11,7 +11,7 @@ import matplotlib.patches as mpatches
 from matplotlib import gridspec
 
 class VisualiseSimulation():
-    def __init__(self, hm):
+    def __init__(self, hm, patch_size=100):
         self.hm = hm
         self.patch_size = 100 // 2
 

@@ -31,11 +31,11 @@ if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
 
 
 def train(params):
-    # model = OmarCNN()
-    model = MicroResnet.micro(1,
-                              n_classes=2,
-                              block=[BasicBlock, BasicBlock, BasicBlock, BasicBlockSE],
-                              preactivated=True)
+    model = OmarCNN()
+    # model = MicroResnet.micro(1,
+    #                           n_classes=2,
+    #                           block=[BasicBlock, BasicBlock, BasicBlock, BasicBlockSE],
+    #                           preactivated=True)
     # print(model)
 
 
@@ -76,7 +76,7 @@ def train(params):
                       path='/home/francesco/Desktop/carino/vaevictis/data/',
                       model_dir='/home/francesco/Desktop/carino/vaevictis/data/',
                       loss_func=criterion,
-                      opt_func= partial(torch.optim.SGD, momentum=0.95, weight_decay=1e-4),
+                      # opt_func= partial(torch.optim.SGD, momentum=0.95, weight_decay=1e-4),
                       metrics=[accuracy])
 
     model_name_acc = '{}-{}-{}-{}-accuracy'.format(params['model'], params['dataset'], params['lr'], params['resize'], params['data-aug'])
@@ -118,25 +118,23 @@ def train(params):
 params = {'epochs': 50,
           'lr': 0.001,
           'batch_size': 128,
-          'model': 'micro-resnet#3-se=True-preactivate=True',
-          'dataset': '100-100-0.12-12-no_tail-spawn',
-          'val_dataset': '100-100-0.12-12-no_tail-spawn',
-          'test_dataset': '100-100-0.12-12-querry-no_tail-spawn',
+          'model': 'omarcc',
+          'dataset': '100-100-0.12-12-no_tail-spawn-shift',
+          'val_dataset': '100-100-0.12-12-no_tail-spawn-shift',
+          'test_dataset': '100-100-0.12-12-querry-no_tail-spawn-shift',
           'sampler': None,
           'samper_type': 'sample',
           'callbacks': '[ReduceLROnPlateauCallback]',
           'data-aug': True,
-          'optim': 'sdg',
+          'optim': 'adam',
           'info': '',
-          'resize': 64}
+          'resize': None}
 
-# train(params)
+train(params)
 #
 # params['data-aug'] = False
 # train(params)
-#
-# params['resize'] = 32
-# train(params)
 
-params['data-aug'] = True
+
+params['data-aug'] = False
 train(params)
