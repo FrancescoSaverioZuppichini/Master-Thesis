@@ -9,4 +9,4 @@ selectionDisabled: 0
 viewpointLocked: 0
 orthographicViewHeight: 1
 textFiles: -1
-renderingDevicePerspectives: robot:front_camera;1;0.45;0;0.00132979
+renderingDevicePerspectives: robot:front_camera;1;1;0;0

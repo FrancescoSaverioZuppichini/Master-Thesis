@@ -4,36 +4,50 @@ import pandas as pd
 import numpy as np
 import rosbag_pandas
 import os
-from os import path
 import glob
 import cv2
 import dateutil
 
-from config import Config
+from tqdm import tqdm
+from os import path
 from utils import *
 from pypeln import thread as th
 
+
 class PostProcessingConfig():
-    def __init__(self,  base_dir, maps_folder, patch_size, advancement_th, time_window, skip_every, translation, resolution=0.2, scale=1, n_workers=16,
-                 bags_dir=None, csv_dir=None, out_dir=None, verbose=True, patches=True):
+    def __init__(self, base_dir, maps_folder, patch_size, advancement_th, time_window, skip_every, translation,
+                 resolution=0.02, scale=1, n_workers=16,
+                 bags_dir=None, csv_dir=None, out_dir=None, verbose=True, patches=True, name='confing'):
         self.base_dir, self.maps_folder, self.bags_dir, self.csv_dir, self.out_dir = base_dir, maps_folder, bags_dir, csv_dir, out_dir
-        self.make_dirs()
 
         self.patch_size, self.advancement_th, self.time_window = patch_size, advancement_th, time_window
-        self.scale, self.skip_every =  scale, skip_every
+        self.scale, self.skip_every = scale, skip_every
         self.resolution, self.translation = resolution, translation
         self.n_workers = n_workers
+        self.name = name
+
+        self.make_dirs()
 
     def make_dirs(self):
-        if self.bags_dir is None: self.bags_dir  = path.normpath(self.base_dir + '/bags/')
+        if self.bags_dir is None: self.bags_dir = path.normpath(self.base_dir + '/bags/')
         if self.csv_dir is None: self.csv_dir = path.normpath(self.base_dir + '/csvs/')
-        if self.out_dir is None: self.out_dir  = path.normpath(self.base_dir + '/outs/')
+        if self.out_dir is None: self.out_dir = path.normpath(self.base_dir + '/outs/')
 
+        self.out_dir = path.normpath(self.out_dir + self.dataset_name)
+
+    @property
+    def dataset_name(self):
+        return '/{}-{}-{}-{}-{}'.format(100, self.patch_size, self.advancement_th, self.skip_every, self.name)
 
     @classmethod
     def from_config(cls, config):
-        return cls(config.BASE_DIR, config. MAPS_FOLDER, config.PATCH_SIZE, config.ADVANCEMENT_TH, config.TIME_WINDOW,
-                   config.SKIP_EVERY, config.TRANSLATION)
+        return cls(config.BASE_DIR, config.MAPS_FOLDER, config.PATCH_SIZE, config.ADVANCEMENT_TH, config.TIME_WINDOW,
+                   config.SKIP_EVERY, config.TRANSLATION, out_dir=config.DATASET_FOLDER)
+
+    @classmethod
+    def from_args(cls, args):
+
+        return cls(**vars(args))
 
 
 class PostProcessing():
@@ -42,6 +56,7 @@ class PostProcessing():
 
     def __call__(self, stage):
         pass
+
 
 class BagsPostProcessing(PostProcessing):
 
@@ -53,10 +68,8 @@ class BagsPostProcessing(PostProcessing):
         return (df, map_name, file_name)
 
     def __call__(self, bags):
-
         stage = th.map(self.bag2df, bags, workers=self.config.n_workers)
         return stage
-
 
 
 class DataFramePostProcessing(PostProcessing):
@@ -84,7 +97,6 @@ class DataFramePostProcessing(PostProcessing):
 
         return df
 
-
     def df_add_hm_coords(self, df, hm):
         """
         Decorate the current dataframe with the robot's position
@@ -94,10 +106,10 @@ class DataFramePostProcessing(PostProcessing):
         :return: decorated dataframe
         """
 
-        df[['hm_x', 'hm_y']] = df.apply(lambda x: to_hm_coordinates(x, hm, self.config.resolution, self.config.translation),
-                                        axis=1)
+        df[['hm_x', 'hm_y']] = df.apply(
+            lambda x: to_hm_coordinates(x, hm, self.config.resolution, self.config.translation),
+            axis=1)
         return df
-
 
     def df_add_advancement(self, df, dt):
         """
@@ -113,8 +125,10 @@ class DataFramePostProcessing(PostProcessing):
 
         assert (np.allclose(1, np.linalg.norm(df[["S_oX", "S_oY"]], axis=1)))
         # look dt in the future and compute the distance for booth axis
-        df["S_dX"] = df.rolling(window=(dt + 1))['pose__pose_position_x'].apply(lambda x: x[-1] - x[0], raw=True).shift(-dt)
-        df["S_dY"] = df.rolling(window=(dt + 1))['pose__pose_position_y'].apply(lambda x: x[-1] - x[0], raw=True).shift(-dt)
+        df["S_dX"] = df.rolling(window=(dt + 1))['pose__pose_position_x'].apply(lambda x: x[-1] - x[0], raw=True).shift(
+            -dt)
+        df["S_dY"] = df.rolling(window=(dt + 1))['pose__pose_position_y'].apply(lambda x: x[-1] - x[0], raw=True).shift(
+            -dt)
         # compute euclidean distance
         df["S_d"] = np.linalg.norm(df[["S_dX", "S_dY"]], axis=1)
         # project x and y in the current line and compute the advancement
@@ -122,11 +136,10 @@ class DataFramePostProcessing(PostProcessing):
 
         return df
 
-
     def df_clean_by_dropping(self, df, max_x, max_y):
         """
         Clean the given dataframe by dropping the rows
-        - with time stamp < 2 and > 18 seconds
+        - with time stamp < ` and > `0 seconds
         - where the robot is upside down
         :param df:
         :param max_x:
@@ -148,9 +161,8 @@ class DataFramePostProcessing(PostProcessing):
 
         return df
 
-
     def df_clean_by_removing_outliers(self, df, hm):
-        offset = 10
+        offset = 20
 
         index = df[(df['hm_y'] > (hm.shape[0] - offset)) | (df['hm_y'] < offset)
                    | (df['hm_x'] > (hm.shape[1] - offset)) | (df['hm_x'] < offset)
@@ -161,6 +173,12 @@ class DataFramePostProcessing(PostProcessing):
         if len(index) > 0:
             idx = index[0]
             df = df.loc[0:idx]
+
+        return df
+
+    def df_adjust_robot_center(self, df):
+        # df['hm_x'] += 15
+        df['pose__pose_position_x'] = df['pose__pose_position_x'] + 0.3
 
         return df
 
@@ -180,9 +198,6 @@ class DataFramePostProcessing(PostProcessing):
         data = list(stage)
         return data
 
-
-
-
     def df2traversability_df(self, data):
         df, map_name, file_path = data
 
@@ -192,24 +207,28 @@ class DataFramePostProcessing(PostProcessing):
             return path.normpath('{}/{}/{}'.format(self.config.csv_dir, map_name, path.splitext(file_name)[0] + '.csv'))
 
         map_name = filename2map(file_path)
-        map_path = '{}/{}.png'.format(Config.MAPS_FOLDER, map_name)
+        map_path = '{}/{}.png'.format(self.config.maps_folder, map_name)
         hm = read_image(map_path)
         file_path = make_path(file_path)
 
         if path.isfile(file_path):
             print('file exist, loading...')
             df = pd.read_csv(file_path)
+            print('adjusting coordinates')
+
 
         else:
             df = df_convert_date2timestamp(df)
             df = df_convert_quaterion2euler(df)
-            df = self.df_clean_by_dropping(df, hm.shape[0] * self.config.resolution, hm.shape[1] * self.config.resolution)
+            df = self.df_clean_by_dropping(df, hm.shape[0] * self.config.resolution,
+                                           hm.shape[1] * self.config.resolution)
 
             if len(df) > 0:
+                df = self.df_add_advancement(df, self.config.time_window)
+                df = self.df_add_label(df, self.config.advancement_th)
+                df = self.df_adjust_robot_center(df)
                 df = self.df_add_hm_coords(df, hm)
                 df = self.df_clean_by_removing_outliers(df, hm)
-                df = self.df_add_advancement(df, Config.TIME_WINDOW)
-                df = self.df_add_label(df, Config.ADVANCEMENT_TH)
 
                 # TODO add flag to decide if store the csv or not
                 os.makedirs(path.dirname(file_path), exist_ok=True)
@@ -222,6 +241,7 @@ class DataFramePostProcessing(PostProcessing):
     def __call__(self, data):
         stage = th.map(self.df2traversability_df, data, workers=self.config.n_workers)
         return stage
+
 
 class DataFrame2PatchesPostProcessing(PostProcessing):
 
@@ -246,11 +266,14 @@ class DataFrame2PatchesPostProcessing(PostProcessing):
         # since the stored rate was really high, 250hz, we will end up with lots of almost
         # identical patches
         df = df.reset_index()
-        df = df.loc[list(range(0, len(df), Config.SKIP_EVERY)), :]
+        df = df.loc[list(range(0, len(df), self.config.skip_every)), :]
         df = df.set_index(df.columns[0])
 
         for idx, (i, row) in enumerate(df.iterrows()):
-            patch = hmpatch(hm, row["hm_x"], row["hm_y"], np.rad2deg(row['pose__pose_e_orientation_z']), self.config.patch_size, scale=1)[0]
+            patch = \
+                hmpatch(hm, row["hm_x"], row["hm_y"], np.rad2deg(row['pose__pose_e_orientation_z']),
+                        self.config.patch_size,
+                        scale=1)[0]
             patch = (patch * 255).astype(np.uint8)
             cv2.imwrite('{}/{}/{}.png'.format(out_dir, row['label'], row['timestamp']), patch)
 
@@ -261,21 +284,63 @@ class DataFrame2PatchesPostProcessing(PostProcessing):
 
         return stage
 
-# # post = PostProcessing(patch_size=100, skip_every=12, time_window=125, advancement_th=0.12, resolution=0.02, translation=[5,5])
-# #
-# # post('./test')
-# post_config = PostProcessingConfig.from_config(Config)
 
-post_config = PostProcessingConfig(base_dir='./test/', patch_size=100, time_window=125, advancement_th=0.09,
-                                   resolution=0.02, translation=[5,5], maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/test/', skip_every=12)
-print(post_config.__dict__)
+if __name__ == '__main__':
+    from config import Config
+    import pprint
+
+    post_config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/flat_spawns/train/',
+                                       maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/train/',
+                                       out_dir='/home/francesco/Desktop/data/train/',
+                                       patch_size=80,
+                                       advancement_th=0.12,
+                                       skip_every=12,
+                                       translation=[5,5],
+                                       time_window=125,
+                                       name='shift')
 
 
-bags_post = BagsPostProcessing(post_config)
-df_post = DataFramePostProcessing(post_config)
-df2patches_post = DataFrame2PatchesPostProcessing(post_config)
+    def run(post_config):
 
-bags = glob.glob('./test/bags/**/*.bag')
+        pprint.pprint(post_config.__dict__)
 
-stage = bags_post(bags)
-print(list(df2patches_post(df_post(bags_post(bags)))))
+        bags_post = BagsPostProcessing(post_config)
+        df_post = DataFramePostProcessing(post_config)
+        df2patches_post = DataFrame2PatchesPostProcessing(post_config)
+
+        bags = glob.glob('{}/**/*.bag'.format(post_config.bags_dir))
+
+        stage = bags_post(bags)
+        stage = df_post(stage)
+        stage = df2patches_post(stage)
+
+        list(tqdm(stage, total=len(bags)))
+
+
+    run(post_config)
+
+    post_config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/flat_spawns/val/',
+                                       maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/val/',
+                                       out_dir='/home/francesco/Desktop/data/val/',
+                                       patch_size=80,
+                                       advancement_th=0.12,
+                                       skip_every=12,
+                                       translation=[5,5],
+                                       time_window=125,
+                                       name='shift')
+
+
+    run(post_config)
+
+    post_config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/flat_spawns/test/',
+                                       maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/test/',
+                                       out_dir='/home/francesco/Desktop/data/test/',
+                                       patch_size=80,
+                                       advancement_th=0.12,
+                                       skip_every=12,
+                                       translation=[5,5],
+                                       time_window=125,
+                                       scale=10,
+                                       name='shift')
+
+    run(post_config)
