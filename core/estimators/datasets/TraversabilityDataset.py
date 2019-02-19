@@ -104,7 +104,9 @@ def get_transform(resize, should_aug=None, scale=1):
     :param scale: integer that is multiplied to the input
     :return:
     """
-    transformations = [Grayscale(), Resize((resize, resize)), ToTensor()]
+    transformations = [Grayscale()]
+    if resize is not None: transformations.append(Resize((resize, resize)))
+    transformations.append(ToTensor())
     if should_aug: transformations.append(ImgaugWrapper(aug))
     transformations.append(CenterAndScalePatch(scale=scale))
     return Compose(transformations)
