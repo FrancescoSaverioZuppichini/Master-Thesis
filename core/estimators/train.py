@@ -119,16 +119,16 @@ params = {'epochs': 50,
           'lr': 0.001,
           'batch_size': 128,
           'model': 'omar',
-          'dataset': '100-80-0.12-25-no_tail-spawn-shift',
-          'val_dataset': '100-80-0.12-12-no_tail-spawn-shift',
-          'test_dataset': '100-80-0.12-12-querry-no_tail-spawn-shift',
+          'dataset': '100-92-0.12-25-no_tail-spawn-shift#2',
+          'val_dataset': '100-92-0.12-12-no_tail-spawn-shift',
+          'test_dataset': '100-92-0.12-12-querry-no_tail-spawn-shift',
           'sampler': None,
           'samper_type': 'sample',
           'callbacks': '[ReduceLROnPlateauCallback]',
           'data-aug': True,
           'optim': 'adam',
           'info': '',
-          'resize': 80}
+          'resize': 92}
 
 train(params)
 
