@@ -31,11 +31,11 @@ if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
 
 
 def train(params):
-    # model = OmarCNN()
-    model = MicroResnet.micro(1,
-                              n_classes=2,
-                              block=[BasicBlock, BasicBlock, BasicBlock, BasicBlockSE],
-                              preactivated=True)
+    model = OmarCNN()
+    # model = MicroResnet.micro(1,
+    #                           n_classes=2,
+    #                           block=[BasicBlock, BasicBlock, BasicBlock, BasicBlockSE],
+    #                           preactivated=True)
     # print(model)
 
 
@@ -118,8 +118,8 @@ def train(params):
 params = {'epochs': 50,
           'lr': 0.001,
           'batch_size': 128,
-          'model': 'microresnet#3-preactive=True-se=True',
-          'dataset': '100-92-0.12-25-no_tail-spawn-shift#2',
+          'model': 'omar',
+          'dataset': '100-92-0.12-12-no_tail-spawn-shift',
           'val_dataset': '100-92-0.12-12-no_tail-spawn-shift',
           'test_dataset': '100-92-0.12-12-querry-no_tail-spawn-shift',
           'sampler': None,
