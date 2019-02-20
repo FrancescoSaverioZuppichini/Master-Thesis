@@ -47,7 +47,7 @@ def train(params):
         train_root='/home/francesco/Desktop/data/train/dataset/{}'.format(params['dataset']),
         test_root='/home/francesco/Desktop/data/test/dataset/{}'.format(params['test_dataset']),
         val_root='/home/francesco/Desktop/data/val/dataset/{}'.format(params['val_dataset']),
-        # val_size=0.1,
+        # val_size=0.15,
         train_transform=get_transform(params['resize'], should_aug=params['data-aug']),
         val_transform=get_transform(params['resize']),
         test_transform=get_transform(params['resize'], scale=10),
@@ -82,8 +82,8 @@ def train(params):
     model_name_acc = '{}-{}-{}-{}-accuracy'.format(params['model'], params['dataset'], params['lr'], params['resize'], params['data-aug'])
     model_name_loss = '{}-{}-{}-{}-loss'.format(params['model'], params['dataset'], params['lr'], params['resize'],  params['data-aug'])
 
-    callbacks = [ReduceLROnPlateauCallback(learn=learner, patience=10),
-                 EarlyStoppingCallback(learn=learner, patience=50),
+    callbacks = [ReduceLROnPlateauCallback(learn=learner, patience=4),
+                 EarlyStoppingCallback(learn=learner, patience=6),
                  SaveModelCallback(learn=learner, name=model_name_acc, monitor='accuracy'),
                  SaveModelCallback(learn=learner, name=model_name_loss)]
     try:
@@ -118,23 +118,21 @@ def train(params):
 params = {'epochs': 50,
           'lr': 0.001,
           'batch_size': 128,
-          'model': 'omarcc',
-          'dataset': '100-100-0.12-12-no_tail-spawn-shift',
-          'val_dataset': '100-100-0.12-12-no_tail-spawn-shift',
-          'test_dataset': '100-100-0.12-12-querry-no_tail-spawn-shift',
+          'model': 'omar',
+          'dataset': '100-80-0.12-25-no_tail-spawn-shift',
+          'val_dataset': '100-80-0.12-12-no_tail-spawn-shift',
+          'test_dataset': '100-80-0.12-12-querry-no_tail-spawn-shift',
           'sampler': None,
           'samper_type': 'sample',
           'callbacks': '[ReduceLROnPlateauCallback]',
           'data-aug': True,
           'optim': 'adam',
           'info': '',
-          'resize': None}
+          'resize': 80}
 
 train(params)
-#
+
+
+
 # params['data-aug'] = False
 # train(params)
-
-
-params['data-aug'] = False
-train(params)

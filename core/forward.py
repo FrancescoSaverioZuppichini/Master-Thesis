@@ -47,8 +47,8 @@ env = KrockWebotsEnv(None,
 # print(env.x, env.y)
 for i in range(1):
     init_obs = env.reset(spawn=False)
-    for _ in range(100):
-        obs, r, done, _ = env.step(env.STOP)
+    for _ in range(10000000000000000000000):
+        obs, r, done, _ = env.step(env.GO_FORWARD)
         pprint.pprint(obs)
         if done: break
     env.agent.die(env)

@@ -47,7 +47,7 @@ class WebotsEnv(gym.Env, Supervisor):
         self.y = (self.translation.z, self.y + self.translation.z)
         self.z = 0
 
-        with open(path.abspath('./env/webots/children'), 'r') as f:
+        with open(path.abspath('./env/webots/children_no_tail'), 'r') as f:
             self.children = f.read()
 
     def reanimate(self):
