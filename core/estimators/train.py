@@ -83,7 +83,7 @@ def train(params):
     model_name_loss = '{}-{}-{}-{}-loss'.format(params['model'], params['dataset'], params['lr'], params['resize'],  params['data-aug'])
 
     callbacks = [ReduceLROnPlateauCallback(learn=learner, patience=4),
-                 EarlyStoppingCallback(learn=learner, patience=6),
+                 EarlyStoppingCallback(learn=learner, patience=10),
                  SaveModelCallback(learn=learner, name=model_name_acc, monitor='accuracy'),
                  SaveModelCallback(learn=learner, name=model_name_loss)]
     try:
@@ -128,7 +128,7 @@ params = {'epochs': 50,
           'data-aug': True,
           'optim': 'adam',
           'info': '',
-          'resize': 92}
+          'resize': 64}
 
 train(params)
 
