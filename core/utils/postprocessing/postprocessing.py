@@ -289,15 +289,15 @@ if __name__ == '__main__':
     from config import Config
     import pprint
 
-    post_config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/flat_spawns/train/',
+    post_config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/train_no_tail#2/train/',
                                        maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/train/',
-                                       out_dir='/home/francesco/Desktop/data/train/',
-                                       patch_size=80,
+                                       out_dir='/home/francesco/Desktop/data/train/dataset/',
+                                       patch_size=92,
                                        advancement_th=0.12,
-                                       skip_every=12,
+                                       skip_every=25,
                                        translation=[5,5],
                                        time_window=125,
-                                       name='shift')
+                                       name='no_tail-spawn-shift#2')
 
 
     def run(post_config):
@@ -321,26 +321,26 @@ if __name__ == '__main__':
 
     post_config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/flat_spawns/val/',
                                        maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/val/',
-                                       out_dir='/home/francesco/Desktop/data/val/',
-                                       patch_size=80,
+                                       out_dir='/home/francesco/Desktop/data/val/dataset/',
+                                       patch_size=92,
                                        advancement_th=0.12,
                                        skip_every=12,
                                        translation=[5,5],
                                        time_window=125,
-                                       name='shift')
+                                       name='no_tail-spawn-shift')
 
 
     run(post_config)
 
     post_config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/flat_spawns/test/',
                                        maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/test/',
-                                       out_dir='/home/francesco/Desktop/data/test/',
-                                       patch_size=80,
+                                       out_dir='/home/francesco/Desktop/data/test/dataset/',
+                                       patch_size=92,
                                        advancement_th=0.12,
                                        skip_every=12,
                                        translation=[5,5],
                                        time_window=125,
-                                       scale=10,
-                                       name='shift')
+                                       scale=1,
+                                       name='querry-no_tail-spawn-shift')
 
     run(post_config)
