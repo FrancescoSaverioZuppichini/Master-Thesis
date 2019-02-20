@@ -289,15 +289,15 @@ if __name__ == '__main__':
     from config import Config
     import pprint
 
-    post_config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/train_no_tail#2/train/',
+    post_config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/flat_spawns/train/',
                                        maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/train/',
                                        out_dir='/home/francesco/Desktop/data/train/dataset/',
                                        patch_size=92,
                                        advancement_th=0.12,
-                                       skip_every=25,
+                                       skip_every=12,
                                        translation=[5,5],
                                        time_window=125,
-                                       name='no_tail-spawn-shift#2')
+                                       name='no_tail-spawn-shift')
 
 
     def run(post_config):
@@ -319,28 +319,28 @@ if __name__ == '__main__':
 
     run(post_config)
 
-    post_config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/flat_spawns/val/',
-                                       maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/val/',
-                                       out_dir='/home/francesco/Desktop/data/val/dataset/',
-                                       patch_size=92,
-                                       advancement_th=0.12,
-                                       skip_every=12,
-                                       translation=[5,5],
-                                       time_window=125,
-                                       name='no_tail-spawn-shift')
-
-
-    run(post_config)
-
-    post_config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/flat_spawns/test/',
-                                       maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/test/',
-                                       out_dir='/home/francesco/Desktop/data/test/dataset/',
-                                       patch_size=92,
-                                       advancement_th=0.12,
-                                       skip_every=12,
-                                       translation=[5,5],
-                                       time_window=125,
-                                       scale=1,
-                                       name='querry-no_tail-spawn-shift')
-
-    run(post_config)
+    # post_config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/flat_spawns/val/',
+    #                                    maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/val/',
+    #                                    out_dir='/home/francesco/Desktop/data/val/dataset/',
+    #                                    patch_size=92,
+    #                                    advancement_th=0.12,
+    #                                    skip_every=12,
+    #                                    translation=[5,5],
+    #                                    time_window=125,
+    #                                    name='no_tail-spawn-shift')
+    #
+    #
+    # run(post_config)
+    #
+    # post_config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/flat_spawns/test/',
+    #                                    maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/test/',
+    #                                    out_dir='/home/francesco/Desktop/data/test/dataset/',
+    #                                    patch_size=92,
+    #                                    advancement_th=0.12,
+    #                                    skip_every=12,
+    #                                    translation=[5,5],
+    #                                    time_window=125,
+    #                                    scale=1,
+    #                                    name='querry-no_tail-spawn-shift')
+    #
+    # run(post_config)
