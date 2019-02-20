@@ -1,4 +1,5 @@
 import glob
+import random
 
 from os import makedirs
 from agent.callbacks import *
@@ -46,7 +47,11 @@ class SimulationPipeline():
 
             # TODO we should store the state in order to be faulty tolerant
             for i in range(args.n_sim):
-                spawn_point = spawn_points[0]
+                if i % 5 == 0:
+                    rospy.loginfo('Reanimate robot')
+                    env.reanimate()
+
+                spawn_point = random.choice(spawn_points)
                 if i < len(spawn_points): spawn_point = spawn_points[i]
 
                 env.reset(pose=spawn_points2webots_pose(spawn_point, env))

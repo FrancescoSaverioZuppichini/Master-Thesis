@@ -64,6 +64,10 @@ class InferenceDataset(Dataset):
                     color = 'r' if pred == 0 else 'g'
                     buffer.append((x, y-self.step, color))
 
+                    if color == 'g':
+                        rect = mpatches.Rectangle((x, y), self.patch_size,
+                                                  self.patch_size, linewidth=0, edgecolor='none', facecolor='b', alpha=0.01)
+                        ax.add_patch(rect)
                     # ax.plot(x + self.patch_size // 2 , y + self.patch_size //2, marker='o', color=color,  alpha=0.2)
                     i+=1
                 except IndexError:
@@ -77,16 +81,16 @@ class InferenceDataset(Dataset):
         def draw_rects(buffer):
             for x, y, color in buffer:
                 rect = mpatches.Rectangle((x, y), self.patch_size,
-                                          self.patch_size, linewidth=1, edgecolor=color, facecolor='none')
+                                          self.patch_size, linewidth=0, edgecolor='none', facecolor=color)
                 ax.add_patch(rect)
 
-        draw_rects(red_buffer)
-        draw_rects(green_buffer)
+        # draw_rects(green_buffer)
+        # draw_rects(red_buffer)
 
         plt.show()
 
 ds = InferenceDataset('/home/francesco/Documents/Master-Thesis/core/maps/train/bars1.png',
-                      step=15,
+                      step=1,
                       transform=get_transform(64, scale=1))
 
 dl = DataLoader(ds, batch_size=128, num_workers=16, shuffle=False)
@@ -94,17 +98,17 @@ dl = DataLoader(ds, batch_size=128, num_workers=16, shuffle=False)
 
 data = DataBunch(train_dl=dl, valid_dl=dl, test_dl=dl)
 
-# model = OmarCNN()
-model = MicroResnet.micro(1,
-                          n_classes=2,
-                          block=[BasicBlock, BasicBlock, BasicBlock, BasicBlockSE],
-                          preactivated=True)
+model = OmarCNN()
+# model = MicroResnet.micro(1,
+#                           n_classes=2,
+#                           block=[BasicBlock, BasicBlock, BasicBlock, BasicBlockSE],
+#                           preactivated=True)
 criterion = CrossEntropyFlat()
 
 learner = Learner(data=data,
                   model=model)
 
-learner.load('/home/francesco/Desktop/carino/vaevictis/data/omar-100-80-0.12-12-no_tail-spawn-0.001-64-accuracy')
+learner.load('/home/francesco/Desktop/carino/vaevictis/data/omar-100-100-0.12-12-no_tail-spawn-0.001-64-accuracy')
 
 outs = learner.get_preds(data.test_dl)
 
