@@ -1,5 +1,4 @@
 import os
-import rosbag
 import pandas as pd
 import numpy as np
 import rosbag_pandas
@@ -286,6 +285,8 @@ class DataFrame2PatchesPostProcessing(PostProcessing):
 
 
 if __name__ == '__main__':
+
+
     from config import Config
     import pprint
 
