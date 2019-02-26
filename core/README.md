@@ -2,6 +2,7 @@
 # Traversability Simulation
 ## Stucture
 
+![image](https://files.slack.com/files-pri/T5FK3SL5S-FGG71F2R1/image.png)
 ```
 .
 ├── agent
