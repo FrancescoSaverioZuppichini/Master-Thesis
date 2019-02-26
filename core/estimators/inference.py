@@ -7,6 +7,7 @@ import numpy as np
 
 from PIL import Image
 from torch.utils.data import Dataset, DataLoader
+from torchvision.transforms.functional import rotate
 from skimage.util.shape import view_as_windows
 
 from models.omar_cnn import *
@@ -18,7 +19,7 @@ from fastai.vision import ClassificationInterpretation
 
 
 class InferenceDataset(Dataset):
-    def __init__(self, hm_path, patch_size=80, step=1, transform=None):
+    def __init__(self, hm_path, patch_size=80, step=1, transform=None, rotate=None):
         self.hm = cv2.imread(hm_path)
         self.hm = cv2.cvtColor(self.hm, cv2.COLOR_BGR2GRAY)
         # self.hm = self.hm.astype(np.float32)
@@ -29,14 +30,15 @@ class InferenceDataset(Dataset):
         self.transform = transform
         self.step = step
         self.patch_size = patch_size
+        self.rotate = rotate
 
         print(self.images_shape)
 
     def __getitem__(self, item):
         img = Image.fromarray(self.images[item])
-
-        # plt.imshow(self.images[item])
-        # plt.show()
+        # img.show()
+        if self.rotate is not None: img = rotate(img, self.rotate)
+        # img.show()
         if self.transform: img = self.transform(img)
 
         return img, 0
@@ -44,9 +46,8 @@ class InferenceDataset(Dataset):
     def __len__(self):
         return len(self.images)
 
-    def add_rects(self, predictions, ax):
+    def iter_patches(self, predictions, func):
         w, h = self.hm.shape
-        buffer = []
 
         j = 0
         for x in range(0, w, self.step):
@@ -54,22 +55,41 @@ class InferenceDataset(Dataset):
             for y in range(self.step, h, self.step):
                 try:
                     pred = predictions[i, j]
-                    color = 'r' if pred == 0 else 'g'
-                    buffer.append((x, y - self.step, color))
+                    is_traversable = pred == 0
 
-                    if color == 'g':
-                        rect = mpatches.Rectangle((x, y), self.patch_size,
-                                                  self.patch_size, linewidth=0, edgecolor='none', facecolor='b',
-                                                  )
-                        ax.add_patch(rect)
-                    # ax.plot(x + self.patch_size // 2 , y + self.patch_size //2, marker='o', color=color,  alpha=0.2)
+                    func(x,y, is_traversable)
                     i += 1
                 except IndexError:
                     break
+        j += 1
+
+
+    def add_rects(self, predictions, ax):
+
+        w, h = self.hm.shape
+
+        j = 0
+        for x in range(0, w, self.step):
+            i = 0
+            for y in range(self.step, h, self.step):
+                try:
+                    pred = predictions[i, j]
+                    is_traversable = pred == 0
+
+                    if is_traversable == 0:
+                        rect = mpatches.Rectangle((x, y), self.patch_size,
+                                                  self.patch_size, linewidth=0, edgecolor='none', facecolor='b', alpha=0.1)
+                        ax.add_patch(rect)
+
+                    i += 1
+                except IndexError:
+                    break
+
             j += 1
 
     def visualise(self, predictions):
         fig = plt.figure()
+        plt.title('rotation={}'.format(self.rotate))
         ax = plt.subplot(1, 1, 1)
 
         sns.heatmap(self.hm, ax=ax)
@@ -95,7 +115,7 @@ class InferenceDataset(Dataset):
             for y in range(self.step, h, self.step):
                 try:
                     pred = predictions[i, j]
-                    is_traversable = pred == 0
+                    is_traversable = pred == 1
                     # TODO understand why they are swapped
                     if is_traversable: texture[y:y + self.patch_size, x: x + self.patch_size] += 1
 
@@ -106,12 +126,13 @@ class InferenceDataset(Dataset):
 
         sns.heatmap(texture)
 
-        cv2.imwrite('/home/francesco/Desktop/textures/{}.png'.format(name), texture)
+        cv2.imwrite('/home/francesco/Desktop/textures/{}-{}.png'.format(name, self.rotate), texture)
 
 
-ds = InferenceDataset('/home/francesco/Documents/Master-Thesis/core/maps/train/bars1.png',
-                      step=2,
-                      transform=get_transform(64, scale=1))
+ds = InferenceDataset('/home/francesco/Documents/Master-Thesis/core/maps/test/querry-big-10.png',
+                      patch_size=92,
+                      step=3,
+                      transform=get_transform(64, scale=10), rotate=180)
 
 dl = DataLoader(ds, batch_size=128, num_workers=16, shuffle=False)
 
@@ -134,5 +155,7 @@ outs = learner.get_preds(data.test_dl)
 
 _, preds = torch.max(outs[0], 1)
 
+ds.make_texture(preds.numpy(), 'querry')
 # ds.visualise(preds.numpy())
-ds.make_texture(preds.numpy(), 'bars1')
+
+# ds.make_texture(preds.numpy(), 'bars1')

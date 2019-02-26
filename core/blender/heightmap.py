@@ -18,7 +18,8 @@ MAP_NAME = 'querry-big-10.png'
 
 MAP_KEY = 'Grid'
 MAP_PATH = '/home/francesco/Documents/Master-Thesis/core/maps/test/querry-big-10.png'
-TEX_NAME = 'Texture'
+TEX_NAME = 'querry'
+TEXT_PATH = '/home/francesco/Desktop/textures/querry-None.png'
 MAT_NAME = 'Mat'
 
 bpy.context.scene.unit_settings.system = 'METRIC'
@@ -35,10 +36,6 @@ top_cam_ob.rotation_euler = [0, 0, 0]
 
 bpy.context.scene.camera = top_cam_ob
 
-print(list(bpy.data.objects))
-krock = bpy.data.objects['krock']
-krock.name = 'krock'
-krock.scale = [0.2, 0.2, 0.2]
 
 lamp = bpy.data.lamps['Lamp'].type = 'HEMI'
 
@@ -57,14 +54,12 @@ if image.dtype == 'uint32':
 if MAP_KEY not in bpy.data.objects:
     bpy.ops.mesh.primitive_grid_add(x_subdivisions=image.shape[0], y_subdivisions=image.shape[0])
 
-print(np.max(image))
 map.location = [map.location[0], map.location[1], map.location[2] - np.max(image)]
 
-scale = (513 * 0.02) / 2
+scale = (image.shape[0] * 0.02) / 2
 
 map.scale = (scale, scale, scale)
 map.location = [map.location[0], map.location[1], map.location[2]]
-# map.rotation_euler = [0,0, np.radians(90)]
 # create texture
 tex = bpy.data.textures.new(TEX_NAME, 'IMAGE')
 image = bpy.data.images.load(MAP_PATH)
@@ -80,7 +75,7 @@ mod = map.modifiers.new("disp", 'DISPLACE')
 mod.texture = tex
 mod.mid_level = 0
 
-mat = bpy.data.materials.new('bricks')
+mat = bpy.data.materials.new('traversability')
 
 map.data.materials.append(mat)
 mat.use_nodes = True
@@ -89,20 +84,13 @@ mat.use_nodes = True
 tree = mat.node_tree
 
 links = tree.links
-text_brick = tree.nodes.new(type='ShaderNodeTexBrick')
+ramp = tree.nodes.new(type='ShaderNodeValToRGB')
+ramp.color = [0, 0, 1, 1]
 
-text_brick.offset = 0
+image_texture = tree.nodes.new(type='ShaderNodeTexImage')
 
-text_brick.inputs[1].default_value = [0.471, 0.643, 0.694, 1]
-text_brick.inputs[2].default_value = [0.471, 0.643, 0.694, 1]
-text_brick.inputs[3].default_value = [1, 1, 1, 1]
-
-text_brick.inputs[4].default_value = 1.0
-text_brick.inputs[5].default_value = 0.0005
-text_brick.inputs[6].default_value = 0
-text_brick.inputs[8].default_value = 0.01
-text_brick.inputs[9].default_value = 0.01
-
+image_texture.image = bpy.data.images.load(TEXT_PATH)
 diff = tree.nodes['Diffuse BSDF']
 # connect to our material
-links.new(text_brick.outputs[0], diff.inputs[0])
+links.new(ramp.outputs[0], diff.inputs[0])
+links.new(ramp.inputs[0], image_texture.outputs[0])

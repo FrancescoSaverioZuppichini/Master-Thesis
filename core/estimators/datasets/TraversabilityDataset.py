@@ -26,17 +26,8 @@ class ImgaugWrapper():
         x = np.array(x)
         c, w, h = x.shape
         x = x.reshape((w, h))
-        #
-        # plt.title('original')
-        # plt.imshow(x)
-        # plt.show()
-
         x_aug = self.aug.augment_image(x)
 
-        #
-        # plt.title('x_aug')
-        # plt.imshow(x_aug)
-        # plt.show()
         return torch.from_numpy(x_aug.reshape((1, w, h)))
 
 
