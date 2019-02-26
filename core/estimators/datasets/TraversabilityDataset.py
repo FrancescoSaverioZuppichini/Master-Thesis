@@ -5,13 +5,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+from fastai.vision import *
 from imgaug import augmenters as iaa
 from torch.utils.data import DataLoader, random_split, RandomSampler
 from torchvision.transforms import *
 from torchvision.datasets import ImageFolder
 
 random.seed(0)
-
+import torchvision
 
 class ImgaugWrapper():
     """
@@ -64,6 +65,55 @@ class EveryNSampler(RandomSampler):
         return iter(torch.randperm(n).tolist())
 
 
+class ImbalancedDatasetSampler(torch.utils.data.sampler.Sampler):
+    """Samples elements randomly from a given list of indices for imbalanced dataset
+    Arguments:
+        indices (list, optional): a list of indices
+        num_samples (int, optional): number of samples to draw
+    """
+
+    def __init__(self, dataset, indices=None, num_samples=None):
+        super().__init__(dataset)
+        # if indices is not provided,
+        # all elements in the dataset will be considered
+        self.indices = list(range(len(dataset))) \
+            if indices is None else indices
+
+        # if num_samples is not provided,
+        # draw `len(indices)` samples in each iteration
+        self.num_samples = len(self.indices) \
+            if num_samples is None else num_samples
+
+        # distribution of classes in the dataset
+        label_to_count = {}
+        for idx in self.indices:
+            label = self._get_label(dataset, idx)
+            if label in label_to_count:
+                label_to_count[label] += 1
+            else:
+                label_to_count[label] = 1
+
+        # weight for each sample
+        weights = [1.0 / label_to_count[self._get_label(dataset, idx)]
+                   for idx in self.indices]
+        self.weights = torch.DoubleTensor(weights)
+
+    def _get_label(self, dataset, idx):
+        dataset_type = type(dataset)
+        if dataset_type is torchvision.datasets.MNIST:
+            return dataset.train_labels[idx].item()
+        elif dataset_type is torchvision.datasets.ImageFolder:
+            return dataset.imgs[idx][1]
+        else:
+            raise NotImplementedError
+
+    def __iter__(self):
+        return (self.indices[i] for i in torch.multinomial(
+            self.weights, self.num_samples, replacement=True))
+
+    def __len__(self):
+        return self.num_samples
+
 class CenterAndScalePatch():
     """
     This class is used to center in the middle and rescale a given
@@ -95,6 +145,10 @@ class CenterAndScalePatch():
 
         return x * self.scale
 
+class FastAIImageFolder(ImageFolder):
+    c = 2
+    classes = 'False', 'True'
+
 
 def get_transform(resize, should_aug=None, scale=1):
     """
@@ -120,7 +174,7 @@ def get_dataloaders(train_root, test_root, val_root=None, val_size=0.2, num_samp
     :return: train, val and test dataloaders
     """
     print(train_transform, val_transform, test_transform)
-    train_ds = ImageFolder(root=train_root,
+    train_ds = FastAIImageFolder(root=train_root,
                            transform=train_transform)
 
     train_size = int(len(train_ds) * (1 - val_size))
@@ -129,20 +183,21 @@ def get_dataloaders(train_root, test_root, val_root=None, val_size=0.2, num_samp
         train_ds, val_ds = random_split(train_ds, [train_size, len(train_ds) - train_size])
 
     else:
-        val_ds = ImageFolder(root=val_root,
+        val_ds = FastAIImageFolder(root=val_root,
                              transform=val_transform)
 
     if num_samples is not None:
         train_dl = DataLoader(train_ds,
-                              sampler=SampleSampler(train_ds, num_samples=num_samples),
+                              sampler=ImbalancedDatasetSampler(train_ds),
                               *args, **kwargs)
     else:
         train_dl = DataLoader(train_ds,
                               shuffle=True,
+                              # sampler=ImbalancedDatasetSampler(train_ds),
                               *args, **kwargs)
     val_dl = DataLoader(val_ds, *args, **kwargs)
 
-    test_ds = ImageFolder(root=test_root,
+    test_ds = FastAIImageFolder(root=test_root,
                           transform=test_transform)
 
     test_dl = DataLoader(test_ds, shuffle=False, *args, **kwargs)

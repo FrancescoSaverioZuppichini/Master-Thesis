@@ -2,21 +2,16 @@ import glob
 import pprint
 from tqdm import tqdm
 from parser import args
-from postprocessing import PostProcessingConfig, BagsPostProcessing, \
-    DataFramePostProcessing, DataFrame2PatchesPostProcessing
+from postprocessing import *
 
 post_config = PostProcessingConfig.from_args(args)
 
 pprint.pprint(post_config.__dict__)
 
-bags_post = BagsPostProcessing(post_config)
-df_post = DataFramePostProcessing(post_config)
-df2patches_post = DataFrame2PatchesPostProcessing(post_config)
+patches_h = PatchesHandler(config=config)
+df_h = DataFrameHandler(successor=patches_h, config=config)
+b_h = BagsHandler(config=config, successor=df_h)
 
-bags = glob.glob('{}/**/*.bag'.format(post_config.bags_dir))
+bags = glob.glob('{}/**/*.bag'.format(config.bags_dir))
 
-print(bags)
-
-stage = df2patches_post(df_post(bags_post(bags)))
-
-list(tqdm(stage, total=len(bags)))
+list(b_h(bags))

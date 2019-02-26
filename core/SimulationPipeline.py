@@ -29,7 +29,8 @@ def make_env(map, args):
     return env, map_name, bags_map_dir
 
 
-class SimulationPipeline():
+class Simulation():
+    # Todo better add a constructor .from_args
     def __call__(self, args, **kwargs):
         rospy.init_node("traversability_simulation")
 

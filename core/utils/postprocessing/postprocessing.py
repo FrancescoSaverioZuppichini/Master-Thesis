@@ -1,3 +1,4 @@
+# from postprocessing import *
 import os
 import pandas as pd
 import numpy as np
@@ -11,7 +12,6 @@ from tqdm import tqdm
 from os import path
 from utils import *
 from pypeln import thread as th
-
 
 class PostProcessingConfig():
     def __init__(self, base_dir, maps_folder, patch_size, advancement_th, time_window, skip_every, translation,
@@ -39,25 +39,31 @@ class PostProcessingConfig():
         return '/{}-{}-{}-{}-{}'.format(100, self.patch_size, self.advancement_th, self.skip_every, self.name)
 
     @classmethod
-    def from_config(cls, config):
-        return cls(config.BASE_DIR, config.MAPS_FOLDER, config.PATCH_SIZE, config.ADVANCEMENT_TH, config.TIME_WINDOW,
-                   config.SKIP_EVERY, config.TRANSLATION, out_dir=config.DATASET_FOLDER)
-
-    @classmethod
     def from_args(cls, args):
 
         return cls(**vars(args))
 
+class Handler():
+    def __init__(self, successor=None):
+        self.successor = successor
 
-class PostProcessing():
-    def __init__(self, config: PostProcessingConfig):
+    def __call__(self, *args, **kwargs):
+        res = self.handle(*args, **kwargs)
+
+        if self.successor is not None: res = self.successor(res)
+
+        return res
+
+    def handle(self, *args, **kwargs):
+        raise NotImplementedError
+
+
+class PostProcessingHandler(Handler):
+    def __init__(self, config: PostProcessingConfig, successor=None):
+        super().__init__(successor=successor)
         self.config = config
 
-    def __call__(self, stage):
-        pass
-
-
-class BagsPostProcessing(PostProcessing):
+class BagsHandler(PostProcessingHandler):
 
     def bag2df(self, file_name):
         df = rosbag_pandas.bag_to_dataframe(file_name)
@@ -66,12 +72,12 @@ class BagsPostProcessing(PostProcessing):
 
         return (df, map_name, file_name)
 
-    def __call__(self, bags):
+    def handle(self, bags):
         stage = th.map(self.bag2df, bags, workers=self.config.n_workers)
-        return stage
+        return tqdm(stage, total=len(bags), desc='[INFO] Bags handler')
 
 
-class DataFramePostProcessing(PostProcessing):
+class DataFrameHandler(PostProcessingHandler):
 
     def df_convert_date2timestamp(self, df):
         """
@@ -192,11 +198,6 @@ class DataFramePostProcessing(PostProcessing):
         df["label"] = df["advancement"] > advancement_th
         return df
 
-    def dfs2patches(self, data):
-        stage = th.map(self.traversability_df2patches, data, workers=self.config.n_workers)
-        data = list(stage)
-        return data
-
     def df2traversability_df(self, data):
         df, map_name, file_path = data
 
@@ -213,8 +214,6 @@ class DataFramePostProcessing(PostProcessing):
         if path.isfile(file_path):
             print('file exist, loading...')
             df = pd.read_csv(file_path)
-            print('adjusting coordinates')
-
 
         else:
             df = df_convert_date2timestamp(df)
@@ -237,19 +236,20 @@ class DataFramePostProcessing(PostProcessing):
 
         return df, hm, file_path
 
-    def __call__(self, data):
+    def handle(self, data):
         stage = th.map(self.df2traversability_df, data, workers=self.config.n_workers)
-        return stage
+        return tqdm(stage, total=len(data),  desc='[INFO] Dataframe handler')
 
 
-class DataFrame2PatchesPostProcessing(PostProcessing):
+class PatchesHandler(PostProcessingHandler):
 
-    def traversability_df2patches(self, data):
+    def df2patches(self, data):
         """
         Given a dataframe, and heightmap and the file path generate the patches
         every `Config.SKIP_EVERY` rows. This is done due to the big rate that we used to
         store the data, around 250hz. A `Config.SKIP_EVERY=12` is equal to a rate of 20.
-        :param data:
+        :param data:import glob
+
         :return:
         """
         df, hm, file_path = data
@@ -278,21 +278,17 @@ class DataFrame2PatchesPostProcessing(PostProcessing):
 
         return data
 
-    def __call__(self, data):
-        stage = th.map(self.traversability_df2patches, data, workers=self.config.n_workers)
+    def handle(self, data):
+        stage = th.map(self.df2patches, data, workers=self.config.n_workers)
 
-        return stage
+        return tqdm(stage, total=len(data), desc='[INFO] Patches handler')
 
 
 if __name__ == '__main__':
 
-
-    from config import Config
-    import pprint
-
-    post_config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/flat_spawns/train/',
+    config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/flat_spawns/train/',
                                        maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/train/',
-                                       out_dir='/home/francesco/Desktop/data/train/dataset/',
+                                       out_dir='/home/francesco/Desktop/test/',
                                        patch_size=92,
                                        advancement_th=0.12,
                                        skip_every=12,
@@ -300,48 +296,10 @@ if __name__ == '__main__':
                                        time_window=125,
                                        name='no_tail-spawn-shift')
 
+    patches_h = PatchesHandler(config=config)
+    df_h = DataFrameHandler(successor=patches_h, config=config)
+    b_h = BagsHandler(config=config, successor=df_h)
 
-    def run(post_config):
+    bags = glob.glob('{}/**/*.bag'.format(config.bags_dir))
 
-        pprint.pprint(post_config.__dict__)
-
-        bags_post = BagsPostProcessing(post_config)
-        df_post = DataFramePostProcessing(post_config)
-        df2patches_post = DataFrame2PatchesPostProcessing(post_config)
-
-        bags = glob.glob('{}/**/*.bag'.format(post_config.bags_dir))
-
-        stage = bags_post(bags)
-        stage = df_post(stage)
-        stage = df2patches_post(stage)
-
-        list(tqdm(stage, total=len(bags)))
-
-
-    run(post_config)
-
-    # post_config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/flat_spawns/val/',
-    #                                    maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/val/',
-    #                                    out_dir='/home/francesco/Desktop/data/val/dataset/',
-    #                                    patch_size=92,
-    #                                    advancement_th=0.12,
-    #                                    skip_every=12,
-    #                                    translation=[5,5],
-    #                                    time_window=125,
-    #                                    name='no_tail-spawn-shift')
-    #
-    #
-    # run(post_config)
-    #
-    # post_config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/flat_spawns/test/',
-    #                                    maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/test/',
-    #                                    out_dir='/home/francesco/Desktop/data/test/dataset/',
-    #                                    patch_size=92,
-    #                                    advancement_th=0.12,
-    #                                    skip_every=12,
-    #                                    translation=[5,5],
-    #                                    time_window=125,
-    #                                    scale=1,
-    #                                    name='querry-no_tail-spawn-shift')
-    #
-    # run(post_config)
+    list(b_h(bags))

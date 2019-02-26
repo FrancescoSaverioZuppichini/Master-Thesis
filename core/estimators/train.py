@@ -10,6 +10,9 @@ from fastai.train import Learner, DataBunch, \
     ReduceLROnPlateauCallback, \
     EarlyStoppingCallback, \
     SaveModelCallback
+
+from fastai.vision import ClassificationInterpretation
+
 from fastai.metrics import accuracy
 from fastai.layers import CrossEntropyFlat
 
@@ -30,12 +33,12 @@ torch.manual_seed(0)
 if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
 
 
-def train(params):
-    model = OmarCNN()
-    # model = MicroResnet.micro(1,
-    #                           n_classes=2,
-    #                           block=[BasicBlock, BasicBlock, BasicBlock, BasicBlockSE],
-    #                           preactivated=True)
+def train_and_evaluate(params, train=True, load_model=None):
+    # model = OmarCNN()
+    model = MicroResnet.micro(1,
+                              n_classes=2,
+                              block=[BasicBlock, BasicBlock, BasicBlock, BasicBlockSE],
+                              preactivated=True)
     # print(model)
 
 
@@ -83,18 +86,20 @@ def train(params):
     model_name_loss = '{}-{}-{}-{}-loss'.format(params['model'], params['dataset'], params['lr'], params['resize'],  params['data-aug'])
 
     callbacks = [ReduceLROnPlateauCallback(learn=learner, patience=4),
-                 EarlyStoppingCallback(learn=learner, patience=10),
+                 EarlyStoppingCallback(learn=learner, patience=6),
                  SaveModelCallback(learn=learner, name=model_name_acc, monitor='accuracy'),
                  SaveModelCallback(learn=learner, name=model_name_loss)]
-    try:
-        with experiment.train():
-            learner.fit(epochs=params['epochs'], lr=params['lr'],
-                        callbacks=callbacks)  # SaveModelCallback load the best model after training!
-    except Exception as e:
-        print(e)
-        pass
 
-    torch.save(learner.model, '/home/francesco/Desktop/carino/vaevictis/data/{}.pck'.format(params['model']))
+    if train:
+        try:
+            with experiment.train():
+                learner.fit(epochs=params['epochs'], lr=params['lr'],
+                            callbacks=callbacks)  # SaveModelCallback load the best model after training!
+        except Exception as e:
+            print(e)
+            pass
+
+        torch.save(learner.model, '/home/francesco/Desktop/carino/vaevictis/data/{}.pck'.format(params['model']))
 
     learner.load(model_name_loss)
 
@@ -113,24 +118,31 @@ def train(params):
         print(loss, acc)
         experiment.log_metric("accuracy-from-best-acc", acc.item())
 
+    if load_model: learner.load(load_model)
 
+    interp = ClassificationInterpretation.from_learner(learner)
+    interp.plot_confusion_matrix(normalize=True)
+    plt.savefig(model_name_acc + '.png')
+    experiment.log_image('/home/francesco/Desktop/carino/vaevictis/data/' + model_name_acc + '.png')
+    plt.show()
 
 params = {'epochs': 50,
           'lr': 0.001,
           'batch_size': 128,
-          'model': 'omar',
-          'dataset': '100-92-0.12-12-no_tail-spawn-shift',
+          # 'model': 'omar',
+          'model': 'microresnet#3-preactivate=True-se=True',
+          'dataset': '100-92-0.12-25-no_tail-spawn-shift#2',
           'val_dataset': '100-92-0.12-12-no_tail-spawn-shift',
           'test_dataset': '100-92-0.12-12-querry-no_tail-spawn-shift',
           'sampler': None,
-          'samper_type': 'sample',
+          'samper_type': 'imbalance',
           'callbacks': '[ReduceLROnPlateauCallback]',
           'data-aug': True,
           'optim': 'adam',
           'info': '',
           'resize': 64}
 
-train(params)
+train_and_evaluate(params, train=False, load_model='microresnet#3-preactivate=True-se=True-100-92-0.12-25-no_tail-spawn-shift#2-0.001-64-accuracy')
 
 
 
