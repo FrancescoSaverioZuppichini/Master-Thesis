@@ -1,4 +1,4 @@
-from SimulationPipeline import Simulation
+from Simulation import Simulation
 from parser import args
 
 sim_pip = Simulation()
