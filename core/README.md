@@ -1,8 +1,10 @@
 
 # Traversability Simulation
+[WARNING] In progress
+![image](https://raw.githubusercontent.com/FrancescoSaverioZuppichini/Master-Thesis/master/resources/images/querry_krock_traversability.png)
+
 ## Stucture
 
-![image](https://raw.githubusercontent.com/FrancescoSaverioZuppichini/Master-Thesis/master/resources/images/querry_krock_traversability.png)
 ```
 .
 ├── agent
