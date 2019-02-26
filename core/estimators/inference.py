@@ -32,15 +32,12 @@ class InferenceDataset(Dataset):
 
         print(self.images_shape)
 
-
     def __getitem__(self, item):
         img = Image.fromarray(self.images[item])
 
         # plt.imshow(self.images[item])
         # plt.show()
         if self.transform: img = self.transform(img)
-
-
 
         return img, 0
 
@@ -83,35 +80,25 @@ class InferenceDataset(Dataset):
 
         plt.show()
 
-
     def make_texture(self, predictions, name):
         texture = np.zeros(self.hm.shape)
         fig = plt.figure()
         ax = plt.subplot(1, 1, 1)
 
-
         predictions = predictions.reshape(self.images_shape[0], self.images_shape[1])
 
         w, h = self.hm.shape
         buffer = []
-
         j = 0
         for x in range(0, w, self.step):
             i = 0
             for y in range(self.step, h, self.step):
                 try:
                     pred = predictions[i, j]
-                    color = 'r' if pred == 0 else 'g'
-                    buffer.append((x, y - self.step, color))
+                    is_traversable = pred == 0
+                    # TODO understand why they are swapped
+                    if is_traversable: texture[y:y + self.patch_size, x: x + self.patch_size] += 1
 
-                    if color == 'g':
-                        # TODO understand why they are swapped
-                        texture[y:y+self.patch_size, x: x + self.patch_size] += 1
-                        # rect = mpatches.Rectangle((x, y), self.patch_size,
-                        #                           self.patch_size, linewidth=0, edgecolor='none', facecolor='b',
-                        #                           )
-                        # ax.add_patch(rect)
-                    # ax.plot(x + self.patch_size // 2 , y + self.patch_size //2, marker='o', color=color,  alpha=0.2)
                     i += 1
                 except IndexError:
                     break
@@ -119,15 +106,14 @@ class InferenceDataset(Dataset):
 
         sns.heatmap(texture)
 
-
         cv2.imwrite('/home/francesco/Desktop/textures/{}.png'.format(name), texture)
+
 
 ds = InferenceDataset('/home/francesco/Documents/Master-Thesis/core/maps/train/bars1.png',
                       step=2,
                       transform=get_transform(64, scale=1))
 
 dl = DataLoader(ds, batch_size=128, num_workers=16, shuffle=False)
-
 
 data = DataBunch(train_dl=dl, valid_dl=dl, test_dl=dl)
 
@@ -141,8 +127,8 @@ criterion = CrossEntropyFlat()
 learner = Learner(data=data,
                   model=model)
 
-learner.load('/home/francesco/Desktop/carino/vaevictis/data/microresnet#3-preactivate=True-se=True-100-92-0.12-25-no_tail-spawn-shift#2-0.001-64-accuracy')
-
+learner.load(
+    '/home/francesco/Desktop/carino/vaevictis/data/microresnet#3-preactivate=True-se=True-100-92-0.12-25-no_tail-spawn-shift#2-0.001-64-accuracy')
 
 outs = learner.get_preds(data.test_dl)
 
