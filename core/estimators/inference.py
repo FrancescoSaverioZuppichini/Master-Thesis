@@ -84,7 +84,7 @@ class InferenceDataset(Dataset):
         plt.show()
 
 
-    def make_texture(self, predictions):
+    def make_texture(self, predictions, name):
         texture = np.zeros(self.hm.shape)
         fig = plt.figure()
         ax = plt.subplot(1, 1, 1)
@@ -120,11 +120,11 @@ class InferenceDataset(Dataset):
         sns.heatmap(texture)
 
 
-        cv2.imwrite('/home/francesco/Desktop/textures/texture.png', texture)
+        cv2.imwrite('/home/francesco/Desktop/textures/{}.png'.format(name), texture)
 
-ds = InferenceDataset('/home/francesco/Documents/Master-Thesis/core/maps/test/querry-big-10.png',
-                      step=5,
-                      transform=get_transform(64, scale=10))
+ds = InferenceDataset('/home/francesco/Documents/Master-Thesis/core/maps/train/bars1.png',
+                      step=2,
+                      transform=get_transform(64, scale=1))
 
 dl = DataLoader(ds, batch_size=128, num_workers=16, shuffle=False)
 
@@ -149,4 +149,4 @@ outs = learner.get_preds(data.test_dl)
 _, preds = torch.max(outs[0], 1)
 
 # ds.visualise(preds.numpy())
-ds.make_texture(preds.numpy())
+ds.make_texture(preds.numpy(), 'bars1')

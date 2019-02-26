@@ -56,18 +56,6 @@ if image.dtype == 'uint32':
 
 if MAP_KEY not in bpy.data.objects:
     bpy.ops.mesh.primitive_grid_add(x_subdivisions=image.shape[0], y_subdivisions=image.shape[0])
-    # # Define mesh and object variables
-    # mymesh = bpy.data.meshes.new("Map")
-    # map = bpy.data.objects.new("Map", mymesh)
-
-    # #Set location and scene of object
-    # map.location = [0,0,0]
-    # bpy.context.scene.objects.link(map)
-
-    # #Create mesh
-    # mymesh.from_pydata(verts,[],faces)
-    # mymesh.update(calc_edges=True)
-
 
 print(np.max(image))
 map.location = [map.location[0], map.location[1], map.location[2] - np.max(image)]
