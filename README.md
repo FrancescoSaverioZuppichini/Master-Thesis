@@ -1,10 +1,15 @@
-## Master Thesis
+## Master Thesis [WARNING] In progress
 ### Francesco Saverio Zuppichini
 
 *write abstract here*
 
 
 # Traversability Simulation
+
+The following images shows the traversability patches (92x92px) of the krock robot from bottom to top of the map
+![image](https://raw.githubusercontent.com/FrancescoSaverioZuppichini/Master-Thesis/master/resources/images/querry_krock_traversability.png)
+
+
 ## Stucture
 
 ```
