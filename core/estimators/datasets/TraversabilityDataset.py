@@ -1,13 +1,15 @@
 import random
 import torch
 
+import cv2
+from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
 from fastai.vision import *
 from imgaug import augmenters as iaa
-from torch.utils.data import DataLoader, random_split, RandomSampler
+from torch.utils.data import DataLoader, random_split, RandomSampler, ConcatDataset
 from torchvision.transforms import *
 from torchvision.datasets import ImageFolder
 
@@ -138,6 +140,27 @@ class CenterAndScalePatch():
 class FastAIImageFolder(ImageFolder):
     c = 2
     classes = 'False', 'True'
+
+
+class TraversabilityDatasetRegression(Dataset):
+    def __init__(self, csv_path):
+        self.df = pd.read_csv(csv_path)
+
+    def __getitem__(self, item):
+        row = self.df[item]
+        img_path = row['image_path']
+
+        img = Image.open(img_path)
+        y = row['advancement']
+
+        return img, y
+
+    def __len__(self):
+        return len(self.df)
+
+    @classmethod
+    def from_dfs(cls, dfs):
+        return ConcatDataset([cls(df) for df in dfs])
 
 
 def get_transform(resize, should_aug=None, scale=1):
