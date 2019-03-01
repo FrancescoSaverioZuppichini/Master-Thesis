@@ -261,7 +261,7 @@ class PatchesHandler(PostProcessingHandler):
         df = df.reset_index()
         df = df.loc[list(range(0, len(df), self.config.skip_every)), :]
         df = df.set_index(df.columns[0])
-
+        image_paths = []
         for idx, (i, row) in enumerate(df.iterrows()):
             patch = \
                 hmpatch(hm, row["hm_x"], row["hm_y"], np.rad2deg(row['pose__pose_e_orientation_z']),
@@ -270,11 +270,11 @@ class PatchesHandler(PostProcessingHandler):
             patch = (patch * 255).astype(np.uint8)
             image_path = '{}/{}/{}.png'.format(out_dir, row['label'], row['timestamp'])
             cv2.imwrite(image_path, patch)
-            row['image_path'] = image_path
-
+            image_paths.append(image_path)
+        df['image_path'] = image_paths
         # update the dataframe with the reference to the image stored
-        df.to_csv(file_path)
-
+        df.to_csv(os.path.splitext(file_path)[0] + '-pacth.csv'
+                  )
         return data
 
     def handle(self, data):
@@ -285,7 +285,7 @@ class PatchesHandler(PostProcessingHandler):
 
 if __name__ == '__main__':
 
-    config = PostProcessingConfig(base_dir='./test',
+    config = PostProcessingConfig(base_dir='./test/',
                                        maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/test/',
                                        patch_size=92,
                                        advancement_th=0.12,
@@ -313,9 +313,9 @@ if __name__ == '__main__':
     # b_h = BagsHandler(config=config, successor=df_h)
     #
     #
-    # bags = glob.glob('{}/**/*.bag'.format(config.bags_dir))
+    bags = glob.glob('{}/**/*.bag'.format(config.bags_dir))
     #
-    # list(b_h(bags))
+    list(b_h(bags))
     #
     # config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/flat_spawns/val/',
     #                                    maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/val/',
