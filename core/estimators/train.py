@@ -9,7 +9,7 @@ from torchsummary import summary
 from fastai.train import Learner, DataBunch, \
     ReduceLROnPlateauCallback, \
     EarlyStoppingCallback, \
-    SaveModelCallback
+    SaveModelCallback, DatasetType
 
 from fastai.vision import ClassificationInterpretation
 
@@ -130,7 +130,7 @@ def train_and_evaluate(params, train=True, load_model=None):
     experiment.log_image('/home/francesco/Desktop/carino/vaevictis/data/' + model_name_acc + '-valid.png')
     plt.show()
 
-    interp = ClassificationInterpretation.from_learner(learner, ds_type='Test')
+    interp = ClassificationInterpretation.from_learner(learner, ds_type=DatasetType.Test)
     interp.plot_confusion_matrix(normalize=False, title='test')
     plt.savefig(learner.model_dir + '/' + model_name_acc + '.png')
     experiment.log_image('/home/francesco/Desktop/carino/vaevictis/data/' + model_name_acc + '-test.png')
