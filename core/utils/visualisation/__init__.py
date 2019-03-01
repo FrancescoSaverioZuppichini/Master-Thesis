@@ -2,6 +2,7 @@ import matplotlib.lines as mlines
 
 import seaborn as sns
 import matplotlib.pyplot as plt
+import numpy as np
 
 from utils.visualisation import *
 from utils.visualisation import *
@@ -54,7 +55,7 @@ class VisualiseSimulation():
                 if center: patch = patch - patch[patch.shape[0] // 2, patch.shape[1] // 2]
                 col.plot(self.patch_size // 2, self.patch_size // 2, marker='o', color='r', ls='', linewidth=10,
                          label='finish')
-                sns.heatmap(patch, ax=col)
+                sns.heatmap(patch, ax=col, vmin=0, vmax=1)
 
         plt.show()
 
@@ -112,7 +113,7 @@ class VisualiseSimulation():
         for i in range(n_show // 2):
             for j in range(n_show // 2):
                 ax_patch = plt.subplot2grid((size), (2 + i, j), colspan=1, rowspan=1)
-                sns.heatmap(hm_patches[i + j], ax=ax_patch)
+                sns.heatmap(hm_patches[i + j], ax=ax_patch, vmin=0, vmax=1)
 
     def show_traversability_in_time(self, df, dt=100):
         fig = plt.figure()
