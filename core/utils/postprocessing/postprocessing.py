@@ -285,63 +285,63 @@ class PatchesHandler(PostProcessingHandler):
 
 if __name__ == '__main__':
 
-    config = PostProcessingConfig(base_dir='./test/',
-                                       maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/test/',
-                                       patch_size=92,
-                                       advancement_th=0.12,
-                                       skip_every=25,
-                                       translation=[5,5],
-                                       time_window=125,
-                                       name='test')
-
-    patches_h = PatchesHandler(config=config)
-    df_h = DataFrameHandler(successor=patches_h, config=config)
-    b_h = BagsHandler(config=config, successor=df_h)
-
-    # config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/train_no_tail#2/train/',
-    #                                    maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/train/',
-    #                                    out_dir='/home/francesco/Desktop/data/train/dataset/',
+    # config = PostProcessingConfig(base_dir='./test/',
+    #                                    maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/test/',
     #                                    patch_size=92,
     #                                    advancement_th=0.12,
     #                                    skip_every=25,
     #                                    translation=[5,5],
     #                                    time_window=125,
-    #                                    name='no_tail-spawn-shift#2')
-    #
+    #                                    name='test')
+    # 
     # patches_h = PatchesHandler(config=config)
     # df_h = DataFrameHandler(successor=patches_h, config=config)
     # b_h = BagsHandler(config=config, successor=df_h)
-    #
-    #
+
+    config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/train_no_tail#2/train/',
+                                       maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/train/',
+                                       out_dir='/home/francesco/Desktop/data/train/dataset/',
+                                       patch_size=92,
+                                       advancement_th=0.12,
+                                       skip_every=25,
+                                       translation=[5,5],
+                                       time_window=125,
+                                       name='no_tail-spawn-shift#2')
+
+    patches_h = PatchesHandler(config=config)
+    df_h = DataFrameHandler(successor=patches_h, config=config)
+    b_h = BagsHandler(config=config, successor=df_h)
+
+
     bags = glob.glob('{}/**/*.bag'.format(config.bags_dir))
-    #
+
     list(b_h(bags))
-    #
-    # config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/flat_spawns/val/',
-    #                                    maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/val/',
-    #                                    out_dir='/home/francesco/Desktop/data/val/dataset/',
-    #                                    patch_size=92,
-    #                                    advancement_th=0.12,
-    #                                    skip_every=12,
-    #                                    translation=[5,5],
-    #                                    time_window=125,
-    #                                    name='no_tail-spawn-shift')
-    #
-    # bags = glob.glob('{}/**/*.bag'.format(config.bags_dir))
-    #
-    # list(b_h(bags))
-    #
-    # config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/flat_spawns/test/',
-    #                                    maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/test/',
-    #                                    out_dir='/home/francesco/Desktop/data/test/dataset/',
-    #                                    patch_size=92,
-    #                                    advancement_th=0.12,
-    #                                    skip_every=12,
-    #                                    translation=[5,5],
-    #                                    time_window=125,
-    #                                    scale=10,
-    #                                    name='querry-no_tail-spawn-shift')
-    #
-    # bags = glob.glob('{}/**/*.bag'.format(config.bags_dir))
-    #
-    # list(b_h(bags))
+
+    config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/flat_spawns/val/',
+                                       maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/val/',
+                                       out_dir='/home/francesco/Desktop/data/val/dataset/',
+                                       patch_size=92,
+                                       advancement_th=0.12,
+                                       skip_every=12,
+                                       translation=[5,5],
+                                       time_window=125,
+                                       name='no_tail-spawn-shift')
+
+    bags = glob.glob('{}/**/*.bag'.format(config.bags_dir))
+
+    list(b_h(bags))
+
+    config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/flat_spawns/test/',
+                                       maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/test/',
+                                       out_dir='/home/francesco/Desktop/data/test/dataset/',
+                                       patch_size=92,
+                                       advancement_th=0.12,
+                                       skip_every=12,
+                                       translation=[5,5],
+                                       time_window=125,
+                                       scale=10,
+                                       name='querry-no_tail-spawn-shift')
+
+    bags = glob.glob('{}/**/*.bag'.format(config.bags_dir))
+
+    list(b_h(bags))
