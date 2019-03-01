@@ -258,7 +258,7 @@ class PatchesHandler(PostProcessingHandler):
         # reset the index to int so we can take only on row every Config.SKIP_EVERY
         # since the stored rate was really high, 250hz, we will end up with lots of almost
         # identical patches
-        df = df.reset_index()
+        df = df.reset_index(drop=True)
         df = df.loc[list(range(0, len(df), self.config.skip_every)), :]
         df = df.set_index(df.columns[0])
         image_paths = []
@@ -273,7 +273,7 @@ class PatchesHandler(PostProcessingHandler):
             image_paths.append(image_path)
         df['image_path'] = image_paths
         # update the dataframe with the reference to the image stored
-        df.to_csv(os.path.splitext(file_path)[0] + '-pacth.csv'
+        df.to_csv(os.path.splitext(file_path)[0] + '-patch.csv'
                   )
         return data
 
@@ -293,7 +293,7 @@ if __name__ == '__main__':
     #                                    translation=[5,5],
     #                                    time_window=125,
     #                                    name='test')
-    # 
+    #
     # patches_h = PatchesHandler(config=config)
     # df_h = DataFrameHandler(successor=patches_h, config=config)
     # b_h = BagsHandler(config=config, successor=df_h)
