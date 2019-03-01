@@ -125,15 +125,15 @@ def train_and_evaluate(params, train=True, load_model=None):
 
 
     interp = ClassificationInterpretation.from_learner(learner)
-    interp.plot_confusion_matrix(normalize=False, title='val')
+    interp.plot_confusion_matrix(normalize=True, title='Val')
     plt.savefig(learner.model_dir + '/' + model_name_acc + '.png')
-    experiment.log_image('/home/francesco/Desktop/carino/vaevictis/data/' + model_name_acc + '-valid.png')
+    experiment.log_image('/home/francesco/Desktop/carino/vaevictis/data/' + load_model + '-valid.png')
     plt.show()
 
     interp = ClassificationInterpretation.from_learner(learner, ds_type=DatasetType.Test)
-    interp.plot_confusion_matrix(normalize=False, title='test')
+    interp.plot_confusion_matrix(normalize=True, title='Test')
     plt.savefig(learner.model_dir + '/' + model_name_acc + '.png')
-    experiment.log_image('/home/francesco/Desktop/carino/vaevictis/data/' + model_name_acc + '-test.png')
+    experiment.log_image('/home/francesco/Desktop/carino/vaevictis/data/' + load_model + '-test.png')
     plt.show()
 
 params = {'epochs': 50,

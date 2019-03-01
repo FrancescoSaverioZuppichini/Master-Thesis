@@ -1,2 +1,3 @@
 webots_ros/
 resources/
+*.wbproj
