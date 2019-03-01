@@ -96,8 +96,7 @@ class ImbalancedDatasetSampler(torch.utils.data.sampler.Sampler):
         elif dataset_type is torchvision.datasets.ImageFolder:
             return dataset.imgs[idx][1]
         else:
-            raise NotImplementedError
-
+            return dataset.imgs[idx][1]
     def __iter__(self):
         return (self.indices[i] for i in torch.multinomial(
             self.weights, self.num_samples, replacement=True))
@@ -178,6 +177,7 @@ def get_dataloaders(train_root, test_root, val_root=None, val_size=0.2, num_samp
                              transform=val_transform)
 
     if num_samples is not None:
+        print('sampling')
         train_dl = DataLoader(train_ds,
                               sampler=ImbalancedDatasetSampler(train_ds),
                               *args, **kwargs)
@@ -186,7 +186,7 @@ def get_dataloaders(train_root, test_root, val_root=None, val_size=0.2, num_samp
                               shuffle=True,
                               # sampler=ImbalancedDatasetSampler(train_ds),
                               *args, **kwargs)
-    val_dl = DataLoader(val_ds, *args, **kwargs)
+    val_dl = DataLoader(val_ds, shuffle=False, *args, **kwargs)
 
     test_ds = FastAIImageFolder(root=test_root,
                           transform=test_transform)
@@ -196,19 +196,45 @@ def get_dataloaders(train_root, test_root, val_root=None, val_size=0.2, num_samp
     return train_dl, val_dl, test_dl
 
 
-if __name__ == '__main__':
-    train_dl, val_dl, test_dl = get_dataloaders(
-        train_root='/home/francesco/Desktop/data/train/dataset/{}'.format('100-100-0.1-12-no_tail-spawn'),
-        test_root='/home/francesco/Desktop/data/test/dataset/{}'.format('100-50-0.09-25-querry'),
-        val_size=0.1,
-        train_transform=get_train_transform(100),
-        transform=get_transform(100, 10),
-        batch_size=2,
-        num_samples=None,
-        num_workers=1,
-        pin_memory=True)
+def visualise(dl, n=10):
+    fig, axes = plt.subplots(nrows=1, ncols=5, figsize=(20,4))
 
-    for (x, y) in train_dl:
-        for i, img in enumerate(x):
-            break
+
+    for (x, y) in dl:
+        for i, img in zip(range(5), x):
+            sns.heatmap(img.numpy().squeeze(), ax=axes[i])
+
+        plt.show()
         break
+
+
+# if __name__ == '__main__':
+#
+#     val_tr = get_transform(92)
+#     val_tr.transforms.append(ImgaugWrapper(aug=iaa.GaussianBlur(sigma=2)))
+#     train_dl, val_dl, test_dl = get_dataloaders(
+#         train_root='/home/francesco/Desktop/data/train/dataset/{}'.format('100-92-0.12-25-no_tail-spawn-shift#2'),
+#         val_root='/home/francesco/Desktop/data/val/dataset/{}'.format('100-92-0.12-12-no_tail-spawn-shift'),
+#         test_root='/home/francesco/Desktop/data/test/dataset/{}'.format('100-92-0.12-12-querry-no_tail-spawn-shift'),
+#         train_transform=get_transform(92, should_aug=True),
+#         val_transform=val_tr,
+#         test_transform=get_transform(92, scale=10),
+#         batch_size=5,
+#         num_samples=None,
+#         num_workers=1,
+#         pin_memory=True)
+#
+#     #
+#     # visualise(train_dl)
+#     # visualise(train_dl)
+#     # visualise(train_dl)
+#     # visualise(train_dl)
+#
+#     visualise(val_dl)
+#     visualise(val_dl)
+#
+#     # visualise(test_dl)
+#     # visualise(test_dl)
+#     # visualise(test_dl)
+#     # visualise(test_dl)
+#

@@ -25,7 +25,7 @@ from models.custom_resnet import *
 import matplotlib.pyplot as plt
 
 from functools import partial
-
+import time
 torch.backends.cudnn.benchmark = True
 torch.backends.cudnn.deterministic = True
 torch.manual_seed(0)
@@ -79,11 +79,11 @@ def train_and_evaluate(params, train=True, load_model=None):
                       path='/home/francesco/Desktop/carino/vaevictis/data/',
                       model_dir='/home/francesco/Desktop/carino/vaevictis/data/',
                       loss_func=criterion,
-                      # opt_func= partial(torch.optim.SGD, momentum=0.95, weight_decay=1e-4),
+                      opt_func= partial(torch.optim.SGD, momentum=0.95, weight_decay=1e-4),
                       metrics=[accuracy])
 
-    model_name_acc = '{}-{}-{}-{}-accuracy'.format(params['model'], params['dataset'], params['lr'], params['resize'], params['data-aug'])
-    model_name_loss = '{}-{}-{}-{}-loss'.format(params['model'], params['dataset'], params['lr'], params['resize'],  params['data-aug'])
+    model_name_acc = '{}-{}-{}-{}-accuracy-{}'.format(params['model'], params['dataset'], params['lr'], params['resize'], params['data-aug'], time.time())
+    model_name_loss = '{}-{}-{}-{}-loss-{}'.format(params['model'], params['dataset'], params['lr'], params['resize'],  params['data-aug'], time.time())
 
     callbacks = [ReduceLROnPlateauCallback(learn=learner, patience=4),
                  EarlyStoppingCallback(learn=learner, patience=6),
@@ -122,7 +122,7 @@ def train_and_evaluate(params, train=True, load_model=None):
 
     interp = ClassificationInterpretation.from_learner(learner)
     interp.plot_confusion_matrix(normalize=True)
-    plt.savefig(model_name_acc + '.png')
+    plt.savefig(learner.model_dir + '/' + model_name_acc + '.png')
     experiment.log_image('/home/francesco/Desktop/carino/vaevictis/data/' + model_name_acc + '.png')
     plt.show()
 
@@ -137,13 +137,17 @@ params = {'epochs': 50,
           'sampler': None,
           'samper_type': 'imbalance',
           'callbacks': '[ReduceLROnPlateauCallback]',
-          'data-aug': True,
-          'optim': 'adam',
+          'data-aug': False,
+          'optim': 'sgd',
           'info': '',
-          'resize': 64}
+          'resize': 92}
 
-train_and_evaluate(params, train=False, load_model='microresnet#3-preactivate=True-se=True-100-92-0.12-25-no_tail-spawn-shift#2-0.001-64-accuracy')
-
+# train_and_evaluate(params, train=True, load_model='microresnet#3-preactivate=True-se=True-100-92-0.12-25-no_tail-spawn-shift#2-0.001-64-accuracy')
+train_and_evaluate(params, train=True)
+params['data-aug'] = True
+train_and_evaluate(params, train=True)
+# params['sampler'] = True
+# train_and_evaluate(params, train=True)
 
 
 # params['data-aug'] = False
