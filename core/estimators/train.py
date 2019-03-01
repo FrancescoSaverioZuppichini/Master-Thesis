@@ -103,6 +103,7 @@ def train_and_evaluate(params, train=True, load_model=None):
 
     learner.load(model_name_loss)
 
+
     with experiment.test():
         loss, acc = learner.validate(data.test_dl, metrics=[accuracy])
         print(loss, acc)
@@ -113,17 +114,26 @@ def train_and_evaluate(params, train=True, load_model=None):
 
     torch.save(learner.model, '/home/francesco/Desktop/carino/vaevictis/data/{}.pck'.format(params['model']))
 
+    if load_model:
+        print('loading model')
+        learner.load(load_model)
+
     with experiment.test():
         loss, acc = learner.validate(data.test_dl, metrics=[accuracy])
         print(loss, acc)
         experiment.log_metric("accuracy-from-best-acc", acc.item())
 
-    if load_model: learner.load(load_model)
 
     interp = ClassificationInterpretation.from_learner(learner)
-    interp.plot_confusion_matrix(normalize=True)
+    interp.plot_confusion_matrix(normalize=False, title='val')
     plt.savefig(learner.model_dir + '/' + model_name_acc + '.png')
-    experiment.log_image('/home/francesco/Desktop/carino/vaevictis/data/' + model_name_acc + '.png')
+    experiment.log_image('/home/francesco/Desktop/carino/vaevictis/data/' + model_name_acc + '-valid.png')
+    plt.show()
+
+    interp = ClassificationInterpretation.from_learner(learner, ds_type='Test')
+    interp.plot_confusion_matrix(normalize=False, title='test')
+    plt.savefig(learner.model_dir + '/' + model_name_acc + '.png')
+    experiment.log_image('/home/francesco/Desktop/carino/vaevictis/data/' + model_name_acc + '-test.png')
     plt.show()
 
 params = {'epochs': 50,
@@ -142,10 +152,10 @@ params = {'epochs': 50,
           'info': '',
           'resize': 92}
 
-# train_and_evaluate(params, train=True, load_model='microresnet#3-preactivate=True-se=True-100-92-0.12-25-no_tail-spawn-shift#2-0.001-64-accuracy')
-train_and_evaluate(params, train=True)
-params['data-aug'] = True
-train_and_evaluate(params, train=True)
+train_and_evaluate(params, train=False, load_model='microresnet#3-preactivate=True-se=True-100-92-0.12-25-no_tail-spawn-shift#2-0.001-92-accuracy-True')
+# train_and_evaluate(params, train=True)
+# params['data-aug'] = True
+# train_and_evaluate(params, train=True)
 # params['sampler'] = True
 # train_and_evaluate(params, train=True)
 
