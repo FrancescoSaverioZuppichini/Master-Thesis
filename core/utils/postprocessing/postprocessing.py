@@ -245,10 +245,10 @@ class PatchesHandler(PostProcessingHandler):
 
     def df2patches(self, data):
         """
-        Given a dataframe, and heightmap and the file path generate the patches
+        Given a dataframe, and heightmap and the file path, this function extracts a patch
         every `Config.SKIP_EVERY` rows. This is done due to the big rate that we used to
         store the data, around 250hz. A `Config.SKIP_EVERY=12` is equal to a rate of 20.
-        :param data:import glob
+        :param data:
 
         :return:
         """
@@ -299,6 +299,7 @@ if __name__ == '__main__':
     patches_h = PatchesHandler(config=config)
     df_h = DataFrameHandler(successor=patches_h, config=config)
     b_h = BagsHandler(config=config, successor=df_h)
+
 
     bags = glob.glob('{}/**/*.bag'.format(config.bags_dir))
 
