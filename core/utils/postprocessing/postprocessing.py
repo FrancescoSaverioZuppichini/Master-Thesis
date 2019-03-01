@@ -153,17 +153,11 @@ class DataFrameHandler(PostProcessingHandler):
         """
         df = df.loc[df.index >= 1].dropna()
         df = df.loc[df.index <= 19].dropna()
-
         # robot upside down
         df = df.loc[df['pose__pose_e_orientation_x'] >= -2.0].dropna()
         df = df.loc[df['pose__pose_e_orientation_x'] <= 2.0].dropna()
         df = df.loc[df['pose__pose_e_orientation_y'] >= -2.0].dropna()
         df = df.loc[df['pose__pose_e_orientation_y'] <= 2.0].dropna()
-
-        # TODO we can use hm_x and hm_y instead!
-        # df = df.loc[(df[P_Y_KEY] < max_x - 5) & (df[P_Y_KEY] > -5.1)].dropna()
-        # df = df.loc[(df[P_Y_KEY] < max_y - 5) & (df[P_Y_KEY] > -5.1)].dropna()
-
         return df
 
     def df_clean_by_removing_outliers(self, df, hm):
@@ -174,7 +168,7 @@ class DataFrameHandler(PostProcessingHandler):
                    ].index
 
         print('removing {} outliers'.format(len(index)))
-
+        # if there are some outliers, we remove all the rows after the first one
         if len(index) > 0:
             idx = index[0]
             df = df.loc[0:idx]

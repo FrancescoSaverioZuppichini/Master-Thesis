@@ -15,11 +15,6 @@ from os import path
 from pypeln import thread as th
 from tf.transformations import euler_from_quaternion
 
-try:
-    from .config import Config
-except ImportError:
-    from config import Config
-
 
 def file2df_map(file):
     df = pd.read_csv(file)
