@@ -34,12 +34,12 @@ if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
 
 
 def train_and_evaluate(params, train=True, load_model=None):
-    model = OmarCNN()
-    # model = MicroResnet.micro(1,
-    #                           n_classes=2,
-    #                           block=[BasicBlock, BasicBlock, BasicBlock, BasicBlockSE],
-    #                           preactivated=True)
-    # print(model)
+    # model = OmarCNN()
+    model = MicroResnet.micro(1,
+                              n_classes=2,
+                              block=[BasicBlock, BasicBlock, BasicBlock, BasicBlockSE],
+                              preactivated=True)
+    print(model)
 
 
     summary(model.cuda(), (1, params['resize'], params['resize']))
@@ -49,8 +49,8 @@ def train_and_evaluate(params, train=True, load_model=None):
     train_dl, val_dl, test_dl = get_dataloaders(
         train_root='/home/francesco/Desktop/data/train/dataset/{}'.format(params['dataset']),
         test_root='/home/francesco/Desktop/data/test/dataset/{}'.format(params['test_dataset']),
-        val_root='/home/francesco/Desktop/data/val/dataset/{}'.format(params['val_dataset']),
-        # val_size=0.15,
+        # val_root='/home/francesco/Desktop/data/val/dataset/{}'.format(params['val_dataset']),
+        val_size=0.15,
         train_transform=get_transform(params['resize'], should_aug=params['data-aug']),
         val_transform=get_transform(params['resize']),
         test_transform=get_transform(params['resize'], scale=10),
@@ -139,8 +139,8 @@ def train_and_evaluate(params, train=True, load_model=None):
 params = {'epochs': 50,
           'lr': 0.001,
           'batch_size': 128,
-          'model': '128omar',
-          # 'model': 'microresnet#3-preactivate=True-se=True-gate=5x5-2-pool-2-1',
+          # 'model': '128omar',
+          'model': 'microresnet#3-preactivate=True-se=True-gate=5x5-2-pool-2-1',
           'dataset': '100-92-0.06-25-no_tail-spawn-shift#2',
           'val_dataset': '100-92-0.06-12-no_tail-spawn-shift',
           'test_dataset': '100-92-0.06-12-querry-no_tail-spawn-shift',
@@ -149,7 +149,7 @@ params = {'epochs': 50,
           'callbacks': '[ReduceLROnPlateauCallback]',
           'data-aug': True,
           'optim': 'sgd',
-          'info': '',
+          'info': 'test as val',
           'resize': 92}
 
 # train_and_evaluate(params, train=False, load_model='microresnet#3-preactivate=True-se=True-100-92-0.12-25-no_tail-spawn-shift#2-0.001-92-accuracy-True')
