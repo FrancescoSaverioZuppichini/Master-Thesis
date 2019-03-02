@@ -12,10 +12,10 @@ class MicroResnet(ResNet):
         super().__init__(in_channel, blocks, block=block, conv_layer=nn.Conv2d, n_classes=n_classes, decoder=MicroEncoder, *args, **kwargs)
 
         self.encoder.gate = nn.Sequential(
-            conv_layer(in_channel, 16, kernel_size=3, stride=1, bias=False),
+            conv_layer(in_channel, 16, kernel_size=5, stride=2, bias=False, padding=1),
             nn.BatchNorm2d(16),
             nn.LeakyReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=2)
+            nn.MaxPool2d(kernel_size=2, stride=1)
         )
 
     @classmethod
