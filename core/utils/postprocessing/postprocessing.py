@@ -312,25 +312,25 @@ if __name__ == '__main__':
     # df_h = DataFrameHandler(successor=patches_h, config=config)
     # b_h = BagsHandler(config=config, successor=df_h)
 
-    config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/train_no_tail#2/train/',
-                                       maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/train/',
-                                       csv_dir='/home/francesco/Desktop/data/train/csv/',
-                                       out_dir='/home/francesco/Desktop/data/train/dataset/',
-                                       patch_size=92,
-                                       advancement_th=0.06,
-                                       skip_every=25,
-                                       translation=[5,5],
-                                       time_window=125,
-                                       name='no_tail-spawn-shift#2')
-
-    patches_h = PatchesHandler(config=config)
-    df_h = DataFrameHandler(successor=patches_h, config=config)
-    b_h = BagsHandler(config=config, successor=df_h)
-
-
-    bags = glob.glob('{}/**/*.bag'.format(config.bags_dir))
-
-    list(b_h(bags))
+    # config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/train_no_tail#2/train/',
+    #                                    maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/train/',
+    #                                    csv_dir='/home/francesco/Desktop/data/train/csv/',
+    #                                    out_dir='/home/francesco/Desktop/data/train/dataset/',
+    #                                    patch_size=92,
+    #                                    advancement_th=0.06,
+    #                                    skip_every=25,
+    #                                    translation=[5,5],
+    #                                    time_window=125,
+    #                                    name='no_tail-spawn-shift#2')
+    #
+    # patches_h = PatchesHandler(config=config)
+    # df_h = DataFrameHandler(successor=patches_h, config=config)
+    # b_h = BagsHandler(config=config, successor=df_h)
+    #
+    #
+    # bags = glob.glob('{}/**/*.bag'.format(config.bags_dir))
+    #
+    # list(b_h(bags))
 
     config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/flat_spawns/val/',
                                        maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/val/',
@@ -342,6 +342,11 @@ if __name__ == '__main__':
                                        translation=[5,5],
                                        time_window=125,
                                        name='no_tail-spawn-shift')
+
+    patches_h = PatchesHandler(config=config)
+    df_h = DataFrameHandler(successor=patches_h, config=config)
+    b_h = BagsHandler(config=config, successor=df_h)
+
 
     bags = glob.glob('{}/**/*.bag'.format(config.bags_dir))
 
@@ -358,6 +363,11 @@ if __name__ == '__main__':
                                        time_window=125,
                                        scale=10,
                                        name='querry-no_tail-spawn-shift')
+
+    patches_h = PatchesHandler(config=config)
+    df_h = DataFrameHandler(successor=patches_h, config=config)
+    b_h = BagsHandler(config=config, successor=df_h)
+
 
     bags = glob.glob('{}/**/*.bag'.format(config.bags_dir))
 
