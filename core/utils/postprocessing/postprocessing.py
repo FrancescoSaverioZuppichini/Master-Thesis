@@ -244,7 +244,7 @@ class PatchesHandler(PostProcessingHandler):
 
     def remove_negative_advancement(self, df):
 
-        return df[df["advancement"] < 0]
+        return df[df["advancement"] > 0]
 
 
     def df2patches(self, data):
