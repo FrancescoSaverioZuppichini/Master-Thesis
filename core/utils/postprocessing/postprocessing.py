@@ -198,7 +198,7 @@ class DataFrameHandler(PostProcessingHandler):
         def make_path(file_path):
             splitted = file_path.split('/')
             map_name, file_name = splitted[-2], splitted[-1]
-            return path.normpath('{}/{}/{}'.format(self.config.csv_dir, map_name, path.splitext(file_name)[0] + '-complete.csv'))
+            return path.normpath('{}/{}/{}'.format(self.config.csv_dir, map_name, path.splitext(file_name)[0]))
 
         map_name = filename2map(file_path)
         map_path = '{}/{}.png'.format(self.config.maps_folder, map_name)
@@ -225,7 +225,7 @@ class DataFrameHandler(PostProcessingHandler):
 
                 # TODO add flag to decide if store the csv or not
                 os.makedirs(path.dirname(file_path), exist_ok=True)
-                df.to_csv(file_path)
+                df.to_csv(file_path + '-complete.csv')
             else:
                 print('{} contains 0 rows, dropping...'.format(file_path))
 
@@ -280,7 +280,7 @@ class PatchesHandler(PostProcessingHandler):
             image_paths.append(image_path)
         df['image_path'] = image_paths
         # update the dataframe with the reference to the image stored
-        df.to_csv(os.path.splitext(file_path)[0] + '-patch.csv'
+        df.to_csv(file_path + '-patch.csv'
                   )
         return data
 
