@@ -208,9 +208,9 @@ class DataFrameHandler(PostProcessingHandler):
         file_path = make_path(file_path)
 
         try:
-            if path.isfile(file_path):
+            if path.isfile(file_path + '-complete.csv'):
                 print('file exist, loading...')
-                df = pd.read_csv(file_path)
+                df = pd.read_csv(file_path + '-complete.csv')
 
             else:
                 df = df_convert_date2timestamp(df)
