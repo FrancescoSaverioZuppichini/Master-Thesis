@@ -203,31 +203,35 @@ class DataFrameHandler(PostProcessingHandler):
         map_name = filename2map(file_path)
         map_path = '{}/{}.png'.format(self.config.maps_folder, map_name)
         print(map_path)
+
         hm = read_image(map_path)
         file_path = make_path(file_path)
 
-        if path.isfile(file_path):
-            print('file exist, loading...')
-            df = pd.read_csv(file_path)
+        try:
+            if path.isfile(file_path):
+                print('file exist, loading...')
+                df = pd.read_csv(file_path)
 
-        else:
-            df = df_convert_date2timestamp(df)
-            df = df_convert_quaterion2euler(df)
-            df = self.df_clean_by_dropping(df, hm.shape[0] * self.config.resolution,
-                                           hm.shape[1] * self.config.resolution)
-
-            if len(df) > 0:
-                df = self.df_add_advancement(df, self.config.time_window)
-                df = self.df_add_label(df, self.config.advancement_th)
-                df = self.df_adjust_robot_center(df)
-                df = self.df_add_hm_coords(df, hm)
-                df = self.df_clean_by_removing_outliers(df, hm)
-
-                # TODO add flag to decide if store the csv or not
-                os.makedirs(path.dirname(file_path), exist_ok=True)
-                df.to_csv(file_path + '-complete.csv')
             else:
-                print('{} contains 0 rows, dropping...'.format(file_path))
+                df = df_convert_date2timestamp(df)
+                df = df_convert_quaterion2euler(df)
+                df = self.df_clean_by_dropping(df, hm.shape[0] * self.config.resolution,
+                                               hm.shape[1] * self.config.resolution)
+
+                if len(df) > 0:
+                    df = self.df_add_advancement(df, self.config.time_window)
+                    df = self.df_add_label(df, self.config.advancement_th)
+                    df = self.df_adjust_robot_center(df)
+                    df = self.df_add_hm_coords(df, hm)
+                    df = self.df_clean_by_removing_outliers(df, hm)
+
+                    # TODO add flag to decide if store the csv or not
+                    os.makedirs(path.dirname(file_path), exist_ok=True)
+                    df.to_csv(file_path + '-complete.csv')
+                else:
+                    print('{} contains 0 rows, dropping...'.format(file_path))
+        except:
+            print('Error with {}'.format(file_path))
 
         return df, hm, file_path
 
@@ -260,28 +264,31 @@ class PatchesHandler(PostProcessingHandler):
 
         os.makedirs(out_dir + '/True', exist_ok=True)
         os.makedirs(out_dir + '/False', exist_ok=True)
+        try:
+            df = self.remove_negative_advancement(df)
+            # reset the index to int so we can take only on row every Config.SKIP_EVERY
+            # since the stored rate was really high, 250hz, we will end up with lots of almost
+            # identical patches
+            df = df.reset_index()
+            df = df.loc[list(range(0, len(df), self.config.skip_every)), :]
+            df = df.set_index(df.columns[0])
+            image_paths = []
+            for idx, (i, row) in enumerate(df.iterrows()):
+                patch = \
+                    hmpatch(hm, row["hm_x"], row["hm_y"], np.rad2deg(row['pose__pose_e_orientation_z']),
+                            self.config.patch_size,
+                            scale=1)[0]
+                patch = (patch * 255).astype(np.uint8)
+                image_path = '{}/{}/{}.png'.format(out_dir, row['label'], row['timestamp'])
+                cv2.imwrite(image_path, patch)
+                image_paths.append(image_path)
+            df['image_path'] = image_paths
+            # update the dataframe with the reference to the image stored
+            df.to_csv(file_path + '-patch.csv')
+        except:
+            print('Error with {}'.format(file_path))
+            pass
 
-        df = self.remove_negative_advancement(df)
-        # reset the index to int so we can take only on row every Config.SKIP_EVERY
-        # since the stored rate was really high, 250hz, we will end up with lots of almost
-        # identical patches
-        df = df.reset_index()
-        df = df.loc[list(range(0, len(df), self.config.skip_every)), :]
-        df = df.set_index(df.columns[0])
-        image_paths = []
-        for idx, (i, row) in enumerate(df.iterrows()):
-            patch = \
-                hmpatch(hm, row["hm_x"], row["hm_y"], np.rad2deg(row['pose__pose_e_orientation_z']),
-                        self.config.patch_size,
-                        scale=1)[0]
-            patch = (patch * 255).astype(np.uint8)
-            image_path = '{}/{}/{}.png'.format(out_dir, row['label'], row['timestamp'])
-            cv2.imwrite(image_path, patch)
-            image_paths.append(image_path)
-        df['image_path'] = image_paths
-        # update the dataframe with the reference to the image stored
-        df.to_csv(file_path + '-patch.csv'
-                  )
         return data
 
     def handle(self, data):
@@ -307,9 +314,10 @@ if __name__ == '__main__':
 
     config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/train_no_tail#2/train/',
                                        maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/train/',
+                                       csv_dir='/home/francesco/Desktop/data/train/csv/',
                                        out_dir='/home/francesco/Desktop/data/train/dataset/',
                                        patch_size=92,
-                                       advancement_th=0.12,
+                                       advancement_th=0.06,
                                        skip_every=25,
                                        translation=[5,5],
                                        time_window=125,
@@ -326,9 +334,10 @@ if __name__ == '__main__':
 
     config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/flat_spawns/val/',
                                        maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/val/',
+                                      csv_dir='/home/francesco/Desktop/data/val/csv/',
                                        out_dir='/home/francesco/Desktop/data/val/dataset/',
                                        patch_size=92,
-                                       advancement_th=0.12,
+                                       advancement_th=0.06,
                                        skip_every=12,
                                        translation=[5,5],
                                        time_window=125,
@@ -340,9 +349,10 @@ if __name__ == '__main__':
 
     config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/flat_spawns/test/',
                                        maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/test/',
+                                       csv_dir='/home/francesco/Desktop/data/test/csv/',
                                        out_dir='/home/francesco/Desktop/data/test/dataset/',
                                        patch_size=92,
-                                       advancement_th=0.12,
+                                       advancement_th=0.06,
                                        skip_every=12,
                                        translation=[5,5],
                                        time_window=125,
