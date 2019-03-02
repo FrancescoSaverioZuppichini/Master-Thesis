@@ -198,7 +198,7 @@ class DataFrameHandler(PostProcessingHandler):
         def make_path(file_path):
             splitted = file_path.split('/')
             map_name, file_name = splitted[-2], splitted[-1]
-            return path.normpath('{}/{}/{}'.format(self.config.csv_dir, map_name, path.splitext(file_name)[0] + '.csv'))
+            return path.normpath('{}/{}/{}'.format(self.config.csv_dir, map_name, path.splitext(file_name)[0] + '-complete.csv'))
 
         map_name = filename2map(file_path)
         map_path = '{}/{}.png'.format(self.config.maps_folder, map_name)
@@ -237,6 +237,11 @@ class DataFrameHandler(PostProcessingHandler):
 
 class PatchesHandler(PostProcessingHandler):
 
+    def remove_negative_advancement(self, df):
+
+        return df[df["advancement"] < 0]
+
+
     def df2patches(self, data):
         """
         Given a dataframe, and heightmap and the file path, this function extracts a patch
@@ -255,10 +260,11 @@ class PatchesHandler(PostProcessingHandler):
         os.makedirs(out_dir + '/True', exist_ok=True)
         os.makedirs(out_dir + '/False', exist_ok=True)
 
+        df = self.remove_negative_advancement(df)
         # reset the index to int so we can take only on row every Config.SKIP_EVERY
         # since the stored rate was really high, 250hz, we will end up with lots of almost
         # identical patches
-        df = df.reset_index(drop=True)
+        df = df.reset_index()
         df = df.loc[list(range(0, len(df), self.config.skip_every)), :]
         df = df.set_index(df.columns[0])
         image_paths = []
