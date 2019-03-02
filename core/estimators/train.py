@@ -82,8 +82,8 @@ def train_and_evaluate(params, train=True, load_model=None):
                       opt_func= partial(torch.optim.SGD, momentum=0.95, weight_decay=1e-4),
                       metrics=[accuracy])
 
-    model_name_acc = '{}-{}-{}-{}-accuracy-{}'.format(params['model'], params['dataset'], params['lr'], params['resize'], params['data-aug'], time.time())
-    model_name_loss = '{}-{}-{}-{}-loss-{}'.format(params['model'], params['dataset'], params['lr'], params['resize'],  params['data-aug'], time.time())
+    model_name_acc = '{}-{}-{}-{}-accuracy-{}'.format(params['model'], params['dataset'], params['lr'], params['resize'], time.time())
+    model_name_loss = '{}-{}-{}-{}-loss-{}'.format(params['model'], params['dataset'], params['lr'], params['resize'], time.time())
 
     callbacks = [ReduceLROnPlateauCallback(learn=learner, patience=4),
                  EarlyStoppingCallback(learn=learner, patience=6),
