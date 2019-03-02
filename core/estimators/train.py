@@ -141,9 +141,9 @@ params = {'epochs': 50,
           'batch_size': 128,
           # 'model': 'omar',
           'model': 'microresnet#3-preactivate=True-se=True',
-          'dataset': '100-92-0.12-25-no_tail-spawn-shift#2',
-          'val_dataset': '100-92-0.12-12-no_tail-spawn-shift',
-          'test_dataset': '100-92-0.12-12-querry-no_tail-spawn-shift',
+          'dataset': '100-92-0.06-25-no_tail-spawn-shift#2',
+          'val_dataset': '100-92-0.06-12-no_tail-spawn-shift',
+          'test_dataset': '100-92-0.06-12-querry-no_tail-spawn-shift',
           'sampler': None,
           'samper_type': 'imbalance',
           'callbacks': '[ReduceLROnPlateauCallback]',
@@ -152,8 +152,8 @@ params = {'epochs': 50,
           'info': '',
           'resize': 92}
 
-train_and_evaluate(params, train=False, load_model='microresnet#3-preactivate=True-se=True-100-92-0.12-25-no_tail-spawn-shift#2-0.001-92-accuracy-True')
-# train_and_evaluate(params, train=True)
+# train_and_evaluate(params, train=False, load_model='microresnet#3-preactivate=True-se=True-100-92-0.12-25-no_tail-spawn-shift#2-0.001-92-accuracy-True')
+train_and_evaluate(params, train=True)
 # params['data-aug'] = True
 # train_and_evaluate(params, train=True)
 # params['sampler'] = True
