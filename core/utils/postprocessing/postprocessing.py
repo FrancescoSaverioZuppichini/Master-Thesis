@@ -202,6 +202,7 @@ class DataFrameHandler(PostProcessingHandler):
 
         map_name = filename2map(file_path)
         map_path = '{}/{}.png'.format(self.config.maps_folder, map_name)
+        print(map_path)
         hm = read_image(map_path)
         file_path = make_path(file_path)
 
