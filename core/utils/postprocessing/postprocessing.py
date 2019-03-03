@@ -265,7 +265,7 @@ class PatchesHandler(PostProcessingHandler):
         os.makedirs(out_dir + '/False', exist_ok=True)
         try:
             df = self.df_add_label(df, self.config.advancement_th)
-            df = self.remove_negative_advancement(df)
+            # df = self.remove_negative_advancement(df)
             # reset the index to int so we can take only on row every Config.SKIP_EVERY
             # since the stored rate was really high, 250hz, we will end up with lots of almost
             # identical patches
@@ -309,7 +309,7 @@ if __name__ == '__main__':
                                        skip_every=25,
                                        translation=[5,5],
                                        time_window=125,
-                                       name='no_tail-spawn-shift#2-no-neg')
+                                       name='no_tail-spawn-shift#2')
 
     patches_h = PatchesHandler(config=config)
     df_h = DataFrameHandler(successor=patches_h, config=config)
@@ -329,7 +329,7 @@ if __name__ == '__main__':
                                        skip_every=12,
                                        translation=[5,5],
                                        time_window=125,
-                                       name='no_tail-spawn-shift-no-neg')
+                                       name='no_tail-spawn-shift')
 
     patches_h = PatchesHandler(config=config)
     df_h = DataFrameHandler(successor=patches_h, config=config)
@@ -350,7 +350,7 @@ if __name__ == '__main__':
                                        translation=[5,5],
                                        time_window=125,
                                        scale=10,
-                                       name='querry-no_tail-spawn-shift-no-neg')
+                                       name='querry-no_tail-spawn-shift')
 
     patches_h = PatchesHandler(config=config)
     df_h = DataFrameHandler(successor=patches_h, config=config)

@@ -136,6 +136,8 @@ def train_and_evaluate(params, train=True, load_model=None):
     # experiment.log_image('/home/francesco/Desktop/carino/vaevictis/data/' + load_model + '-test.png')
     plt.show()
 
+    print(model_name_acc)
+
 params = {'epochs': 50,
           'lr': 0.001,
           'batch_size': 128,
