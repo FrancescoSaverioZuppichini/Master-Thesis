@@ -264,8 +264,8 @@ class PatchesHandler(PostProcessingHandler):
         os.makedirs(out_dir + '/True', exist_ok=True)
         os.makedirs(out_dir + '/False', exist_ok=True)
         try:
-            df = self.remove_negative_advancement(df)
             df = self.df_add_label(df, self.config.advancement_th)
+            df = self.remove_negative_advancement(df)
             # reset the index to int so we can take only on row every Config.SKIP_EVERY
             # since the stored rate was really high, 250hz, we will end up with lots of almost
             # identical patches
