@@ -181,17 +181,6 @@ class DataFrameHandler(PostProcessingHandler):
 
         return df
 
-    def df_add_label(self, df, advancement_th):
-        """
-        Decore the dataframe with the 'label' column that indicates
-        if a patch is traversable or not based on the advancement
-        :param df:
-        :param advancement_th:
-        :return:
-        """
-        df["label"] = df["advancement"] > advancement_th
-        return df
-
     def df2traversability_df(self, data):
         df, map_name, file_path = data
 
@@ -220,7 +209,6 @@ class DataFrameHandler(PostProcessingHandler):
 
                 if len(df) > 0:
                     df = self.df_add_advancement(df, self.config.time_window)
-                    df = self.df_add_label(df, self.config.advancement_th)
                     df = self.df_adjust_robot_center(df)
                     df = self.df_add_hm_coords(df, hm)
                     df = self.df_clean_by_removing_outliers(df, hm)
@@ -230,6 +218,7 @@ class DataFrameHandler(PostProcessingHandler):
                     df.to_csv(file_path + '-complete.csv')
                 else:
                     print('{} contains 0 rows, dropping...'.format(file_path))
+
         except:
             print('Error with {}'.format(file_path))
 
@@ -246,6 +235,16 @@ class PatchesHandler(PostProcessingHandler):
 
         return df[df["advancement"] >= 0]
 
+    def df_add_label(self, df, advancement_th):
+        """
+        Decore the dataframe with the 'label' column that indicates
+        if a patch is traversable or not based on the advancement
+        :param df:
+        :param advancement_th:
+        :return:
+        """
+        df["label"] = df["advancement"] > advancement_th
+        return df
 
     def df2patches(self, data):
         """
@@ -266,6 +265,7 @@ class PatchesHandler(PostProcessingHandler):
         os.makedirs(out_dir + '/False', exist_ok=True)
         try:
             df = self.remove_negative_advancement(df)
+            df = self.df_add_label(df, self.config.advancement_th)
             # reset the index to int so we can take only on row every Config.SKIP_EVERY
             # since the stored rate was really high, 250hz, we will end up with lots of almost
             # identical patches
@@ -302,7 +302,7 @@ if __name__ == '__main__':
 
     config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/train_no_tail#2/train/',
                                        maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/train/',
-                                       csv_dir='/home/francesco/Desktop/data/train/csv/',
+                                       csv_dir='/home/francesco/Desktop/carino/vaevictis/data/train_no_tail#2/csv/',
                                        out_dir='/home/francesco/Desktop/data/train/dataset/',
                                        patch_size=92,
                                        advancement_th=0.12,
