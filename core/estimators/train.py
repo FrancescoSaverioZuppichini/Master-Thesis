@@ -34,11 +34,11 @@ if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
 
 
 def train_and_evaluate(params, train=True, load_model=None):
-    model = OmarCNN()
-    # model = MicroResnet.micro(1,
-    #                           n_classes=2,
-    #                           block=[BasicBlock, BasicBlock, BasicBlock, BasicBlockSE],
-    #                           preactivated=True)
+    # model = OmarCNN()
+    model = MicroResnet.micro(1,
+                              n_classes=2,
+                              block=[BasicBlock, BasicBlock, BasicBlock, BasicBlockSE],
+                              preactivated=True)
     # print(model)
 
 
@@ -49,10 +49,10 @@ def train_and_evaluate(params, train=True, load_model=None):
     train_dl, val_dl, test_dl = get_dataloaders(
         train_root='/home/francesco/Desktop/data/train/dataset/{}'.format(params['dataset']),
         test_root='/home/francesco/Desktop/data/test/dataset/{}'.format(params['test_dataset']),
-        # val_root='/home/francesco/Desktop/data/val/dataset/{}'.format(params['val_dataset']),
-        val_size=0.15,
+        val_root='/home/francesco/Desktop/data/test/dataset/{}'.format(params['test_dataset']),
+        # val_size=0.15,
         train_transform=get_transform(params['resize'], should_aug=params['data-aug']),
-        val_transform=get_transform(params['resize']),
+        val_transform=get_transform(params['resize'], scale=10),
         test_transform=get_transform(params['resize'], scale=10),
         num_samples=params['sampler'],
         batch_size=params['batch_size'],
@@ -79,7 +79,7 @@ def train_and_evaluate(params, train=True, load_model=None):
                       path='/home/francesco/Desktop/carino/vaevictis/data/',
                       model_dir='/home/francesco/Desktop/carino/vaevictis/data/',
                       loss_func=criterion,
-                      # opt_func= partial(torch.optim.SGD, momentum=0.95, weight_decay=1e-4),
+                      opt_func= partial(torch.optim.SGD, momentum=0.95, weight_decay=1e-4),
                       metrics=[accuracy])
 
     model_name_acc = '{}-{}-{}-{}-accuracy-{}'.format(params['model'], params['dataset'], params['lr'], params['resize'], time.time())
@@ -127,28 +127,28 @@ def train_and_evaluate(params, train=True, load_model=None):
     interp = ClassificationInterpretation.from_learner(learner)
     interp.plot_confusion_matrix(normalize=True, title='Val')
     plt.savefig(learner.model_dir + '/' + model_name_acc + '.png')
-    experiment.log_image('/home/francesco/Desktop/carino/vaevictis/data/' + load_model + '-valid.png')
+    # experiment.log_image('/home/francesco/Desktop/carino/vaevictis/data/' + load_model + '-valid.png')
     plt.show()
 
     interp = ClassificationInterpretation.from_learner(learner, ds_type=DatasetType.Test)
     interp.plot_confusion_matrix(normalize=True, title='Test')
     plt.savefig(learner.model_dir + '/' + model_name_acc + '.png')
-    experiment.log_image('/home/francesco/Desktop/carino/vaevictis/data/' + load_model + '-test.png')
+    # experiment.log_image('/home/francesco/Desktop/carino/vaevictis/data/' + load_model + '-test.png')
     plt.show()
 
 params = {'epochs': 50,
           'lr': 0.001,
           'batch_size': 128,
-          'model': '128omar',
-          # 'model': 'microresnet#3-preactivate=True-se=True-gate=5x5-2-pool-2-1',
-          'dataset': '100-92-0.06-25-no_tail-spawn-shift#2',
-          'val_dataset': 0.15,
-          'test_dataset': '100-92-0.06-12-querry-no_tail-spawn-shift',
+          # 'model': '128omar',
+          'model': 'microresnet#3-preactivate=True-se=True-gate=5x5-2-pool-2-1',
+          'dataset': '100-92-0.12-25-no_tail-spawn-shift#2-no-neg',
+          'val_dataset': '100-92-0.12-12-no_tail-spawn-shift-no-neg',
+          'test_dataset': '100-92-0.12-12-querry-no_tail-spawn-shift-no-neg',
           'sampler': None,
           'samper_type': 'imbalance',
           'callbacks': '[ReduceLROnPlateauCallback]',
           'data-aug': True,
-          'optim': 'adam',
+          'optim': 'sdg',
           'info': 'test as val',
           'resize': 92}
 
