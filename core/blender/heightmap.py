@@ -16,9 +16,11 @@ import bpy
 import cv2
 
 
-MAP_PATH = '/home/francesco/Documents/Master-Thesis/core/maps/train/bars1.png'
-TEXT_PATH = '/home/francesco/Desktop/textures/bars1.png'
+# MAP_PATH = '/home/francesco/Documents/Master-Thesis/core/maps/test/querry-big-10.png'
+# TEXT_PATH = '/home/francesco/Desktop/textures/querry-None.png'
 
+MAP_PATH = '/home/francesco/Documents/Master-Thesis/core/maps/train/bars1.png'
+TEXT_PATH = '/home/francesco/Desktop/textures/bars1-None.png'
 
 MAP_NAME = 'querry-big-10.png'
 MAP_KEY = 'Grid'

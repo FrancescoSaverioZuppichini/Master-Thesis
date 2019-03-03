@@ -34,12 +34,12 @@ if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
 
 
 def train_and_evaluate(params, train=True, load_model=None):
-    # model = OmarCNN()
-    model = MicroResnet.micro(1,
-                              n_classes=2,
-                              block=[BasicBlock, BasicBlock, BasicBlock, BasicBlockSE],
-                              preactivated=True)
-    print(model)
+    model = OmarCNN()
+    # model = MicroResnet.micro(1,
+    #                           n_classes=2,
+    #                           block=[BasicBlock, BasicBlock, BasicBlock, BasicBlockSE],
+    #                           preactivated=True)
+    # print(model)
 
 
     summary(model.cuda(), (1, params['resize'], params['resize']))
@@ -79,7 +79,7 @@ def train_and_evaluate(params, train=True, load_model=None):
                       path='/home/francesco/Desktop/carino/vaevictis/data/',
                       model_dir='/home/francesco/Desktop/carino/vaevictis/data/',
                       loss_func=criterion,
-                      opt_func= partial(torch.optim.SGD, momentum=0.95, weight_decay=1e-4),
+                      # opt_func= partial(torch.optim.SGD, momentum=0.95, weight_decay=1e-4),
                       metrics=[accuracy])
 
     model_name_acc = '{}-{}-{}-{}-accuracy-{}'.format(params['model'], params['dataset'], params['lr'], params['resize'], time.time())
@@ -139,16 +139,16 @@ def train_and_evaluate(params, train=True, load_model=None):
 params = {'epochs': 50,
           'lr': 0.001,
           'batch_size': 128,
-          # 'model': '128omar',
-          'model': 'microresnet#3-preactivate=True-se=True-gate=5x5-2-pool-2-1',
+          'model': '128omar',
+          # 'model': 'microresnet#3-preactivate=True-se=True-gate=5x5-2-pool-2-1',
           'dataset': '100-92-0.06-25-no_tail-spawn-shift#2',
-          # 'val_dataset': '100-92-0.06-12-no_tail-spawn-shift',
+          'val_dataset': 0.15,
           'test_dataset': '100-92-0.06-12-querry-no_tail-spawn-shift',
           'sampler': None,
           'samper_type': 'imbalance',
           'callbacks': '[ReduceLROnPlateauCallback]',
           'data-aug': True,
-          'optim': 'sgd',
+          'optim': 'adam',
           'info': 'test as val',
           'resize': 92}
 
