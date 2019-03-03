@@ -130,12 +130,13 @@ class CenterAndScalePatch():
         if debug: self.show_heatmap(x, 'original')
 
         x = x.squeeze()
+        x *= self.scale
         x -= x[x.shape[0] // 2, x.shape[1] // 2].item()
         x = x.unsqueeze(0)
 
         if debug: self.show_heatmap(x, 'center')
 
-        return x * self.scale
+        return x
 
 class FastAIImageFolder(ImageFolder):
     c = 2

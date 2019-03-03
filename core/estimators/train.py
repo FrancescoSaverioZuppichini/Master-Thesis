@@ -49,10 +49,10 @@ def train_and_evaluate(params, train=True, load_model=None):
     train_dl, val_dl, test_dl = get_dataloaders(
         train_root='/home/francesco/Desktop/data/train/dataset/{}'.format(params['dataset']),
         test_root='/home/francesco/Desktop/data/test/dataset/{}'.format(params['test_dataset']),
-        val_root='/home/francesco/Desktop/data/test/dataset/{}'.format(params['test_dataset']),
+        val_root='/home/francesco/Desktop/data/val/dataset/{}'.format(params['val_dataset']),
         # val_size=0.15,
         train_transform=get_transform(params['resize'], should_aug=params['data-aug']),
-        val_transform=get_transform(params['resize'], scale=10),
+        val_transform=get_transform(params['resize'], scale=1),
         test_transform=get_transform(params['resize'], scale=10),
         num_samples=params['sampler'],
         batch_size=params['batch_size'],
@@ -141,22 +141,22 @@ def train_and_evaluate(params, train=True, load_model=None):
 params = {'epochs': 50,
           'lr': 0.001,
           'batch_size': 128,
-          # 'model': '128omar',
+          # 'model': 'omar',
           'model': 'microresnet#3-preactivate=True-se=True-gate=5x5-2-pool-2-1',
-          'dataset': '100-92-0.08-25-no_tail-spawn-shift#2-no-neg',
-          'val_dataset': '100-92-0.08-12-no_tail-spawn-shift-no-neg',
-          'test_dataset': '100-92-0.08-12-querry-no_tail-spawn-shift-no-neg',
+          'dataset': '100-92-0.08-25-no_tail-spawn-shift#2',
+          'val_dataset': '100-92-0.08-12-no_tail-spawn-shift',
+          'test_dataset': '100-92-0.08-12-querry-no_tail-spawn-shift',
           'sampler': None,
           'samper_type': 'imbalance',
           'callbacks': '[ReduceLROnPlateauCallback]',
           'data-aug': True,
-          'optim': 'sdg',
-          'info': 'test as val',
+          'optim': 'adam',
+          'info': '',
           'resize': 92}
 
 # train_and_evaluate(params, train=False, load_model='microresnet#3-preactivate=True-se=True-100-92-0.12-25-no_tail-spawn-shift#2-0.001-92-accuracy-True')
 train_and_evaluate(params, train=True)
-# params['data-aug'] = True
+# params['data-aug'] = False
 # train_and_evaluate(params, train=True)
 # params['sampler'] = True
 # train_and_evaluate(params, train=True)
