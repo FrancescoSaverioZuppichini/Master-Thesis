@@ -27,7 +27,8 @@ class OmarCNN(nn.Module):
         self.decoder = nn.Sequential(nn.Linear(10580, 128),
                                      nn.ReLU(),
                                      nn.Dropout(),
-                                     nn.Linear(128, 2))
+                                     nn.Linear(128, 1),
+                                     nn.Sigmoid())
 
     def forward(self, x):
         x = self.encoder(x)

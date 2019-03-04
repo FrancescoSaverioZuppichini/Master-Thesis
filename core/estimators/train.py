@@ -1,11 +1,13 @@
 from comet_ml import Experiment
 
+import os
 import torch
 import pprint
+import numpy as np
 # from torchvision.models import *
 
 from torchsummary import summary
-
+from os import path
 from fastai.train import Learner, DataBunch, \
     ReduceLROnPlateauCallback, \
     EarlyStoppingCallback, \
@@ -14,9 +16,9 @@ from fastai.train import Learner, DataBunch, \
 from fastai.vision import ClassificationInterpretation
 
 from fastai.metrics import accuracy
-from fastai.layers import CrossEntropyFlat
+from fastai.layers import CrossEntropyFlat, MSELossFlat
 
-from datasets.TraversabilityDataset import get_dataloaders, get_transform
+from datasets.TraversabilityDataset import get_dataloaders, get_transform, TraversabilityDatasetRegression
 
 from models.resnet import *
 from models.omar_cnn import OmarCNN
@@ -34,30 +36,40 @@ if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
 
 
 def train_and_evaluate(params, train=True, load_model=None):
-    # model = OmarCNN()
-    model = MicroResnet.micro(1,
-                              n_classes=2,
-                              block=[BasicBlock, BasicBlock, BasicBlock, BasicBlockSE],
-                              preactivated=True)
+    model = OmarCNN()
+    # model = MicroResnet.micro(1,
+    #
+    #                           n=3,
+    #                           blocks=[BasicBlock, BasicBlock, BasicBlock, BasicBlockSE],
+    #                           preactivate=True)
     # print(model)
 
 
     summary(model.cuda(), (1, params['resize'], params['resize']))
     pprint.pprint(params)
-    criterion = CrossEntropyFlat()
+
+    # criterion = CrossEntropyFlat()
+
+    criterion = MSELossFlat()
 
     train_dl, val_dl, test_dl = get_dataloaders(
-        train_root='/home/francesco/Desktop/data/train/dataset/{}'.format(params['dataset']),
-        test_root='/home/francesco/Desktop/data/test/dataset/{}'.format(params['test_dataset']),
-        val_root='/home/francesco/Desktop/data/val/dataset/{}'.format(params['val_dataset']),
+        train_root='/home/francesco/Desktop/carino/vaevictis/data/train_no_tail#2/csv',
+        test_root='/home/francesco/Desktop/carino/vaevictis/data/test/csvs',
+        val_root='/home/francesco/Desktop/carino/vaevictis/data/flat_spawns/val/csv',
         # val_size=0.15,
         train_transform=get_transform(params['resize'], should_aug=params['data-aug']),
         val_transform=get_transform(params['resize'], scale=1),
         test_transform=get_transform(params['resize'], scale=10),
+        dataset=TraversabilityDatasetRegression.from_root,
         num_samples=params['sampler'],
         batch_size=params['batch_size'],
         num_workers=16,
         pin_memory=True)
+
+    model_name = '{}-{}-{}-{}-{}'.format(params['model'], params['dataset'].split('/')[0], params['lr'], params['resize'], time.time())
+    model_dir = path.normpath('/home/francesco/Desktop/carino/vaevictis/data/' + model_name + '/')
+
+    os.makedirs(model_dir)
 
     print("train size={}, val size={}, test size={}".format(
         len(train_dl) * params['batch_size'],
@@ -77,13 +89,13 @@ def train_and_evaluate(params, train=True, load_model=None):
     learner = Learner(data=data,
                       model=model,
                       path='/home/francesco/Desktop/carino/vaevictis/data/',
-                      model_dir='/home/francesco/Desktop/carino/vaevictis/data/',
+                      model_dir=model_dir,
                       loss_func=criterion,
-                      opt_func= partial(torch.optim.SGD, momentum=0.95, weight_decay=1e-4),
+                      # opt_func= partial(torch.optim.SGD, momentum=0.95, weight_decay=1e-4),
                       metrics=[accuracy])
 
-    model_name_acc = '{}-{}-{}-{}-accuracy-{}'.format(params['model'], params['dataset'], params['lr'], params['resize'], time.time())
-    model_name_loss = '{}-{}-{}-{}-loss-{}'.format(params['model'], params['dataset'], params['lr'], params['resize'], time.time())
+    model_name_acc = 'accuracy'
+    model_name_loss = 'loss'
 
     callbacks = [ReduceLROnPlateauCallback(learn=learner, patience=4),
                  EarlyStoppingCallback(learn=learner, patience=6),
@@ -91,15 +103,13 @@ def train_and_evaluate(params, train=True, load_model=None):
                  SaveModelCallback(learn=learner, name=model_name_loss)]
 
     if train:
-        try:
+        # try:
             with experiment.train():
                 learner.fit(epochs=params['epochs'], lr=params['lr'],
                             callbacks=callbacks)  # SaveModelCallback load the best model after training!
-        except Exception as e:
-            print(e)
-            pass
-
-        torch.save(learner.model, '/home/francesco/Desktop/carino/vaevictis/data/{}.pck'.format(params['model']))
+        # except Exception as e:
+        #     print(e)
+        #     pass
 
     learner.load(model_name_loss)
 
@@ -112,7 +122,6 @@ def train_and_evaluate(params, train=True, load_model=None):
 
     learner.load(model_name_acc)
 
-    torch.save(learner.model, '/home/francesco/Desktop/carino/vaevictis/data/{}.pck'.format(params['model']))
 
     if load_model:
         print('loading model')
@@ -123,35 +132,33 @@ def train_and_evaluate(params, train=True, load_model=None):
         print(loss, acc)
         experiment.log_metric("accuracy-from-best-acc", acc.item())
 
-
-    interp = ClassificationInterpretation.from_learner(learner)
-    interp.plot_confusion_matrix(normalize=True, title='Val')
-    plt.savefig(learner.model_dir + '/' + model_name_acc + '.png')
-    # experiment.log_image('/home/francesco/Desktop/carino/vaevictis/data/' + load_model + '-valid.png')
-    plt.show()
-
-    interp = ClassificationInterpretation.from_learner(learner, ds_type=DatasetType.Test)
-    interp.plot_confusion_matrix(normalize=True, title='Test')
-    plt.savefig(learner.model_dir + '/' + model_name_acc + '.png')
-    # experiment.log_image('/home/francesco/Desktop/carino/vaevictis/data/' + load_model + '-test.png')
-    plt.show()
-
-    print(model_name_acc)
+    #
+    # interp = ClassificationInterpretation.from_learner(learner)
+    # interp.plot_confusion_matrix(normalize=True, title='Val')
+    # plt.savefig(learner.model_dir + '/' + 'val.png')
+    # plt.show()
+    #
+    # interp = ClassificationInterpretation.from_learner(learner, ds_type=DatasetType.Test)
+    # interp.plot_confusion_matrix(normalize=True, title='Test')
+    # plt.savefig(learner.model_dir + '/' + 'test.png')
+    # plt.show()
+    #
+    # print(model_name_acc)
 
 params = {'epochs': 50,
           'lr': 0.001,
           'batch_size': 128,
-          # 'model': 'omar',
-          'model': 'microresnet#3-preactivate=True-se=True-gate=5x5-2-pool-2-2',
-          'dataset': '100-92-0.08-25-no_tail-spawn-shift#2',
-          'val_dataset': '100-92-0.08-12-no_tail-spawn-shift',
-          'test_dataset': '100-92-0.08-12-querry-no_tail-spawn-shift',
+          'model': 'omar-db',
+          # 'model': 'microresnet#4',
+          'dataset': '100-92-0.08-25/train/',
+          'val_dataset': '100-92-0.08-25/val/',
+          'test_dataset': '100-92-0.08-25/test/',
           'sampler': None,
           'samper_type': 'imbalance',
           'callbacks': '[ReduceLROnPlateauCallback]',
           'data-aug': True,
           'optim': 'adam',
-          'info': '',
+          'info': 'regression',
           'resize': 92}
 
 # train_and_evaluate(params, train=False, load_model='microresnet#3-preactivate=True-se=True-100-92-0.12-25-no_tail-spawn-shift#2-0.001-92-accuracy-True')

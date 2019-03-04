@@ -1,5 +1,5 @@
 import torch.nn as nn
-from estimators.models.resnet import *
+from models.resnet import *
 
 from torchsummary import summary
 
@@ -51,6 +51,6 @@ class MicroResnet(ResNet):
 # summary(OmarCNN(), (1, 92, 92))
 
 
-model = MicroResnet.micro(1, n=3, preactivate=True, blocks=[BasicBlock, BasicBlock, BasicBlockSE])
-
-summary(model, (1, 92, 92))
+# model = MicroResnet.micro(1, n=3, preactivate=True, blocks=[BasicBlock, BasicBlock, BasicBlockSE])
+#
+# summary(model, (1, 92, 92))

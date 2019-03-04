@@ -13,6 +13,7 @@ from os import path
 from utils import *
 from pypeln import thread as th
 
+
 class PostProcessingConfig():
     def __init__(self, base_dir, maps_folder, patch_size, advancement_th, time_window, skip_every, translation,
                  resolution=0.02, scale=1, n_workers=16,
@@ -32,16 +33,17 @@ class PostProcessingConfig():
         if self.csv_dir is None: self.csv_dir = path.normpath(self.base_dir + '/csvs/')
         if self.out_dir is None: self.out_dir = path.normpath(self.base_dir + '/outs/')
 
-        self.out_dir = path.normpath(self.out_dir + '/' + self.name)
+        self.out_dir = path.normpath(self.out_dir + '/' + self.dataset_name + '/' + self.name)
 
     @property
     def dataset_name(self):
-        return '/{}-{}-{}-{}-{}'.format(100, self.patch_size, self.advancement_th, self.skip_every, self.name)
+        return '/{}-{}-{}-{}'.format(100, self.patch_size, self.advancement_th, self.skip_every)
 
     @classmethod
     def from_args(cls, args):
 
         return cls(**vars(args))
+
 
 class Handler():
     def __init__(self, successor=None):
@@ -62,6 +64,7 @@ class PostProcessingHandler(Handler):
     def __init__(self, config: PostProcessingConfig, successor=None):
         super().__init__(successor=successor)
         self.config = config
+
 
 class BagsHandler(PostProcessingHandler):
 
@@ -226,7 +229,7 @@ class DataFrameHandler(PostProcessingHandler):
 
     def handle(self, data):
         stage = th.map(self.df2traversability_df, data, workers=self.config.n_workers)
-        return tqdm(stage, total=len(data),  desc='[INFO] Dataframe handler')
+        return tqdm(stage, total=len(data), desc='[INFO] Dataframe handler')
 
 
 class PatchesHandler(PostProcessingHandler):
@@ -296,6 +299,7 @@ class PatchesHandler(PostProcessingHandler):
 
         return tqdm(stage, total=len(data), desc='[INFO] Patches handler')
 
+
 def make_and_run_chain(config):
     patches_h = PatchesHandler(config=config)
     df_h = DataFrameHandler(successor=patches_h, config=config)
@@ -305,45 +309,43 @@ def make_and_run_chain(config):
 
     list(b_h(bags))
 
+
 if __name__ == '__main__':
-
-
     config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/train_no_tail#2/train/',
-                                   maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/train/',
-                                   csv_dir='/home/francesco/Desktop/carino/vaevictis/data/train_no_tail#2/csv/',
-                                   out_dir='/home/francesco/Desktop/data/',
-                                   patch_size=92,
-                                   advancement_th=0.08,
-                                   skip_every=25,
-                                   translation=[5,5],
-                                   time_window=125,
-                                   name='train')
+                                  maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/train/',
+                                  csv_dir='/home/francesco/Desktop/carino/vaevictis/data/train_no_tail#2/csv/',
+                                  out_dir='/home/francesco/Desktop/data/',
+                                  patch_size=92,
+                                  advancement_th=0.12,
+                                  skip_every=25,
+                                  translation=[5, 5],
+                                  time_window=125,
+                                  name='train')
 
     make_and_run_chain(config)
-
+    #
     config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/flat_spawns/val/',
-                                       maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/val/',
-                                       csv_dir='/home/francesco/Desktop/data/val/csv/',
-                                       out_dir='/home/francesco/Desktop/data/',
-                                       patch_size=92,
-                                       advancement_th=0.08,
-                                       skip_every=12,
-                                       translation=[5,5],
-                                       time_window=125,
-                                       name='eval')
+                                  maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/val/',
+                                  csv_dir='/home/francesco/Desktop/data/flat_spawns/val/csv/',
+                                  out_dir='/home/francesco/Desktop/data/',
+                                  patch_size=92,
+                                  advancement_th=0.12,
+                                  skip_every=12,
+                                  translation=[5, 5],
+                                  time_window=125,
+                                  name='val')
     make_and_run_chain(config)
-
 
     config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/flat_spawns/test/',
-                                       maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/test/',
-                                       csv_dir='/home/francesco/Desktop/data/test/csv/',
-                                       out_dir='/home/francesco/Desktop/data/',
-                                       patch_size=92,
-                                       advancement_th=0.08,
-                                       skip_every=12,
-                                       translation=[5,5],
-                                       time_window=125,
-                                       scale=10,
-                                       name='test')
+                                  maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/test/',
+                                  csv_dir='/home/francesco/Desktop/data/flat_spawns/test/csv/',
+                                  out_dir='/home/francesco/Desktop/data/',
+                                  patch_size=92,
+                                  advancement_th=0.12,
+                                  skip_every=12,
+                                  translation=[5, 5],
+                                  time_window=125,
+                                  scale=10,
+                                  name='test')
 
     make_and_run_chain(config)

@@ -1,16 +1,18 @@
 import random
 import torch
+import glob
 
-import cv2
+# import cv2
 from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-
-from fastai.vision import *
+import pandas as pd
+# from fastai.vision import *
 from imgaug import augmenters as iaa
 from torch.utils.data import DataLoader, random_split, RandomSampler, ConcatDataset
-from torchvision.transforms import *
+from torchvision.transforms import Resize, ToPILImage, ToTensor, Grayscale, Compose
+from torch.utils.data import Dataset
 from torchvision.datasets import ImageFolder
 
 random.seed(0)
@@ -144,24 +146,32 @@ class FastAIImageFolder(ImageFolder):
 
 
 class TraversabilityDatasetRegression(Dataset):
-    def __init__(self, csv_path):
-        self.df = pd.read_csv(csv_path)
+    def __init__(self, df, transform):
+        self.df = pd.read_csv(df)
+        self.transform = transform
 
     def __getitem__(self, item):
-        row = self.df[item]
+        row = self.df.iloc[item]
         img_path = row['image_path']
 
+        # img = cv2.imread(img_path)
+        # img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         img = Image.open(img_path)
-        y = row['advancement']
 
-        return img, y
+        y = row['advancement']
+        y = torch.tensor(y)
+
+        return self.transform(img), y
 
     def __len__(self):
         return len(self.df)
 
+
     @classmethod
-    def from_dfs(cls, dfs):
-        return ConcatDataset([cls(df) for df in dfs])
+    def from_root(cls, root, transform):
+        dfs = glob.glob(root + '/**/*-patch.csv')
+        return ConcatDataset([cls(df, transform) for df in dfs])
+
 
 
 def get_transform(resize, should_aug=None, scale=1):
@@ -181,14 +191,14 @@ def get_transform(resize, should_aug=None, scale=1):
 
 
 def get_dataloaders(train_root, test_root, val_root=None, val_size=0.2, num_samples=None, train_transform=None,
-                    val_transform=None, test_transform=None, *args,
+                    val_transform=None, test_transform=None, dataset=FastAIImageFolder, *args,
                     **kwargs):
     """
     Get train, val and test dataloader.
     :return: train, val and test dataloaders
     """
     print(train_transform, val_transform, test_transform)
-    train_ds = FastAIImageFolder(root=train_root,
+    train_ds = dataset(root=train_root,
                            transform=train_transform)
 
     train_size = int(len(train_ds) * (1 - val_size))
@@ -197,7 +207,7 @@ def get_dataloaders(train_root, test_root, val_root=None, val_size=0.2, num_samp
         train_ds, val_ds = random_split(train_ds, [train_size, len(train_ds) - train_size])
 
     else:
-        val_ds = FastAIImageFolder(root=val_root,
+        val_ds = dataset(root=val_root,
                              transform=val_transform)
 
     if num_samples is not None:
@@ -212,7 +222,7 @@ def get_dataloaders(train_root, test_root, val_root=None, val_size=0.2, num_samp
                               *args, **kwargs)
     val_dl = DataLoader(val_ds, shuffle=False, *args, **kwargs)
 
-    test_ds = FastAIImageFolder(root=test_root,
+    test_ds = dataset(root=test_root,
                           transform=test_transform)
 
     test_dl = DataLoader(test_ds, shuffle=False, *args, **kwargs)
