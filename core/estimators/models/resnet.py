@@ -117,7 +117,7 @@ class BasicBlockSE(BasicBlock):
         if self.shortcut is not None:
             residual = self.shortcut(residual)
 
-        out = self.block(x)
+        out = self.convs(x)
         out = self.se(out)
         out += residual
 
@@ -135,7 +135,7 @@ class BottleneckSE(Bottleneck):
         if self.shortcut is not None:
             residual = self.shortcut(residual)
 
-        out = self.block(x)
+        out = self.convs(x)
         out = self.se(out)
 
         out.add_(residual)

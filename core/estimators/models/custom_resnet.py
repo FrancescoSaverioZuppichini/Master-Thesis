@@ -36,17 +36,21 @@ class MicroResnet(ResNet):
             nn.Conv2d(in_channel, 16, kernel_size=5, stride=2, bias=False, padding=1),
             nn.BatchNorm2d(16),
             nn.LeakyReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=2, stride=1)
+            nn.MaxPool2d(kernel_size=2)
         )
 
     @classmethod
     def micro(cls, in_channel, n=5, *args, **kwargs):
-        return cls(in_channel=in_channel, depths=[1 + n, n, n],
+        return cls(in_channel=in_channel, depths=[n, n, n],
                    blocks_sizes=[(16, 32), (32, 64), (64, 128)],
                    n_classes=2, *args, **kwargs)
 
 
+# from estimators.models.omar_cnn import OmarCNN
+#
+# summary(OmarCNN(), (1, 92, 92))
 
-model = MicroResnet.micro(1)
+
+model = MicroResnet.micro(1, n=3, preactivate=True, blocks=[BasicBlock, BasicBlock, BasicBlockSE])
 
 summary(model, (1, 92, 92))

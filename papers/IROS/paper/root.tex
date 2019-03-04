@@ -75,9 +75,15 @@ This template provides authors with most of the formatting specifications needed
 \subsection{Deep Learning approach}
 
 \section{Dataset Generation}
-
+Similar to CITE OMAR, we used syntethic generate heighmaps in the simulation to generated the train set, while using real-world scenario to evaluate the model. 
 \subsection{Heightmaps}
+We generated 15 heighmaps of 513x513 pixels with a resolution of 2cm per pixel to train the model. Those maps are DIRE CHE SONO LE STESSE DI OMAR. Those maps present a wide array of interesting scenarios such as bumps, holes, walls and slopes. The maps can be found HERE 
+
 \subsection{Simulation Pipeline}
+We used Webots to simulate the robot in the different scenarios. For each map we, select $k$ obstacle-free spawns points by select $k$ in $k$ cluster generate by K-Means on all the possible points that allows the spawn without hitting an obstacle. This reduce noise in the training sets avoid the situation in which the robot directly spawns on an obstacle, in addition, this approach mimic a real world simulation in which usually the robot is placed into a traversable patch with obstacle in front of it. 
+
+For each maps we runs 100 simulation of a maximum of 20 seconds each, we stop a simulation if the robot felts outside the maps boundaries.
+
 \subsection{Patch extraction}
 
 
