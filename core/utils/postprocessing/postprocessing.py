@@ -17,8 +17,8 @@ from pypeln import thread as th
 class PostProcessingConfig():
     def __init__(self, base_dir, maps_folder, patch_size, advancement_th, time_window, skip_every, translation,
                  resolution=0.02, scale=1, n_workers=16,
-                 bags_dir=None, csv_dir=None, out_dir=None, verbose=True, patches=True, name='confing'):
-        self.base_dir, self.maps_folder, self.bags_dir, self.csv_dir, self.out_dir = base_dir, maps_folder, bags_dir, csv_dir, out_dir
+                 bags_dir=None, csv_dir=None, out_dir=None, patch_dir=None, verbose=True, patches=True, name='confing'):
+        self.base_dir, self.maps_folder, self.bags_dir, self.csv_dir, self.out_dir, self.patch_dir = base_dir, maps_folder, bags_dir, csv_dir, out_dir, patch_dir
 
         self.patch_size, self.advancement_th, self.time_window = patch_size, advancement_th, time_window
         self.scale, self.skip_every = scale, skip_every
@@ -37,7 +37,7 @@ class PostProcessingConfig():
 
     @property
     def dataset_name(self):
-        return '/{}-{}-{}-{}'.format(100, self.patch_size, self.advancement_th, self.skip_every)
+        return '/{}'.format(self.patch_size)
 
     @classmethod
     def from_args(cls, args):
@@ -264,8 +264,8 @@ class PatchesHandler(PostProcessingHandler):
 
         out_dir = self.config.out_dir
 
-        os.makedirs(out_dir + '/True', exist_ok=True)
-        os.makedirs(out_dir + '/False', exist_ok=True)
+        os.makedirs(out_dir + '/patches', exist_ok=True)
+        os.makedirs(out_dir + '/df', exist_ok=True)
         try:
             df = self.df_add_label(df, self.config.advancement_th)
             df = self.remove_negative_advancement(df)
@@ -282,13 +282,19 @@ class PatchesHandler(PostProcessingHandler):
                             self.config.patch_size,
                             scale=1)[0]
                 patch = (patch * 255).astype(np.uint8)
-                image_path = '{}/{}/{}.png'.format(out_dir, row['label'], row['timestamp'])
+
+                image_path = '{}/patches/{}.png'.format(out_dir,  row['timestamp'])
+
                 cv2.imwrite(image_path, patch)
                 image_paths.append(image_path)
             df['image_path'] = image_paths
             # update the dataframe with the reference to the image stored
-            df.to_csv(file_path + '-patch.csv')
-        except:
+
+            light_df = df[['advancement','image_path']]
+            light_df.to_csv(self.config.out_dir+ '/df/' + name + '-patch.csv')
+
+        except Exception as e:
+            print(e)
             print('Error with {}'.format(file_path))
             pass
 
@@ -311,22 +317,34 @@ def make_and_run_chain(config):
 
 
 if __name__ == '__main__':
-    config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/train_no_tail#2/train/',
-                                  maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/train/',
-                                  csv_dir='/home/francesco/Desktop/carino/vaevictis/data/train_no_tail#2/csv/',
-                                  out_dir='/home/francesco/Desktop/data/',
-                                  patch_size=92,
-                                  advancement_th=0.12,
-                                  skip_every=25,
-                                  translation=[5, 5],
-                                  time_window=125,
-                                  name='train')
+    # config = PostProcessingConfig(base_dir='./test',
+    #                               maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/test/',
+    #                               # csv_dir='/home/francesco/Desktop/carino/vaevictis/data/train_no_tail#2/csv/',
+    #                               # out_dir='/home/francesco/Desktop/data/',
+    #                               patch_size=92,
+    #                               advancement_th=0.12,
+    #                               skip_every=25,
+    #                               translation=[5, 5],
+    #                               time_window=125,
+    #                               name='test')
 
-    make_and_run_chain(config)
+    # make_and_run_chain(config)
+    # config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/train_no_tail#2/train/',
+    #                               maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/train/',
+    #                               csv_dir='/home/francesco/Desktop/carino/vaevictis/data/train_no_tail#2/csv/',
+    #                               out_dir='/home/francesco/Desktop/data/',
+    #                               patch_size=92,
+    #                               advancement_th=0.12,
+    #                               skip_every=25,
+    #                               translation=[5, 5],
+    #                               time_window=125,
+    #                               name='train')
+    #
+    # make_and_run_chain(config)
     #
     config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/flat_spawns/val/',
                                   maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/val/',
-                                  csv_dir='/home/francesco/Desktop/data/flat_spawns/val/csv/',
+                                  csv_dir='/home/francesco/Desktop/data/92/val/csv/',
                                   out_dir='/home/francesco/Desktop/data/',
                                   patch_size=92,
                                   advancement_th=0.12,
@@ -338,7 +356,7 @@ if __name__ == '__main__':
 
     config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/flat_spawns/test/',
                                   maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/test/',
-                                  csv_dir='/home/francesco/Desktop/data/flat_spawns/test/csv/',
+                                  csv_dir='/home/francesco/Desktop/data/92/test/csv/',
                                   out_dir='/home/francesco/Desktop/data/',
                                   patch_size=92,
                                   advancement_th=0.12,
