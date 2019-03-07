@@ -245,9 +245,8 @@ class DataFrameHandler(PostProcessingHandler):
                     # print('{} contains 0 rows, dropping...'.format(file_path))
 
         except Exception as e:
-            # print(e)
-            # print('Error with {}'.format(file_path))
-            pass
+            print(e)
+
         return df, hm, file_path
 
     def handle(self, data):
@@ -303,28 +302,24 @@ class PatchesHandler(PostProcessingHandler):
             df = df.set_index(df.columns[0])
             image_paths = []
             for idx, (i, row) in enumerate(df.iterrows()):
-                # patch = \
-                #     hmpatch(hm, row["hm_x"], row["hm_y"], np.rad2deg(row['pose__pose_e_orientation_z']),
-                #             self.config.patch_size,
-                #             scale=1)[0]
-                # patch = (patch * 255).astype(np.uint8)
+                patch = \
+                    hmpatch(hm, row["hm_x"], row["hm_y"], np.rad2deg(row['pose__pose_e_orientation_z']),
+                            self.config.patch_size,
+                            scale=1)[0]
+                patch = (patch * 255).astype(np.uint8)
                 #
                 image_path = path.normpath('{}/patches/{}.png'.format(out_dir, row['timestamp']))
-                #
-                # cv2.imwrite(image_path, patch)
+
+                cv2.imwrite(image_path, patch)
                 image_paths.append(image_path)
             df['image_path'] = image_paths
 
             # create a new small dataframe with the reference to the image stored
-            # light_df = df[['advancement', 'image_path']]
-            # light_df.to_csv(self.config.out_dir + '/df/' + name + '-patch.csv')
-            # also store in the csvs folder so we know witch df is for witch map
             df.to_csv(file_path_light + '/{}-patch.csv'.format(name))
 
         except Exception as e:
-            # print(e)
-            # print('Error with {}'.format(file_path))
-            pass
+            print(e)
+
         return data
 
     def handle(self, data):
