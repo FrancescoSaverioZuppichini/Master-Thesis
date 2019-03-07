@@ -1,4 +1,5 @@
 import argparse
+from art import *
 
 parser = argparse.ArgumentParser(description='Traversability Simulation')
 
@@ -64,3 +65,16 @@ parser.add_argument(
                     required=False)
 
 args = parser.parse_args()
+
+
+
+parser.add_argument('--memory',
+                    type=bool,
+                    help='If True, we assume the csvs were already created and we will load them',
+                    default=False,
+                    required=False)
+
+utility_args = parser.parse_args()
+
+art = text2art('Traversability Postprocessing')
+print(art)

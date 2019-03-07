@@ -6,6 +6,7 @@ import pprint
 import numpy as np
 # from torchvision.models import *
 
+from torch.nn.functional import softmax
 from torchsummary import summary
 from os import path
 from fastai.train import Learner, DataBunch, \
@@ -14,8 +15,8 @@ from fastai.train import Learner, DataBunch, \
     SaveModelCallback, DatasetType
 
 from fastai.vision import ClassificationInterpretation
-
-from fastai.metrics import accuracy
+from fastai.callback import Callback
+from fastai.metrics import accuracy, dice
 from fastai.layers import CrossEntropyFlat, MSELossFlat
 
 from sklearn.metrics import roc_auc_score
@@ -33,16 +34,33 @@ torch.backends.cudnn.benchmark = True
 torch.backends.cudnn.deterministic = True
 torch.manual_seed(0)
 
+
+def roc_auc(input, targs):
+
+    preds = softmax(input, dim=1)
+    targs = targs.cpu().numpy()
+    hot_targs = np.zeros((targs.shape[0], 2))
+    hot_targs[np.arange(targs.shape[0]), targs] = 1
+
+    try:
+        roc = roc_auc_score(hot_targs, preds.cpu().numpy())
+    except ValueError:
+        roc = 1
+        pass
+    return torch.tensor(roc)
+
+
+
 if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
 
 
 def train_and_evaluate(params, train=True, load_model=None):
-    # model = OmarCNN()
-    model = MicroResnet.micro(1,
-
-                              n=5,
-                              blocks=[BasicBlock, BasicBlock, BasicBlock, BasicBlockSE],
-                              preactivate=True)
+    model = OmarCNN()
+    # model = MicroResnet.micro(1,
+    #
+    #                           n=5,
+    #                           blocks=[BasicBlock, BasicBlock, BasicBlock, BasicBlockSE],
+    #                           preactivate=True)
     # print(model)
 
 
@@ -101,7 +119,7 @@ def train_and_evaluate(params, train=True, load_model=None):
                       model_dir=model_dir,
                       loss_func=criterion,
                       opt_func= partial(torch.optim.SGD, momentum=0.95, weight_decay=1e-4),
-                      metrics=[accuracy, roc_auc_score])
+                      metrics=[accuracy, roc_auc])
 
     model_name_acc = 'accuracy'
     model_name_loss = 'loss'
@@ -163,13 +181,13 @@ params = {'epochs': 100,
           'val_dataset': '92/val/',
           'test_dataset': '92/test/',
           'sampler': None,
-          'num_samples': 10000,
+          'num_samples': None,
           'samper_type': 'imbalance',
           'callbacks': '[ReduceLROnPlateauCallback]',
           'data-aug': True,
           'optim': 'adam',
           'info': 'regression',
-          'tr' : 0.10,
+          'tr' : 0.08,
           'resize': 92}
 
 # train_and_evaluate(params, train=False, load_model='microresnet#3-preactivate=True-se=True-100-92-0.12-25-no_tail-spawn-shift#2-0.001-92-accuracy-True')

@@ -33,8 +33,6 @@ class PostProcessingConfig():
         if self.csv_dir is None: self.csv_dir = path.normpath(self.base_dir + '/csvs/')
         if self.out_dir is None: self.out_dir = path.normpath(self.base_dir + '/outs/')
 
-        self.out_dir = path.normpath(self.out_dir + '/' + self.dataset_name + '/' + self.name)
-
     @property
     def dataset_name(self):
         return '/{}'.format(self.patch_size)
@@ -61,12 +59,17 @@ class Handler():
 
 
 class PostProcessingHandler(Handler):
+    # TODO add tqdm bar so each handler can write stuff on it
     def __init__(self, config: PostProcessingConfig, successor=None):
         super().__init__(successor=successor)
         self.config = config
 
 
 class BagsHandler(PostProcessingHandler):
+    """
+    This class loads the bags file and converted to Panda's dataframe. In addition,
+    it opens each map for each file and return a list of tuples.
+    """
 
     def bag2df(self, file_name):
         df = rosbag_pandas.bag_to_dataframe(file_name)
@@ -80,7 +83,26 @@ class BagsHandler(PostProcessingHandler):
         return tqdm(stage, total=len(bags), desc='[INFO] Bags handler')
 
 
+class InMemoryHandler(PostProcessingHandler):
+    """
+    This class loads only the maps without using the bags file. This must be used when
+    the csvs files from DataFrameHandler where already generated
+    """
+
+    def add_maps(self, file_name):
+        map_name = filename2map(file_name)
+        return (None, map_name, file_name)
+
+    def handle(self, names):
+        stage = th.map(self.add_maps, names, workers=self.config.n_workers)
+        return tqdm(stage, total=len(names), desc='[INFO] Memory handler')
+
+
 class DataFrameHandler(PostProcessingHandler):
+    """
+    This class decorate the dataframe generated from the bags file with
+    all the information we need, e.g. 'advancement'
+    """
 
     def df_convert_date2timestamp(self, df):
         """
@@ -147,7 +169,7 @@ class DataFrameHandler(PostProcessingHandler):
     def df_clean_by_dropping(self, df, max_x, max_y):
         """
         Clean the given dataframe by dropping the rows
-        - with time stamp < ` and > `0 seconds
+        - with time stamp < 1 and > 19 seconds
         - where the robot is upside down
         :param df:
         :param max_x:
@@ -238,7 +260,6 @@ class PatchesHandler(PostProcessingHandler):
 
         return df[df["advancement"] >= 0]
 
-
     def df_add_label(self, df, advancement_th):
         """
         Decore the dataframe with the 'label' column that indicates
@@ -284,15 +305,14 @@ class PatchesHandler(PostProcessingHandler):
                             scale=1)[0]
                 patch = (patch * 255).astype(np.uint8)
 
-                image_path = '{}/patches/{}.png'.format(out_dir,  row['timestamp'])
+                image_path = '{}/patches/{}.png'.format(out_dir, row['timestamp'])
 
                 cv2.imwrite(image_path, patch)
                 image_paths.append(image_path)
             df['image_path'] = image_paths
-            # update the dataframe with the reference to the image stored
-
-            light_df = df[['advancement','image_path']]
-            light_df.to_csv(self.config.out_dir+ '/df/' + name + '-patch.csv')
+            # create a new small dataframe with the reference to the image stored
+            light_df = df[['advancement', 'image_path']]
+            light_df.to_csv(self.config.out_dir + '/df/' + name + '-patch.csv')
 
         except Exception as e:
             print(e)
@@ -318,18 +338,6 @@ def make_and_run_chain(config):
 
 
 if __name__ == '__main__':
-    config = PostProcessingConfig(base_dir='./test',
-                                  maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/test/',
-                                  # csv_dir='/home/francesco/Desktop/carino/vaevictis/data/train_no_tail#2/csv/',
-                                  # out_dir='/home/francesco/Desktop/data/',
-                                  patch_size=92,
-                                  advancement_th=0.12,
-                                  skip_every=25,
-                                  translation=[5, 5],
-                                  time_window=125,
-                                  name='test')
-
-    make_and_run_chain(config)
     config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/train_no_tail#2/train/',
                                   maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/train/',
                                   csv_dir='/home/francesco/Desktop/carino/vaevictis/data/train_no_tail#2/csv/',

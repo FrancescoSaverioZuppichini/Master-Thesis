@@ -18,6 +18,7 @@ from torchvision.datasets import ImageFolder
 random.seed(0)
 import torchvision
 
+
 class ImgaugWrapper():
     """
     Wrapper for imgaug
@@ -44,20 +45,6 @@ aug = iaa.Sometimes(0.9,
 
                                ], random_order=True)
                     )
-
-
-class SampleSampler(RandomSampler):
-    def __iter__(self):
-        n = len(self.data_source)
-        if self.replacement:
-            return iter(random.sample(range(n), self.num_samples))
-        return iter(torch.randperm(n).tolist())
-
-
-class EveryNSampler(RandomSampler):
-    def __iter__(self, n_samples):
-        n = len(self.data_source)
-        return iter(torch.randperm(n).tolist())
 
 
 class ImbalancedDatasetSampler(torch.utils.data.sampler.Sampler):
@@ -101,12 +88,14 @@ class ImbalancedDatasetSampler(torch.utils.data.sampler.Sampler):
             return dataset.imgs[idx][1]
         else:
             return dataset.imgs[idx][1]
+
     def __iter__(self):
         return (self.indices[i] for i in torch.multinomial(
             self.weights, self.num_samples, replacement=True))
 
     def __len__(self):
         return self.num_samples
+
 
 class CenterAndScalePatch():
     """
@@ -142,13 +131,14 @@ class CenterAndScalePatch():
 
 
 class TraversabilityDataset(Dataset):
-    def __init__(self, df, transform, tr=None):
+    def __init__(self, df, transform, tr=None, remove_negative=False):
         self.df = pd.read_csv(df)
+        if remove_negative: self.df = self.df[self.df['advancement'] >= 0]
         self.transform = transform
         self.tr = tr
 
-        self.idx2class = { 'False' : 0,
-                           'True' : 1 }
+        self.idx2class = {'False': 0,
+                          'True': 1}
 
     def __getitem__(self, item):
         row = self.df.iloc[item]
@@ -156,13 +146,6 @@ class TraversabilityDataset(Dataset):
         img = Image.open(img_path)
 
         y = row['advancement']
-
-
-        # else :
-        #     y = 0.18 if y > 0.18 else y
-        #
-        #     y = (y - 0) / (0.18 - 0)
-
         y = torch.tensor(y)
 
         if self.tr is not None:
@@ -173,7 +156,6 @@ class TraversabilityDataset(Dataset):
     def __len__(self):
         return len(self.df)
 
-
     @classmethod
     def from_root(cls, root, transform, tr):
         dfs = glob.glob(root + '/**/*-patch.csv')
@@ -182,7 +164,6 @@ class TraversabilityDataset(Dataset):
         concat_ds.classes = 'False', 'True'
 
         return concat_ds
-
 
 
 class FastAIImageFolder(TraversabilityDataset):
@@ -215,7 +196,7 @@ def get_dataloaders(train_root, test_root, val_root=None, val_size=0.2, tr=0.12,
     """
     print(train_transform, val_transform, test_transform)
     train_ds = FastAIImageFolder.from_root(root=train_root,
-                           transform=train_transform, tr=tr)
+                                           transform=train_transform, tr=tr)
 
     train_size = int(len(train_ds) * (1 - val_size))
 
@@ -224,7 +205,7 @@ def get_dataloaders(train_root, test_root, val_root=None, val_size=0.2, tr=0.12,
 
     else:
         val_ds = FastAIImageFolder.from_root(root=val_root,
-                             transform=val_transform, tr=tr)
+                                             transform=val_transform, tr=tr)
 
     if num_samples is not None:
         print('sampling')
@@ -239,7 +220,7 @@ def get_dataloaders(train_root, test_root, val_root=None, val_size=0.2, tr=0.12,
     val_dl = DataLoader(val_ds, shuffle=False, *args, **kwargs)
 
     test_ds = FastAIImageFolder.from_root(root=test_root,
-                          transform=test_transform, tr=tr)
+                                          transform=test_transform, tr=tr)
 
     test_dl = DataLoader(test_ds, shuffle=False, *args, **kwargs)
 
@@ -247,8 +228,7 @@ def get_dataloaders(train_root, test_root, val_root=None, val_size=0.2, tr=0.12,
 
 
 def visualise(dl, n=10):
-    fig, axes = plt.subplots(nrows=1, ncols=5, figsize=(20,4))
-
+    fig, axes = plt.subplots(nrows=1, ncols=5, figsize=(20, 4))
 
     for (x, y) in dl:
         for i, img in zip(range(5), x):
@@ -256,7 +236,6 @@ def visualise(dl, n=10):
 
         plt.show()
         break
-
 
 # if __name__ == '__main__':
 #
