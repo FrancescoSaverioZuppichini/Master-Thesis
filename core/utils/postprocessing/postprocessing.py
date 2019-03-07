@@ -238,6 +238,7 @@ class PatchesHandler(PostProcessingHandler):
 
         return df[df["advancement"] >= 0]
 
+
     def df_add_label(self, df, advancement_th):
         """
         Decore the dataframe with the 'label' column that indicates
@@ -268,7 +269,7 @@ class PatchesHandler(PostProcessingHandler):
         os.makedirs(out_dir + '/df', exist_ok=True)
         try:
             df = self.df_add_label(df, self.config.advancement_th)
-            df = self.remove_negative_advancement(df)
+            # df = self.remove_negative_advancement(df)
             # reset the index to int so we can take only on row every Config.SKIP_EVERY
             # since the stored rate was really high, 250hz, we will end up with lots of almost
             # identical patches
@@ -317,30 +318,30 @@ def make_and_run_chain(config):
 
 
 if __name__ == '__main__':
-    # config = PostProcessingConfig(base_dir='./test',
-    #                               maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/test/',
-    #                               # csv_dir='/home/francesco/Desktop/carino/vaevictis/data/train_no_tail#2/csv/',
-    #                               # out_dir='/home/francesco/Desktop/data/',
-    #                               patch_size=92,
-    #                               advancement_th=0.12,
-    #                               skip_every=25,
-    #                               translation=[5, 5],
-    #                               time_window=125,
-    #                               name='test')
+    config = PostProcessingConfig(base_dir='./test',
+                                  maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/test/',
+                                  # csv_dir='/home/francesco/Desktop/carino/vaevictis/data/train_no_tail#2/csv/',
+                                  # out_dir='/home/francesco/Desktop/data/',
+                                  patch_size=92,
+                                  advancement_th=0.12,
+                                  skip_every=25,
+                                  translation=[5, 5],
+                                  time_window=125,
+                                  name='test')
 
-    # make_and_run_chain(config)
-    # config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/train_no_tail#2/train/',
-    #                               maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/train/',
-    #                               csv_dir='/home/francesco/Desktop/carino/vaevictis/data/train_no_tail#2/csv/',
-    #                               out_dir='/home/francesco/Desktop/data/',
-    #                               patch_size=92,
-    #                               advancement_th=0.12,
-    #                               skip_every=25,
-    #                               translation=[5, 5],
-    #                               time_window=125,
-    #                               name='train')
-    #
-    # make_and_run_chain(config)
+    make_and_run_chain(config)
+    config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/train_no_tail#2/train/',
+                                  maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/train/',
+                                  csv_dir='/home/francesco/Desktop/carino/vaevictis/data/train_no_tail#2/csv/',
+                                  out_dir='/home/francesco/Desktop/data/',
+                                  patch_size=92,
+                                  advancement_th=0.12,
+                                  skip_every=25,
+                                  translation=[5, 5],
+                                  time_window=125,
+                                  name='train')
+
+    make_and_run_chain(config)
     #
     config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/flat_spawns/val/',
                                   maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/val/',

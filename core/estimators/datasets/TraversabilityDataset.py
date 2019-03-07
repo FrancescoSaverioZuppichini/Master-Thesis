@@ -10,7 +10,7 @@ import seaborn as sns
 import pandas as pd
 # from fastai.vision import *
 from imgaug import augmenters as iaa
-from torch.utils.data import DataLoader, random_split, RandomSampler, ConcatDataset
+from torch.utils.data import DataLoader, random_split, RandomSampler, ConcatDataset, WeightedRandomSampler
 from torchvision.transforms import Resize, ToPILImage, ToTensor, Grayscale, Compose
 from torch.utils.data import Dataset
 from torchvision.datasets import ImageFolder
@@ -132,8 +132,8 @@ class CenterAndScalePatch():
         if debug: self.show_heatmap(x, 'original')
 
         x = x.squeeze()
-        x *= self.scale
         x -= x[x.shape[0] // 2, x.shape[1] // 2].item()
+        x *= self.scale
         x = x.unsqueeze(0)
 
         if debug: self.show_heatmap(x, 'center')
@@ -156,10 +156,17 @@ class TraversabilityDataset(Dataset):
         img = Image.open(img_path)
 
         y = row['advancement']
+
+
+        # else :
+        #     y = 0.18 if y > 0.18 else y
+        #
+        #     y = (y - 0) / (0.18 - 0)
+
         y = torch.tensor(y)
 
-        # if a tr is selected, we want to perform classification
-        if self.tr is not None:  y = 1 if y > self.tr else 0
+        if self.tr is not None:
+            y = 1 if y >= self.tr else 0
 
         return self.transform(img), y
 
@@ -170,7 +177,12 @@ class TraversabilityDataset(Dataset):
     @classmethod
     def from_root(cls, root, transform, tr):
         dfs = glob.glob(root + '/**/*-patch.csv')
-        return ConcatDataset([cls(df, transform, tr) for df in dfs])
+        concat_ds = ConcatDataset([cls(df, transform, tr) for df in dfs])
+        concat_ds.c = 2
+        concat_ds.classes = 'False', 'True'
+
+        return concat_ds
+
 
 
 class FastAIImageFolder(TraversabilityDataset):
@@ -217,7 +229,7 @@ def get_dataloaders(train_root, test_root, val_root=None, val_size=0.2, tr=0.12,
     if num_samples is not None:
         print('sampling')
         train_dl = DataLoader(train_ds,
-                              sampler=ImbalancedDatasetSampler(train_ds),
+                              sampler=RandomSampler(train_ds, num_samples=num_samples, replacement=True),
                               *args, **kwargs)
     else:
         train_dl = DataLoader(train_ds,
