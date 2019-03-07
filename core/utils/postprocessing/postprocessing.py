@@ -67,8 +67,8 @@ class PostProcessingHandler(Handler):
 
 class BagsHandler(PostProcessingHandler):
     """
-    This class loads the bags file and converted to Panda's dataframe. In addition,
-    it opens each map for each file and return a list of tuples.
+    This class loads the bags file and converted them to Pandas' dataframe. In addition,
+    it opens each map for each file and add it to the return.
     """
 
     def bag2df(self, file_name):
