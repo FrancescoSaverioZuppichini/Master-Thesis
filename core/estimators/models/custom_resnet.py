@@ -28,6 +28,15 @@ from torchsummary import summary
 # micro-resnet#2 like resnet but with gate 5x5
 # micro-resnet#3 [(16, 32), (32, 64), (64, 128)] with [1 + n, n, n]
 
+# class ResnetDecoderRegression(ResnetDecoder):
+#
+#     def __init__(self, in_features, n_classes):
+#         super().__init__(in_features, n_classes)
+#         self.avg = nn.AdaptiveAvgPool2d((1, 1))
+#         self.decoder = nn.Sequential(
+#             nn.Linear(in_features, 1),
+#             nn.Sigmoid())
+
 class MicroResnet(ResNet):
     def __init__(self, depths, in_channel,  *args, **kwargs):
         super().__init__(depths, in_channel, *args, **kwargs)
@@ -38,6 +47,8 @@ class MicroResnet(ResNet):
             nn.LeakyReLU(inplace=True),
             nn.MaxPool2d(kernel_size=2)
         )
+
+
 
     @classmethod
     def micro(cls, in_channel, n=5, *args, **kwargs):

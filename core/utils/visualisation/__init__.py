@@ -73,7 +73,7 @@ class VisualiseSimulation():
         ax1.set_title("advancement: {:.4f}, x={:.0f}, y={:.0f}".format(ad,
                                                                        x,
                                                                        y))
-        sns.heatmap(self.hm, ax=ax1)
+        sns.heatmap(self.hm, ax=ax1, vmin=0, vmax=1)
         rect = mpatches.Rectangle((x - self.patch_size // 2, y - self.patch_size // 2), self.patch_size,
                                  self.patch_size, linewidth=1, edgecolor='r', facecolor='none')
         ax1.add_patch(rect)
@@ -91,7 +91,7 @@ class VisualiseSimulation():
 
         ax_hm = plt.subplot2grid((size), (0, 0), colspan=2, rowspan=2)
 
-        sns.heatmap(self.hm / 255, ax=ax_hm)
+        sns.heatmap(self.hm / 255, ax=ax_hm, vmin=0, vmax=1)
 
         self.show_traces([df], ax=ax_hm)
 
