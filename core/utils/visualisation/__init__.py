@@ -14,7 +14,7 @@ from matplotlib import gridspec
 class VisualiseSimulation():
     def __init__(self, hm, patch_size=100):
         self.hm = hm
-        self.patch_size = 100 // 2
+        self.patch_size = 92
 
     @property
     def hm_ax(self):
@@ -75,7 +75,7 @@ class VisualiseSimulation():
                                                                        y))
         sns.heatmap(self.hm, ax=ax1, vmin=0, vmax=1)
         rect = mpatches.Rectangle((x - self.patch_size // 2, y - self.patch_size // 2), self.patch_size,
-                                 self.patch_size, linewidth=1, edgecolor='r', facecolor='none')
+                                 self.patch_size, linewidth=1, edgecolor='r', facecolor='none', angle=np.rad2deg(ang))
         ax1.add_patch(rect)
 
         patch, _ = hmpatch(self.hm, x, y, np.rad2deg(ang), self.patch_size, scale=1)
@@ -104,7 +104,7 @@ class VisualiseSimulation():
                             row["pose__pose_position_z"], \
                             row["advancement"]
             rect = mpatches.Rectangle((x - self.patch_size // 2, y - self.patch_size // 2), self.patch_size,
-                                     self.patch_size, linewidth=1, edgecolor='r', facecolor='none')
+                                     self.patch_size, linewidth=1, edgecolor='r', facecolor='none', angle=np.rad2deg(ang))
             ax_hm.add_patch(rect)
 
             patch, _ = hmpatch(self.hm, x, y, np.rad2deg(ang), self.patch_size, scale=1)
@@ -147,7 +147,46 @@ class VisualiseSimulation():
         df['pose__pose_position_y'].plot(label='y')
         plt.legend()
 
-    def __call__(self, df, dt=100):
+    def plot_patch_map_advancement_in_time(self, df):
+        fig = plt.figure(figsize=(10, 10))
+
+        plt.ion()
+
+        patch_size = 92
+
+        gridspec.GridSpec(2, 2)
+
+        fig.show()
+        fig.canvas.draw()
+
+        for i, row in df.iterrows():
+            ax_ad = plt.subplot2grid((2, 2), (0, 0), colspan=2, rowspan=1)
+
+            ax_ad.plot(df['advancement'][:i])
+
+            #         ax = plt.subplot2grid((2,2), (1, 0), colspan=1, rowspan=1)
+            patch = cv2.imread(row['image_path'])
+            patch = cv2.cvtColor(patch, cv2.COLOR_BGR2GRAY)
+
+            ax_patch = plt.subplot2grid((2, 2), (1, 0), colspan=1, rowspan=1)
+            sns.heatmap(patch, vmin=0, vmax=1, ax=ax_patch)
+
+            x, y, ang, ad = row["hm_x"], \
+                            row["hm_y"], \
+                            row["pose__pose_position_z"], \
+                            row["advancement"]
+
+            ax_hm = plt.subplot2grid((2, 2), (1, 1), colspan=1, rowspan=1)
+            sns.heatmap(self.hm, vmin=0, vmax=1, ax=ax_hm)
+
+            rect = mpatches.Rectangle((x - self.patch_size // 2, y - self.patch_size  // 2), self.patch_size ,
+                                      self.patch_size , linewidth=1, angle=np.rad2deg(ang), edgecolor='r', facecolor='none')
+            ax_hm.add_patch(rect)
+
+            fig.canvas.draw()
+            plt.pause(0.025)
+
+    def __call__(self, df):
         self.show_patches_on_the_map(df)
         self.plot_rotation(df)
         self.plot_position(df)

@@ -192,7 +192,7 @@ class DataFrameHandler(PostProcessingHandler):
                    | (df['hm_x'] > (hm.shape[1] - offset)) | (df['hm_x'] < offset)
                    ].index
 
-        print('removing {} outliers'.format(len(index)))
+        # print('removing {} outliers'.format(len(index)))
         # if there are some outliers, we remove all the rows after the first one
         if len(index) > 0:
             idx = index[0]
@@ -216,14 +216,14 @@ class DataFrameHandler(PostProcessingHandler):
 
         map_name = filename2map(file_path)
         map_path = '{}/{}.png'.format(self.config.maps_folder, map_name)
-        print(map_path)
+        # print(map_path)
 
         hm = read_image(map_path)
         file_path = make_path(file_path)
 
         try:
             if path.isfile(file_path + '-complete.csv'):
-                print('file exist, loading...')
+                # print('file exist, loading...')
                 df = pd.read_csv(file_path + '-complete.csv')
 
             else:
@@ -241,12 +241,13 @@ class DataFrameHandler(PostProcessingHandler):
                     # TODO add flag to decide if store the csv or not
                     os.makedirs(path.dirname(file_path), exist_ok=True)
                     df.to_csv(file_path + '-complete.csv')
-                else:
-                    print('{} contains 0 rows, dropping...'.format(file_path))
+                # else:
+                    # print('{} contains 0 rows, dropping...'.format(file_path))
 
-        except:
-            print('Error with {}'.format(file_path))
-
+        except Exception as e:
+            # print(e)
+            # print('Error with {}'.format(file_path))
+            pass
         return df, hm, file_path
 
     def handle(self, data):
@@ -282,13 +283,16 @@ class PatchesHandler(PostProcessingHandler):
         """
         df, hm, file_path = data
         dirs, name = path.split(file_path)
-        name, _ = os.path.splitext(name)
 
         out_dir = self.config.out_dir
+        _, map_name = path.split(dirs)
+
+        file_path_light =path.normpath(self.config.base_dir + '/csvs-light/' + map_name )
 
         os.makedirs(out_dir + '/patches', exist_ok=True)
-        os.makedirs(out_dir + '/df', exist_ok=True)
+        os.makedirs(file_path_light, exist_ok=True)
         try:
+
             df = self.df_add_label(df, self.config.advancement_th)
             # df = self.remove_negative_advancement(df)
             # reset the index to int so we can take only on row every Config.SKIP_EVERY
@@ -299,26 +303,28 @@ class PatchesHandler(PostProcessingHandler):
             df = df.set_index(df.columns[0])
             image_paths = []
             for idx, (i, row) in enumerate(df.iterrows()):
-                patch = \
-                    hmpatch(hm, row["hm_x"], row["hm_y"], np.rad2deg(row['pose__pose_e_orientation_z']),
-                            self.config.patch_size,
-                            scale=1)[0]
-                patch = (patch * 255).astype(np.uint8)
-
-                image_path = '{}/patches/{}.png'.format(out_dir, row['timestamp'])
-
-                cv2.imwrite(image_path, patch)
+                # patch = \
+                #     hmpatch(hm, row["hm_x"], row["hm_y"], np.rad2deg(row['pose__pose_e_orientation_z']),
+                #             self.config.patch_size,
+                #             scale=1)[0]
+                # patch = (patch * 255).astype(np.uint8)
+                #
+                image_path = path.normpath('{}/patches/{}.png'.format(out_dir, row['timestamp']))
+                #
+                # cv2.imwrite(image_path, patch)
                 image_paths.append(image_path)
             df['image_path'] = image_paths
+
             # create a new small dataframe with the reference to the image stored
-            light_df = df[['advancement', 'image_path']]
-            light_df.to_csv(self.config.out_dir + '/df/' + name + '-patch.csv')
+            # light_df = df[['advancement', 'image_path']]
+            # light_df.to_csv(self.config.out_dir + '/df/' + name + '-patch.csv')
+            # also store in the csvs folder so we know witch df is for witch map
+            df.to_csv(file_path_light + '/{}-patch.csv'.format(name))
 
         except Exception as e:
-            print(e)
-            print('Error with {}'.format(file_path))
+            # print(e)
+            # print('Error with {}'.format(file_path))
             pass
-
         return data
 
     def handle(self, data):
@@ -330,18 +336,17 @@ class PatchesHandler(PostProcessingHandler):
 def make_and_run_chain(config):
     patches_h = PatchesHandler(config=config)
     df_h = DataFrameHandler(successor=patches_h, config=config)
-    b_h = BagsHandler(config=config, successor=df_h)
-
+    b_h = InMemoryHandler(config=config, successor=df_h)
     bags = glob.glob('{}/**/*.bag'.format(config.bags_dir))
 
     list(b_h(bags))
 
 
 if __name__ == '__main__':
-    config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/train_no_tail#2/train/',
+    config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/krock-dataset/92/train/',
                                   maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/train/',
-                                  csv_dir='/home/francesco/Desktop/carino/vaevictis/data/train_no_tail#2/csv/',
-                                  out_dir='/home/francesco/Desktop/data/',
+                                  # csv_dir='/home/francesco/Desktop/data/92/train/csvs/',
+                                  out_dir='/home/francesco/Desktop/data/92/train/',
                                   patch_size=92,
                                   advancement_th=0.12,
                                   skip_every=25,
@@ -351,10 +356,10 @@ if __name__ == '__main__':
 
     make_and_run_chain(config)
     #
-    config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/flat_spawns/val/',
+    config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/krock-dataset/92/val/',
                                   maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/val/',
-                                  csv_dir='/home/francesco/Desktop/data/92/val/csv/',
-                                  out_dir='/home/francesco/Desktop/data/',
+                                  # csv_dir='/home/francesco/Desktop/data/92/val/csvs/',
+                                  out_dir='/home/francesco/Desktop/data/92/val/',
                                   patch_size=92,
                                   advancement_th=0.12,
                                   skip_every=12,
@@ -363,10 +368,10 @@ if __name__ == '__main__':
                                   name='val')
     make_and_run_chain(config)
 
-    config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/flat_spawns/test/',
+    config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/krock-dataset/92/test/',
                                   maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/test/',
-                                  csv_dir='/home/francesco/Desktop/data/92/test/csv/',
-                                  out_dir='/home/francesco/Desktop/data/',
+                                  # csv_dir='/home/francesco/Desktop/data/92/test/csvs/',
+                                  out_dir='/home/francesco/Desktop/data/92/test/',
                                   patch_size=92,
                                   advancement_th=0.12,
                                   skip_every=12,

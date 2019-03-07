@@ -16,8 +16,11 @@ class FlatGroundSpawnStrategy():
     Later on, the buffer is processed by a k-means in order to extract k spawn points.
     """
     def __init__(self, hm_path, debug=False,  scale=1):
-        self.hm = cv2.imread(hm_path)
-        self.hm = cv2.cvtColor(self.hm, cv2.COLOR_BGR2GRAY)
+        if type(hm_path) is str:
+            self.hm = cv2.imread(hm_path)
+            self.hm = cv2.cvtColor(self.hm, cv2.COLOR_BGR2GRAY)
+
+        else: self.hm = hm_path
         self.hm  = self.hm .astype(np.float32)
         self.debug = debug
         self.hm *= scale
@@ -67,7 +70,7 @@ class FlatGroundSpawnStrategy():
 
     def __call__(self, k=100, size=40, *args, **kwargs):
         positions = self.find_spawn_points(size=size, *args, **kwargs)
-        print(len(positions))
+        print('found {} spawn points'.format(len(positions)))
         if self.debug: self.show_spawn_pos(positions, size)
         new_positions = self.reduce_positions_by_clustering(positions, k=k)
         if self.debug: self.show_spawn_pos(new_positions, size)

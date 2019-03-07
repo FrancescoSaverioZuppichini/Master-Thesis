@@ -50,6 +50,13 @@ def roc_auc(input, targs):
     return torch.tensor(roc)
 
 
+def custom_accuracy(y_pred, y_true, thresh:float=0.01):
+    # print(y_pred[0:10], y_true[0:10])
+    distance = (y_pred - y_true).abs()
+    acc = (distance < thresh).float().mean()
+    return acc
+
+
 
 if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
 
@@ -57,10 +64,9 @@ if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
 def train_and_evaluate(params, train=True, load_model=None):
     model = OmarCNN()
     # model = MicroResnet.micro(1,
-    #
     #                           n=5,
-    #                           blocks=[BasicBlock, BasicBlock, BasicBlock, BasicBlockSE],
-    #                           preactivate=True)
+    #                           blocks=[BasicBlock, BasicBlock, BasicBlock, BasicBlock],
+    #                           preactivate=False)
     # print(model)
 
 
@@ -72,9 +78,9 @@ def train_and_evaluate(params, train=True, load_model=None):
     # criterion = MSELossFlat()
 
     train_dl, val_dl, test_dl = get_dataloaders(
-        train_root='/home/francesco/Desktop/data/{}'.format(params['dataset']),
-        test_root='/home/francesco/Desktop/data/{}'.format(params['test_dataset']),
-        val_root='/home/francesco/Desktop/data/{}'.format(params['val_dataset']),
+        train_root='/home/francesco/Desktop/data/{}/train/'.format(params['dataset']),
+        test_root='/home/francesco/Desktop/data/{}/test/'.format(params['dataset']),
+        val_root='/home/francesco/Desktop/data/{}/val'.format(params['dataset']),
         # val_size=0.15,
         train_transform=get_transform(params['resize'], should_aug=params['data-aug']),
         val_transform=get_transform(params['resize'], scale=1),
@@ -83,6 +89,7 @@ def train_and_evaluate(params, train=True, load_model=None):
         batch_size=params['batch_size'],
         num_workers=16,
         tr=params['tr'],
+        remove_negative=['remove-negative'],
         pin_memory=True)
 
     model_name = '{}-{}-{}-{}-{}'.format(params['model'], params['dataset'].split('/')[0], params['lr'], params['resize'], time.time())
@@ -98,20 +105,11 @@ def train_and_evaluate(params, train=True, load_model=None):
 
     data = DataBunch(train_dl=train_dl, valid_dl=val_dl, test_dl=test_dl)
 
-
     experiment = Experiment(api_key="8THqoAxomFyzBgzkStlY95MOf",
-                            project_name="master-thesis",
+                            project_name="krock",
                             workspace="francescosaveriozuppichini")
 
     experiment.log_parameters(params)
-
-
-    def custom_accuracy(y_pred, y_true, thresh:float=0.01):
-        # print(y_pred[0:10], y_true[0:10])
-        distance = (y_pred - y_true).abs()
-        acc = (distance < thresh).float().mean()
-        return acc
-
 
     learner = Learner(data=data,
                       model=model,
@@ -120,6 +118,8 @@ def train_and_evaluate(params, train=True, load_model=None):
                       loss_func=criterion,
                       opt_func= partial(torch.optim.SGD, momentum=0.95, weight_decay=1e-4),
                       metrics=[accuracy, roc_auc])
+
+
 
     model_name_acc = 'accuracy'
     model_name_loss = 'loss'
@@ -176,27 +176,26 @@ params = {'epochs': 100,
           'lr': 0.001,
           'batch_size': 128,
           'model': 'omar',
-          # 'model': 'microresnet#4',
-          'dataset': '92/train/',
-          'val_dataset': '92/val/',
-          'test_dataset': '92/test/',
+          # 'model': 'microresnet#4-gate=7x7',
+          'dataset': '92',
           'sampler': None,
           'num_samples': None,
           'samper_type': 'imbalance',
           'callbacks': '[ReduceLROnPlateauCallback]',
-          'data-aug': True,
-          'optim': 'adam',
-          'info': 'regression',
-          'tr' : 0.08,
+          'data-aug': False,
+          'optim': 'sdg',
+          'info': '',
+          'tr' : 0.12,
+          'remove-negative': False,
           'resize': 92}
 
 # train_and_evaluate(params, train=False, load_model='microresnet#3-preactivate=True-se=True-100-92-0.12-25-no_tail-spawn-shift#2-0.001-92-accuracy-True')
+# train_and_evaluate(params, train=True)
+# params['resize'] = 64
+# train_and_evaluate(params, train=True)
+# params['resize'] = 92
+# params['remove-negative'] = True
+# train_and_evaluate(params, train=True)
+params['data-aug'] = True
 train_and_evaluate(params, train=True)
-# params['data-aug'] = False
-# train_and_evaluate(params, train=True)
-# params['sampler'] = True
-# train_and_evaluate(params, train=True)
 
-
-# params['data-aug'] = False
-# train(params)
