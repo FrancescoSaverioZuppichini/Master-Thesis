@@ -17,8 +17,8 @@ from pypeln import thread as th
 class PostProcessingConfig():
     def __init__(self, base_dir, maps_folder, patch_size, advancement_th, time_window, skip_every, translation,
                  resolution=0.02, scale=1, n_workers=16,
-                 bags_dir=None, csv_dir=None, out_dir=None, verbose=True, patches=True, name='confing'):
-        self.base_dir, self.maps_folder, self.bags_dir, self.csv_dir, self.out_dir = base_dir, maps_folder, bags_dir, csv_dir, out_dir
+                 bags_dir=None, csv_dir=None, out_dir=None, patch_dir=None, verbose=True, patches=True, name='confing'):
+        self.base_dir, self.maps_folder, self.bags_dir, self.csv_dir, self.out_dir, self.patch_dir = base_dir, maps_folder, bags_dir, csv_dir, out_dir, patch_dir
 
         self.patch_size, self.advancement_th, self.time_window = patch_size, advancement_th, time_window
         self.scale, self.skip_every = scale, skip_every
@@ -33,11 +33,9 @@ class PostProcessingConfig():
         if self.csv_dir is None: self.csv_dir = path.normpath(self.base_dir + '/csvs/')
         if self.out_dir is None: self.out_dir = path.normpath(self.base_dir + '/outs/')
 
-        self.out_dir = path.normpath(self.out_dir + '/' + self.dataset_name + '/' + self.name)
-
     @property
     def dataset_name(self):
-        return '/{}-{}-{}-{}'.format(100, self.patch_size, self.advancement_th, self.skip_every)
+        return '/{}'.format(self.patch_size)
 
     @classmethod
     def from_args(cls, args):
@@ -61,12 +59,17 @@ class Handler():
 
 
 class PostProcessingHandler(Handler):
+    # TODO add tqdm bar so each handler can write stuff on it
     def __init__(self, config: PostProcessingConfig, successor=None):
         super().__init__(successor=successor)
         self.config = config
 
 
 class BagsHandler(PostProcessingHandler):
+    """
+    This class loads the bags file and converted to Panda's dataframe. In addition,
+    it opens each map for each file and return a list of tuples.
+    """
 
     def bag2df(self, file_name):
         df = rosbag_pandas.bag_to_dataframe(file_name)
@@ -80,7 +83,26 @@ class BagsHandler(PostProcessingHandler):
         return tqdm(stage, total=len(bags), desc='[INFO] Bags handler')
 
 
+class InMemoryHandler(PostProcessingHandler):
+    """
+    This class loads only the maps without using the bags file. This must be used when
+    the csvs files from DataFrameHandler where already generated
+    """
+
+    def add_maps(self, file_name):
+        map_name = filename2map(file_name)
+        return (None, map_name, file_name)
+
+    def handle(self, names):
+        stage = th.map(self.add_maps, names, workers=self.config.n_workers)
+        return tqdm(stage, total=len(names), desc='[INFO] Memory handler')
+
+
 class DataFrameHandler(PostProcessingHandler):
+    """
+    This class decorate the dataframe generated from the bags file with
+    all the information we need, e.g. 'advancement'
+    """
 
     def df_convert_date2timestamp(self, df):
         """
@@ -147,7 +169,7 @@ class DataFrameHandler(PostProcessingHandler):
     def df_clean_by_dropping(self, df, max_x, max_y):
         """
         Clean the given dataframe by dropping the rows
-        - with time stamp < ` and > `0 seconds
+        - with time stamp < 1 and > 19 seconds
         - where the robot is upside down
         :param df:
         :param max_x:
@@ -264,11 +286,11 @@ class PatchesHandler(PostProcessingHandler):
 
         out_dir = self.config.out_dir
 
-        os.makedirs(out_dir + '/True', exist_ok=True)
-        os.makedirs(out_dir + '/False', exist_ok=True)
+        os.makedirs(out_dir + '/patches', exist_ok=True)
+        os.makedirs(out_dir + '/df', exist_ok=True)
         try:
             df = self.df_add_label(df, self.config.advancement_th)
-            df = self.remove_negative_advancement(df)
+            # df = self.remove_negative_advancement(df)
             # reset the index to int so we can take only on row every Config.SKIP_EVERY
             # since the stored rate was really high, 250hz, we will end up with lots of almost
             # identical patches
@@ -282,13 +304,18 @@ class PatchesHandler(PostProcessingHandler):
                             self.config.patch_size,
                             scale=1)[0]
                 patch = (patch * 255).astype(np.uint8)
-                image_path = '{}/{}/{}.png'.format(out_dir, row['label'], row['timestamp'])
+
+                image_path = '{}/patches/{}.png'.format(out_dir, row['timestamp'])
+
                 cv2.imwrite(image_path, patch)
                 image_paths.append(image_path)
             df['image_path'] = image_paths
-            # update the dataframe with the reference to the image stored
-            df.to_csv(file_path + '-patch.csv')
-        except:
+            # create a new small dataframe with the reference to the image stored
+            light_df = df[['advancement', 'image_path']]
+            light_df.to_csv(self.config.out_dir + '/df/' + name + '-patch.csv')
+
+        except Exception as e:
+            print(e)
             print('Error with {}'.format(file_path))
             pass
 
@@ -326,7 +353,7 @@ if __name__ == '__main__':
     #
     config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/flat_spawns/val/',
                                   maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/val/',
-                                  csv_dir='/home/francesco/Desktop/data/flat_spawns/val/csv/',
+                                  csv_dir='/home/francesco/Desktop/data/92/val/csv/',
                                   out_dir='/home/francesco/Desktop/data/',
                                   patch_size=92,
                                   advancement_th=0.12,
@@ -338,7 +365,7 @@ if __name__ == '__main__':
 
     config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/data/flat_spawns/test/',
                                   maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/test/',
-                                  csv_dir='/home/francesco/Desktop/data/flat_spawns/test/csv/',
+                                  csv_dir='/home/francesco/Desktop/data/92/test/csv/',
                                   out_dir='/home/francesco/Desktop/data/',
                                   patch_size=92,
                                   advancement_th=0.12,

@@ -10,13 +10,14 @@ import seaborn as sns
 import pandas as pd
 # from fastai.vision import *
 from imgaug import augmenters as iaa
-from torch.utils.data import DataLoader, random_split, RandomSampler, ConcatDataset
+from torch.utils.data import DataLoader, random_split, RandomSampler, ConcatDataset, WeightedRandomSampler
 from torchvision.transforms import Resize, ToPILImage, ToTensor, Grayscale, Compose
 from torch.utils.data import Dataset
 from torchvision.datasets import ImageFolder
 
 random.seed(0)
 import torchvision
+
 
 class ImgaugWrapper():
     """
@@ -44,20 +45,6 @@ aug = iaa.Sometimes(0.9,
 
                                ], random_order=True)
                     )
-
-
-class SampleSampler(RandomSampler):
-    def __iter__(self):
-        n = len(self.data_source)
-        if self.replacement:
-            return iter(random.sample(range(n), self.num_samples))
-        return iter(torch.randperm(n).tolist())
-
-
-class EveryNSampler(RandomSampler):
-    def __iter__(self, n_samples):
-        n = len(self.data_source)
-        return iter(torch.randperm(n).tolist())
 
 
 class ImbalancedDatasetSampler(torch.utils.data.sampler.Sampler):
@@ -101,12 +88,14 @@ class ImbalancedDatasetSampler(torch.utils.data.sampler.Sampler):
             return dataset.imgs[idx][1]
         else:
             return dataset.imgs[idx][1]
+
     def __iter__(self):
         return (self.indices[i] for i in torch.multinomial(
             self.weights, self.num_samples, replacement=True))
 
     def __len__(self):
         return self.num_samples
+
 
 class CenterAndScalePatch():
     """
@@ -132,46 +121,54 @@ class CenterAndScalePatch():
         if debug: self.show_heatmap(x, 'original')
 
         x = x.squeeze()
-        x *= self.scale
         x -= x[x.shape[0] // 2, x.shape[1] // 2].item()
+        x *= self.scale
         x = x.unsqueeze(0)
 
         if debug: self.show_heatmap(x, 'center')
 
         return x
 
-class FastAIImageFolder(ImageFolder):
-    c = 2
-    classes = 'False', 'True'
 
-
-class TraversabilityDatasetRegression(Dataset):
-    def __init__(self, df, transform):
+class TraversabilityDataset(Dataset):
+    def __init__(self, df, transform, tr=None, remove_negative=False):
         self.df = pd.read_csv(df)
+        if remove_negative: self.df = self.df[self.df['advancement'] >= 0]
         self.transform = transform
+        self.tr = tr
+
+        self.idx2class = {'False': 0,
+                          'True': 1}
 
     def __getitem__(self, item):
         row = self.df.iloc[item]
         img_path = row['image_path']
-
-        # img = cv2.imread(img_path)
-        # img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         img = Image.open(img_path)
 
         y = row['advancement']
         y = torch.tensor(y)
+
+        if self.tr is not None:
+            y = 1 if y >= self.tr else 0
 
         return self.transform(img), y
 
     def __len__(self):
         return len(self.df)
 
-
     @classmethod
-    def from_root(cls, root, transform):
+    def from_root(cls, root, transform, tr):
         dfs = glob.glob(root + '/**/*-patch.csv')
-        return ConcatDataset([cls(df, transform) for df in dfs])
+        concat_ds = ConcatDataset([cls(df, transform, tr) for df in dfs])
+        concat_ds.c = 2
+        concat_ds.classes = 'False', 'True'
 
+        return concat_ds
+
+
+class FastAIImageFolder(TraversabilityDataset):
+    c = 2
+    classes = 'False', 'True'
 
 
 def get_transform(resize, should_aug=None, scale=1):
@@ -190,16 +187,16 @@ def get_transform(resize, should_aug=None, scale=1):
     return Compose(transformations)
 
 
-def get_dataloaders(train_root, test_root, val_root=None, val_size=0.2, num_samples=None, train_transform=None,
-                    val_transform=None, test_transform=None, dataset=FastAIImageFolder, *args,
+def get_dataloaders(train_root, test_root, val_root=None, val_size=0.2, tr=0.12, num_samples=None, train_transform=None,
+                    val_transform=None, test_transform=None, *args,
                     **kwargs):
     """
     Get train, val and test dataloader.
     :return: train, val and test dataloaders
     """
     print(train_transform, val_transform, test_transform)
-    train_ds = dataset(root=train_root,
-                           transform=train_transform)
+    train_ds = FastAIImageFolder.from_root(root=train_root,
+                                           transform=train_transform, tr=tr)
 
     train_size = int(len(train_ds) * (1 - val_size))
 
@@ -207,13 +204,13 @@ def get_dataloaders(train_root, test_root, val_root=None, val_size=0.2, num_samp
         train_ds, val_ds = random_split(train_ds, [train_size, len(train_ds) - train_size])
 
     else:
-        val_ds = dataset(root=val_root,
-                             transform=val_transform)
+        val_ds = FastAIImageFolder.from_root(root=val_root,
+                                             transform=val_transform, tr=tr)
 
     if num_samples is not None:
         print('sampling')
         train_dl = DataLoader(train_ds,
-                              sampler=ImbalancedDatasetSampler(train_ds),
+                              sampler=RandomSampler(train_ds, num_samples=num_samples, replacement=True),
                               *args, **kwargs)
     else:
         train_dl = DataLoader(train_ds,
@@ -222,8 +219,8 @@ def get_dataloaders(train_root, test_root, val_root=None, val_size=0.2, num_samp
                               *args, **kwargs)
     val_dl = DataLoader(val_ds, shuffle=False, *args, **kwargs)
 
-    test_ds = dataset(root=test_root,
-                          transform=test_transform)
+    test_ds = FastAIImageFolder.from_root(root=test_root,
+                                          transform=test_transform, tr=tr)
 
     test_dl = DataLoader(test_ds, shuffle=False, *args, **kwargs)
 
@@ -231,8 +228,7 @@ def get_dataloaders(train_root, test_root, val_root=None, val_size=0.2, num_samp
 
 
 def visualise(dl, n=10):
-    fig, axes = plt.subplots(nrows=1, ncols=5, figsize=(20,4))
-
+    fig, axes = plt.subplots(nrows=1, ncols=5, figsize=(20, 4))
 
     for (x, y) in dl:
         for i, img in zip(range(5), x):
@@ -240,7 +236,6 @@ def visualise(dl, n=10):
 
         plt.show()
         break
-
 
 # if __name__ == '__main__':
 #

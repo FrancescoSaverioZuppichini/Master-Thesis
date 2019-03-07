@@ -6,6 +6,7 @@ import pprint
 import numpy as np
 # from torchvision.models import *
 
+from torch.nn.functional import softmax
 from torchsummary import summary
 from os import path
 from fastai.train import Learner, DataBunch, \
@@ -14,11 +15,12 @@ from fastai.train import Learner, DataBunch, \
     SaveModelCallback, DatasetType
 
 from fastai.vision import ClassificationInterpretation
-
-from fastai.metrics import accuracy
+from fastai.callback import Callback
+from fastai.metrics import accuracy, dice
 from fastai.layers import CrossEntropyFlat, MSELossFlat
 
-from datasets.TraversabilityDataset import get_dataloaders, get_transform, TraversabilityDatasetRegression
+from sklearn.metrics import roc_auc_score
+from datasets.TraversabilityDataset import get_dataloaders, get_transform, TraversabilityDataset
 
 from models.resnet import *
 from models.omar_cnn import OmarCNN
@@ -32,6 +34,23 @@ torch.backends.cudnn.benchmark = True
 torch.backends.cudnn.deterministic = True
 torch.manual_seed(0)
 
+
+def roc_auc(input, targs):
+
+    preds = softmax(input, dim=1)
+    targs = targs.cpu().numpy()
+    hot_targs = np.zeros((targs.shape[0], 2))
+    hot_targs[np.arange(targs.shape[0]), targs] = 1
+
+    try:
+        roc = roc_auc_score(hot_targs, preds.cpu().numpy())
+    except ValueError:
+        roc = 1
+        pass
+    return torch.tensor(roc)
+
+
+
 if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
 
 
@@ -39,7 +58,7 @@ def train_and_evaluate(params, train=True, load_model=None):
     model = OmarCNN()
     # model = MicroResnet.micro(1,
     #
-    #                           n=3,
+    #                           n=5,
     #                           blocks=[BasicBlock, BasicBlock, BasicBlock, BasicBlockSE],
     #                           preactivate=True)
     # print(model)
@@ -48,22 +67,22 @@ def train_and_evaluate(params, train=True, load_model=None):
     summary(model.cuda(), (1, params['resize'], params['resize']))
     pprint.pprint(params)
 
-    # criterion = CrossEntropyFlat()
+    criterion = CrossEntropyFlat()
 
-    criterion = MSELossFlat()
+    # criterion = MSELossFlat()
 
     train_dl, val_dl, test_dl = get_dataloaders(
-        train_root='/home/francesco/Desktop/carino/vaevictis/data/train_no_tail#2/csv',
-        test_root='/home/francesco/Desktop/carino/vaevictis/data/test/csvs',
-        val_root='/home/francesco/Desktop/carino/vaevictis/data/flat_spawns/val/csv',
+        train_root='/home/francesco/Desktop/data/{}'.format(params['dataset']),
+        test_root='/home/francesco/Desktop/data/{}'.format(params['test_dataset']),
+        val_root='/home/francesco/Desktop/data/{}'.format(params['val_dataset']),
         # val_size=0.15,
         train_transform=get_transform(params['resize'], should_aug=params['data-aug']),
         val_transform=get_transform(params['resize'], scale=1),
         test_transform=get_transform(params['resize'], scale=10),
-        dataset=TraversabilityDatasetRegression.from_root,
-        num_samples=params['sampler'],
+        num_samples=params['num_samples'],
         batch_size=params['batch_size'],
         num_workers=16,
+        tr=params['tr'],
         pin_memory=True)
 
     model_name = '{}-{}-{}-{}-{}'.format(params['model'], params['dataset'].split('/')[0], params['lr'], params['resize'], time.time())
@@ -86,13 +105,21 @@ def train_and_evaluate(params, train=True, load_model=None):
 
     experiment.log_parameters(params)
 
+
+    def custom_accuracy(y_pred, y_true, thresh:float=0.01):
+        # print(y_pred[0:10], y_true[0:10])
+        distance = (y_pred - y_true).abs()
+        acc = (distance < thresh).float().mean()
+        return acc
+
+
     learner = Learner(data=data,
                       model=model,
                       path='/home/francesco/Desktop/carino/vaevictis/data/',
                       model_dir=model_dir,
                       loss_func=criterion,
-                      # opt_func= partial(torch.optim.SGD, momentum=0.95, weight_decay=1e-4),
-                      metrics=[accuracy])
+                      opt_func= partial(torch.optim.SGD, momentum=0.95, weight_decay=1e-4),
+                      metrics=[accuracy, roc_auc])
 
     model_name_acc = 'accuracy'
     model_name_loss = 'loss'
@@ -132,33 +159,35 @@ def train_and_evaluate(params, train=True, load_model=None):
         print(loss, acc)
         experiment.log_metric("accuracy-from-best-acc", acc.item())
 
-    #
-    # interp = ClassificationInterpretation.from_learner(learner)
-    # interp.plot_confusion_matrix(normalize=True, title='Val')
-    # plt.savefig(learner.model_dir + '/' + 'val.png')
-    # plt.show()
-    #
-    # interp = ClassificationInterpretation.from_learner(learner, ds_type=DatasetType.Test)
-    # interp.plot_confusion_matrix(normalize=True, title='Test')
-    # plt.savefig(learner.model_dir + '/' + 'test.png')
-    # plt.show()
-    #
-    # print(model_name_acc)
 
-params = {'epochs': 50,
+    interp = ClassificationInterpretation.from_learner(learner)
+    interp.plot_confusion_matrix(normalize=True, title='Val')
+    plt.savefig(learner.model_dir + '/' + 'val.png')
+    plt.show()
+
+    interp = ClassificationInterpretation.from_learner(learner, ds_type=DatasetType.Test)
+    interp.plot_confusion_matrix(normalize=True, title='Test')
+    plt.savefig(learner.model_dir + '/' + 'test.png')
+    plt.show()
+
+    print(model_name_acc)
+
+params = {'epochs': 100,
           'lr': 0.001,
           'batch_size': 128,
-          'model': 'omar-db',
+          'model': 'omar',
           # 'model': 'microresnet#4',
-          'dataset': '100-92-0.08-25/train/',
-          'val_dataset': '100-92-0.08-25/val/',
-          'test_dataset': '100-92-0.08-25/test/',
+          'dataset': '92/train/',
+          'val_dataset': '92/val/',
+          'test_dataset': '92/test/',
           'sampler': None,
+          'num_samples': None,
           'samper_type': 'imbalance',
           'callbacks': '[ReduceLROnPlateauCallback]',
           'data-aug': True,
           'optim': 'adam',
           'info': 'regression',
+          'tr' : 0.08,
           'resize': 92}
 
 # train_and_evaluate(params, train=False, load_model='microresnet#3-preactivate=True-se=True-100-92-0.12-25-no_tail-spawn-shift#2-0.001-92-accuracy-True')
