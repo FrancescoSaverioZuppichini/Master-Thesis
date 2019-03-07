@@ -62,11 +62,11 @@ if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
 
 
 def train_and_evaluate(params, train=True, load_model=None):
-    model = OmarCNN()
-    # model = MicroResnet.micro(1,
-    #                           n=5,
-    #                           blocks=[BasicBlock, BasicBlock, BasicBlock, BasicBlock],
-    #                           preactivate=False)
+    # model = OmarCNN()
+    model = MicroResnet.micro(1,
+                              n=5,
+                              blocks=[BasicBlock, BasicBlock, BasicBlock, BasicBlock],
+                              preactivate=False)
     # print(model)
 
 
@@ -89,7 +89,7 @@ def train_and_evaluate(params, train=True, load_model=None):
         batch_size=params['batch_size'],
         num_workers=16,
         tr=params['tr'],
-        remove_negative=['remove-negative'],
+        remove_negative=params['remove-negative'],
         pin_memory=True)
 
     model_name = '{}-{}-{}-{}-{}'.format(params['model'], params['dataset'].split('/')[0], params['lr'], params['resize'], time.time())
@@ -175,8 +175,8 @@ def train_and_evaluate(params, train=True, load_model=None):
 params = {'epochs': 100,
           'lr': 0.001,
           'batch_size': 128,
-          'model': 'omar',
-          # 'model': 'microresnet#4-gate=7x7',
+          # 'model': 'omar',
+          'model': 'microresnet#4-gate=7x7',
           'dataset': '92',
           'sampler': None,
           'num_samples': None,
@@ -194,8 +194,10 @@ params = {'epochs': 100,
 # params['resize'] = 64
 # train_and_evaluate(params, train=True)
 # params['resize'] = 92
-# params['remove-negative'] = True
-# train_and_evaluate(params, train=True)
+
 params['data-aug'] = True
 train_and_evaluate(params, train=True)
-
+params['remove-negative'] = True
+train_and_evaluate(params, train=True)
+params['data-aug'] = False
+train_and_evaluate(params, train=True)
