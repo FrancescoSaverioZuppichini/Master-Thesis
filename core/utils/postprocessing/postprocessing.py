@@ -1,12 +1,15 @@
 # from postprocessing import *
 import os
-import pandas as pd
-import numpy as np
-import rosbag_pandas
 import os
 import glob
 import cv2
 import dateutil
+import rosbag_pandas
+
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 from tqdm import tqdm
 from os import path
@@ -228,13 +231,13 @@ class DataFrameHandler(PostProcessingHandler):
 
             else:
                 df = df_convert_date2timestamp(df)
+                df = self.df_adjust_robot_center(df)
                 df = df_convert_quaterion2euler(df)
                 df = self.df_clean_by_dropping(df, hm.shape[0] * self.config.resolution,
                                                hm.shape[1] * self.config.resolution)
 
                 if len(df) > 0:
                     df = self.df_add_advancement(df, self.config.time_window)
-                    df = self.df_adjust_robot_center(df)
                     df = self.df_add_hm_coords(df, hm)
                     df = self.df_clean_by_removing_outliers(df, hm)
 
@@ -242,7 +245,7 @@ class DataFrameHandler(PostProcessingHandler):
                     os.makedirs(path.dirname(file_path), exist_ok=True)
                     df.to_csv(file_path + '-complete.csv')
                 # else:
-                    # print('{} contains 0 rows, dropping...'.format(file_path))
+                # print('{} contains 0 rows, dropping...'.format(file_path))
 
         except Exception as e:
             print(e)
@@ -256,9 +259,9 @@ class DataFrameHandler(PostProcessingHandler):
 
 class PatchesHandler(PostProcessingHandler):
 
-    def remove_negative_advancement(self, df):
-
-        return df[df["advancement"] >= 0]
+    def __init__(self, debug=False, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.debug = debug
 
     def df_add_label(self, df, advancement_th):
         """
@@ -286,7 +289,7 @@ class PatchesHandler(PostProcessingHandler):
         out_dir = self.config.out_dir
         _, map_name = path.split(dirs)
 
-        file_path_light =path.normpath(self.config.base_dir + '/csvs-light/' + map_name )
+        file_path_light = path.normpath(self.config.out_dir + '/df/' + map_name)
 
         os.makedirs(out_dir + '/patches', exist_ok=True)
         os.makedirs(file_path_light, exist_ok=True)
@@ -301,17 +304,38 @@ class PatchesHandler(PostProcessingHandler):
             df = df.loc[list(range(0, len(df), self.config.skip_every)), :]
             df = df.set_index(df.columns[0])
             image_paths = []
+
+            to_show = 1
+
             for idx, (i, row) in enumerate(df.iterrows()):
                 patch = \
                     hmpatch(hm, row["hm_x"], row["hm_y"], np.rad2deg(row['pose__pose_e_orientation_z']),
                             self.config.patch_size,
                             scale=1)[0]
+
+                if self.debug and to_show > idx:
+                    fig = plt.figure()
+                    sns.heatmap(patch, vmin=0, vmax=1)
+                    plt.title('before saving')
+                    plt.show()
+
                 patch = (patch * 255).astype(np.uint8)
-                #
+
                 image_path = path.normpath('{}/patches/{}.png'.format(out_dir, row['timestamp']))
 
                 cv2.imwrite(image_path, patch)
+
                 image_paths.append(image_path)
+
+                if self.debug and to_show > idx:
+                    fig = plt.figure()
+                    patch_saved = cv2.imread(image_path)
+                    patch_saved = cv2.cvtColor(patch_saved, cv2.COLOR_BGR2GRAY)
+
+                    sns.heatmap(patch_saved / 255, vmin=0, vmax=1)
+                    plt.title('after saving')
+                    plt.show()
+
             df['image_path'] = image_paths
 
             # create a new small dataframe with the reference to the image stored
@@ -329,7 +353,7 @@ class PatchesHandler(PostProcessingHandler):
 
 
 def make_and_run_chain(config):
-    patches_h = PatchesHandler(config=config)
+    patches_h = PatchesHandler(config=config, debug=False)
     df_h = DataFrameHandler(successor=patches_h, config=config)
     b_h = InMemoryHandler(config=config, successor=df_h)
     bags = glob.glob('{}/**/*.bag'.format(config.bags_dir))
@@ -338,41 +362,69 @@ def make_and_run_chain(config):
 
 
 if __name__ == '__main__':
+    # config = PostProcessingConfig(base_dir='/home/francesco/Desktop/bars1-run-recorded/',
+    #                               maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/train/',
+    #                               # csv_dir='/home/francesco/Desktop/data/92/train/csvs/',
+    #                               # out_dir='/home/francesco/Desktop/data/92/train/',
+    #                               patch_size=92,
+    #                               advancement_th=0.12,
+    #                               skip_every=25,
+    #                               translation=[5, 5],
+    #                               time_window=125,
+    #                               name='train')
+    #
+    # make_and_run_chain(config)
+
     config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/krock-dataset/92/train/',
                                   maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/train/',
-                                  # csv_dir='/home/francesco/Desktop/data/92/train/csvs/',
-                                  out_dir='/home/francesco/Desktop/data/92/train/',
+                                  csv_dir='/home/francesco/Desktop/carino/vaevictis/krock-dataset/750/train/csvs/',
+                                  out_dir='/home/francesco/Desktop/data/750/train/',
                                   patch_size=92,
                                   advancement_th=0.12,
                                   skip_every=25,
                                   translation=[5, 5],
-                                  time_window=125,
+                                  time_window=750,
                                   name='train')
 
     make_and_run_chain(config)
     #
     config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/krock-dataset/92/val/',
                                   maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/val/',
-                                  # csv_dir='/home/francesco/Desktop/data/92/val/csvs/',
-                                  out_dir='/home/francesco/Desktop/data/92/val/',
+                                  csv_dir='/home/francesco/Desktop/carino/vaevictis/krock-dataset/750/val/csvs/',
+                                  out_dir='/home/francesco/Desktop/data/750/val/',
                                   patch_size=92,
                                   advancement_th=0.12,
                                   skip_every=12,
                                   translation=[5, 5],
-                                  time_window=125,
+                                  time_window=750,
                                   name='val')
     make_and_run_chain(config)
-
+    #
     config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/krock-dataset/92/test/',
                                   maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/test/',
-                                  # csv_dir='/home/francesco/Desktop/data/92/test/csvs/',
-                                  out_dir='/home/francesco/Desktop/data/92/test/',
+                                  csv_dir='/home/francesco/Desktop/carino/vaevictis/krock-dataset/750/test/csvs/',
+                                  out_dir='/home/francesco/Desktop/data/750/test/',
                                   patch_size=92,
                                   advancement_th=0.12,
                                   skip_every=12,
                                   translation=[5, 5],
-                                  time_window=125,
+                                  time_window=750,
                                   scale=10,
                                   name='test')
 
     make_and_run_chain(config)
+
+    #
+    # config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/krock-dataset/flat/',
+    #                               maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/test/',
+    #                               # csv_dir='/home/francesco/Desktop/data/750/test/csvs/',
+    #                               # out_dir='/home/francesco/Desktop/data/750/test/',
+    #                               patch_size=92,
+    #                               advancement_th=0.12,
+    #                               skip_every=12,
+    #                               translation=[5, 5],
+    #                               time_window=750,
+    #                               scale=10,
+    #                               name='flat')
+    #
+    # make_and_run_chain(config)

@@ -41,7 +41,7 @@ aug = iaa.Sometimes(0.9,
                                [
                                    iaa.Dropout(p=(0, 0.2)),
                                    iaa.CoarseDropout((0.05, 0.1),
-                                                     size_percent=(0.1, 0.25))
+                                                     size_percent=(0.01, 0.1))
 
                                ], random_order=True)
                     )
@@ -160,6 +160,7 @@ class TraversabilityDataset(Dataset):
     @classmethod
     def from_root(cls, root, transform, tr, remove_negative):
         dfs = glob.glob(root + '/**/*-patch.csv')
+        print(root + '/**/*-patch.csv')
         concat_ds = ConcatDataset([cls(df, transform, tr, remove_negative) for df in dfs])
         # needed for fastAI
         concat_ds.c = 2
@@ -245,7 +246,7 @@ def visualise(dl, n=10):
 if __name__ == '__main__':
 
     train_dl, val_dl, test_dl = get_dataloaders(
-        train_root='/home/francesco/Desktop/data/92/train/',
+        train_root='/home/francesco/Desktop/bars1-run-recorded/csvs-light/',
         test_root='/home/francesco/Desktop/data/92/test/',
         val_root='/home/francesco/Desktop/data/92/val',
         train_transform=get_transform(92, should_aug=True),
@@ -259,8 +260,8 @@ if __name__ == '__main__':
     #
     visualise(train_dl)
     visualise(train_dl)
-    visualise(train_dl)
-    visualise(train_dl)
+    # visualise(train_dl)
+    # visualise(train_dl)
     #
     # visualise(val_dl)
     # visualise(val_dl)

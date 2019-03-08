@@ -78,9 +78,9 @@ def train_and_evaluate(params, train=True, load_model=None):
     # criterion = MSELossFlat()
 
     train_dl, val_dl, test_dl = get_dataloaders(
-        train_root='/home/francesco/Desktop/data/{}/train/'.format(params['dataset']),
-        test_root='/home/francesco/Desktop/data/{}/test/'.format(params['dataset']),
-        val_root='/home/francesco/Desktop/data/{}/val'.format(params['dataset']),
+        train_root='/home/francesco/Desktop/data/{}/train/df/'.format(params['dataset']),
+        test_root='/home/francesco/Desktop/data/{}/test/df/'.format(params['dataset']),
+        val_root='/home/francesco/Desktop/data/{}/val/df/'.format(params['dataset']),
         # val_size=0.15,
         train_transform=get_transform(params['resize'], should_aug=params['data-aug']),
         val_transform=get_transform(params['resize'], scale=1),
@@ -180,21 +180,22 @@ params = {'epochs': 100,
           'lr': 0.001,
           'batch_size': 128,
           # 'model': 'omar',
-          'model': 'microresnet#4-gate=3x3',
-          'dataset': '92',
+          'model': 'microresnet#4-gate=7x7',
+          'dataset': '750',
           'sampler': None,
           'num_samples': None,
           'samper_type': 'imbalance',
           'callbacks': '[ReduceLROnPlateauCallback]',
-          'data-aug': False,
+          'data-aug': True,
           'optim': 'sdg',
-          'info': '',
-          'tr' : 0.12,
+          'info': 'new val',
+          'tr' : 0.45,
           'remove-negative': False,
+          'time-window': 750,
           'resize': 92}
 
-train_and_evaluate(params, train=False, load_model='microresnet#4-gate=7x7-92-0.001-92-1551994605.486166')
-# train_and_evaluate(params, train=True)
+# train_and_evaluate(params, train=False, load_model='microresnet#4-gate=7x7-92-0.001-92-1551994605.486166')
+train_and_evaluate(params, train=True)
 # params['resize'] = 64
 # train_and_evaluate(params, train=True)
 # params['resize'] = 92

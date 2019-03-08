@@ -2,7 +2,7 @@ import glob
 
 from postprocessing import BagsHandler, InMemoryHandler, DataFrameHandler, PatchesHandler, PostProcessingConfig
 
-config = PostProcessingConfig(base_dir='./test',
+config = PostProcessingConfig(base_dir='/home/francesco/Desktop/data/test/',
                               maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/test/',
                               # csv_dir='/home/francesco/Desktop/carino/vaevictis/data/train_no_tail#2/csv/',
                               # out_dir='/home/francesco/Desktop/data/',
@@ -13,7 +13,7 @@ config = PostProcessingConfig(base_dir='./test',
                               time_window=125,
                               name='test')
 
-patches_h = PatchesHandler(config=config)
+patches_h = PatchesHandler(config=config, debug=True)
 df_h = DataFrameHandler(successor=patches_h, config=config)
 b_h = BagsHandler(config=config, successor=df_h)
 

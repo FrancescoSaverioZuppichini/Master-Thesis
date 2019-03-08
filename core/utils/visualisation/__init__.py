@@ -3,12 +3,11 @@ import matplotlib.lines as mlines
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.patches as mpatches
 
 from utils.visualisation import *
 from utils.visualisation import *
 from utils.postprocessing.utils import *
-import matplotlib.patches as mpatches
-
 from matplotlib import gridspec
 
 class VisualiseSimulation():
@@ -50,7 +49,7 @@ class VisualiseSimulation():
         for row in ax:
             for idx, (col, (i, row)) in enumerate(zip(row, sample.iterrows())):
                 x, y = row["hm_x"], row["hm_y"]
-                patch, _ = hmpatch(self.hm, x, y, np.rad2deg(row['pose__pose_position_z']), self.patch_size, scale=1)
+                patch, _ = hmpatch(self.hm, x, y, np.rad2deg(row['pose__pose_e_orientation_z']), self.patch_size, scale=1)
                 patch = patch.astype(np.float32)
                 if center: patch = patch - patch[patch.shape[0] // 2, patch.shape[1] // 2]
                 col.plot(self.patch_size // 2, self.patch_size // 2, marker='o', color='r', ls='', linewidth=10,
@@ -64,7 +63,7 @@ class VisualiseSimulation():
 
         x, y, ang, ad = sample["hm_x"], \
                         sample["hm_y"], \
-                        sample['pose__pose_position_z'], \
+                        sample['pose__pose_e_orientation_z'], \
                         sample["advancement"]
 
         ax1 = plt.subplot(2, 1, 1)
@@ -101,10 +100,10 @@ class VisualiseSimulation():
         for i, row in subset.iterrows():
             x, y, ang, ad = row["hm_x"], \
                             row["hm_y"], \
-                            row["pose__pose_position_z"], \
+                            row["pose__pose_e_orientation_z"], \
                             row["advancement"]
             rect = mpatches.Rectangle((x - self.patch_size // 2, y - self.patch_size // 2), self.patch_size,
-                                     self.patch_size, linewidth=1, edgecolor='r', facecolor='none', angle=np.rad2deg(ang))
+                                     self.patch_size, linewidth=1, edgecolor='r', facecolor='none')
             ax_hm.add_patch(rect)
 
             patch, _ = hmpatch(self.hm, x, y, np.rad2deg(ang), self.patch_size, scale=1)
@@ -173,14 +172,15 @@ class VisualiseSimulation():
 
             x, y, ang, ad = row["hm_x"], \
                             row["hm_y"], \
-                            row["pose__pose_position_z"], \
+                            row["pose__pose_e_orientation_z"], \
                             row["advancement"]
 
+
             ax_hm = plt.subplot2grid((2, 2), (1, 1), colspan=1, rowspan=1)
-            sns.heatmap(self.hm, vmin=0, vmax=1, ax=ax_hm)
+            sns.heatmap(self.hm / 255, vmin=0, vmax=1, ax=ax_hm)
 
             rect = mpatches.Rectangle((x - self.patch_size // 2, y - self.patch_size  // 2), self.patch_size ,
-                                      self.patch_size , linewidth=1, angle=np.rad2deg(ang), edgecolor='r', facecolor='none')
+                                      self.patch_size , linewidth=1, edgecolor='r', facecolor='none')
             ax_hm.add_patch(rect)
 
             fig.canvas.draw()
