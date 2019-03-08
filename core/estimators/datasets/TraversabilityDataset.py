@@ -237,38 +237,36 @@ def visualise(dl, n=10):
 
     for (x, y) in dl:
         for i, img in zip(range(5), x):
-            sns.heatmap(img.numpy().squeeze(), ax=axes[i])
+            sns.heatmap(img.numpy().squeeze(), ax=axes[i], vmin=0, vmax=1)
 
         plt.show()
         break
 
-# if __name__ == '__main__':
-#
-#     val_tr = get_transform(92)
-#     val_tr.transforms.append(ImgaugWrapper(aug=iaa.GaussianBlur(sigma=2)))
-#     train_dl, val_dl, test_dl = get_dataloaders(
-#         train_root='/home/francesco/Desktop/data/train/dataset/{}'.format('100-92-0.12-25-no_tail-spawn-shift#2'),
-#         val_root='/home/francesco/Desktop/data/val/dataset/{}'.format('100-92-0.12-12-no_tail-spawn-shift'),
-#         test_root='/home/francesco/Desktop/data/test/dataset/{}'.format('100-92-0.12-12-querry-no_tail-spawn-shift'),
-#         train_transform=get_transform(92, should_aug=True),
-#         val_transform=val_tr,
-#         test_transform=get_transform(92, scale=10),
-#         batch_size=5,
-#         num_samples=None,
-#         num_workers=1,
-#         pin_memory=True)
-#
-#     #
-#     # visualise(train_dl)
-#     # visualise(train_dl)
-#     # visualise(train_dl)
-#     # visualise(train_dl)
-#
-#     visualise(val_dl)
-#     visualise(val_dl)
-#
-#     # visualise(test_dl)
-#     # visualise(test_dl)
-#     # visualise(test_dl)
-#     # visualise(test_dl)
+if __name__ == '__main__':
+
+    train_dl, val_dl, test_dl = get_dataloaders(
+        train_root='/home/francesco/Desktop/data/92/train/',
+        test_root='/home/francesco/Desktop/data/92/test/',
+        val_root='/home/francesco/Desktop/data/92/val',
+        train_transform=get_transform(92, should_aug=True),
+        val_transform=get_transform(92),
+        test_transform=get_transform(92, scale=10),
+        batch_size=5,
+        num_samples=None,
+        num_workers=1,
+        pin_memory=True)
+
+    #
+    visualise(train_dl)
+    visualise(train_dl)
+    visualise(train_dl)
+    visualise(train_dl)
+    #
+    # visualise(val_dl)
+    # visualise(val_dl)
+
+    # visualise(test_dl)
+    # visualise(test_dl)
+    # visualise(test_dl)
+    # visualise(test_dl)
 #
