@@ -93,9 +93,12 @@ def train_and_evaluate(params, train=True, load_model=None):
         pin_memory=True)
 
     model_name = '{}-{}-{}-{}-{}'.format(params['model'], params['dataset'].split('/')[0], params['lr'], params['resize'], time.time())
+
+    model_name = load_model if load_model is not None else model_name
+
     model_dir = path.normpath('/home/francesco/Desktop/carino/vaevictis/data/' + model_name + '/')
 
-    os.makedirs(model_dir)
+    os.makedirs(model_dir, exist_ok=True)
 
     print("train size={}, val size={}, test size={}".format(
         len(train_dl) * params['batch_size'],
@@ -110,6 +113,7 @@ def train_and_evaluate(params, train=True, load_model=None):
                             workspace="francescosaveriozuppichini")
 
     experiment.log_parameters(params)
+    experiment.log_metric("model_dir", model_dir)
 
     learner = Learner(data=data,
                       model=model,
@@ -131,28 +135,28 @@ def train_and_evaluate(params, train=True, load_model=None):
 
     if train:
         # try:
-            with experiment.train():
-                learner.fit(epochs=params['epochs'], lr=params['lr'],
-                            callbacks=callbacks)  # SaveModelCallback load the best model after training!
+        with experiment.train():
+            learner.fit(epochs=params['epochs'], lr=params['lr'],
+                        callbacks=callbacks)  # SaveModelCallback load the best model after training!
         # except Exception as e:
         #     print(e)
         #     pass
 
-    learner.load(model_name_loss)
+
+        learner.load(model_name_loss)
 
 
-    with experiment.test():
-        loss, acc = learner.validate(data.test_dl, metrics=[accuracy])
-        print(loss, acc)
-        experiment.log_metric("accuracy", acc.item())
-        experiment.log_metric("test_loss", loss)
+        with experiment.test():
+            loss, acc = learner.validate(data.test_dl, metrics=[accuracy])
+            print(loss, acc)
+            experiment.log_metric("accuracy", acc.item())
+            experiment.log_metric("test_loss", loss)
 
-    learner.load(model_name_acc)
-
+        learner.load(model_name_acc)
 
     if load_model:
         print('loading model')
-        learner.load(load_model)
+        learner.load('accuracy')
 
     with experiment.test():
         loss, acc = learner.validate(data.test_dl, metrics=[accuracy])
@@ -176,7 +180,7 @@ params = {'epochs': 100,
           'lr': 0.001,
           'batch_size': 128,
           # 'model': 'omar',
-          'model': 'microresnet#4-gate=7x7',
+          'model': 'microresnet#4-gate=3x3',
           'dataset': '92',
           'sampler': None,
           'num_samples': None,
@@ -189,15 +193,17 @@ params = {'epochs': 100,
           'remove-negative': False,
           'resize': 92}
 
-# train_and_evaluate(params, train=False, load_model='microresnet#3-preactivate=True-se=True-100-92-0.12-25-no_tail-spawn-shift#2-0.001-92-accuracy-True')
+train_and_evaluate(params, train=False, load_model='microresnet#4-gate=7x7-92-0.001-92-1551994605.486166')
 # train_and_evaluate(params, train=True)
 # params['resize'] = 64
 # train_and_evaluate(params, train=True)
 # params['resize'] = 92
 
-params['data-aug'] = True
-train_and_evaluate(params, train=True)
-params['remove-negative'] = True
-train_and_evaluate(params, train=True)
-params['data-aug'] = False
-train_and_evaluate(params, train=True)
+# params['data-aug'] = True
+# train_and_evaluate(params, train=True)
+# params['remove-negative'] = True
+# train_and_evaluate(params, train=True)
+# params['data-aug'] = False
+# train_and_evaluate(params, train=True)
+# params['remove-negative'] = True
+# train_and_evaluate(params, train=True)

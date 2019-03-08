@@ -129,10 +129,10 @@ class InferenceDataset(Dataset):
         cv2.imwrite('/home/francesco/Desktop/textures/{}-{}.png'.format(name, self.rotate), texture)
 
 
-ds = InferenceDataset('/home/francesco/Documents/Master-Thesis/core/maps/train/bars1.png',
+ds = InferenceDataset('/home/francesco/Documents/Master-Thesis/core/maps/test/querry-big-10.png',
                       patch_size=92,
                       step=3,
-                      transform=get_transform(92, scale=1), rotate=None)
+                      transform=get_transform(92, scale=10), rotate=-90)
 
 dl = DataLoader(ds, batch_size=128, num_workers=16, shuffle=False)
 
@@ -140,22 +140,21 @@ data = DataBunch(train_dl=dl, valid_dl=dl, test_dl=dl)
 
 # model = OmarCNN()
 model = MicroResnet.micro(1,
-                          n_classes=2,
-                          block=[BasicBlock, BasicBlock, BasicBlock, BasicBlockSE],
-                          preactivated=True)
+                          n=5,
+                          blocks=[BasicBlock, BasicBlock, BasicBlock, BasicBlock],
+                          preactivate=False)
 criterion = CrossEntropyFlat()
 
 learner = Learner(data=data,
                   model=model)
 
 learner.load(
-    '/home/francesco/Desktop/carino/vaevictis/data/microresnet#3-preactivate=True-se=True-gate=5x5-2-pool-2-1-100-92-0.06-25-no_tail-spawn-shift#2-0.001-92-accuracy-1551544152.1612258')
+    '/home/francesco/Desktop/carino/vaevictis/data/microresnet#4-gate=7x7-92-0.001-92-1551994605.486166/accuracy')
 
 outs = learner.get_preds(data.test_dl)
 
 _, preds = torch.max(outs[0], 1)
 
-ds.make_texture(preds.numpy(), 'bars1')
+ds.make_texture(preds.numpy(), 'querry')
 # ds.visualise(preds.numpy())
-
 # ds.make_texture(preds.numpy(), 'bars1')
