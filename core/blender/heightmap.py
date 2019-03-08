@@ -17,7 +17,7 @@ import cv2
 
 
 MAP_PATH = '/home/francesco/Documents/Master-Thesis/core/maps/test/querry-big-10.png'
-TEXT_PATH = '/home/francesco/Desktop/textures/querry-None.png'
+TEXT_PATH = '/home/francesco/Desktop/textures/querry-270.png'
 #
 # MAP_PATH = '/home/francesco/Documents/Master-Thesis/core/maps/train/bars1.png'
 # TEXT_PATH = '/home/francesco/Desktop/textures/bars1-None.png'

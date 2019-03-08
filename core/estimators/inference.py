@@ -132,7 +132,7 @@ class InferenceDataset(Dataset):
 ds = InferenceDataset('/home/francesco/Documents/Master-Thesis/core/maps/test/querry-big-10.png',
                       patch_size=92,
                       step=3,
-                      transform=get_transform(92, scale=10), rotate=-90)
+                      transform=get_transform(92, scale=10), rotate=270)
 
 dl = DataLoader(ds, batch_size=128, num_workers=16, shuffle=False)
 
