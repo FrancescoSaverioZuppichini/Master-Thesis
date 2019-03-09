@@ -42,7 +42,7 @@ class MicroResnet(ResNet):
         super().__init__(depths, in_channel, *args, **kwargs)
 
         self.encoder.gate = nn.Sequential(
-            nn.Conv2d(in_channel, 16, kernel_size=7, stride=3, bias=False, padding=2),
+            nn.Conv2d(in_channel, 16, kernel_size=3, stride=1, bias=False, padding=1),
             nn.BatchNorm2d(16),
             nn.LeakyReLU(inplace=True),
             nn.MaxPool2d(kernel_size=2)

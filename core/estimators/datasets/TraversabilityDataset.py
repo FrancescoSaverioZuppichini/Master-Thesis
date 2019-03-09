@@ -39,63 +39,22 @@ class ImgaugWrapper():
 aug = iaa.Sometimes(0.9,
                     iaa.SomeOf((2, 3),
                                [
-                                   iaa.Dropout(p=(0, 0.2)),
+                                   iaa.Dropout(p=(0.1, 0.2)),
                                    iaa.CoarseDropout((0.05, 0.1),
-                                                     size_percent=(0.01, 0.1))
+                                                     size_percent=(0.05, 0.1))
 
                                ], random_order=True)
                     )
 
 
-class ImbalancedDatasetSampler(torch.utils.data.sampler.Sampler):
-    """Samples elements randomly from a given list of indices for imbalanced dataset
-    Arguments:
-        indices (list, optional): a list of indices
-        num_samples (int, optional): number of samples to draw
-    """
-
-    def __init__(self, dataset, indices=None, num_samples=None):
-        super().__init__(dataset)
-        # if indices is not provided,
-        # all elements in the dataset will be considered
-        self.indices = list(range(len(dataset))) \
-            if indices is None else indices
-
-        # if num_samples is not provided,
-        # draw `len(indices)` samples in each iteration
-        self.num_samples = len(self.indices) \
-            if num_samples is None else num_samples
-
-        # distribution of classes in the dataset
-        label_to_count = {}
-        for idx in self.indices:
-            label = self._get_label(dataset, idx)
-            if label in label_to_count:
-                label_to_count[label] += 1
-            else:
-                label_to_count[label] = 1
-
-        # weight for each sample
-        weights = [1.0 / label_to_count[self._get_label(dataset, idx)]
-                   for idx in self.indices]
-        self.weights = torch.DoubleTensor(weights)
-
-    def _get_label(self, dataset, idx):
-        dataset_type = type(dataset)
-        if dataset_type is torchvision.datasets.MNIST:
-            return dataset.train_labels[idx].item()
-        elif dataset_type is torchvision.datasets.ImageFolder:
-            return dataset.imgs[idx][1]
-        else:
-            return dataset.imgs[idx][1]
-
-    def __iter__(self):
-        return (self.indices[i] for i in torch.multinomial(
-            self.weights, self.num_samples, replacement=True))
-
-    def __len__(self):
-        return self.num_samples
-
+def show_heatmap(self, x, title):
+    fig = plt.figure(figsize=(10, 10), dpi=100)
+    plt.title(title)
+    img_n = x.cpu().numpy().squeeze()
+    sns.heatmap(img_n,
+                annot=True,
+                linewidths=.5,
+                fmt='0.2f')
 
 class CenterAndScalePatch():
     """
@@ -108,38 +67,44 @@ class CenterAndScalePatch():
     def __init__(self, scale=1.0):
         self.scale = scale
 
-    def show_heatmap(self, x, title):
-        fig = plt.figure(figsize=(10, 10), dpi=100)
-        plt.title(title)
-        img_n = x.cpu().numpy().squeeze()
-        sns.heatmap(img_n,
-                    annot=True,
-                    linewidths=.5,
-                    fmt='0.2f')
 
     def __call__(self, x, debug=False):
-        if debug: self.show_heatmap(x, 'original')
+        if debug: show_heatmap(x, 'original')
 
         x = x.squeeze()
         # center the patch in the middle
-        x -= x[x.shape[0] // 2, x.shape[1] // 2].item()
         x *= self.scale
+        x -= x[x.shape[0] // 2, x.shape[1] // 2].item()
         x = x.unsqueeze(0)
 
-        if debug: self.show_heatmap(x, 'center')
+        if debug: show_heatmap(x, 'center')
 
         return x
 
 
 class TraversabilityDataset(Dataset):
-    def __init__(self, df, transform, tr=None, remove_negative=False):
+    def __init__(self, df, transform, tr=None, remove_negative=False, time_window=100):
         self.df = pd.read_csv(df)
         if remove_negative: self.df = self.df[self.df['advancement'] >= 0]
         self.transform = transform
         self.tr = tr
-
+        self.time_window = time_window
         self.idx2class = {'False': 0,
                           'True': 1}
+        self.df = self.df.dropna() # to be sure
+
+        # self.compute_advancement()
+
+    def compute_advancement(self):
+        self.df["S_dX"] =  self.df.rolling(window=(self.time_window + 1))['pose__pose_position_x'].apply(lambda x: x[-1] - x[0], raw=True).shift(
+            -self.time_window)
+        self.df["S_dY"] =  self.df.rolling(window=(self.time_window + 1))['pose__pose_position_y'].apply(lambda x: x[-1] - x[0], raw=True).shift(
+            -self.time_window)
+
+        # project x and y in the current line and compute the advancement
+        self.df["advancement"] = np.einsum('ij,ij->i', self.df[["S_dX", "S_dY"]], self.df[["S_oX", "S_oY"]])  # row-wise dot product
+
+        self.df = self.df.dropna()
 
     def __getitem__(self, item):
         row = self.df.iloc[item]
@@ -222,13 +187,13 @@ def get_dataloaders(train_root, test_root, val_root=None, val_size=0.2, tr=0.12,
                               shuffle=True,
                               # sampler=ImbalancedDatasetSampler(train_ds),
                               *args, **kwargs)
-    val_dl = DataLoader(val_ds, shuffle=False, *args, **kwargs)
+    val_dl = DataLoader(val_ds, shuffle=True, *args, **kwargs)
 
     test_ds = FastAIImageFolder.from_root(root=test_root,
                                           transform=test_transform, tr=tr,
                                           remove_negative=remove_negative)
 
-    test_dl = DataLoader(test_ds, shuffle=False, *args, **kwargs)
+    test_dl = DataLoader(test_ds, shuffle=True, *args, **kwargs)
 
     return train_dl, val_dl, test_dl
 
@@ -244,22 +209,24 @@ def visualise(dl, n=10):
         break
 
 if __name__ == '__main__':
+    df = '/home/francesco/Desktop/bars1-run-recorded/csvs-light/bars1/1551992796.2643805-patch.csv'
+    ds = TraversabilityDataset(df, get_transform(92))
 
-    train_dl, val_dl, test_dl = get_dataloaders(
-        train_root='/home/francesco/Desktop/bars1-run-recorded/csvs-light/',
-        test_root='/home/francesco/Desktop/data/92/test/',
-        val_root='/home/francesco/Desktop/data/92/val',
-        train_transform=get_transform(92, should_aug=True),
-        val_transform=get_transform(92),
-        test_transform=get_transform(92, scale=10),
-        batch_size=5,
-        num_samples=None,
-        num_workers=1,
-        pin_memory=True)
-
+    # train_dl, val_dl, test_dl = get_dataloaders(
+    #     train_root='/home/francesco/Desktop/bars1-run-recorded/csvs-light/',
+    #     test_root='/home/francesco/Desktop/data/92/test/',
+    #     val_root='/home/francesco/Desktop/data/92/val',
+    #     train_transform=get_transform(92, should_aug=True),
+    #     val_transform=get_transform(92),
+    #     test_transform=get_transform(92, scale=10),
+    #     batch_size=5,
+    #     num_samples=None,
+    #     num_workers=1,
+    #     pin_memory=True)
     #
-    visualise(train_dl)
-    visualise(train_dl)
+    # #
+    # visualise(train_dl)
+    # visualise(train_dl)
     # visualise(train_dl)
     # visualise(train_dl)
     #

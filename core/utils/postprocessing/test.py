@@ -2,10 +2,10 @@ import glob
 
 from postprocessing import BagsHandler, InMemoryHandler, DataFrameHandler, PatchesHandler, PostProcessingConfig
 
-config = PostProcessingConfig(base_dir='/home/francesco/Desktop/data/test/',
+config = PostProcessingConfig(bags_dir='./test/bags/',
                               maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/test/',
                               # csv_dir='/home/francesco/Desktop/carino/vaevictis/data/train_no_tail#2/csv/',
-                              # out_dir='/home/francesco/Desktop/data/',
+                              out_dir='./test/',
                               patch_size=92,
                               advancement_th=0.12,
                               skip_every=25,

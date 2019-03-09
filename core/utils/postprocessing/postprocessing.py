@@ -18,10 +18,10 @@ from pypeln import thread as th
 
 
 class PostProcessingConfig():
-    def __init__(self, base_dir, maps_folder, patch_size, advancement_th, time_window, skip_every, translation,
+    def __init__(self, out_dir, maps_folder, patch_size, advancement_th, time_window, skip_every, translation,
                  resolution=0.02, scale=1, n_workers=16,
-                 bags_dir=None, csv_dir=None, out_dir=None, patch_dir=None, verbose=True, patches=True, name='confing'):
-        self.base_dir, self.maps_folder, self.bags_dir, self.csv_dir, self.out_dir, self.patch_dir = base_dir, maps_folder, bags_dir, csv_dir, out_dir, patch_dir
+                 bags_dir=None, csv_dir=None,  patch_dir=None, verbose=True, patches=True, name='confing'):
+        self.maps_folder, self.bags_dir, self.out_dir = maps_folder, bags_dir, out_dir
 
         self.patch_size, self.advancement_th, self.time_window = patch_size, advancement_th, time_window
         self.scale, self.skip_every = scale, skip_every
@@ -29,12 +29,7 @@ class PostProcessingConfig():
         self.n_workers = n_workers
         self.name = name
 
-        self.make_dirs()
-
-    def make_dirs(self):
-        if self.bags_dir is None: self.bags_dir = path.normpath(self.base_dir + '/bags/')
-        if self.csv_dir is None: self.csv_dir = path.normpath(self.base_dir + '/csvs/')
-        if self.out_dir is None: self.out_dir = path.normpath(self.base_dir + '/outs/')
+        self.out_dir = os.path.normpath(self.out_dir + name)
 
     @property
     def dataset_name(self):
@@ -215,7 +210,7 @@ class DataFrameHandler(PostProcessingHandler):
         def make_path(file_path):
             splitted = file_path.split('/')
             map_name, file_name = splitted[-2], splitted[-1]
-            return path.normpath('{}/{}/{}'.format(self.config.csv_dir, map_name, path.splitext(file_name)[0]))
+            return path.normpath('{}/{}/{}'.format(self.config.out_dir + '/csvs/', map_name, path.splitext(file_name)[0]))
 
         map_name = filename2map(file_path)
         map_path = '{}/{}.png'.format(self.config.maps_folder, map_name)
@@ -375,10 +370,9 @@ if __name__ == '__main__':
     #
     # make_and_run_chain(config)
 
-    config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/krock-dataset/92/train/',
+    config = PostProcessingConfig(bags_dir='/home/francesco/Desktop/carino/vaevictis/krock-dataset/92/train/bags/',
                                   maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/train/',
-                                  csv_dir='/home/francesco/Desktop/carino/vaevictis/krock-dataset/750/train/csvs/',
-                                  out_dir='/home/francesco/Desktop/data/750/train/',
+                                  out_dir='/home/francesco/Desktop/data/750/',
                                   patch_size=92,
                                   advancement_th=0.12,
                                   skip_every=25,
@@ -388,10 +382,9 @@ if __name__ == '__main__':
 
     make_and_run_chain(config)
     #
-    config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/krock-dataset/92/val/',
+    config = PostProcessingConfig(bags_dir='/home/francesco/Desktop/carino/vaevictis/krock-dataset/92/val/bags/',
                                   maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/val/',
-                                  csv_dir='/home/francesco/Desktop/carino/vaevictis/krock-dataset/750/val/csvs/',
-                                  out_dir='/home/francesco/Desktop/data/750/val/',
+                                  out_dir='/home/francesco/Desktop/data/750/',
                                   patch_size=92,
                                   advancement_th=0.12,
                                   skip_every=12,
@@ -400,10 +393,9 @@ if __name__ == '__main__':
                                   name='val')
     make_and_run_chain(config)
     #
-    config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/krock-dataset/92/test/',
+    config = PostProcessingConfig(bags_dir='/home/francesco/Desktop/carino/vaevictis/krock-dataset/92/test/bags/',
                                   maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/test/',
-                                  csv_dir='/home/francesco/Desktop/carino/vaevictis/krock-dataset/750/test/csvs/',
-                                  out_dir='/home/francesco/Desktop/data/750/test/',
+                                  out_dir='/home/francesco/Desktop/data/750/',
                                   patch_size=92,
                                   advancement_th=0.12,
                                   skip_every=12,

@@ -80,24 +80,24 @@ class VisualiseSimulation():
         patch, _ = hmpatch(self.hm, x, y, np.rad2deg(ang), self.patch_size, scale=1)
         sns.heatmap(patch, ax=ax2)
 
-    def show_patches_on_the_map(self, df):
-        n_show = 4
+    def show_patches_on_the_map(self, df, n_show=4, title='patches', compress=True):
 
-        fig = plt.figure(figsize=(12, 12))
-
-        size = (2 + n_show // 2, 2 + n_show // 2)
+        fig = plt.figure(figsize=(4 * 2,  4 * 3))
+        size = (2 + n_show // 2, n_show // 2)
         gridspec.GridSpec(*size)
 
         ax_hm = plt.subplot2grid((size), (0, 0), colspan=2, rowspan=2)
-
+        ax_hm.set_title(title)
         sns.heatmap(self.hm / 255, ax=ax_hm, vmin=0, vmax=1)
 
         self.show_traces([df], ax=ax_hm)
 
-        subset = df.loc[list(range(0, len(df), len(df) // n_show)), :]
-        print(list(range(0, len(df), len(df) // n_show)))
+        if compress:
+            df = df.loc[list(range(0, len(df), len(df) // n_show)), :]
+            print(list(range(0, len(df), len(df) // n_show)))
+
         hm_patches = []
-        for i, row in subset.iterrows():
+        for i, row in df.iterrows():
             x, y, ang, ad = row["hm_x"], \
                             row["hm_y"], \
                             row["pose__pose_e_orientation_z"], \
@@ -107,12 +107,36 @@ class VisualiseSimulation():
             ax_hm.add_patch(rect)
 
             patch, _ = hmpatch(self.hm, x, y, np.rad2deg(ang), self.patch_size, scale=1)
-            hm_patches.append(patch)
+            hm_patches.append((patch, ad))
 
         for i in range(n_show // 2):
             for j in range(n_show // 2):
                 ax_patch = plt.subplot2grid((size), (2 + i, j), colspan=1, rowspan=1)
-                sns.heatmap(hm_patches[i + j], ax=ax_patch, vmin=0, vmax=1)
+                patch, ad = hm_patches[i + j]
+                sns.heatmap(patch, ax=ax_patch, vmin=0, vmax=1)
+                ax_patch.set_title(ad)
+
+
+    def show_labeled_patches(self, df, tr=None, label='True'):
+        # useful if we want to test an other tr on the fly
+        if tr is not None: df['label'] = df[df['advancement'] > tr]
+
+
+        tmp = df.loc[df['label'] == True, ]
+
+        sample = tmp.sort_values("advancement").head(4)
+
+        self.show_patches_on_the_map(sample, title='true', compress=False)
+
+        plt.show()
+
+        tmp = df[df['label'] == False]
+
+        sample = tmp.sort_values("advancement").tail(4)
+
+        self.show_patches_on_the_map(sample, title='false', compress=False)
+
+        plt.show()
 
     def show_traversability_in_time(self, df, dt=100):
         fig = plt.figure()
@@ -192,3 +216,12 @@ class VisualiseSimulation():
         self.plot_position(df)
         self.show_traversability_in_time(df)
 
+
+if __name__ == '__main__':
+
+    hm = cv2.imread('/home/francesco/Documents/Master-Thesis/core/maps/train/bars1.png')
+    hm = cv2.cvtColor(hm, cv2.COLOR_BGR2GRAY)
+
+    deb_pip = VisualiseSimulation(hm, patch_size=92)
+    df = pd.read_csv('/home/francesco/Desktop/bars1-run-recorded/csvs-light/bars1/1551992796.2643805-patch.csv')
+    deb_pip.show_labeled_patches(df.dropna())

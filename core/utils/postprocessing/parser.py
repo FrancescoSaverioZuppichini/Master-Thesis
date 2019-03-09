@@ -5,7 +5,7 @@ parser = argparse.ArgumentParser(description='Traversability Simulation')
 
 
 parser.add_argument('-i',
-                    '--base_dir',
+                    '--bags_dir',
                     type=str,
                     help='Directory in which there is a /bag subdirectory that contains the .bag files. This directory is used to store the dataframes',
                     required=True)

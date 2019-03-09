@@ -38,16 +38,17 @@ torch.manual_seed(0)
 def roc_auc(input, targs):
 
     preds = softmax(input, dim=1)
+    preds = torch.argmax(preds, dim=1).long()
     targs = targs.cpu().numpy()
-    hot_targs = np.zeros((targs.shape[0], 2))
-    hot_targs[np.arange(targs.shape[0]), targs] = 1
+    # hot_targs = np.zeros((targs.shape[0], 2))
+    # hot_targs[np.arange(targs.shape[0]), targs] = 1
 
     try:
-        roc = roc_auc_score(hot_targs, preds.cpu().numpy())
+        roc = roc_auc_score(targs, preds.cpu().numpy())
     except ValueError:
         roc = 1
         pass
-    return torch.tensor(roc)
+    return torch.tensor(roc).float()
 
 
 def custom_accuracy(y_pred, y_true, thresh:float=0.01):
@@ -64,7 +65,7 @@ if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
 def train_and_evaluate(params, train=True, load_model=None):
     # model = OmarCNN()
     model = MicroResnet.micro(1,
-                              n=5,
+                              n=2,
                               blocks=[BasicBlock, BasicBlock, BasicBlock, BasicBlock],
                               preactivate=False)
     # print(model)
@@ -147,8 +148,8 @@ def train_and_evaluate(params, train=True, load_model=None):
 
 
         with experiment.test():
-            loss, acc = learner.validate(data.test_dl, metrics=[accuracy])
-            print(loss, acc)
+            loss, acc, roc = learner.validate(data.test_dl, metrics=[accuracy, roc_auc])
+            print(loss, acc, roc)
             experiment.log_metric("accuracy", acc.item())
             experiment.log_metric("test_loss", loss)
 
@@ -159,8 +160,8 @@ def train_and_evaluate(params, train=True, load_model=None):
         learner.load('accuracy')
 
     with experiment.test():
-        loss, acc = learner.validate(data.test_dl, metrics=[accuracy])
-        print(loss, acc)
+        loss, acc, roc = learner.validate(data.test_dl, metrics=[accuracy, roc_auc])
+        print(loss, acc, roc)
         experiment.log_metric("accuracy-from-best-acc", acc.item())
 
 
@@ -180,7 +181,7 @@ params = {'epochs': 100,
           'lr': 0.001,
           'batch_size': 128,
           # 'model': 'omar',
-          'model': 'microresnet#4-gate=7x7',
+          'model': 'microresnet#4-gate=3x3-n=2',
           'dataset': '750',
           'sampler': None,
           'num_samples': None,
@@ -188,7 +189,7 @@ params = {'epochs': 100,
           'callbacks': '[ReduceLROnPlateauCallback]',
           'data-aug': True,
           'optim': 'sdg',
-          'info': 'new val',
+          'info': 'new val, dropping nana (did I forget?)',
           'tr' : 0.45,
           'remove-negative': False,
           'time-window': 750,
