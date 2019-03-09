@@ -94,7 +94,7 @@ class VisualiseSimulation():
 
         if compress:
             df = df.loc[list(range(0, len(df), len(df) // n_show)), :]
-            print(list(range(0, len(df), len(df) // n_show)))
+
 
         hm_patches = []
         for i, row in df.iterrows():
@@ -171,7 +171,7 @@ class VisualiseSimulation():
         plt.legend()
 
     def plot_patch_map_advancement_in_time(self, df):
-        fig = plt.figure(figsize=(10, 10))
+        fig = plt.figure(figsize=(8, 8))
 
         plt.ion()
 
@@ -192,7 +192,7 @@ class VisualiseSimulation():
             patch = cv2.cvtColor(patch, cv2.COLOR_BGR2GRAY)
 
             ax_patch = plt.subplot2grid((2, 2), (1, 0), colspan=1, rowspan=1)
-            sns.heatmap(patch, vmin=0, vmax=1, ax=ax_patch)
+            sns.heatmap(patch / 255, vmin=0, vmax=1, ax=ax_patch)
 
             x, y, ang, ad = row["hm_x"], \
                             row["hm_y"], \
@@ -210,11 +210,21 @@ class VisualiseSimulation():
             fig.canvas.draw()
             plt.pause(0.025)
 
-    def __call__(self, df):
+    def show_classes(self, df, tr):
+        fig = plt.figure()
+
+        temp = df['label']
+        if tr is not None: temp = df['advancement'] > tr
+        temp.value_counts().plot.bar()
+        plt.show()
+
+    def __call__(self, df, tr=None):
         self.show_patches_on_the_map(df)
         self.plot_rotation(df)
         self.plot_position(df)
         self.show_traversability_in_time(df)
+        # self.show_labeled_patches(df)
+        self.show_classes(df, tr)
 
 
 if __name__ == '__main__':

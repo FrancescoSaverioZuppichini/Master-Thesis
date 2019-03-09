@@ -73,8 +73,8 @@ class CenterAndScalePatch():
 
         x = x.squeeze()
         # center the patch in the middle
-        x *= self.scale
         x -= x[x.shape[0] // 2, x.shape[1] // 2].item()
+        x *= self.scale
         x = x.unsqueeze(0)
 
         if debug: show_heatmap(x, 'center')
@@ -83,9 +83,10 @@ class CenterAndScalePatch():
 
 
 class TraversabilityDataset(Dataset):
-    def __init__(self, df, transform, tr=None, remove_negative=False, time_window=100):
+    def __init__(self, df, transform, tr=None, more_than=None, time_window=100):
         self.df = pd.read_csv(df)
-        if remove_negative: self.df = self.df[self.df['advancement'] >= 0]
+        if more_than is not None:
+            self.df = self.df[self.df['advancement'] >= more_than]
         self.transform = transform
         self.tr = tr
         self.time_window = time_window
@@ -123,10 +124,10 @@ class TraversabilityDataset(Dataset):
         return len(self.df)
 
     @classmethod
-    def from_root(cls, root, transform, tr, remove_negative):
+    def from_root(cls, root, transform, tr, more_than):
         dfs = glob.glob(root + '/**/*-patch.csv')
         print(root + '/**/*-patch.csv')
-        concat_ds = ConcatDataset([cls(df, transform, tr, remove_negative) for df in dfs])
+        concat_ds = ConcatDataset([cls(df, transform, tr, more_than) for df in dfs])
         # needed for fastAI
         concat_ds.c = 2
         concat_ds.classes = 'False', 'True'
@@ -156,7 +157,7 @@ def get_transform(resize, should_aug=None, scale=1):
 
 
 def get_dataloaders(train_root, test_root, val_root=None, val_size=0.2, tr=0.12, num_samples=None, train_transform=None,
-                    val_transform=None, test_transform=None, *args, remove_negative=False,
+                    val_transform=None, test_transform=None, *args, more_than=None,
                     **kwargs):
     """
     Get train, val and test dataloader.
@@ -165,7 +166,7 @@ def get_dataloaders(train_root, test_root, val_root=None, val_size=0.2, tr=0.12,
     print(train_transform, val_transform, test_transform)
     train_ds = FastAIImageFolder.from_root(root=train_root,
                                            transform=train_transform, tr=tr,
-                                           remove_negative=remove_negative)
+                                           more_than=more_than)
 
     train_size = int(len(train_ds) * (1 - val_size))
 
@@ -175,7 +176,7 @@ def get_dataloaders(train_root, test_root, val_root=None, val_size=0.2, tr=0.12,
     else:
         val_ds = FastAIImageFolder.from_root(root=val_root,
                                              transform=val_transform, tr=tr,
-                                             remove_negative=remove_negative)
+                                             more_than=more_than)
 
     if num_samples is not None:
         print('sampling')
@@ -187,13 +188,13 @@ def get_dataloaders(train_root, test_root, val_root=None, val_size=0.2, tr=0.12,
                               shuffle=True,
                               # sampler=ImbalancedDatasetSampler(train_ds),
                               *args, **kwargs)
-    val_dl = DataLoader(val_ds, shuffle=True, *args, **kwargs)
+    val_dl = DataLoader(val_ds, shuffle=False, *args, **kwargs)
 
     test_ds = FastAIImageFolder.from_root(root=test_root,
                                           transform=test_transform, tr=tr,
-                                          remove_negative=remove_negative)
+                                          more_than=more_than)
 
-    test_dl = DataLoader(test_ds, shuffle=True, *args, **kwargs)
+    test_dl = DataLoader(test_ds, shuffle=False, *args, **kwargs)
 
     return train_dl, val_dl, test_dl
 
