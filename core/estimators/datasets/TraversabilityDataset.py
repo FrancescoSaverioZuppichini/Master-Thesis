@@ -191,7 +191,8 @@ def get_dataloaders(train_root, test_root, val_root=None, val_size=0.2, tr=0.12,
     val_dl = DataLoader(val_ds, shuffle=False, *args, **kwargs)
 
     test_ds = FastAIImageFolder.from_root(root=test_root,
-                                          transform=test_transform, tr=tr,
+                                          transform=test_transform,
+                                          tr=tr,
                                           more_than=more_than)
 
     test_dl = DataLoader(test_ds, shuffle=False, *args, **kwargs)
