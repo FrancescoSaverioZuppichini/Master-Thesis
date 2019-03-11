@@ -2,18 +2,18 @@ import random
 import torch
 import glob
 
-# import cv2
+import cv2
 from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
-# from fastai.vision import *
+
 from imgaug import augmenters as iaa
 from torch.utils.data import DataLoader, random_split, RandomSampler, ConcatDataset, WeightedRandomSampler
 from torchvision.transforms import Resize, ToPILImage, ToTensor, Grayscale, Compose
 from torch.utils.data import Dataset
-from torchvision.datasets import ImageFolder
+from torch.nn import Dropout
 
 random.seed(0)
 import torchvision
@@ -24,37 +24,37 @@ class ImgaugWrapper():
     Wrapper for imgaug
     """
 
-    def __init__(self, aug):
+    def __init__(self, aug, debug=False):
         self.aug = aug
+        self.debug = debug
 
     def __call__(self, x):
-        x = np.array(x)
-        c, w, h = x.shape
-        x = x.reshape((w, h))
-        x_aug = self.aug.augment_image(x)
+        # x = np.array(x)
+        # c, w, h = x.shape
+        # x = x.reshape((w, h))
+        x = self.aug.augment_image(x)
 
-        return torch.from_numpy(x_aug.reshape((1, w, h)))
+        if self.debug:
+            print(x.min())
+            plt.title('aug')
+            sns.heatmap(x.squeeze())
+            plt.show()
+
+        return x
 
 
-aug = iaa.Sometimes(0.9,
-                    iaa.SomeOf((2, 3),
+aug = iaa.Sometimes(1,
+                    iaa.Sequential(
                                [
-                                   iaa.Dropout(p=(0.1, 0.2)),
-                                   iaa.CoarseDropout((0.05, 0.1),
-                                                     size_percent=(0.05, 0.1))
+                                   iaa.SaltAndPepper(p=(0.05, 0.1)),
+                                   iaa.CoarseDropout((0.01, 0.05),
+                                                     size_percent=(0.4, 0.5))
 
                                ], random_order=True)
                     )
 
 
-def show_heatmap(self, x, title):
-    fig = plt.figure(figsize=(10, 10), dpi=100)
-    plt.title(title)
-    img_n = x.cpu().numpy().squeeze()
-    sns.heatmap(img_n,
-                annot=True,
-                linewidths=.5,
-                fmt='0.2f')
+
 
 class CenterAndScalePatch():
     """
@@ -64,53 +64,92 @@ class CenterAndScalePatch():
     depending on the map, we need to multiply the patch by a scaling factor.
     """
 
-    def __init__(self, scale=1.0):
+    def __init__(self, scale=1.0,  debug=False, should_aug=False):
         self.scale = scale
+        self.debug = debug
+        self.should_aug = should_aug
 
+    def show_heatmap(self, x, title):
+        fig = plt.figure()
+        plt.title(title)
+        img_n = x
+        sns.heatmap(img_n,
+                    # vmin=0,
+                    # annot=True,
+                    # linewidths=.5,
+                    fmt='0.2f')
+
+        plt.show()
 
     def __call__(self, x, debug=False):
-        if debug: show_heatmap(x, 'original')
+        if self.debug: self.show_heatmap(x, 'original')
+        center = x[x.shape[0] // 2, x.shape[1] // 2] / 255
 
-        x = x.squeeze()
-        # center the patch in the middle
-        x -= x[x.shape[0] // 2, x.shape[1] // 2].item()
+        if self.should_aug: x = aug.augment_image(x)
+
+        if self.debug:
+            plt.title('aug')
+            sns.heatmap(x)
+            plt.show()
+
+        x = x / 255
+
+        x -= center
+
         x *= self.scale
-        x = x.unsqueeze(0)
+        if self.debug: self.show_heatmap(x, 'scale - {}'.format(center))
 
-        if debug: show_heatmap(x, 'center')
+        if self.debug:
+            print(x.min())
+            self.show_heatmap(x, 'centered')
+
+        # x = x.unsqueeze(0)
 
         return x
-
+    #
+    # def __call__(self, x):
+    #     if self.debug: self.show_heatmap(x, 'original')
+    #     # center the patch in the middle
+    #     x *= self.scale
+    #     center = x[x.shape[0] // 2, x.shape[1] // 2]
+    #     if self.debug: self.show_heatmap(x, 'scale - {}'.format(center))
+    #     x -= center
+    #     if self.debug: self.show_heatmap(x, 'center')
+    #
+    #     # x = torch.tensor(x).unsqueeze(0)
+    #
+    #     return torch.from_numpy(x).unsqueeze(0)
 
 class TraversabilityDataset(Dataset):
-    def __init__(self, df, transform, tr=None, more_than=None, time_window=100):
+    def __init__(self, df, transform, tr=None, more_than=None, should_aug=False, debug=False):
         self.df = pd.read_csv(df)
-        if more_than is not None:
-            self.df = self.df[self.df['advancement'] >= more_than]
+        self.df = self.df.dropna()  # to be sure
+        if more_than is not None:  self.df = self.df[self.df['advancement'] >= more_than]
         self.transform = transform
         self.tr = tr
-        self.time_window = time_window
         self.idx2class = {'False': 0,
                           'True': 1}
-        self.df = self.df.dropna() # to be sure
 
+        self.should_aug = should_aug
+        self.debug = debug
         # self.compute_advancement()
+    def show_heatmap(self, x, title):
+        fig = plt.figure()
+        plt.title(title)
+        img_n = x
+        sns.heatmap(img_n,
+                    # vmin=0,
+                    # annot=True,
+                    # linewidths=.5,
+                    fmt='0.2f')
 
-    def compute_advancement(self):
-        self.df["S_dX"] =  self.df.rolling(window=(self.time_window + 1))['pose__pose_position_x'].apply(lambda x: x[-1] - x[0], raw=True).shift(
-            -self.time_window)
-        self.df["S_dY"] =  self.df.rolling(window=(self.time_window + 1))['pose__pose_position_y'].apply(lambda x: x[-1] - x[0], raw=True).shift(
-            -self.time_window)
 
-        # project x and y in the current line and compute the advancement
-        self.df["advancement"] = np.einsum('ij,ij->i', self.df[["S_dX", "S_dY"]], self.df[["S_oX", "S_oY"]])  # row-wise dot product
-
-        self.df = self.df.dropna()
+        plt.show()
 
     def __getitem__(self, item):
         row = self.df.iloc[item]
         img_path = row['image_path']
-        img = Image.open(img_path)
+        # img = Image.open(img_path)
 
         y = row['advancement']
         y = torch.tensor(y)
@@ -118,16 +157,22 @@ class TraversabilityDataset(Dataset):
         if self.tr is not None:
             y = 1 if y >= self.tr else 0
 
+        img = cv2.imread(img_path)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        img = img.astype(np.float32)
+
+
         return self.transform(img), y
 
     def __len__(self):
         return len(self.df)
 
     @classmethod
-    def from_root(cls, root, transform, tr, more_than):
+    def from_root(cls, root, n=None, *args, **kwargs):
         dfs = glob.glob(root + '/**/*-patch.csv')
+        if n is not None: dfs = dfs[:n]
         print(root + '/**/*-patch.csv')
-        concat_ds = ConcatDataset([cls(df, transform, tr, more_than) for df in dfs])
+        concat_ds = ConcatDataset([cls(df, *args, **kwargs) for df in dfs])
         # needed for fastAI
         concat_ds.c = 2
         concat_ds.classes = 'False', 'True'
@@ -140,7 +185,7 @@ class FastAIImageFolder(TraversabilityDataset):
     classes = 'False', 'True'
 
 
-def get_transform(resize, should_aug=None, scale=1):
+def get_transform(resize, should_aug=None, scale=1, debug=False):
     """
     Return a `Compose` transformation to be applied to the input of the model
     :param resize: size in pixel of the wanted final patch size
@@ -148,16 +193,18 @@ def get_transform(resize, should_aug=None, scale=1):
     :param scale: integer that is multiplied to the input
     :return:
     """
-    transformations = [Grayscale()]
+    transformations = []
     if resize is not None: transformations.append(Resize((resize, resize)))
+    # transformations.append(ToTensor())
+    transformations.append(CenterAndScalePatch(scale=scale, debug=debug, should_aug=should_aug))
+    # if should_aug: transformations.append(ImgaugWrapper(aug, debug))
     transformations.append(ToTensor())
-    if should_aug: transformations.append(ImgaugWrapper(aug))
-    transformations.append(CenterAndScalePatch(scale=scale))
+    # if should_aug: transformations.append(Dropout(0.1))
+
     return Compose(transformations)
 
-
 def get_dataloaders(train_root, test_root, val_root=None, val_size=0.2, tr=0.12, num_samples=None, train_transform=None,
-                    val_transform=None, test_transform=None, *args, more_than=None,
+                    val_transform=None, test_transform=None, *args, more_than=None, should_aug=False,
                     **kwargs):
     """
     Get train, val and test dataloader.
@@ -166,6 +213,7 @@ def get_dataloaders(train_root, test_root, val_root=None, val_size=0.2, tr=0.12,
     print(train_transform, val_transform, test_transform)
     train_ds = FastAIImageFolder.from_root(root=train_root,
                                            transform=train_transform, tr=tr,
+                                           should_aug=should_aug,
                                            more_than=more_than)
 
     train_size = int(len(train_ds) * (1 - val_size))
@@ -211,8 +259,19 @@ def visualise(dl, n=10):
         break
 
 if __name__ == '__main__':
-    df = '/home/francesco/Desktop/bars1-run-recorded/csvs-light/bars1/1551992796.2643805-patch.csv'
-    ds = TraversabilityDataset(df, get_transform(92))
+    # df = '/home/francesco/Desktop/querry-high/df/querry-big-10/1552309429.462741-patch.csv'
+    #
+    df = '/home/francesco/Desktop/data/750/train/df/bars1/1550614988.2771952-patch.csv'
+    ds = TraversabilityDataset(df, transform=get_transform(None, False, scale=1, debug=True), debug=True)
+
+    # for i in  range(2):
+    img, y = ds[0]
+
+    # from torch.nn import Dropout
+    # img = Dropout(0.1)(img)
+
+    sns.heatmap(img.cpu().numpy().squeeze())
+    plt.show()
 
     # train_dl, val_dl, test_dl = get_dataloaders(
     #     train_root='/home/francesco/Desktop/bars1-run-recorded/csvs-light/',

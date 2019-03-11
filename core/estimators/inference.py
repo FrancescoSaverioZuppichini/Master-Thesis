@@ -163,24 +163,31 @@ class InferenceDataset(Dataset):
 ds = InferenceDataset('/home/francesco/Documents/Master-Thesis/core/maps/test/querry-big-10.png',
                       patch_size=92,
                       step=3,
-                      transform=get_transform(92, scale=10), rotate=0)
+                      transform=get_transform(92, scale=10), rotate=180)
 
 dl = DataLoader(ds, batch_size=128, num_workers=16, shuffle=False)
 
 data = DataBunch(train_dl=dl, valid_dl=dl, test_dl=dl)
 
 # model = OmarCNN()
+
 model = MicroResnet.micro(1,
                           n=2,
                           blocks=[BasicBlock, BasicBlock, BasicBlock, BasicBlockSE],
-                          preactivate=False)
+                          preactivate=True,
+                          activation='leaky_relu')
+
+# model = MicroResnet.micro(1,
+#                           n=2,
+#                           blocks=[BasicBlock, BasicBlock, BasicBlock, BasicBlockSE],
+#                           preactivate=False)
 
 criterion = CrossEntropyFlat()
 
 learner = Learner(data=data,
                   model=model)
 
-learner.load('/home/francesco/Desktop/carino/vaevictis/data/microresnet#4-gate=3x3-n=2-se=True-750-0.001-92-1552129741.4400764/roc_auc')
+learner.load('/home/francesco/Desktop/carino/vaevictis/data/microresnet#4-gate=3x3-n=2-se=True-750-0.001-92-1552226514.811947/roc_auc')
 
 outs = learner.get_preds(data.test_dl)
 

@@ -20,7 +20,7 @@ from pypeln import thread as th
 class PostProcessingConfig():
     def __init__(self, out_dir, maps_folder, patch_size, advancement_th, time_window, skip_every, translation,
                  resolution=0.02, scale=1, n_workers=16,
-                 bags_dir=None, csv_dir=None,  patch_dir=None, verbose=True, patches=True, name='confing'):
+                 bags_dir=None, csv_dir=None,  patch_dir=None, verbose=True, patches=True, name=''):
         self.maps_folder, self.bags_dir, self.out_dir, self.csv_dir= maps_folder, bags_dir, out_dir, csv_dir
 
         self.patch_size, self.advancement_th, self.time_window = patch_size, advancement_th, time_window
@@ -394,21 +394,21 @@ if __name__ == '__main__':
     #                               translation=[5, 5],
     #                               time_window=125,
     #                               name='train')
-    #
-    # make_and_run_chain(config)
 
-    config = PostProcessingConfig(bags_dir='/home/francesco/Desktop/carino/vaevictis/krock-dataset/92/train/bags/',
-                                  maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/train/',
-                                  out_dir='/home/francesco/Desktop/data/750/',
-                                  patch_size=92,
-                                  advancement_th=0.45,
-                                  skip_every=12,
-                                  translation=[5, 5],
-                                  time_window=750,
-                                  name='train')
-    #
     make_and_run_chain(config)
+
+    # config = PostProcessingConfig(bags_dir='/home/francesco/Desktop/carino/vaevictis/krock-dataset/92/train/bags/',
+    #                               maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/train/',
+    #                               out_dir='/home/francesco/Desktop/data/750/',
+    #                               patch_size=92,
+    #                               advancement_th=0.45,
+    #                               skip_every=12,
+    #                               translation=[5, 5],
+    #                               time_window=750,
+    #                               name='train')
     # #
+    # make_and_run_chain(config)
+    # # #
     # config = PostProcessingConfig(bags_dir='/home/francesco/Desktop/carino/vaevictis/krock-dataset/92/val/bags/',
     #                               maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/val/',
     #                               out_dir='/home/francesco/Desktop/data/750/',

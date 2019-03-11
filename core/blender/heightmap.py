@@ -18,7 +18,7 @@ import numpy as np
 
 MAP_PATH = '/home/francesco/Documents/Master-Thesis/core/maps/test/querry-big-10.png'
 TEXT_PATH = '/home/francesco/Desktop/textures/querry-270.png'
-FILE_PATH = '/home/francesco/Desktop/test.png'
+FILE_PATH = '/home/francesco/Desktop/querry-270.png'
 
 class BlenderVisualization():
 

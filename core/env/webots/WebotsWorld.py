@@ -87,7 +87,7 @@ class WebotsWorld(World, Supervisor):
         random_pose.position.x = rx
         random_pose.position.y = ry
         # to get the 2d index in 1d matrix x + width * y
-        idx = int(
+        idx = int( #TODO 1600 is not correct
             ((rx + abs(self.translation.x)) // self.x_spac) + (1600 * ((ry + abs(self.translation.z)) // self.y_spac)))
 
         h = self.grid['height'][idx].value

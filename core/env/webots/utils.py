@@ -12,15 +12,11 @@ def plot_terrain(terrain):
     plt.show()
 
 def image2webots_terrain(image, src_world, config, output_path=None, verbose=False):
-    if image.dtype == 'uint8':
-        image = image / 256.
-    if image.dtype == 'uint16':
-        image = image / 65536.
-    if image.dtype == 'uint32':
-        image = image / 4294967296.
+
 
     height, resolution = config['height'], config['resolution']
-
+    image = image.astype(np.float)
+    image = image / 255
     terrain = image * height
 
     if verbose: print('mod image type: ', terrain.dtype, ' height factor: ', height, ' max val (m): ',

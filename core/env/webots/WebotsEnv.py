@@ -118,6 +118,7 @@ class WebotsEnv(gym.Env, Supervisor):
     def from_image(cls, image_path, src_world, config, output_dir, *args, **kwargs):
         image = cv2.imread(image_path)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        # image = cv2.normalize(image, None, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
 
         filename_w_ext = os.path.basename(image_path)
         filename, file_extension = os.path.splitext(filename_w_ext)

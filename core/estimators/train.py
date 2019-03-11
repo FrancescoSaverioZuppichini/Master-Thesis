@@ -4,7 +4,6 @@ import os
 import torch
 import pprint
 import numpy as np
-# from torchvision.models import *
 
 from torch.nn.functional import softmax
 from torchsummary import summary
@@ -14,42 +13,26 @@ from fastai.train import Learner, DataBunch, \
     EarlyStoppingCallback, \
     SaveModelCallback, DatasetType
 
-from fastai.vision import ClassificationInterpretation
 from fastai.callback import Callback
 from fastai.metrics import accuracy, dice
 from fastai.layers import CrossEntropyFlat, MSELossFlat
 
+from datasets.TraversabilityDataset import TraversabilityDataset
+
 from sklearn.metrics import roc_auc_score
 from datasets.TraversabilityDataset import get_dataloaders, get_transform, TraversabilityDataset
 
-from models.resnet import *
-from models.omar_cnn import OmarCNN
+from models import zoo
 
-from models.custom_resnet import *
 import matplotlib.pyplot as plt
-
 from functools import partial
 import time
+import seaborn as sns
 
+torch.manual_seed(0)
 torch.backends.cudnn.benchmark = True
 torch.backends.cudnn.deterministic = True
-torch.manual_seed(0)
-
-
-def roc_auc(input, targs):
-    preds = softmax(input, dim=1)
-    preds = torch.argmax(preds, dim=1).long()
-    targs = targs.cpu().numpy()
-    # hot_targs = np.zeros((targs.shape[0], 2))
-    # hot_targs[np.arange(targs.shape[0]), targs] = 1
-
-    try:
-        roc = roc_auc_score(targs, preds.cpu().numpy())
-    except ValueError:
-        print('diocane')
-        roc = 1
-        pass
-    return torch.tensor(roc).float()
+np.random.seed(0)
 
 
 class ROC_AUC(Callback):
@@ -79,6 +62,15 @@ class ROC_AUC(Callback):
         self.targs = np.array([])
         return {'last_metrics': last_metrics + [torch.tensor(self.metric)]}
 
+class Timer(Callback):
+    def on_epoch_begin(self, **kwargs):
+        self.start = time.time()
+
+    def on_epoch_end(self, train, last_metrics, **kwargs):
+        self.metric = time.time() - self.start
+
+        return {'last_metrics': last_metrics + [self.metric]}
+
 
 def custom_accuracy(y_pred, y_true, thresh: float = 0.01):
     # print(y_pred[0:10], y_true[0:10])
@@ -91,15 +83,10 @@ if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
 
 
 def train_and_evaluate(params, train=True, load_model=None):
-    model = OmarCNN()
-    # model = MicroResnet.micro(1,
-    #                           n=2,
-    #                           blocks=[BasicBlock, BasicBlock, BasicBlock, BasicBlockSE],
-    #                           preactivate=True,
-    #                           activation='leaky_relu')
-    # print(model)
+    # model = OmarCNN()
+    model = zoo[params['model']]
 
-    summary(model.cuda(), (1, params['resize'], params['resize']))
+    summary(model.cuda(), (1, 92, 92))
     pprint.pprint(params)
 
     criterion = CrossEntropyFlat()
@@ -108,11 +95,12 @@ def train_and_evaluate(params, train=True, load_model=None):
 
     train_dl, val_dl, test_dl = get_dataloaders(
         train_root='/home/francesco/Desktop/data/{}/train/df/'.format(params['dataset']),
+        val_root='/home/francesco/Desktop/data/{}/val/df/'.format(params['dataset']),
         test_root='/home/francesco/Desktop/data/{}/test/df/'.format(params['dataset']),
-        val_root='/home/francesco/Desktop/data/{}/test/df/'.format(params['dataset']),
+
         # val_size=0.15,
         train_transform=get_transform(params['resize'], should_aug=params['data-aug']),
-        val_transform=get_transform(params['resize'], scale=10),
+        val_transform=get_transform(params['resize'], scale=1),
         test_transform=get_transform(params['resize'], scale=10),
         num_samples=params['num_samples'],
         batch_size=params['batch_size'],
@@ -152,7 +140,7 @@ def train_and_evaluate(params, train=True, load_model=None):
                       model_dir=model_dir,
                       loss_func=criterion,
                       opt_func=partial(torch.optim.SGD, momentum=0.95, weight_decay=1e-4),
-                      metrics=[accuracy, ROC_AUC()])
+                      metrics=[accuracy, ROC_AUC(), Timer()])
 
     model_name_acc = 'roc_auc'
     model_name_loss = 'loss'
@@ -163,75 +151,51 @@ def train_and_evaluate(params, train=True, load_model=None):
                  SaveModelCallback(learn=learner, name=model_name_loss)]
 
     if train:
-        # try:
-        with experiment.train():
-            learner.fit(epochs=params['epochs'], lr=params['lr'],
-                        callbacks=callbacks)  # SaveModelCallback load the best model after training!
-        # except Exception as e:
-        #     print(e)
-        #     pass
+        try:
+            with experiment.train():
+                learner.fit(epochs=params['epochs'], lr=params['lr'],
+                            callbacks=callbacks)  # SaveModelCallback load the best model after training!
 
-        learner.load(model_name_loss)
+            learner.load(model_name_loss)
 
-        with experiment.test():
-            loss, acc, roc = learner.validate(data.test_dl, metrics=[accuracy, ROC_AUC()])
-            print(loss, acc, roc)
-            experiment.log_metric("roc_auc", acc.item())
-            experiment.log_metric("test_loss", loss)
+            with experiment.test():
+                loss, acc, roc = learner.validate(data.test_dl, metrics=[accuracy, ROC_AUC()])
+                print(loss, acc, roc)
+                experiment.log_metric("roc_auc", roc.item())
+                experiment.log_metric("test_loss", loss)
 
-        learner.load(model_name_acc)
+            learner.load(model_name_acc)
+        except Exception as e:
+            print(e)
+            pass
 
     if load_model:
-        print('loading model')
+        print('Loading model...')
         learner.load(model_name_acc)
 
     with experiment.test():
         loss, acc, roc = learner.validate(data.test_dl, metrics=[accuracy, ROC_AUC()])
         print(loss, acc, roc)
-        experiment.log_metric("roc_auc-from-best-roc_auc", acc.item())
-
-    interp = ClassificationInterpretation.from_learner(learner)
-    interp.plot_confusion_matrix(normalize=True, title='Val')
-    plt.savefig(learner.model_dir + '/' + 'val.png')
-    plt.show()
-
-    interp = ClassificationInterpretation.from_learner(learner, ds_type=DatasetType.Test)
-    interp.plot_confusion_matrix(normalize=True, title='Test')
-    plt.savefig(learner.model_dir + '/' + 'test.png')
-    plt.show()
-
-    print(model_name_acc)
+        experiment.log_metric("roc_auc-from-best", roc.item())
 
 
-params = {'epochs': 100,
+params = {'epochs': 10,
           'lr': 0.001,
           'batch_size': 128,
-          'model': 'omar',
-          # 'model': 'microresnet#4-gate=3x3-n=2-se=True',
+          # 'model': 'omar',
+          'model': 'microresnet#4-gate=3x3-n=2-se=True',
           'dataset': '750',
-          'sampler': None,
+          'sampler': '',
           'num_samples': None,
           'samper_type': 'imbalance',
           'callbacks': '[ReduceLROnPlateauCallback]',
           'data-aug': True,
           'optim': 'sdg',
-          'info': 'val correct',
+          'info': 'dropout in input',
           'tr': 0.45,
-          'more_than': None,
+          'more_than': -0.5,
+          'skip_every': 12,
           'time-window': 750,
-          'resize': 92}
+          'resize': None}
 
-# train_and_evaluate(params, train=False, load_model='microresnet#4-gate=7x7-92-0.001-92-1551994605.486166')
-train_and_evaluate(params, train=True)
-# params['resize'] = 64
-# train_and_evaluate(params, train=True)
-# params['resize'] = 92
-
-# params['data-aug'] = True
-# train_and_evaluate(params, train=True)
-# params['remove-negative'] = True
-# train_and_evaluate(params, train=True)
-# params['data-aug'] = False
-# train_and_evaluate(params, train=True)
-# params['remove-negative'] = True
-# train_and_evaluate(params, train=True)
+train_and_evaluate(params)

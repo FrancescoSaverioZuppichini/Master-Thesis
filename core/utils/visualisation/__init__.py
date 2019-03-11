@@ -73,7 +73,7 @@ class VisualiseSimulation():
                                                                        x,
                                                                        y))
         sns.heatmap(self.hm, ax=ax1, vmin=0, vmax=1)
-        rect = mpatches.Rectangle((x - self.patch_size // 2, y - self.patch_size // 2), self.patch_size,
+        rect = mpatches.Rectangle((x - self.patch_size // 2, y - self.patch_sizplot_patch_map_advancement_in_timee // 2), self.patch_size,
                                  self.patch_size, linewidth=1, edgecolor='r', facecolor='none', angle=np.rad2deg(ang))
         ax1.add_patch(rect)
 
@@ -188,7 +188,7 @@ class VisualiseSimulation():
             ax_ad.plot(df['advancement'][:i])
 
             #         ax = plt.subplot2grid((2,2), (1, 0), colspan=1, rowspan=1)
-            patch = cv2.imread(row['image_path'])
+            patch = cv2.imread(row.loc['image_path'])
             patch = cv2.cvtColor(patch, cv2.COLOR_BGR2GRAY)
 
             ax_patch = plt.subplot2grid((2, 2), (1, 0), colspan=1, rowspan=1)
