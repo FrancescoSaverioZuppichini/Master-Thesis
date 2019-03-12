@@ -47,8 +47,9 @@ aug = iaa.Sometimes(1,
                     iaa.Sequential(
                                [
                                    iaa.SaltAndPepper(p=(0.05, 0.1)),
-                                   iaa.CoarseDropout((0.01, 0.05),
-                                                     size_percent=(0.4, 0.5))
+                                   # iaa.Dropout(p=(0.01,0.05)),
+                                   # iaa.CoarseDropout((0.01, 0.05),
+                                   #                   size_percent=(0.1, 0.3))
 
                                ], random_order=True)
                     )
@@ -262,7 +263,7 @@ if __name__ == '__main__':
     # df = '/home/francesco/Desktop/querry-high/df/querry-big-10/1552309429.462741-patch.csv'
     #
     df = '/home/francesco/Desktop/data/750/train/df/bars1/1550614988.2771952-patch.csv'
-    ds = TraversabilityDataset(df, transform=get_transform(None, False, scale=1, debug=True), debug=True)
+    ds = TraversabilityDataset(df, transform=get_transform(None, True, scale=1, debug=True), debug=True)
 
     # for i in  range(2):
     img, y = ds[0]
