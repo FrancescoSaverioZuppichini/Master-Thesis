@@ -45,16 +45,14 @@ class ImgaugWrapper():
 
 aug = iaa.Sometimes(1,
                     iaa.Sequential(
-                               [
-                                   iaa.SaltAndPepper(p=(0.05, 0.1)),
-                                   # iaa.Dropout(p=(0.01,0.05)),
-                                   # iaa.CoarseDropout((0.01, 0.05),
-                                   #                   size_percent=(0.1, 0.3))
+                        [
+                        iaa.GaussianBlur(sigma=(0.0, 1.0)),
+                            iaa.Dropout(p=(0.05, 0.1)),
+                            iaa.CoarseDropout((0.02, 0.05),
+                                              size_percent=(0.4 , 0.5))
 
-                               ], random_order=True)
+                        ], random_order=True)
                     )
-
-
 
 
 class CenterAndScalePatch():
@@ -65,7 +63,7 @@ class CenterAndScalePatch():
     depending on the map, we need to multiply the patch by a scaling factor.
     """
 
-    def __init__(self, scale=1.0,  debug=False, should_aug=False):
+    def __init__(self, scale=1.0, debug=False, should_aug=False):
         self.scale = scale
         self.debug = debug
         self.should_aug = should_aug
@@ -84,42 +82,27 @@ class CenterAndScalePatch():
 
     def __call__(self, x, debug=False):
         if self.debug: self.show_heatmap(x, 'original')
-        center = x[x.shape[0] // 2, x.shape[1] // 2] / 255
-
-        if self.should_aug: x = aug.augment_image(x)
-
-        if self.debug:
-            plt.title('aug')
-            sns.heatmap(x)
-            plt.show()
-
+        x = x.astype(np.double)
         x = x / 255
 
+        center = x[x.shape[0] // 2, x.shape[1] // 2]
         x -= center
-
-        x *= self.scale
-        if self.debug: self.show_heatmap(x, 'scale - {}'.format(center))
+        min, max = x.min(), x.max()
 
         if self.debug:
-            print(x.min())
+            print(max, min)
             self.show_heatmap(x, 'centered')
 
-        # x = x.unsqueeze(0)
+        if self.should_aug:
+            x = (x - min) / (max - min)  # norm to 0,1 -> imgaug does not accept neg values
+            x = aug.augment_image(x)
+            x = x * (max - min) + min  # go back
 
-        return x
-    #
-    # def __call__(self, x):
-    #     if self.debug: self.show_heatmap(x, 'original')
-    #     # center the patch in the middle
-    #     x *= self.scale
-    #     center = x[x.shape[0] // 2, x.shape[1] // 2]
-    #     if self.debug: self.show_heatmap(x, 'scale - {}'.format(center))
-    #     x -= center
-    #     if self.debug: self.show_heatmap(x, 'center')
-    #
-    #     # x = torch.tensor(x).unsqueeze(0)
-    #
-    #     return torch.from_numpy(x).unsqueeze(0)
+        if self.debug: self.show_heatmap(x, 'aug')
+        x *= self.scale
+
+        return x.astype(np.float32)
+
 
 class TraversabilityDataset(Dataset):
     def __init__(self, df, transform, tr=None, more_than=None, should_aug=False, debug=False):
@@ -134,6 +117,7 @@ class TraversabilityDataset(Dataset):
         self.should_aug = should_aug
         self.debug = debug
         # self.compute_advancement()
+
     def show_heatmap(self, x, title):
         fig = plt.figure()
         plt.title(title)
@@ -143,7 +127,6 @@ class TraversabilityDataset(Dataset):
                     # annot=True,
                     # linewidths=.5,
                     fmt='0.2f')
-
 
         plt.show()
 
@@ -160,8 +143,7 @@ class TraversabilityDataset(Dataset):
 
         img = cv2.imread(img_path)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        img = img.astype(np.float32)
-
+        # img = img.astype(np.float32)
 
         return self.transform(img), y
 
@@ -203,6 +185,7 @@ def get_transform(resize, should_aug=None, scale=1, debug=False):
     # if should_aug: transformations.append(Dropout(0.1))
 
     return Compose(transformations)
+
 
 def get_dataloaders(train_root, test_root, val_root=None, val_size=0.2, tr=0.12, num_samples=None, train_transform=None,
                     val_transform=None, test_transform=None, *args, more_than=None, should_aug=False,
@@ -259,11 +242,12 @@ def visualise(dl, n=10):
         plt.show()
         break
 
+
 if __name__ == '__main__':
-    # df = '/home/francesco/Desktop/querry-high/df/querry-big-10/1552309429.462741-patch.csv'
+    df = '/home/francesco/Desktop/querry-high/df/querry-big-10/1552309429.462741-patch.csv'
     #
-    df = '/home/francesco/Desktop/data/750/train/df/bars1/1550614988.2771952-patch.csv'
-    ds = TraversabilityDataset(df, transform=get_transform(None, True, scale=1, debug=True), debug=True)
+    # df = '/home/francesco/Desktop/data/750/train/df/slope_rocks3/1550606526.7238998-patch.csv'
+    ds = TraversabilityDataset(df, transform=get_transform(None, True, scale=10, debug=True), debug=True)
 
     # for i in  range(2):
     img, y = ds[0]

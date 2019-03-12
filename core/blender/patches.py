@@ -1,5 +1,7 @@
 import bpy
 import cv2
+import glob
+
 import numpy as np
 
 bpy.context.scene.unit_settings.system = 'METRIC'
@@ -20,13 +22,13 @@ class HeightMap():
         self.hm = cv2.cvtColor(self.hm, cv2.COLOR_BGR2GRAY)
         self.grid = None
 
-    def spawn(self, location, name=None):
+    def spawn(self, location, scale, name=None):
         _ = bpy.ops.mesh.primitive_grid_add(x_subdivisions=self.hm.shape[0],
                                             y_subdivisions=self.hm.shape[1],
                                             location=location)
 
         self.grid = bpy.context.selected_objects[0]
-
+        
         if name is not None: self.grid.name = name
 
     def add_disp(self):
@@ -80,23 +82,40 @@ class HeightMap():
         return self.grid
 
 
-def heightmap_grid(hms):
+def heightmap_grid(hms, textures):
     heightmaps = []
 
     location = np.array([0,0,0])
-
-    for hm in hms:
+    
+    for i, (hm, tex) in enumerate(zip(hms, textures)):
         heightmap = HeightMap(hm)
         heightmaps.append(heightmap)
 
-        heightmap('/home/francesco/Desktop/textures/bars1-0.png',
+        heightmap(tex,
                   location.tolist())
-        location[0] += 2
+        location[0] += 5
+
+        if i == 4:
+            location[0] = 0
+            location[1] = 5
+
+from os import path
+
+patches = glob.glob('/home/francesco/Desktop/test-patches/patches/*.png')
+textures = glob.glob('/home/francesco/Desktop/test-patches/textures/*.png')
+
+def get_label(x):
+    file_name = path.splitext(path.basename(x))[0]
+    label, _ = file_name.split('-')
+
+    return int(label)
 
 
+patches.sort()
+textures.sort()
+print(patches)
+print(textures)
 
-
-
-heightmap_grid(['/home/francesco/Documents/Master-Thesis/core/maps/train/bars1.png', '/home/francesco/Documents/Master-Thesis/core/maps/train/bars1.png'])
+heightmap_grid(patches, textures)
 
 # HeightMap('/home/francesco/Documents/Master-Thesis/core/maps/train/bars1.png')('/home/francesco/Desktop/textures/bars1-0.png')

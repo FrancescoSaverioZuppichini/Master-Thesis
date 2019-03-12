@@ -83,7 +83,6 @@ preds, targs = learner.get_preds(ds_type=DatasetType.Valid)
 
 preds = softmax(preds, dim=1)
 preds = torch.argmax(preds, dim=1)
-print(preds)
 # def show_preds(leaner):
 
 best  = vis.df.sort_values(['output_1'], ascending=False).head(2)
@@ -95,3 +94,22 @@ vis.plot(best)
 #
 vis.plot(worst)
 
+import cv2
+from mirror.visualisations.core import GradCam
+
+device = torch.device('cuda')
+grad_cam = GradCam(learner.model.to(device), device)
+
+
+def run_grad_cam(sample, out_dir):
+    for i, (idx, row) in enumerate(sample.iterrows()):
+        img = np.array(row['input'])
+        print(img.shape)
+#         img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
+        img = torch.from_numpy(img).unsqueeze(0).to(device).float()
+        print(img.shape)
+        print(grad_cam(img, None))
+#         img_path = out_dir + '/{}-{}.png'.format(row['prediction'], i)
+#         cv2.imwrite(img_path, img)
+
+run_grad_cam(best, '/home/francesco/Desktop/test-patches/textures/')
