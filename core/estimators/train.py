@@ -100,8 +100,8 @@ def train_and_evaluate(params, train=True, load_model=None):
 
         # val_size=0.15,
         train_transform=get_transform(params['resize'], should_aug=params['data-aug']),
-        val_transform=get_transform(params['resize'], scale=1),
-        test_transform=get_transform(params['resize'], scale=10),
+        val_transform=get_transform(params['resize'], scale=1, should_aug=False),
+        test_transform=get_transform(params['resize'], scale=10, should_aug=False),
         num_samples=params['num_samples'],
         batch_size=params['batch_size'],
         num_workers=16,
@@ -128,7 +128,7 @@ def train_and_evaluate(params, train=True, load_model=None):
     data = DataBunch(train_dl=train_dl, valid_dl=val_dl, test_dl=test_dl)
 
     experiment = Experiment(api_key="8THqoAxomFyzBgzkStlY95MOf",
-                            project_name="krock",
+                            project_name="remove",
                             workspace="francescosaveriozuppichini")
 
     experiment.log_parameters(params)
@@ -191,7 +191,7 @@ params = {'epochs': 10,
           'callbacks': '[ReduceLROnPlateauCallback]',
           'data-aug': True,
           'optim': 'sdg',
-          'info': 'fixed center',
+          'info': 'scale aug',
           'tr': 0.45,
           'more_than': -0.5,
           'skip_every': 12,

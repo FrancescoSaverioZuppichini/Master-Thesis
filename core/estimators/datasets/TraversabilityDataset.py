@@ -8,6 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
+import imgaug as ia
 
 from imgaug import augmenters as iaa
 from torch.utils.data import DataLoader, random_split, RandomSampler, ConcatDataset, WeightedRandomSampler
@@ -16,8 +17,8 @@ from torch.utils.data import Dataset
 from torch.nn import Dropout
 
 random.seed(0)
-import torchvision
-
+np.random.seed(0)
+ia.seed(0)
 
 class ImgaugWrapper():
     """
@@ -43,17 +44,21 @@ class ImgaugWrapper():
         return x
 
 
-aug = iaa.Sometimes(1,
+aug = iaa.Sometimes(0.8,
                     iaa.Sequential(
                         [
-                        iaa.GaussianBlur(sigma=(0.0, 1.0)),
+                        # iaa.GaussianBlur(sigma=(0.0, 1.0)),
                             iaa.Dropout(p=(0.05, 0.1)),
                             iaa.CoarseDropout((0.02, 0.05),
-                                              size_percent=(0.4 , 0.5))
+                                              size_percent=(0.3 , 0.5))
 
                         ], random_order=True)
                     )
 
+def random_scale(x):
+    random_scale = np.random.choice(np.arange(1, 5, 0.5))
+    x *= random_scale
+    return x, random_scale
 
 class CenterAndScalePatch():
     """
@@ -68,38 +73,58 @@ class CenterAndScalePatch():
         self.debug = debug
         self.should_aug = should_aug
 
-    def show_heatmap(self, x, title):
-        fig = plt.figure()
-        plt.title(title)
+    def show_heatmap(self, x, title, ax):
+        ax.set_title(title)
         img_n = x
         sns.heatmap(img_n,
                     # vmin=0,
                     # annot=True,
                     # linewidths=.5,
+                    ax=ax,
                     fmt='0.2f')
 
-        plt.show()
 
-    def __call__(self, x, debug=False):
-        if self.debug: self.show_heatmap(x, 'original')
+    def __call__(self, data, debug=False):
+        x, y = data
+
+        if self.debug: fig = plt.figure()
+        is_traversable = y == 1
+
+        if self.debug:
+            ax = plt.subplot(2, 2, 1)
+            self.show_heatmap(x, 'original', ax)
+
         x = x.astype(np.double)
         x = x / 255
-
         center = x[x.shape[0] // 2, x.shape[1] // 2]
         x -= center
+
         min, max = x.min(), x.max()
 
         if self.debug:
             print(max, min)
-            self.show_heatmap(x, 'centered')
+            ax = plt.subplot(2, 2, 2)
+            self.show_heatmap(x, 'centered', ax)
 
         if self.should_aug:
             x = (x - min) / (max - min)  # norm to 0,1 -> imgaug does not accept neg values
             x = aug.augment_image(x)
             x = x * (max - min) + min  # go back
+            ax = plt.subplot(2, 2, 3)
+            if self.debug: self.show_heatmap(x, 'aug', ax)
 
-        if self.debug: self.show_heatmap(x, 'aug')
         x *= self.scale
+
+        # if not is_traversable:
+        #     scale = 1
+        #     if self.should_aug:
+        #         if np.random.rand() > 0.8:
+        #             x, scale = random_scale(x)
+        #         if self.debug:
+        #             ax = plt.subplot(2, 2, 4)
+        #             self.show_heatmap(x, 'scale aug scale={} class={}'.format(scale, y), ax)
+        #             plt.show()
+
 
         return x.astype(np.float32)
 
@@ -116,36 +141,20 @@ class TraversabilityDataset(Dataset):
 
         self.should_aug = should_aug
         self.debug = debug
-        # self.compute_advancement()
-
-    def show_heatmap(self, x, title):
-        fig = plt.figure()
-        plt.title(title)
-        img_n = x
-        sns.heatmap(img_n,
-                    # vmin=0,
-                    # annot=True,
-                    # linewidths=.5,
-                    fmt='0.2f')
-
-        plt.show()
 
     def __getitem__(self, item):
         row = self.df.iloc[item]
         img_path = row['image_path']
         # img = Image.open(img_path)
-
         y = row['advancement']
         y = torch.tensor(y)
 
-        if self.tr is not None:
-            y = 1 if y >= self.tr else 0
+        if self.tr is not None: y = 1 if y >= self.tr else 0
 
         img = cv2.imread(img_path)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        # img = img.astype(np.float32)
 
-        return self.transform(img), y
+        return self.transform((img, y)), y
 
     def __len__(self):
         return len(self.df)
@@ -194,6 +203,7 @@ def get_dataloaders(train_root, test_root, val_root=None, val_size=0.2, tr=0.12,
     Get train, val and test dataloader.
     :return: train, val and test dataloaders
     """
+    print('tr={}'.format(tr))
     print(train_transform, val_transform, test_transform)
     train_ds = FastAIImageFolder.from_root(root=train_root,
                                            transform=train_transform, tr=tr,
@@ -244,19 +254,17 @@ def visualise(dl, n=10):
 
 
 if __name__ == '__main__':
-    df = '/home/francesco/Desktop/querry-high/df/querry-big-10/1552309429.462741-patch.csv'
+    # df = '/home/francesco/Desktop/querry-high/df/querry-big-10/1552309429.462741-patch.csv'
     #
-    # df = '/home/francesco/Desktop/data/750/train/df/slope_rocks3/1550606526.7238998-patch.csv'
-    ds = TraversabilityDataset(df, transform=get_transform(None, True, scale=10, debug=True), debug=True)
+    df = '/home/francesco/Desktop/data/750/train/df/slope_rocks3/1550606526.7238998-patch.csv'
+    ds = TraversabilityDataset(df, transform=get_transform(None, True, scale=1, debug=True), debug=True, tr=0.45)
 
     # for i in  range(2):
     img, y = ds[0]
+    print(y)
 
     # from torch.nn import Dropout
     # img = Dropout(0.1)(img)
-
-    sns.heatmap(img.cpu().numpy().squeeze())
-    plt.show()
 
     # train_dl, val_dl, test_dl = get_dataloaders(
     #     train_root='/home/francesco/Desktop/bars1-run-recorded/csvs-light/',
