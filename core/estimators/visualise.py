@@ -7,23 +7,13 @@ import seaborn as sns
 from torch.nn.functional import softmax
 from fastai.train import Learner, DataBunch, DatasetType
 from fastai.callback import Callback
-from torch.utils.data import DataLoader
-from datasets.TraversabilityDataset import TraversabilityDataset
 from datasets.TraversabilityDataset import get_dataloaders, get_transform, TraversabilityDataset
-from models.resnet import *
-from models.omar_cnn import *
-from models import zoo
 
 
+model_dir = 'microresnet#4-gate=3x3-n=2-se=True-750-0.001-None-1552506972.5252423'
+model_name = 'microresnet#4-gate=3x3-n=2-se=True'
 
-model = zoo['microresnet#4-gate=3x3-n=2-se=True']
-
-test_dl = DataLoader(TraversabilityDataset.from_root(root='/home/francesco/Desktop/data/750/test/df/',
-                                                     more_than=-0.5,
-                                                     transform=get_transform(None, scale=10),
-                                                     tr=0.45,
-                                                     n=10), shuffle=False, batch_size=128, num_workers=16)
-
+from utils import get_learner
 
 class Visualise(Callback):
     """
@@ -34,6 +24,7 @@ class Visualise(Callback):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.df = None
+        self.df_sample = None
 
     def on_batch_end(self, last_input, last_output, last_target, train, **kwargs):
         if not train:
@@ -53,13 +44,30 @@ class Visualise(Callback):
 
             if self.df is None:
                 self.df = df
+                self.df_sample = df.sample(1)
             else:
                 self.df = pd.concat([self.df, df])
+                self.df_sample = pd.concat([self.df_sample, df.sample(1)])
 
+            self.free_memory()
+
+
+    def free_memory(self):
+        """
+        This function reduces the number of rows in the dataframe.
+        If we store everything we will run out of RAM!
+        :return:
+        """
+
+        best = self.df.sort_values(['output_1'], ascending=False).head(10)
+        worst = self.df.sort_values(['output_0'], ascending=False).head(10)
+
+        self.df = pd.concat([best, worst])
 
     def plot(self, sample):
-        for img in sample['input']:
+        for img, pred in zip(sample['input'], sample['prediction']):
             img = np.array(img).squeeze()
+            plt.title(pred)
             sns.heatmap(img,
                         vmin=0,
                         # annot=True,
@@ -70,11 +78,8 @@ class Visualise(Callback):
 
 vis = Visualise()
 
-learner = Learner(data=DataBunch(test_dl, test_dl), model=model,
-                  callbacks=[vis],
-                  model_dir='/home/francesco/Desktop/carino/vaevictis/data/microresnet#4-gate=3x3-n=2-se=True-750-0.001-92-1552230465.2925863/')
+learner = get_learner(model_name, model_dir, callbacks=[vis], transform=get_transform(None, scale=10),  tr=0.45)
 
-learner.load('roc_auc')
 
 # loss, acc, roc = learner.validate(learner.data.test_dl, metrics=[accuracy, ROC_AUC()])
 import pandas as pd
@@ -85,14 +90,16 @@ preds = softmax(preds, dim=1)
 preds = torch.argmax(preds, dim=1)
 # def show_preds(leaner):
 
-best  = vis.df.sort_values(['output_1'], ascending=False).head(2)
-worst  = vis.df.sort_values(['output_0'], ascending=False).head(2)
+best  = vis.df.sort_values(['output_1'], ascending=False).head(10)
+worst  = vis.df.sort_values(['output_0'], ascending=False).head(10)
+
+random = vis.df_sample.head(100)
 
 print(best['output_1'], worst['output_0'])
 
-vis.plot(best)
+# vis.plot(best)
 #
-vis.plot(worst)
+# vis.plot(worst)
 
 import cv2
 from mirror.visualisations.core import GradCam
@@ -100,16 +107,33 @@ from mirror.visualisations.core import GradCam
 device = torch.device('cuda')
 grad_cam = GradCam(learner.model.to(device), device)
 
+def store_inputs(sample, out_dir):
+    for i, (idx, row) in enumerate(sample.iterrows()):
+        img = np.array(row['input']).squeeze()
+        img = img * 255
+        img_path = out_dir + '/{}-{}.png'.format(row['prediction'], i)
+        cv2.imwrite(img_path, img)
+
 
 def run_grad_cam(sample, out_dir):
     for i, (idx, row) in enumerate(sample.iterrows()):
         img = np.array(row['input'])
-        print(img.shape)
-#         img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
         img = torch.from_numpy(img).unsqueeze(0).to(device).float()
-        print(img.shape)
-        print(grad_cam(img, None))
-#         img_path = out_dir + '/{}-{}.png'.format(row['prediction'], i)
-#         cv2.imwrite(img_path, img)
 
-run_grad_cam(best, '/home/francesco/Desktop/test-patches/textures/')
+        _, info = grad_cam(img, None)
+        cam = info['cam'].cpu().numpy()
+        cam = cv2.resize(cam, (92, 92))
+        cam = (cam - cam.min()) / (cam.max() - cam.min())
+        cam *= 255
+        img_path = out_dir + '/{}-{}.png'.format(row['prediction'], i)
+        cv2.imwrite(img_path, cam)
+
+
+store_inputs(random, '/home/francesco/Desktop/data/test-patches/patches')
+run_grad_cam(random, '/home/francesco/Desktop/data/test-patches/textures/')
+
+# store_inputs(best, '/home/francesco/Desktop/data/test-patches/patches')
+# store_inputs(worst, '/home/francesco/Desktop/data/test-patches/patches')
+#
+# run_grad_cam(best, '/home/francesco/Desktop/data/test-patches/textures/')
+# run_grad_cam(worst, '/home/francesco/Desktop/data/test-patches/textures/')

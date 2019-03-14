@@ -16,10 +16,6 @@ import cv2
 import numpy as np
 
 
-MAP_PATH = '/home/francesco/Documents/Master-Thesis/core/maps/test/querry-big-10.png'
-TEXT_PATH = '/home/francesco/Desktop/textures/querry-270.png'
-FILE_PATH = '/home/francesco/Desktop/querry-270.png'
-
 class BlenderVisualization():
 
     def draw_heightmap(self, map_path):
@@ -85,6 +81,10 @@ class BlenderVisualization():
 
 if __name__ == '__main__':
     import bpy
+
+    MAP_PATH = '/home/francesco/Documents/Master-Thesis/core/maps/test/querry-big-10.png'
+    TEXT_PATH = '/home/francesco/Desktop/textures/querry-270.png'
+    FILE_PATH = '/home/francesco/Desktop/querry-270.png'
     b_vis = BlenderVisualization()
     b_vis(MAP_PATH, TEXT_PATH, FILE_PATH)
 

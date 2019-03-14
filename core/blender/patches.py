@@ -1,11 +1,33 @@
-import bpy
 import cv2
 import glob
 
 import numpy as np
 
-bpy.context.scene.unit_settings.system = 'METRIC'
-bpy.context.scene.render.engine = 'CYCLES'
+
+def make_locations(size, ncols, start=None):
+    temp = [0, 0, 0] if start is None else start
+    locations = [temp]
+    
+    for i in range(ncols):
+        temp = temp.copy()
+        temp[0] += size
+        locations.append(temp)
+
+    return locations
+
+
+def heightmap_grid(hms, textures, ncols, start):
+    heightmaps = []
+
+    locations = make_locations(2.5, ncols, start)
+    
+    for i, (hm, tex) in enumerate(zip(hms, textures)):
+        heightmap = HeightMap(hm)
+        heightmaps.append(heightmap)
+
+        heightmap(tex,
+                  locations[i])
+
 
 def make_tex(tex_path, name):
     tex = bpy.data.textures.new(name, 'IMAGE')
@@ -13,6 +35,7 @@ def make_tex(tex_path, name):
     tex.image = img
 
     return tex
+
 
 class HeightMap():
 
@@ -28,7 +51,7 @@ class HeightMap():
                                             location=location)
 
         self.grid = bpy.context.selected_objects[0]
-        
+
         if name is not None: self.grid.name = name
 
     def add_disp(self):
@@ -52,10 +75,14 @@ class HeightMap():
         diff = tree.nodes['Diffuse BSDF']
 
         color_ramp = tree.nodes.new('ShaderNodeValToRGB')
-        # color_ramp.elements[0].color = [0, 0, 255, 0.5]
+        color_ramp.color_ramp.color_mode = 'HSV'
+        color_ramp.color_ramp.hue_interpolation = 'FAR'
+        color_ramp.color_ramp.elements[0].color = [0.275, 0.078, 0.322, 1.0]
+        color_ramp.color_ramp.elements[1].color = [1.000, 0.898, 0.294, 1.0]
+        color_ramp.color_ramp.elements[1].position = 1
 
         img_tex = tree.nodes.new('ShaderNodeTexImage')
-        img_tex.image  = bpy.data.images.load(tex_path)
+        img_tex.image = bpy.data.images.load(tex_path)
 
         uv_map = tree.nodes.new('ShaderNodeUVMap')
 
@@ -67,7 +94,7 @@ class HeightMap():
 
         self.grid.data.materials.append(mat)
 
-        self.unwrap() # need to unwrap the obj to properly link the texture to the grid
+        self.unwrap()  # need to unwrap the obj to properly link the texture to the grid
 
     def unwrap(self):
         bpy.ops.object.mode_set(mode='EDIT')
@@ -75,47 +102,45 @@ class HeightMap():
         bpy.ops.object.mode_set(mode='OBJECT')
 
     def __call__(self, tex_path, location, name=None):
+        bpy.context.scene.unit_settings.system = 'METRIC'
+        bpy.context.scene.render.engine = 'CYCLES'
         self.spawn(location, name)
         self.add_disp()
         self.add_texture(tex_path)
 
         return self.grid
 
+    @staticmethod
+    def run_from_python():
+        """
+        This can be used in any others python code, it will create a new process
+        to run the script in blender.
+        :return:
+        """
+        import subprocess
+        from os import path
 
-def heightmap_grid(hms, textures):
-    heightmaps = []
+        base_dir, _ = path.split(__file__)
 
-    location = np.array([0,0,0])
+        subprocess.run(["blender", '--python', '{}/patches.py'.format(base_dir)])
+
+
+if __name__ == '__main__':
+    import bpy
+
+    patches_true = glob.glob('/home/francesco/Desktop/data/test-patches/patches/1-*.png')
+    patches_true.sort()
+    textures_true = glob.glob('/home/francesco/Desktop/data/test-patches/textures/1-*.png')
+    textures_true.sort()
     
-    for i, (hm, tex) in enumerate(zip(hms, textures)):
-        heightmap = HeightMap(hm)
-        heightmaps.append(heightmap)
+    patches_false = glob.glob('/home/francesco/Desktop/data/test-patches/patches/0-*.png')
+    patches_false.sort()
+    textures_false = glob.glob('/home/francesco/Desktop/data/test-patches/textures/0-*.png')
+    textures_false.sort()
 
-        heightmap(tex,
-                  location.tolist())
-        location[0] += 5
-
-        if i == 4:
-            location[0] = 0
-            location[1] = 5
-
-from os import path
-
-patches = glob.glob('/home/francesco/Desktop/test-patches/patches/*.png')
-textures = glob.glob('/home/francesco/Desktop/test-patches/textures/*.png')
-
-def get_label(x):
-    file_name = path.splitext(path.basename(x))[0]
-    label, _ = file_name.split('-')
-
-    return int(label)
+    
+    print(len(patches_true))
 
 
-patches.sort()
-textures.sort()
-print(patches)
-print(textures)
-
-heightmap_grid(patches, textures)
-
-# HeightMap('/home/francesco/Documents/Master-Thesis/core/maps/train/bars1.png')('/home/francesco/Desktop/textures/bars1-0.png')
+    heightmap_grid(patches_true, textures_true, ncols=len(patches_true), start=None)
+    heightmap_grid(patches_false, textures_false, ncols=len(patches_false), start=[0, 2.5, 0])
