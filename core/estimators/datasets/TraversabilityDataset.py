@@ -83,7 +83,6 @@ class CenterAndScalePatch():
     def __call__(self, x, debug=False):
         if self.debug: fig = plt.figure()
         # is_traversable = y == 1
-
         if self.debug:
             ax = plt.subplot(2, 2, 1)
             self.show_heatmap(x, 'original', ax)
@@ -106,10 +105,11 @@ class CenterAndScalePatch():
             x = (x - min) / (max - min)  # norm to 0,1 -> imgaug does not accept neg values
             x = aug.augment_image(x)
             x = x * (max - min) + min  # go back
-            if self.debug:
-                ax = plt.subplot(2, 2, 3)
-                self.show_heatmap(x, 'aug', ax)
+        if self.debug:
+            ax = plt.subplot(2, 2, 3)
+            self.show_heatmap(x, 'aug', ax)
 
+        if self.debug: plt.show()
 
         return x.astype(np.float32)
 
@@ -155,6 +155,7 @@ class TraversabilityDataset(Dataset):
         # needed for fastAI
         concat_ds.c = 2
         concat_ds.classes = 'False', 'True'
+        print('PORCODIO')
 
         return concat_ds
 
@@ -164,7 +165,7 @@ class FastAIImageFolder(TraversabilityDataset):
     classes = 'False', 'True'
 
 
-def get_transform(resize, should_aug=None, scale=1, debug=False):
+def get_transform(resize, should_aug=False, scale=1, debug=False):
     """
     Return a `Compose` transformation to be applied to the input of the model
     :param resize: size in pixel of the wanted final patch size
@@ -250,7 +251,7 @@ if __name__ == '__main__':
     # df = '/home/francesco/Desktop/querry-high/df/querry-big-10/1552309429.462741-patch.csv'
     #
     df = '/home/francesco/Desktop/data/750/train/df/slope_rocks3/1550606526.7238998-patch.csv'
-    ds = TraversabilityDataset(df, transform=get_transform(None, True, scale=1, debug=True), debug=True, tr=0.45)
+    ds = TraversabilityDataset(df, transform=get_transform(None, True, scale=10, debug=True), debug=True, tr=0.45)
 
     print(len(ds))
     # for i in  range(2):
