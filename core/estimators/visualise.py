@@ -77,8 +77,9 @@ class Visualise(Callback):
 
 
 vis = Visualise()
-
-learner = get_learner(model_name, model_dir, callbacks=[vis], transform=get_transform(None, scale=10),  tr=0.45)
+# root = '/home/francesco/Desktop/data/750/test/df/'
+root = '/home/francesco/Desktop/data/750/train/df/bars1/'
+learner = get_learner(model_name, model_dir, callbacks=[vis], root=root, transform=get_transform(None, scale=1),  tr=0.45)
 
 
 # loss, acc, roc = learner.validate(learner.data.test_dl, metrics=[accuracy, ROC_AUC()])
@@ -90,8 +91,8 @@ preds = softmax(preds, dim=1)
 preds = torch.argmax(preds, dim=1)
 # def show_preds(leaner):
 
-best  = vis.df.sort_values(['output_1'], ascending=False).head(10)
-worst  = vis.df.sort_values(['output_0'], ascending=False).head(10)
+best  = vis.df.sort_values(['output_1'], ascending=False).head(30)
+worst  = vis.df.sort_values(['output_0'], ascending=False).head(30)
 
 random = vis.df_sample.head(100)
 
@@ -129,11 +130,11 @@ def run_grad_cam(sample, out_dir):
         cv2.imwrite(img_path, cam)
 
 
-store_inputs(random, '/home/francesco/Desktop/data/test-patches/patches')
-run_grad_cam(random, '/home/francesco/Desktop/data/test-patches/textures/')
-
-# store_inputs(best, '/home/francesco/Desktop/data/test-patches/patches')
-# store_inputs(worst, '/home/francesco/Desktop/data/test-patches/patches')
+# store_inputs(random, '/home/francesco/Desktop/data/test-patches/patches')
+# run_grad_cam(random, '/home/francesco/Desktop/data/test-patches/textures/')
 #
-# run_grad_cam(best, '/home/francesco/Desktop/data/test-patches/textures/')
-# run_grad_cam(worst, '/home/francesco/Desktop/data/test-patches/textures/')
+store_inputs(best, '/home/francesco/Desktop/data/test-patches/patches')
+store_inputs(worst, '/home/francesco/Desktop/data/test-patches/patches')
+
+run_grad_cam(best, '/home/francesco/Desktop/data/test-patches/textures/')
+run_grad_cam(worst, '/home/francesco/Desktop/data/test-patches/textures/')

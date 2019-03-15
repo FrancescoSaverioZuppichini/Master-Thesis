@@ -83,8 +83,8 @@ if __name__ == '__main__':
     import bpy
 
     MAP_PATH = '/home/francesco/Documents/Master-Thesis/core/maps/test/querry-big-10.png'
-    TEXT_PATH = '/home/francesco/Desktop/textures/querry-270.png'
-    FILE_PATH = '/home/francesco/Desktop/querry-270.png'
+    TEXT_PATH = '/home/francesco/Desktop/textures/querry-90.png'
+    FILE_PATH = '/home/francesco/Desktop/querry-90.png'
     b_vis = BlenderVisualization()
     b_vis(MAP_PATH, TEXT_PATH, FILE_PATH)
 

@@ -108,6 +108,7 @@ class HeightMap():
         self.add_disp()
         self.add_texture(tex_path)
 
+
         return self.grid
 
     @staticmethod
@@ -144,3 +145,8 @@ if __name__ == '__main__':
 
     heightmap_grid(patches_true, textures_true, ncols=len(patches_true), start=None)
     heightmap_grid(patches_false, textures_false, ncols=len(patches_false), start=[0, 2.5, 0])
+
+    filepath = './patches.blend'
+    bpy.ops.file.pack_all()
+    bpy.ops.wm.save_as_mainfile(filepath=filepath)
+    # bpy.ops.wm.quit_blender()

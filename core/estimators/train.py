@@ -107,6 +107,7 @@ def train_and_evaluate(params, train=True, load_model=None):
         num_workers=16,
         tr=params['tr'],
         more_than=params['more_than'],
+        downsample_factor=params['downsample_factor'],
         pin_memory=True)
 
     timestamp = time.time()
@@ -128,8 +129,7 @@ def train_and_evaluate(params, train=True, load_model=None):
     data = DataBunch(train_dl=train_dl, valid_dl=val_dl, test_dl=test_dl)
 
     experiment = Experiment(api_key="8THqoAxomFyzBgzkStlY95MOf",
-                            project_name="remove",
-                            workspace="francescosaveriozuppichini")
+                            project_name="krock-new", workspace="francescosaveriozuppichini")
 
     experiment.log_parameters(params)
     experiment.log_metric("timestamp", timestamp)
@@ -187,15 +187,19 @@ params = {'epochs': 10,
           'dataset': '750',
           'sampler': '',
           'num_samples': None,
-          'samper_type': 'imbalance',
+          'samper_type': 'random',
           'callbacks': '[ReduceLROnPlateauCallback]',
           'data-aug': True,
           'optim': 'sdg',
-          'info': 'scale aug',
+          'info': 'scale before center',
           'tr': 0.45,
           'more_than': -0.5,
-          'skip_every': 12,
-          'time-window': 750,
+          'downsample_factor': None,
+          'time_window': 750,
           'resize': None}
 
+
 train_and_evaluate(params)
+train_and_evaluate(params)
+train_and_evaluate(params)
+
