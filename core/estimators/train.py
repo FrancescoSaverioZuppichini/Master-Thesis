@@ -199,7 +199,23 @@ params = {'epochs': 10,
           'resize': None}
 
 
-train_and_evaluate(params)
-train_and_evaluate(params)
-train_and_evaluate(params)
+params['more_than'] = None
+for i in range(10):
+    train_and_evaluate(params)
+
+params['more_than'] = -0.5
+params['data-aug'] = False
+for i in range(10):
+    train_and_evaluate(params)
+
+params['data-aug'] = True
+for i in range(10):
+    train_and_evaluate(params)
+
+
+params['lr'] = 0.0001
+for i in range(10):
+    train_and_evaluate(params)
+# train_and_evaluate(params)
+# train_and_evaluate(params)
 
