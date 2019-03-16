@@ -132,8 +132,3 @@ class WebotsEnv(gym.Env, Supervisor):
         world_path = image2webots_terrain(image_np, src_world, config, output_path)
 
         return cls(world_path, *args, **kwargs)
-
-    @classmethod
-    def from_dir(cls, dir):
-        # TODO
-        files = os.listdir(dir)

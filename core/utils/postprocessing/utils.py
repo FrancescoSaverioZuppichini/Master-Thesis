@@ -137,9 +137,9 @@ def hmpatch(hm, x, y, alpha, edge, scale=1):
     :param hm:
     :param x:
     :param y:
-    :param alpha: TODO ask
-    :param edge: TODO ask
-    :param scale: TODO ask
+    :param alpha:
+    :param edge:
+    :param scale:
     :return:
     """
     tf1 = skimage.transform.SimilarityTransform(translation=[-x, -y])

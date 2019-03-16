@@ -60,7 +60,6 @@ class Handler():
 
 
 class PostProcessingHandler(Handler):
-    # TODO add tqdm bar so each handler can write stuff on it
     def __init__(self, config: PostProcessingConfig, successor=None):
         super().__init__(successor=successor)
         self.config = config
