@@ -1,0 +1,70 @@
+# Thesis content
+
+- Introduction
+    - Problem definition
+    - Previous Work
+    - [Should I add a introduction to Robot, Deep Learning?]
+- Tools
+    - Webots
+    - Ros
+    - Pandas
+    - Numpy
+    - Matplotlib & Seaborn
+    - Pytorch
+    - opencv
+    - imgaug 
+    - blender
+- Data Gathering
+    - Heightmap generation
+    - Simulation Pipeline
+        - Framework
+        - Webots Communication 
+            - How I communicate with webots and the custom API I build it for it
+        - Gym Env
+            - Custom gym enviroment to work easily with the simulator
+        - Robot spawn
+            - flat spawm problem
+            - K-means 
+- Data Postprocessing
+    - Introduction (why I need to postprocessing it?)
+    - Pipeline 
+        - overview 
+        - in deep (quat 2 euler conversion, advancemnt computation)
+        - labelling 
+            - talk about how I label the data
+            - talk about using flat ground as reference for the advancement
+
+    - Data exploration
+- Estimator
+    - Model motivation
+        - Omar CNN
+        - Resnet
+            - preactivation
+            - squeeze and excitation
+            - custom micro resnet
+
+    - Dataset Generation
+        - train/test/val set
+        - normalization (center patch) 
+        - scaling
+        - data aug
+            - dropout/coarse dropout
+            - others augmentation that did not work or did not improve anything
+                - gaussian noise
+                - random scaling based on class
+    - Training 
+        - hardware [should I put it here?]
+        - hyperparameters 
+        - metrics
+        - overfitting 
+
+- Results and Evaluation
+    - metrics results
+    - visualization 
+        - Gradcam 
+        - interesting patch
+            - from the train/val/test set
+            - custom patch to test robustness 
+                - different walls/bumps/slopes
+- Conclusion and Future works
+
