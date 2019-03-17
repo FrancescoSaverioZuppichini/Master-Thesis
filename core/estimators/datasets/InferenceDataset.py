@@ -139,7 +139,7 @@ class InferenceDataset(Dataset):
 
         path = '/home/francesco/Desktop/textures/{}-{}.png'.format(name, self.rotate)
 
-        cv2.imwrite(path, texhttps://www.youtube.com/watch?v=lYucGK-lPqMture)
+        cv2.imwrite(path, texture)
 
         return path
 

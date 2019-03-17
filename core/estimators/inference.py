@@ -36,7 +36,7 @@ class Inference():
         _, preds = torch.max(outs[0], 1)
         outs = softmax(outs[0], dim=1)
         path = ds.make_texture(outs.numpy(), preds.numpy(), 'querry')
-
+        print(path)
         tex = cv2.imread(path)
         plt.imshow(tex)
         plt.show()
