@@ -104,6 +104,8 @@ class InferenceDataset(Dataset):
 
     def make_texture(self, outputs, predictions, name):
         texture = np.zeros(self.hm.shape)
+        sns.heatmap(imutils.rotate(self.hm, self.rotate))
+
         fig = plt.figure()
         ax = plt.subplot(1, 1, 1)
 
@@ -137,13 +139,13 @@ class InferenceDataset(Dataset):
 
         path = '/home/francesco/Desktop/textures/{}-{}.png'.format(name, self.rotate)
 
-        cv2.imwrite(path, texture)
+        cv2.imwrite(path, texhttps://www.youtube.com/watch?v=lYucGK-lPqMture)
 
         return path
 
 
 if __name__ == '__main__':
-    from . import get_transform
+    from TraversabilityDataset import get_transform
 
     ds = InferenceDataset('/home/francesco/Documents/Master-Thesis/core/maps/test/querry-big-10.png',
                           patch_size=92,
