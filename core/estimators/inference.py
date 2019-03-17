@@ -35,8 +35,8 @@ class Inference():
 
         _, preds = torch.max(outs[0], 1)
         outs = softmax(outs[0], dim=1)
-        path = ds.make_texture(outs.numpy(), preds.numpy(), 'querry')
-
+        path = ds.make_texture(outs.numpy(), preds.numpy(), 'querry-big-10')
+        print(path)
         return path
 
     def for_all_rotation(self, *args, **kwargs):

@@ -86,7 +86,7 @@ if __name__ == '__main__':
     TEX_DIR = '/home/francesco/Desktop/textures/'
     MAP_NAME = 'querry-big-10'
     texture_paths = glob.glob('{}/{}-*'.format(TEX_DIR, MAP_NAME))
-
+    print(texture_paths)
     MAP_PATH = '/home/francesco/Documents/Master-Thesis/core/maps/test/{}.png'.format(MAP_NAME)
 
     TEXT_PATH = '/home/francesco/Desktop/textures/querry-270.png'
