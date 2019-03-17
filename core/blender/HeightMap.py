@@ -56,8 +56,6 @@ class BlenderVisualization():
         self.setup_camera()
         self.render(file_path)
 
-        bpy.ops.wm.quit_blender()
-
     @staticmethod
     def run_from_python():
         """
@@ -94,10 +92,13 @@ if __name__ == '__main__':
     b_vis = BlenderVisualization()
 
     for text_path in texture_paths:
-        name = path.splitext(text_path)[0]
-        out_path = '{]/{}.png'.format(OUT_DIR, name)
-
+        name = path.splitext(path.basename(text_path))[0]
+        out_path = '{}/{}.png'.format(OUT_DIR, name)
+        print(name, 'OUT')
         b_vis(MAP_PATH, text_path, out_path)
+
+    bpy.ops.wm.quit_blender()
+
 
 
 
