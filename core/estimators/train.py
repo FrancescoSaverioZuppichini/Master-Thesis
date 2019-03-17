@@ -119,47 +119,7 @@ def train_and_evaluate(params, train=True, load_model=None):
         experiment.log_metric("roc_auc-from-best", roc.item())
 
 
-<<<<<<< HEAD
-params = {'epochs': 10,
-          'lr': 0.001,
-          'batch_size': 128,
-          # 'model': 'omar',
-          'model': 'microresnet#4-gate=3x3-n=2-se=True',
-          'dataset': '750',
-          'sampler': '',
-          'num_samples': None,
-          'samper_type': 'random',
-          'callbacks': '[ReduceLROnPlateauCallback]',
-          'data-aug': True,
-          'optim': 'sdg',
-          'info': 'scale before center',
-          'tr': 0.45,
-          'more_than': -0.5,
-          'downsample_factor': None,
-          'time_window': 750,
-          'resize': None}
 
-
-params['more_than'] = None
-for i in range(10):
-    train_and_evaluate(params)
-
-params['more_than'] = -0.5
-params['data-aug'] = False
-for i in range(10):
-    train_and_evaluate(params)
-
-params['data-aug'] = True
-for i in range(10):
-    train_and_evaluate(params)
-
-
-params['lr'] = 0.0001
-for i in range(10):
-    train_and_evaluate(params)
-# train_and_evaluate(params)
-# train_and_evaluate(params)
-=======
 if __name__ == '__main__':
     params = {'epochs': 10,
               'lr': 0.001,
@@ -184,5 +144,4 @@ if __name__ == '__main__':
     train_and_evaluate(params)
     train_and_evaluate(params)
     train_and_evaluate(params)
->>>>>>> master
 
