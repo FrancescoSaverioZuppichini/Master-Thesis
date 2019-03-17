@@ -104,16 +104,17 @@ class InferenceDataset(Dataset):
 
     def make_texture(self, outputs, predictions, name):
         texture = np.zeros(self.hm.shape)
-        sns.heatmap(imutils.rotate(self.hm, self.rotate))
 
         fig = plt.figure()
-        ax = plt.subplot(1, 1, 1)
+        sns.heatmap(imutils.rotate(self.hm, self.rotate))
+        plt.title('rotation = {}'.format(self.rotate))
+        plt.show()
+
 
         predictions = predictions.reshape(self.images_shape[0], self.images_shape[1])
         outputs = outputs.reshape(self.images_shape[0], self.images_shape[1], 2)
 
         w, h = self.hm.shape
-        buffer = []
         j = 0
         for x in range(0, w, self.step):
             i = 0
@@ -130,12 +131,12 @@ class InferenceDataset(Dataset):
                     break
             j += 1
 
+        texture = cv2.normalize(texture, None, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
+        texture = (texture * 255).astype(np.uint8)
 
-        # texture = (texture - texture.min()) / (texture.max() - texture.min())
-
-        # texture = cv2.normalize(texture, None, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
-
+        fig = plt.figure()
         sns.heatmap(texture)
+        plt.show()
 
         path = '/home/francesco/Desktop/textures/{}-{}.png'.format(name, self.rotate)
 

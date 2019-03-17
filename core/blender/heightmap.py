@@ -81,13 +81,23 @@ class BlenderVisualization():
 
 if __name__ == '__main__':
     import bpy
+    import glob
+    from os import path
+    TEX_DIR = '/home/francesco/Desktop/textures/'
+    MAP_NAME = 'querry-big-10'
+    texture_paths = glob.glob('{}/{}-*'.format(TEX_DIR, MAP_NAME))
 
-    MAP_PATH = '/home/francesco/Documents/Master-Thesis/core/maps/test/querry-big-10.png'
+    MAP_PATH = '/home/francesco/Documents/Master-Thesis/core/maps/test/{}.png'.format(MAP_NAME)
+
     TEXT_PATH = '/home/francesco/Desktop/textures/querry-270.png'
-    FILE_PATH = '/home/francesco/Desktop/querry-270.png'
-    print(MAP_PATH, TEXT_PATH)
+    OUT_DIR = '/home/francesco/Desktop/'
     b_vis = BlenderVisualization()
-    b_vis(MAP_PATH, TEXT_PATH, FILE_PATH)
+
+    for text_path in texture_paths:
+        name = path.splitext(text_path)[0]
+        out_path = '{]/{}.png'.format(OUT_DIR, name)
+
+        b_vis(MAP_PATH, text_path, out_path)
 
 
 

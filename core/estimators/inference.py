@@ -22,11 +22,11 @@ from torch.nn.functional import softmax
 class Inference():
 
 
-    def __call__(self, model_dir, model_name):
+    def __call__(self, model_dir, model_name, rotate):
         ds = InferenceDataset('/home/francesco/Documents/Master-Thesis/core/maps/test/querry-big-10.png',
                               patch_size=92,
                               step=3,
-                              transform=get_transform(None, scale=10), rotate=270)
+                              transform=get_transform(None, scale=10), rotate=rotate)
 
         model = zoo[model_name]
         self.learner = get_learner(model_name, model_dir, callbacks=[], dataset=ds)
@@ -36,16 +36,16 @@ class Inference():
         _, preds = torch.max(outs[0], 1)
         outs = softmax(outs[0], dim=1)
         path = ds.make_texture(outs.numpy(), preds.numpy(), 'querry')
-        print(path)
-        tex = cv2.imread(path)
-        plt.imshow(tex)
-        plt.show()
 
         return path
 
+    def for_all_rotation(self, *args, **kwargs):
+        for rotation in [0, 90, 180, 270]:
+            self(rotate=rotation, *args, **kwargs)
+
 infer = Inference()
 
-infer('microresnet#4-gate=3x3-n=2-se=True-750-0.001-None-1552582563.7411294',
+infer.for_all_rotation('microresnet#4-gate=3x3-n=2-se=True-750-0.001-None-1552582563.7411294',
                                   'microresnet#4-gate=3x3-n=2-se=True')
 # for angle in [0, 90, 180, 270]:
 #     run_inference(angle)
