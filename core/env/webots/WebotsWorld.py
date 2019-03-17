@@ -23,8 +23,7 @@ class WebotsWorld(World, Supervisor):
 
 
     def __call__(self, *args, **kwargs):
-        # TODO check the world name and load if different
-        print(self.world_path)
+        print('Loading world {}'.format(self.world_path))
         # self.load_world('/home/francesco/Documents/Master-Thesis/core/webots/' + self.world_path)
         self.load_world( self.world_path)
 
@@ -58,7 +57,6 @@ class WebotsWorld(World, Supervisor):
             self.children = f.read()
 
     def reanimate(self):
-
         # get the ROBOT node using the NODE API to make our life easier :)
         node = Node.from_def(self.name, 'ROBOT')
         # get the children field that cointas all the joints connections

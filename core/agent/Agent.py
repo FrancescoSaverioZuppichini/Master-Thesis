@@ -6,7 +6,6 @@ class Agent(Callbackable, AgentCallback):
     Basic Agent interface. An agent is an entity that interacts with a world.
     It is defined by the action it can do. This interfaces exposes some basic
     interaction such as 'move'.
-    # TODO I should add a Brain that decide how to act based on the enviroment
     """
     def __init__(self):
         self.state = AgentState(self)

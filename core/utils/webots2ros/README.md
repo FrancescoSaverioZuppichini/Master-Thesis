@@ -55,5 +55,4 @@ correct type and then using a dictionary to get the correct ROS msg and the url 
 the service request.
 
 ### TODO
-- change the name in something like **webots2ros**
 - create setup.py

@@ -4,7 +4,9 @@ import os
 import torch
 import pprint
 import numpy as np
+import time
 
+from functools import partial
 from torch.nn.functional import softmax
 from torchsummary import summary
 from os import path
@@ -16,69 +18,16 @@ from fastai.train import Learner, DataBunch, \
 from fastai.callback import Callback
 from fastai.metrics import accuracy, dice
 from fastai.layers import CrossEntropyFlat, MSELossFlat
-
 from datasets.TraversabilityDataset import TraversabilityDataset
-
 from sklearn.metrics import roc_auc_score
 from datasets.TraversabilityDataset import get_dataloaders, get_transform, TraversabilityDataset
-
 from models import zoo
-
-import matplotlib.pyplot as plt
-from functools import partial
-import time
-import seaborn as sns
+from callbacks import ROC_AUC, Timer
 
 torch.manual_seed(0)
 torch.backends.cudnn.benchmark = True
 torch.backends.cudnn.deterministic = True
 np.random.seed(0)
-
-
-class ROC_AUC(Callback):
-    """
-    Compute roc auc by storing all the predictions/targets and run it once
-    when the epoch is over
-    """
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.preds = np.array([])
-        self.targs = np.array([])
-
-    def on_batch_end(self, last_target, last_output, train, **kwargs):
-        if not train:
-            preds = softmax(last_output, dim=1)
-            preds = torch.argmax(preds, dim=1).long().cpu().numpy()
-            targs = last_target.cpu().numpy()
-
-            self.preds = np.append(self.preds, preds)
-            self.targs = np.append(self.targs, targs)
-
-    def on_epoch_end(self, last_metrics, last_target, last_output, **kwargs):
-        roc = roc_auc_score(self.preds, self.targs)
-        self.metric = roc
-        self.preds = np.array([])
-        self.targs = np.array([])
-        return {'last_metrics': last_metrics + [torch.tensor(self.metric)]}
-
-class Timer(Callback):
-    def on_epoch_begin(self, **kwargs):
-        self.start = time.time()
-
-    def on_epoch_end(self, train, last_metrics, **kwargs):
-        self.metric = time.time() - self.start
-
-        return {'last_metrics': last_metrics + [self.metric]}
-
-
-def custom_accuracy(y_pred, y_true, thresh: float = 0.01):
-    # print(y_pred[0:10], y_true[0:10])
-    distance = (y_pred - y_true).abs()
-    acc = (distance < thresh).float().mean()
-    return acc
-
-
 if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
 
 
@@ -91,14 +40,10 @@ def train_and_evaluate(params, train=True, load_model=None):
 
     criterion = CrossEntropyFlat()
 
-    # criterion = MSELossFlat()
-
     train_dl, val_dl, test_dl = get_dataloaders(
         train_root='/home/francesco/Desktop/data/{}/train/df/'.format(params['dataset']),
         val_root='/home/francesco/Desktop/data/{}/val/df/'.format(params['dataset']),
         test_root='/home/francesco/Desktop/data/{}/test/df/'.format(params['dataset']),
-
-        # val_size=0.15,
         train_transform=get_transform(params['resize'], should_aug=params['data-aug']),
         val_transform=get_transform(params['resize'], scale=1, should_aug=False),
         test_transform=get_transform(params['resize'], scale=10, should_aug=False),
@@ -156,29 +101,25 @@ def train_and_evaluate(params, train=True, load_model=None):
                 learner.fit(epochs=params['epochs'], lr=params['lr'],
                             callbacks=callbacks)  # SaveModelCallback load the best model after training!
 
-            learner.load(model_name_loss)
-
-            with experiment.test():
-                loss, acc, roc = learner.validate(data.test_dl, metrics=[accuracy, ROC_AUC()])
-                print(loss, acc, roc)
-                experiment.log_metric("roc_auc", roc.item())
-                experiment.log_metric("test_loss", loss)
-
-            learner.load(model_name_acc)
         except Exception as e:
             print(e)
             pass
 
-    if load_model:
-        print('Loading model...')
-        learner.load(model_name_acc)
+    with experiment.test():
+        learner.load(model_name_loss)
+        loss, acc, roc = learner.validate(data.test_dl, metrics=[accuracy, ROC_AUC()])
+        print(loss, acc, roc)
+        experiment.log_metric("roc_auc", roc.item())
+        experiment.log_metric("test_loss", loss)
 
     with experiment.test():
+        learner.load(model_name_acc)
         loss, acc, roc = learner.validate(data.test_dl, metrics=[accuracy, ROC_AUC()])
         print(loss, acc, roc)
         experiment.log_metric("roc_auc-from-best", roc.item())
 
 
+<<<<<<< HEAD
 params = {'epochs': 10,
           'lr': 0.001,
           'batch_size': 128,
@@ -218,4 +159,30 @@ for i in range(10):
     train_and_evaluate(params)
 # train_and_evaluate(params)
 # train_and_evaluate(params)
+=======
+if __name__ == '__main__':
+    params = {'epochs': 10,
+              'lr': 0.001,
+              'batch_size': 128,
+              # 'model': 'omar',
+              'model': 'microresnet#4-gate=3x3-n=2-se=True',
+              'dataset': '750',
+              'sampler': '',
+              'num_samples': None,
+              'samper_type': 'random',
+              'callbacks': '[ReduceLROnPlateauCallback]',
+              'data-aug': True,
+              'optim': 'sdg',
+              'info': 'scale before center',
+              'tr': 0.45,
+              'more_than': -0.5,
+              'downsample_factor': None,
+              'time_window': 750,
+              'resize': None}
+
+
+    train_and_evaluate(params)
+    train_and_evaluate(params)
+    train_and_evaluate(params)
+>>>>>>> master
 

@@ -32,15 +32,13 @@ class IsInside(Condition):
         x, y, z = pos.x, pos.y, pos.z
 
         def check_if_inside(to_check, bounds):
+            is_inside = True
             lower, upper = bounds
-            # TODO bad raising in if statement
-            if to_check - tol <= lower:
-                return False
+            if to_check - tol <= lower: is_inside = False
             # upper bound
-            elif to_check + tol >= upper:
-                return False
+            elif to_check + tol >= upper: is_inside =  False
 
-            return True
+            return is_inside
 
         # has_not_fall = world.z + z >= tol
         has_not_fall = True

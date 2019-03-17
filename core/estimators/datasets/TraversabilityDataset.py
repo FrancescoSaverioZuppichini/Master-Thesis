@@ -155,7 +155,6 @@ class TraversabilityDataset(Dataset):
         # needed for fastAI
         concat_ds.c = 2
         concat_ds.classes = 'False', 'True'
-        print('PORCODIO')
 
         return concat_ds
 
