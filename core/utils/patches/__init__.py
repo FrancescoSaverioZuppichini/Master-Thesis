@@ -28,13 +28,21 @@ class BarPatch(Patch):
 
         return self.hm
 
-class HolesPatch(Patch):
+class BumpsPatch(Patch):
     def make(self):
         self.hm = cv2.resize(self.hm, (3,3))
 
         self.hm[self.hm.shape[0] //2,-1] = 1
 
         self.hm = cv2.resize(self.hm, self.size)
+
+        return self.hm
+
+
+class HolesPatch(BumpsPatch):
+    def make(self, *args, **kwargs):
+        self.hm = -1 * super().make(*args, **kwargs)
+
         return self.hm
 
 
@@ -42,6 +50,6 @@ class HolesPatch(Patch):
 # p()
 # p.plot2d()
 
-p = HolesPatch((92,92))
+p = BumpsPatch((92,92))
 p()
 p.plot2d()
