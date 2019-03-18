@@ -11,6 +11,9 @@ from utils.postprocessing.utils import *
 from matplotlib import gridspec
 
 class VisualiseSimulation():
+    """
+    This class shows different features of one or more dataframes.
+    """
     def __init__(self, hm, patch_size=100):
         self.hm = hm
         self.patch_size = 92
