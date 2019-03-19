@@ -49,6 +49,7 @@ class BarPatch(Patch):
 
         return self.hm
 
+
 class BumpsPatch(Patch):
     def make(self, strength=1.0, resolution=(4,4), size=(1,1)):
         self.hm = cv2.resize(self.hm, resolution, interpolation = cv2.INTER_LANCZOS4)
@@ -60,7 +61,6 @@ class BumpsPatch(Patch):
         self.hm = cv2.resize(self.hm, self.size)
 
         return self.hm
-
 
 class HolesPatch(BumpsPatch):
     def make(self, *args, **kwargs):

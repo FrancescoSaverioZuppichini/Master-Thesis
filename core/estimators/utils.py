@@ -20,9 +20,9 @@ def load_model(path: str, model: Module):
 
 def get_learner(model_name, model_dir, callbacks, load_metric='roc_auc', dataset=None, *args, **kwargs):
     model = zoo[model_name]
-    if dataset is None: dataset = TraversabilityDataset.from_root(*args, **kwargs),
+    if dataset is None: dataset = TraversabilityDataset.from_root(*args, **kwargs)
     test_dl = DataLoader(dataset,
-                         shuffle=False, batch_size=128, num_workers=6)
+                         shuffle=False, batch_size=128, num_workers=8)
 
     learner = Learner(data=DataBunch(test_dl, test_dl, test_dl=test_dl), model=model,
                       callbacks=callbacks,

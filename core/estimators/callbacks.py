@@ -23,6 +23,7 @@ class ROC_AUC(Callback):
     def on_batch_end(self, last_target, last_output, train, **kwargs):
         if not train:
             preds = softmax(last_output, dim=1)
+            # TODO this can be done in one shot later
             preds = torch.argmax(preds, dim=1).long().cpu().numpy()
             targs = last_target.cpu().numpy()
 

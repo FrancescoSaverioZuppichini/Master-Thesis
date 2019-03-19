@@ -105,20 +105,23 @@ def train_and_evaluate(params, train=True, load_model=None):
             print(e)
             pass
 
-    with experiment.test():
-        learner.load(model_name_loss)
+        with experiment.test():
+            learner.load(model_name_loss)
+            loss, acc, roc = learner.validate(data.test_dl, metrics=[accuracy, ROC_AUC()])
+            print(loss, acc, roc)
+            experiment.log_metric("roc_auc", roc.item())
+            experiment.log_metric("test_loss", loss)
+
+        with experiment.test():
+            learner.load(model_name_acc)
+            loss, acc, roc = learner.validate(data.test_dl, metrics=[accuracy, ROC_AUC()])
+            print(loss, acc, roc)
+            experiment.log_metric("roc_auc-from-best", roc.item())
+
+    if load_model is not None:
+        learner.load(load_model)
         loss, acc, roc = learner.validate(data.test_dl, metrics=[accuracy, ROC_AUC()])
         print(loss, acc, roc)
-        experiment.log_metric("roc_auc", roc.item())
-        experiment.log_metric("test_loss", loss)
-
-    with experiment.test():
-        learner.load(model_name_acc)
-        loss, acc, roc = learner.validate(data.test_dl, metrics=[accuracy, ROC_AUC()])
-        print(loss, acc, roc)
-        experiment.log_metric("roc_auc-from-best", roc.item())
-
-
 
 if __name__ == '__main__':
     params = {'epochs': 10,

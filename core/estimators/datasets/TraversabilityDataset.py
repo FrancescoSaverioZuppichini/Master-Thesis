@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 
+from os import path
 from imgaug import augmenters as iaa
 from torch.utils.data import DataLoader, random_split, RandomSampler, ConcatDataset, WeightedRandomSampler
 from torchvision.transforms import Resize, ToPILImage, ToTensor, Grayscale, Compose
@@ -115,13 +116,14 @@ class CenterAndScalePatch():
 
 
 class TraversabilityDataset(Dataset):
-    def __init__(self, df, transform, tr=None, more_than=None, should_aug=False, debug=False, downsample_factor=None):
+    def __init__(self, df, root, transform, tr=None, more_than=None, should_aug=False, debug=False, downsample_factor=None):
         self.df = pd.read_csv(df)
         self.df = self.df.dropna()  # to be sure
         if downsample_factor is not None: self.df = self.df[0:-1:downsample_factor]
         if more_than is not None:  self.df = self.df[self.df['advancement'] >= more_than]
         self.transform = transform
         self.tr = tr
+        self.image_dir =root
         self.idx2class = {'False': 0,
                           'True': 1}
 
@@ -130,7 +132,7 @@ class TraversabilityDataset(Dataset):
 
     def __getitem__(self, item):
         row = self.df.iloc[item]
-        img_path = row['image_path']
+        img_path = path.normpath(self.image_dir + row['image_path'])
         # img = Image.open(img_path)
         y = row['advancement']
         y = torch.tensor(y)
@@ -147,15 +149,15 @@ class TraversabilityDataset(Dataset):
 
     @classmethod
     def from_root(cls, root, n=None, *args, **kwargs):
-        dfs = glob.glob(root + '/*-patch.csv')
-        if len(dfs) == 0: dfs = glob.glob(root + '/**/*-patch.csv')
+        dfs = glob.glob(root + '/df/*-patch.csv')
+        if len(dfs) == 0: dfs = glob.glob(root + '/df/**/*-patch.csv')
         if n is not None: dfs = dfs[:n]
-        print(root + '/**/*-patch.csv')
-        concat_ds = ConcatDataset([cls(df, *args, **kwargs) for df in dfs])
+
+        concat_ds = ConcatDataset([cls(df, root, *args, **kwargs) for df in dfs])
         # needed for fastAI
         concat_ds.c = 2
         concat_ds.classes = 'False', 'True'
-
+        print(len(concat_ds))
         return concat_ds
 
 

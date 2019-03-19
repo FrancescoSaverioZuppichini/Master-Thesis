@@ -15,14 +15,15 @@ from utils import load_model_from_name, get_learner
 from patches import *
 from datasets.TraversabilityDataset import get_transform, CenterAndScalePatch
 from torch.nn.functional import softmax
-class Visualise(Callback):
+from callbacks import ROC_AUC
+
+class StoreBestWorstAndSample(Callback):
     """
     Store each input, target and prediction into a Dataframe in order to
     perform custom queries on the dataset.
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def on_epoch_begin(self, **kwargs):
         self.df = None
         self.df_sample = None
 
@@ -51,7 +52,6 @@ class Visualise(Callback):
 
             self.free_memory()
 
-
     def free_memory(self):
         """
         This function reduces the number of rows in the dataframe.
@@ -63,6 +63,7 @@ class Visualise(Callback):
         worst = self.df.sort_values(['output_0'], ascending=False).head(10)
 
         self.df = pd.concat([best, worst])
+
 
     def plot(self, sample):
         for img, pred in zip(sample['input'], sample['prediction']):
@@ -99,36 +100,36 @@ class GradCamVisualization():
         plt.show()
 
 
-
-
-model_dir = 'microresnet#4-gate=3x3-n=2-se=True-750-0.001-None-1552506972.5252423'
+model_dir = path.abspath('../../resources/assets/models/microresnet#4-gate=3x3-n=2-se=True-750-0.001-None-1552582563.7411294')
 model_name = 'microresnet#4-gate=3x3-n=2-se=True'
-model_path = path.abspath('../../resources/assets/models/microresnet#4-gate=3x3-n=2-se=True-750-0.001-None-1552582563.7411294')
 
 # learner = get_learner(model_name, model_dir, callbacks=[vis], root=root, transform=get_transform(None, scale=1),  tr=0.45)
 
-model = load_model_from_name(model_path + '/roc_auc.pth', model_name)
-
-
-mod_vis = GradCamVisualization(model)
-
-p = HolesPatch((92,92))
-p(strength=0)
-p.plot2d()
-
-tr = CenterAndScalePatch(debug=True)
-
-res = model(torch.zeros((1,1,92,92)).float())
-print(softmax(res, dim=1))
-# mod_vis(tr(p.hm))
-#
-# vis = Visualise()
-# # root = '/home/francesco/Desktop/data/750/test/df/'
-# root = '/home/francesco/Desktop/data/750/train/df/bars1/'
-# learner = get_learner(model_name, model_dir, callbacks=[vis], root=root, transform=get_transform(None, scale=1),  tr=0.45)
+# model = load_model_from_name(model_path + '/roc_auc.pth', model_name)
 #
 #
-# # loss, acc, roc = learner.validate(learner.data.test_dl, metrics=[accuracy, ROC_AUC()])
+# mod_vis = GradCamVisualization(model)
+# tr = get_transform(resize=None, debug=True)
+# x = np.zeros((92,92)).astype(np.uint8)
+#
+# res = model(tr(x).unsqueeze(0))
+# print(softmax(res, dim=1))
+# p = BumpsPatch((92,92))
+# p(strength=1, size=(2,2))
+# p.hm *= 255
+# p.plot2d()
+
+
+#
+store_inputs = StoreBestWorstAndSample()
+
+root = path.abspath('../../resources/assets/datasets/test/')
+
+learner = get_learner(model_name, model_dir, callbacks=[store_inputs], root=root, transform=get_transform(None, scale=10),  tr=0.45, n=1)
+loss, roc = learner.validate(learner.data.test_dl, metrics=[ROC_AUC()])
+
+print(roc)
+
 # import pandas as pd
 #
 # preds, targs = learner.get_preds(ds_type=DatasetType.Valid)
@@ -137,7 +138,12 @@ print(softmax(res, dim=1))
 # preds = torch.argmax(preds, dim=1)
 # # def show_preds(leaner):
 #
-# best  = vis.df.sort_values(['output_1'], ascending=False).head(30)
+
+print(store_inputs.df.head(2))
+
+best  = store_inputs.df.sort_values(['output_1'], ascending=False)
+
+store_inputs.plot(best)
 # worst  = vis.df.sort_values(['output_0'], ascending=False).head(30)
 #
 # random = vis.df_sample.head(100)

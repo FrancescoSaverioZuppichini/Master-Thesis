@@ -6,6 +6,7 @@ from datasets.TraversabilityDataset import get_transform
 from utils import get_learner
 from datasets.InferenceDataset import InferenceDataset
 from utils import get_probs_and_labels_from_preds
+from torch.nn.functional import softmax
 
 class HeightMapInference():
     """
@@ -27,6 +28,10 @@ class HeightMapInference():
 
         probs, labels = get_probs_and_labels_from_preds(self.learner.get_preds(self.learner.data.test_dl))
         path = self.ds.make_texture(probs.numpy(), labels.numpy(), 'querry-big-10')
+        # x = torch.ones((1, 1, 92, 92))
+        # res = self.learner.model(x).float()
+
+        # print(softmax(res, dim=1))
 
         return path
 
