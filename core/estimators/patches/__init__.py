@@ -43,9 +43,9 @@ class Patch():
 
 
 class BarPatch(Patch):
-    def make(self, offset=16, size=4):
-        self.hm[offset: offset + size] = 1
-        self.hm[-offset: -offset + size] = 1
+    def make(self, offset=16, size=4, strength=1):
+        self.hm[offset: offset + size] = strength
+        self.hm[-offset: -offset + size] = strength
 
         return self.hm
 

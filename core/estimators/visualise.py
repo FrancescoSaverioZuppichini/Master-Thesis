@@ -1,20 +1,20 @@
 import torch
+import cv2
 
+import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+from os import path
 from torch.nn.functional import softmax
 from fastai.train import Learner, DataBunch, DatasetType
 from fastai.callback import Callback
-from datasets.TraversabilityDataset import get_dataloaders, get_transform, TraversabilityDataset
-
-
-model_dir = 'microresnet#4-gate=3x3-n=2-se=True-750-0.001-None-1552506972.5252423'
-model_name = 'microresnet#4-gate=3x3-n=2-se=True'
-
-from utils import get_learner
-
+from mirror.visualisations.core import GradCam
+from utils import load_model_from_name, get_learner
+from patches import *
+from datasets.TraversabilityDataset import get_transform, CenterAndScalePatch
+from torch.nn.functional import softmax
 class Visualise(Callback):
     """
     Store each input, target and prediction into a Dataframe in order to
@@ -75,66 +75,112 @@ class Visualise(Callback):
                         fmt='0.2f')
             plt.show()
 
+class GradCamVisualization():
 
-vis = Visualise()
-# root = '/home/francesco/Desktop/data/750/test/df/'
-root = '/home/francesco/Desktop/data/750/train/df/bars1/'
-learner = get_learner(model_name, model_dir, callbacks=[vis], root=root, transform=get_transform(None, scale=1),  tr=0.45)
+    def __init__(self, model):
+        self.model = model
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.grad_cam = GradCam(model.to(self.device), self.device)
 
+    def __call__(self, patch):
+        img = torch.from_numpy(patch).unsqueeze(0).unsqueeze(0).to(self.device).float()
 
-# loss, acc, roc = learner.validate(learner.data.test_dl, metrics=[accuracy, ROC_AUC()])
-import pandas as pd
+        _, info = self.grad_cam(img, None, target_class=None)
+        print(info['predictions'])
 
-preds, targs = learner.get_preds(ds_type=DatasetType.Valid)
-
-preds = softmax(preds, dim=1)
-preds = torch.argmax(preds, dim=1)
-# def show_preds(leaner):
-
-best  = vis.df.sort_values(['output_1'], ascending=False).head(30)
-worst  = vis.df.sort_values(['output_0'], ascending=False).head(30)
-
-random = vis.df_sample.head(100)
-
-print(best['output_1'], worst['output_0'])
-
-# vis.plot(best)
-#
-# vis.plot(worst)
-
-import cv2
-from mirror.visualisations.core import GradCam
-
-device = torch.device('cuda')
-grad_cam = GradCam(learner.model.to(device), device)
-
-def store_inputs(sample, out_dir):
-    for i, (idx, row) in enumerate(sample.iterrows()):
-        img = np.array(row['input']).squeeze()
-        img = img * 255
-        img_path = out_dir + '/{}-{}.png'.format(row['prediction'], i)
-        cv2.imwrite(img_path, img)
-
-
-def run_grad_cam(sample, out_dir):
-    for i, (idx, row) in enumerate(sample.iterrows()):
-        img = np.array(row['input'])
-        img = torch.from_numpy(img).unsqueeze(0).to(device).float()
-
-        _, info = grad_cam(img, None)
         cam = info['cam'].cpu().numpy()
-        cam = cv2.resize(cam, (92, 92))
+        cam = cv2.resize(cam, patch.shape)
         cam = (cam - cam.min()) / (cam.max() - cam.min())
         cam *= 255
-        img_path = out_dir + '/{}-{}.png'.format(row['prediction'], i)
-        cv2.imwrite(img_path, cam)
+
+        fig = plt.figure()
+        plt.title(info['predictions'])
+        sns.heatmap(cam)
+        plt.show()
 
 
-# store_inputs(random, '/home/francesco/Desktop/data/test-patches/patches')
-# run_grad_cam(random, '/home/francesco/Desktop/data/test-patches/textures/')
+
+
+model_dir = 'microresnet#4-gate=3x3-n=2-se=True-750-0.001-None-1552506972.5252423'
+model_name = 'microresnet#4-gate=3x3-n=2-se=True'
+model_path = path.abspath('../../resources/assets/models/microresnet#4-gate=3x3-n=2-se=True-750-0.001-None-1552582563.7411294')
+
+# learner = get_learner(model_name, model_dir, callbacks=[vis], root=root, transform=get_transform(None, scale=1),  tr=0.45)
+
+model = load_model_from_name(model_path + '/roc_auc.pth', model_name)
+
+
+mod_vis = GradCamVisualization(model)
+
+p = HolesPatch((92,92))
+p(strength=0)
+p.plot2d()
+
+tr = CenterAndScalePatch(debug=True)
+
+res = model(torch.zeros((1,1,92,92)).float())
+print(softmax(res, dim=1))
+# mod_vis(tr(p.hm))
 #
-store_inputs(best, '/home/francesco/Desktop/data/test-patches/patches')
-store_inputs(worst, '/home/francesco/Desktop/data/test-patches/patches')
-
-run_grad_cam(best, '/home/francesco/Desktop/data/test-patches/textures/')
-run_grad_cam(worst, '/home/francesco/Desktop/data/test-patches/textures/')
+# vis = Visualise()
+# # root = '/home/francesco/Desktop/data/750/test/df/'
+# root = '/home/francesco/Desktop/data/750/train/df/bars1/'
+# learner = get_learner(model_name, model_dir, callbacks=[vis], root=root, transform=get_transform(None, scale=1),  tr=0.45)
+#
+#
+# # loss, acc, roc = learner.validate(learner.data.test_dl, metrics=[accuracy, ROC_AUC()])
+# import pandas as pd
+#
+# preds, targs = learner.get_preds(ds_type=DatasetType.Valid)
+#
+# preds = softmax(preds, dim=1)
+# preds = torch.argmax(preds, dim=1)
+# # def show_preds(leaner):
+#
+# best  = vis.df.sort_values(['output_1'], ascending=False).head(30)
+# worst  = vis.df.sort_values(['output_0'], ascending=False).head(30)
+#
+# random = vis.df_sample.head(100)
+#
+# print(best['output_1'], worst['output_0'])
+#
+# # vis.plot(best)
+# #
+# # vis.plot(worst)
+#
+# import cv2
+# from mirror.visualisations.core import GradCam
+#
+# device = torch.device('cuda')
+# grad_cam = GradCam(learner.model.to(device), device)
+#
+# def store_inputs(sample, out_dir):
+#     for i, (idx, row) in enumerate(sample.iterrows()):
+#         img = np.array(row['input']).squeeze()
+#         img = img * 255
+#         img_path = out_dir + '/{}-{}.png'.format(row['prediction'], i)
+#         cv2.imwrite(img_path, img)
+#
+#
+# def run_grad_cam(sample, out_dir):
+#     for i, (idx, row) in enumerate(sample.iterrows()):
+#         img = np.array(row['input'])
+#         img = torch.from_numpy(img).unsqueeze(0).to(device).float()
+#
+#         _, info = grad_cam(img, None)
+#         cam = info['cam'].cpu().numpy()
+#         cam = cv2.resize(cam, (92, 92))
+#         cam = (cam - cam.min()) / (cam.max() - cam.min())
+#         cam *= 255
+#         img_path = out_dir + '/{}-{}.png'.format(row['prediction'], i)
+#         cv2.imwrite(img_path, cam)
+#
+#
+# # store_inputs(random, '/home/francesco/Desktop/data/test-patches/patches')
+# # run_grad_cam(random, '/home/francesco/Desktop/data/test-patches/textures/')
+# #
+# store_inputs(best, '/home/francesco/Desktop/data/test-patches/patches')
+# store_inputs(worst, '/home/francesco/Desktop/data/test-patches/patches')
+#
+# run_grad_cam(best, '/home/francesco/Desktop/data/test-patches/textures/')
+# run_grad_cam(worst, '/home/francesco/Desktop/data/test-patches/textures/')

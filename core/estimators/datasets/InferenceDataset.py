@@ -21,8 +21,6 @@ class InferenceDataset(Dataset):
         self.hm = cv2.imread(hm_path)
         self.hm = cv2.cvtColor(self.hm, cv2.COLOR_BGR2GRAY)
 
-        # rotate the heightmap and them cup the images = to cut the images and then rotate them
-        # if rotate is not None: self.hm = imutils.rotate(self.hm, rotate)
         self.images = view_as_windows(self.hm, (patch_size, patch_size), step)
         self.images_shape = self.images.shape
         self.images = self.images.reshape(-1, patch_size, patch_size)

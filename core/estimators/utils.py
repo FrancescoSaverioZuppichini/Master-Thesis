@@ -9,10 +9,13 @@ from torch.utils.data import DataLoader
 from datasets.TraversabilityDataset import get_dataloaders, get_transform, TraversabilityDataset
 from models import zoo
 from fastai.train import Learner, DataBunch, DatasetType
+from torch.nn.functional import softmax
 
 def load_model(path: str, model: Module):
-    state = torch.load(path)
+    state = torch.load(path, map_location='cpu')
     model.load_state_dict(state['model'])
+
+    return model
 
 
 def get_learner(model_name, model_dir, callbacks, load_metric='roc_auc', dataset=None, *args, **kwargs):
@@ -30,6 +33,11 @@ def get_learner(model_name, model_dir, callbacks, load_metric='roc_auc', dataset
     return learner
 
 
+def load_model_from_name(model_path, model_name):
+    model = zoo[model_name]
+    return load_model(model_path, model)
+
+
 def seed(seed=0):
     torch.backends.cudnn.deterministic = True
     torch.manual_seed(seed)
@@ -37,3 +45,13 @@ def seed(seed=0):
     np.random.seed(seed)
     random.seed(seed)
     ia.seed(seed)
+
+
+def get_probs_and_labels_from_preds(preds):
+    probs, _ = preds
+    _, labels = torch.max(probs, 1)
+    probs = softmax(probs, dim=1)
+
+    return probs, labels
+
+
