@@ -111,7 +111,7 @@ class CenterAndScalePatch():
 
         if self.debug: plt.show()
 
-        return x.astype(np.float32)
+        return  x.astype(np.float32)
 
 
 class TraversabilityDataset(Dataset):

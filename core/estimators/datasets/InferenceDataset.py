@@ -2,6 +2,7 @@ import torch
 import cv2
 import imutils
 
+import tqdm
 import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
@@ -12,6 +13,10 @@ from torchvision.transforms.functional import rotate
 from skimage.util.shape import view_as_windows
 
 class InferenceDataset(Dataset):
+    """
+    This class creates a dataset from an heightmap that can be used during inference
+    to test the model.
+    """
     def __init__(self, hm_path, patch_size=92, step=1, transform=None, rotate=None, debug=False):
         self.hm = cv2.imread(hm_path)
         self.hm = cv2.cvtColor(self.hm, cv2.COLOR_BGR2GRAY)
@@ -29,7 +34,7 @@ class InferenceDataset(Dataset):
         print(self.images_shape)
 
     def show_patch(self, patch, title):
-        # fig = plt.figure()
+        fig = plt.figure()
         plt.title(title)
         sns.heatmap(patch.squeeze())
         plt.show()
@@ -116,6 +121,9 @@ class InferenceDataset(Dataset):
 
         w, h = self.hm.shape
         j = 0
+
+        pbar = tqdm.tqdm(total=self.images.shape[0])
+
         for x in range(0, w, self.step):
             i = 0
             for y in range(self.step, h, self.step):
@@ -127,9 +135,12 @@ class InferenceDataset(Dataset):
                     if is_traversable: texture[y:y + self.patch_size, x: x + self.patch_size] += out[1]
 
                     i += 1
+                    pbar.update(1)
                 except IndexError:
                     break
             j += 1
+
+        pbar.close()
 
         texture = cv2.normalize(texture, None, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
         texture = (texture * 255).astype(np.uint8)
@@ -138,7 +149,7 @@ class InferenceDataset(Dataset):
         sns.heatmap(texture)
         plt.show()
 
-        path = '/home/francesco/Desktop/textures/{}-{}.png'.format(name, self.rotate)
+        path = '/Users/vaevictis/Documents/Project/Master-Thesis/resources/assets/textures/{}-{}.png'.format(name, self.rotate)
 
         cv2.imwrite(path, texture)
 
@@ -148,9 +159,9 @@ class InferenceDataset(Dataset):
 if __name__ == '__main__':
     from TraversabilityDataset import get_transform
 
-    ds = InferenceDataset('/home/francesco/Documents/Master-Thesis/core/maps/test/querry-big-10.png',
+    ds = InferenceDataset('../../maps/test/querry-big-10.png',
                           patch_size=92,
-                          step=3,
+                          step=10,
                           transform=get_transform(None, scale=10), rotate=0, debug=True)
 
     ds[0]

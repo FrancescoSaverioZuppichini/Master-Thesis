@@ -35,6 +35,12 @@ class Patch():
 
         plt.show()
 
+    @classmethod
+    def from_hm(cls, hm):
+        p = cls(hm.shape)
+        p.hm =hm
+        return p
+
 
 class BarPatch(Patch):
     def make(self, offset=16, size=4):
@@ -63,12 +69,14 @@ class HolesPatch(BumpsPatch):
         return self.hm
 
 
-# p = BarPatch((92,92))
-# p()
-# p.plot2d()
+if __name__ == '__main__':
+#     little tests
+    # p = BarPatch((92,92))
+    # p()
+    # p.plot2d()
 
-p = HolesPatch((92,92))
-p(strength=0.5)
-p.plot2d()
-p.plot3d()
+    p = HolesPatch((92,92))
+    p(strength=0.5)
+    p.plot2d()
+    p.plot3d()
 
