@@ -51,7 +51,7 @@ model_name = 'microresnet#4-gate=3x3-n=2-se=True'
 
 # learner = get_learner(model_name, model_dir, callbacks=[vis], root=root, transform=get_transform(None, scale=1),  tr=0.45)
 
-model = load_model_from_name(model_dir + '/roc_auc.pth', model_name).cuda()
+# model = load_model_from_name(model_dir + '/roc_auc.pth', model_name).cuda()
 
 def test():
     # root = path.abspath(
@@ -69,7 +69,7 @@ def test():
         print('class={}'.format(y))
 
 
-test()
+# test()
 
 
 # mod_vis = GradCamVisualization(model)
@@ -89,38 +89,22 @@ test()
 
 
 # #
-# store_inputs = StoreBestWorstAndSample()
+store_inputs = StoreBestWorstAndSample()
 #
 # root = path.abspath('../../resources/assets/datasets/test/')
-# # root = '/media/francesco/saetta/test/'
-# learner = get_learner(model_name, model_dir, callbacks=[store_inputs], root=root, transform=get_transform(None, scale=10),  tr=0.45, n=1)
-# loss, roc = learner.validate(learner.data.test_dl, metrics=[ROC_AUC()])
-#
-# print(roc)
-#
-# # import pandas as pd
-# #
-# # preds, targs = learner.get_preds(ds_type=DatasetType.Valid)
-# #
-# # preds = softmax(preds, dim=1)
-# # preds = torch.argmax(preds, dim=1)
-# # # def show_preds(leaner):
-# #
-#
-# print(store_inputs.df.head(2))
-#
-# best  = store_inputs.df.sort_values(['output_1'], ascending=False)
-#
-# store_inputs.plot(best)
-# worst  = vis.df.sort_values(['output_0'], ascending=False).head(30)
+root = '/media/francesco/saetta/test/'
+learner = get_learner(model_name, model_dir, callbacks=[store_inputs], root=root, transform=get_transform(None, scale=10),  tr=0.45, n=20)
+loss, roc = learner.validate(learner.data.test_dl, metrics=[ROC_AUC()])
+
+best  = store_inputs.df.sort_values(['output_1'], ascending=False)
+worst  = store_inputs.df.sort_values(['output_0'], ascending=False).head(30)
 #
 # random = vis.df_sample.head(100)
 #
 # print(best['output_1'], worst['output_0'])
 #
-# # vis.plot(best)
-# #
-# # vis.plot(worst)
+store_inputs.plot(best)
+store_inputs.plot(worst)
 #
 # import cv2
 # from mirror.visualisations.core import GradCam
