@@ -44,7 +44,7 @@ class GradCamVisualization():
 
 # model_dir = path.abspath('../../resources/assets/models/microresnet#4-gate=3x3-n=2-se=True-750-0.001-None-1552582563.7411294/')
 
-model_dir ='/home/francesco/Desktop/carino/vaevictis/data/microresnet#4-gate=3x3-n=2-se=True-750-0.001-None-1552581592.3601837/'
+model_dir ='/home/francesco/Desktop/carino/vaevictis/data/microresnet#4-gate=3x3-n=2-se=True-750-0.001-None-1552582563.7411294/'
 # model_dir = '/home/francesco/Documents/Master-Thesis/resources/assets/models/microresnet#4-gate=3x3-n=2-se=True-750-0.001-None-1552582563.7411294'
 
 model_name = 'microresnet#4-gate=3x3-n=2-se=True'
@@ -60,7 +60,7 @@ def test():
     root = '/media/francesco/saetta/test/'
     df = root + '/df/querry-big-10/1550308203.5360308-patch.csv'
 
-    ds = TraversabilityDataset(df, root=root, transform=get_transform(None, False, scale=10, debug=True), debug=True, tr=0.45)
+    ds = TraversabilityDataset(df, root=root, transform=get_transform(None, False, scale=10, debug=True), debug=True, tr=0.45, n=10)
 
     for i in  range(0, 100, 10):
         img, y = ds[i]
@@ -93,10 +93,10 @@ store_inputs = StoreBestWorstAndSample()
 #
 # root = path.abspath('../../resources/assets/datasets/test/')
 root = '/media/francesco/saetta/test/'
-learner = get_learner(model_name, model_dir, callbacks=[store_inputs], root=root, transform=get_transform(None, scale=10),  tr=0.45, n=2)
+learner = get_learner(model_name, model_dir, callbacks=[store_inputs], root=root, transform=get_transform(None, scale=10),  tr=0.45, n=15)
 loss, roc = learner.validate(learner.data.test_dl, metrics=[ROC_AUC()])
 
-best  = store_inputs.df.sort_values(['output_1'], ascending=False)
+best  = store_inputs.df.sort_values(['output_1'], ascending=False).head(30)
 # worst  = store_inputs.df.sort_values(['output_0'], ascending=False).head(30)
 #
 # random = vis.df_sample.head(100)
@@ -104,7 +104,7 @@ best  = store_inputs.df.sort_values(['output_1'], ascending=False)
 # print(best['output_1'], worst['output_0'])
 
 print('*********************')
-store_inputs.plot(best)
+store_inputs.plot(store_inputs.df)
 # store_inputs.plot(worst)
 #
 # import cv2
