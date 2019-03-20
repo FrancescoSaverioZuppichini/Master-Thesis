@@ -51,7 +51,7 @@ model_name = 'microresnet#4-gate=3x3-n=2-se=True'
 
 # learner = get_learner(model_name, model_dir, callbacks=[vis], root=root, transform=get_transform(None, scale=1),  tr=0.45)
 
-model = load_model_from_name(model_dir + '/roc_auc.pth', model_name)
+model = load_model_from_name(model_dir + '/roc_auc.pth', model_name).cuda()
 
 def test():
     # root = path.abspath(
