@@ -93,10 +93,16 @@ store_inputs = StoreBestWorstAndSample()
 #
 # root = path.abspath('../../resources/assets/datasets/test/')
 root = '/media/francesco/saetta/train/'
-learner = get_learner(model_name, model_dir, callbacks=[store_inputs], root=root, transform=get_transform(None, scale=1),  tr=0.45, n=15)
+
+df = root + '/df/querry-big-10/1550307709.2522066-patch.csv'
+
+ds = TraversabilityDataset(df, root=root, transform=get_transform(None, False, scale=10, debug=True), debug=True,
+                           tr=0.45)
+
+learner = get_learner(model_name, model_dir, callbacks=[store_inputs], dataset=ds)
 loss, roc = learner.validate(learner.data.test_dl, metrics=[ROC_AUC()])
 
-best  = store_inputs.df.sort_values(['output_1'], ascending=False).head(30)
+best  = store_inputs.df.sort_values(['output_1'], ascending=False).head(10)
 # worst  = store_inputs.df.sort_values(['output_0'], ascending=False).head(30)
 #
 # random = vis.df_sample.head(100)
