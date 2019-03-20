@@ -64,7 +64,7 @@ def test():
 
     for i in  range(0, 100, 10):
         img, y = ds[i]
-        res = model(img.unsqueeze(0))
+        res = model(img.unsqueeze(0).cuda())
         print(softmax(res, dim=1))
         print('class={}'.format(y))
 
