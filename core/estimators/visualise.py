@@ -87,6 +87,11 @@ def test():
 # res = model(tr(x).unsqueeze(0))
 # print(softmax(res, dim=1))
 
+res = model(torch.zeros((1,1,92,92)).cuda())
+prob = softmax(res, dim=1)
+print(prob, torch.argmax(prob, dim=1))
+
+print('*********************')
 
 # #
 store_inputs = StoreBestWorstAndSample()
