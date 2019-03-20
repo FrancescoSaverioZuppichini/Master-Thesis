@@ -51,7 +51,7 @@ model_name = 'microresnet#4-gate=3x3-n=2-se=True'
 
 # learner = get_learner(model_name, model_dir, callbacks=[vis], root=root, transform=get_transform(None, scale=1),  tr=0.45)
 
-# model = load_model_from_name(model_dir + '/roc_auc.pth', model_name).cuda()
+model = load_model_from_name(model_dir + '/roc_auc.pth', model_name).cuda()
 
 def test():
     # root = path.abspath(
@@ -109,8 +109,13 @@ best  = store_inputs.df.sort_values(['output_1'], ascending=False).head(10)
 #
 # print(best['output_1'], worst['output_0'])
 
+res = model(torch.zeros((1,1,92,92)).cuda())
+print(softmax(res, dim=1))
+
 print('*********************')
 store_inputs.plot(store_inputs.df)
+
+
 # store_inputs.plot(worst)
 #
 # import cv2
