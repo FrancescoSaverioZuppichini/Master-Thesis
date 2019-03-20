@@ -92,8 +92,8 @@ class StoreBestWorstAndSample(Callback):
         :return:
         """
 
-        best = self.df.sort_values(['output_1'], ascending=False).head(10)
-        worst = self.df.sort_values(['output_0'], ascending=False).head(10)
+        best = self.df.sort_values(['output_1'], ascending=False).head(30)
+        worst = self.df.sort_values(['output_0'], ascending=False).head(30)
 
         self.df = pd.concat([best, worst])
 
