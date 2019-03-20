@@ -92,7 +92,7 @@ def test():
 store_inputs = StoreBestWorstAndSample()
 #
 # root = path.abspath('../../resources/assets/datasets/test/')
-root = '/media/francesco/saetta/train/'
+root = '/media/francesco/saetta/test/'
 
 df = root + '/df/querry-big-10/1550307709.2522066-patch.csv'
 
