@@ -110,7 +110,8 @@ best  = store_inputs.df.sort_values(['output_1'], ascending=False).head(10)
 # print(best['output_1'], worst['output_0'])
 
 res = model(torch.zeros((1,1,92,92)).cuda())
-print(softmax(res, dim=1))
+prob = softmax(res, dim=1)
+print(prob, torch.argmax(prob, dim=1))
 
 print('*********************')
 store_inputs.plot(store_inputs.df)
