@@ -44,7 +44,7 @@ class GradCamVisualization():
 
 # model_dir = path.abspath('../../resources/assets/models/microresnet#4-gate=3x3-n=2-se=True-750-0.001-None-1552582563.7411294/')
 
-model_dir ='/home/francesco/Desktop/carino/vaevictis/data/microresnet#4-gate=3x3-n=2-se=True-750-0.001-None-1552582563.7411294/'
+model_dir ='/home/francesco/Desktop/carino/vaevictis/data/microresnet#4-gate=3x3-n=2-se=True-750-0.001-None-1552581592.3601837/'
 # model_dir = '/home/francesco/Documents/Master-Thesis/resources/assets/models/microresnet#4-gate=3x3-n=2-se=True-750-0.001-None-1552582563.7411294'
 
 model_name = 'microresnet#4-gate=3x3-n=2-se=True'
