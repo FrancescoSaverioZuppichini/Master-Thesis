@@ -95,7 +95,7 @@ class CenterAndScalePatch():
         center = x[x.shape[0] // 2, x.shape[1] // 2]
         x -= center
 
-        min, max = x.min(), x.max()
+        min, max = x.min() + 1e-5, x.max()
 
         if self.debug:
             print(max, min)
@@ -250,14 +250,18 @@ def visualise(dl, n=10):
 
 if __name__ == '__main__':
     # df = '/home/francesco/Desktop/querry-high/df/querry-big-10/1552309429.462741-patch.csv'
-    #
-    df = '/home/francesco/Desktop/data/750/train/df/slope_rocks3/1550606526.7238998-patch.csv'
-    ds = TraversabilityDataset(df, transform=get_transform(None, True, scale=10, debug=True), debug=True, tr=0.45)
+    from torch.nn.functional import softmax
 
-    print(len(ds))
-    # for i in  range(2):
-    img, y = ds[0]
-    print(y)
+    root = path.abspath(
+        '../../../resources/assets/datasets/test/')
+
+    df = root + '/df/querry-big-10/1550307709.2522066-patch.csv'
+    ds = TraversabilityDataset(df, root=root, transform=get_transform(None, False, scale=10, debug=True), debug=True, tr=0.45)
+
+    for i in  range(2):
+        img, y = ds[i]
+
+        print(y)
 
     # from torch.nn import Dropout
     # img = Dropout(0.1)(img)

@@ -13,7 +13,7 @@ from fastai.callback import Callback
 from mirror.visualisations.core import GradCam
 from utils import load_model_from_name, get_learner
 from patches import *
-from datasets.TraversabilityDataset import get_transform, CenterAndScalePatch
+from datasets.TraversabilityDataset import get_transform, CenterAndScalePatch, TraversabilityDataset
 from torch.nn.functional import softmax
 from callbacks import ROC_AUC, StoreBestWorstAndSample
 
@@ -42,52 +42,72 @@ class GradCamVisualization():
         plt.show()
 
 
-# model_dir = path.abspath('../../resources/assets/models/microresnet#4-gate=3x3-n=2-se=True-750-0.001-None-1552582563.7411294')
-model_dir = '/home/francesco/Documents/Master-Thesis/resources/assets/models/microresnet#4-gate=3x3-n=2-se=True-750-0.001-None-1552582563.7411294'
+model_dir = path.abspath('../../resources/assets/models/microresnet#4-gate=3x3-n=2-se=True-750-0.001-None-1552582563.7411294/')
+# model_dir = '/home/francesco/Documents/Master-Thesis/resources/assets/models/microresnet#4-gate=3x3-n=2-se=True-750-0.001-None-1552582563.7411294'
 
 model_name = 'microresnet#4-gate=3x3-n=2-se=True'
 
 # learner = get_learner(model_name, model_dir, callbacks=[vis], root=root, transform=get_transform(None, scale=1),  tr=0.45)
 
-# model = load_model_from_name(model_path + '/roc_auc.pth', model_name)
-#
-#
+model = load_model_from_name(model_dir + '/roc_auc.pth', model_name)
+
+def test():
+    root = path.abspath(
+        '../../resources/assets/datasets/test/')
+
+    df = root + '/df/querry-big-10/1550308203.5360308-patch.csv'
+    ds = TraversabilityDataset(df, root=root, transform=get_transform(None, False, scale=10, debug=True), debug=True, tr=0.45)
+
+    for i in  range(0, 100, 10):
+        img, y = ds[i]
+        res = model(img.unsqueeze(0))
+        print(softmax(res, dim=1))
+        print('class={}'.format(y))
+
+
+test()
+
+
 # mod_vis = GradCamVisualization(model)
-# tr = get_transform(resize=None, debug=True)
-# x = np.zeros((92,92)).astype(np.uint8)
-#
-# res = model(tr(x).unsqueeze(0))
-# print(softmax(res, dim=1))
+
 # p = BumpsPatch((92,92))
-# p(strength=1, size=(2,2))
+# p(strength=10, size=(8,1))
 # p.hm *= 255
 # p.plot2d()
-
-
+# #
+# x = p.hm
 #
-store_inputs = StoreBestWorstAndSample()
+# tr = get_transform(resize=None, debug=True)
+# # x = np.zeros((92,92)).astype(np.uint8)
+# print(model)
+# res = model(tr(x).unsqueeze(0))
+# print(softmax(res, dim=1))
 
+
+# #
+# store_inputs = StoreBestWorstAndSample()
+#
 # root = path.abspath('../../resources/assets/datasets/test/')
-root = '/media/francesco/saetta/test/'
-learner = get_learner(model_name, model_dir, callbacks=[store_inputs], root=root, transform=get_transform(None, scale=10),  tr=0.45, n=1)
-loss, roc = learner.validate(learner.data.test_dl, metrics=[ROC_AUC()])
-
-print(roc)
-
-# import pandas as pd
+# # root = '/media/francesco/saetta/test/'
+# learner = get_learner(model_name, model_dir, callbacks=[store_inputs], root=root, transform=get_transform(None, scale=10),  tr=0.45, n=1)
+# loss, roc = learner.validate(learner.data.test_dl, metrics=[ROC_AUC()])
 #
-# preds, targs = learner.get_preds(ds_type=DatasetType.Valid)
+# print(roc)
 #
-# preds = softmax(preds, dim=1)
-# preds = torch.argmax(preds, dim=1)
-# # def show_preds(leaner):
+# # import pandas as pd
+# #
+# # preds, targs = learner.get_preds(ds_type=DatasetType.Valid)
+# #
+# # preds = softmax(preds, dim=1)
+# # preds = torch.argmax(preds, dim=1)
+# # # def show_preds(leaner):
+# #
 #
-
-print(store_inputs.df.head(2))
-
-best  = store_inputs.df.sort_values(['output_1'], ascending=False)
-
-store_inputs.plot(best)
+# print(store_inputs.df.head(2))
+#
+# best  = store_inputs.df.sort_values(['output_1'], ascending=False)
+#
+# store_inputs.plot(best)
 # worst  = vis.df.sort_values(['output_0'], ascending=False).head(30)
 #
 # random = vis.df_sample.head(100)
