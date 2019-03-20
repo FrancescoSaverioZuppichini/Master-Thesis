@@ -42,7 +42,9 @@ class GradCamVisualization():
         plt.show()
 
 
-model_dir = path.abspath('../../resources/assets/models/microresnet#4-gate=3x3-n=2-se=True-750-0.001-None-1552582563.7411294/')
+# model_dir = path.abspath('../../resources/assets/models/microresnet#4-gate=3x3-n=2-se=True-750-0.001-None-1552582563.7411294/')
+
+model_dir ='/home/francesco/Desktop/carino/vaevictis/data/microresnet#4-gate=3x3-n=2-se=True-750-0.001-None-1552582563.7411294/'
 # model_dir = '/home/francesco/Documents/Master-Thesis/resources/assets/models/microresnet#4-gate=3x3-n=2-se=True-750-0.001-None-1552582563.7411294'
 
 model_name = 'microresnet#4-gate=3x3-n=2-se=True'
@@ -52,10 +54,12 @@ model_name = 'microresnet#4-gate=3x3-n=2-se=True'
 model = load_model_from_name(model_dir + '/roc_auc.pth', model_name)
 
 def test():
-    root = path.abspath(
-        '../../resources/assets/datasets/test/')
+    # root = path.abspath(
+    #     '../../resources/assets/datasets/test/')
 
+    root = '/media/francesco/saetta/test/'
     df = root + '/df/querry-big-10/1550308203.5360308-patch.csv'
+
     ds = TraversabilityDataset(df, root=root, transform=get_transform(None, False, scale=10, debug=True), debug=True, tr=0.45)
 
     for i in  range(0, 100, 10):
