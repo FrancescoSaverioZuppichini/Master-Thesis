@@ -92,8 +92,8 @@ def test():
 store_inputs = StoreBestWorstAndSample()
 #
 # root = path.abspath('../../resources/assets/datasets/test/')
-root = '/media/francesco/saetta/test/'
-learner = get_learner(model_name, model_dir, callbacks=[store_inputs], root=root, transform=get_transform(None, scale=10),  tr=0.45, n=15)
+root = '/media/francesco/saetta/train/'
+learner = get_learner(model_name, model_dir, callbacks=[store_inputs], root=root, transform=get_transform(None, scale=1),  tr=0.45, n=15)
 loss, roc = learner.validate(learner.data.test_dl, metrics=[ROC_AUC()])
 
 best  = store_inputs.df.sort_values(['output_1'], ascending=False).head(30)
