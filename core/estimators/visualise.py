@@ -93,18 +93,18 @@ store_inputs = StoreBestWorstAndSample()
 #
 # root = path.abspath('../../resources/assets/datasets/test/')
 root = '/media/francesco/saetta/test/'
-learner = get_learner(model_name, model_dir, callbacks=[store_inputs], root=root, transform=get_transform(None, scale=10),  tr=0.45, n=20)
+learner = get_learner(model_name, model_dir, callbacks=[store_inputs], root=root, transform=get_transform(None, scale=10),  tr=0.45, n=2)
 loss, roc = learner.validate(learner.data.test_dl, metrics=[ROC_AUC()])
 
 best  = store_inputs.df.sort_values(['output_1'], ascending=False)
-worst  = store_inputs.df.sort_values(['output_0'], ascending=False).head(30)
+# worst  = store_inputs.df.sort_values(['output_0'], ascending=False).head(30)
 #
 # random = vis.df_sample.head(100)
 #
 # print(best['output_1'], worst['output_0'])
 #
 store_inputs.plot(best)
-store_inputs.plot(worst)
+# store_inputs.plot(worst)
 #
 # import cv2
 # from mirror.visualisations.core import GradCam
