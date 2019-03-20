@@ -96,7 +96,7 @@ root = '/media/francesco/saetta/test/'
 
 df = root + '/df/querry-big-10/1550307709.2522066-patch.csv'
 
-ds = TraversabilityDataset(df, root=root, transform=get_transform(None, False, scale=10, debug=True), debug=True,
+ds = TraversabilityDataset(df, root=root, transform=get_transform(None, False, scale=10, debug=False), debug=True,
                            tr=0.45)
 
 learner = get_learner(model_name, model_dir, callbacks=[store_inputs], dataset=ds)
