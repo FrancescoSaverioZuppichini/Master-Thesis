@@ -99,10 +99,10 @@ class StoreBestWorstAndSample(Callback):
 
 
     def plot(self, sample):
-        for img, pred in zip(sample['input'], sample['prediction']):
+        for img, pred, target in zip(sample['input'], sample['prediction'], sample['target']):
             img = np.array(img).squeeze()
             fig = plt.figure()
-            plt.title(pred)
+            plt.title('pred={}, target={}'.format(pred, target))
             sns.heatmap(img,
                         vmin=0,
                         # annot=True,
