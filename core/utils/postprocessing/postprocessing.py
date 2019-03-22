@@ -302,7 +302,7 @@ class PatchesHandler(PostProcessingHandler):
 
         :return:
         """
-        df, hm, file_path = data
+        df, hm, file_path = data #TODO create a function that takes a df and hm and produces the patches
         dirs, name = path.split(file_path)
 
         out_dir = self.config.out_dir
@@ -381,20 +381,38 @@ def make_and_run_chain(config):
 
     list(b_h(bags))
 
+def run_train_val_test_chain(base_dir, base_maps_dir, *args, **kwargs):
+    for name in ['train', 'val', 'test']:
+        bags_dir = base_dir + '/{}'.format(name) + '/bags/'
+        maps_dir = base_maps_dir + '/{}'.format(name)
+
+        config = PostProcessingConfig(bags_dir=bags_dir, maps_folder=maps_dir, name=name, *args, **kwargs)
+
+        make_and_run_chain(config)
 
 if __name__ == '__main__':
-    config = PostProcessingConfig(bags_dir='./test/bags/',
-                                  maps_folder='../../maps/test/',
-                                  # csv_dir='/home/francesco/Desktop/data/92/train/csvs/',
-                                  out_dir='./test/',
-                                  patch_size=85,
-                                  advancement_th=0.45,
-                                  skip_every=12,
-                                  translation=[5, 5],
-                                  time_window=750,
-                                  name='train')
+    run_train_val_test_chain(base_dir='/media/francesco/saetta/krock-dataset/92/',
+                             base_maps_dir='/home/francesco/Documents/Master-Thesis/core/maps/',
+                             out_dir='/media/francesco/saetta/85-750/',
+                             patch_size=85,
+                              advancement_th=0.45,
+                              skip_every=12,
+                              translation=[5, 5],
+                              time_window=750)
 
-    make_and_run_chain(config)
+    #
+    # config = PostProcessingConfig(bags_dir='./test/bags/',
+    #                               maps_folder='../../maps/test/',
+    #                               # csv_dir='/home/francesco/Desktop/data/92/train/csvs/',
+    #                               out_dir='./test/',
+    #                               patch_size=85,
+    #                               advancement_th=0.45,
+    #                               skip_every=12,
+    #                               translation=[5, 5],
+    #                               time_window=750,
+    #                               name='train')
+    #
+    # make_and_run_chain(config)
 
     # config = PostProcessingConfig(bags_dir='/home/francesco/Desktop/carino/vaevictis/krock-dataset/92/train/bags/',
     #                               maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/train/',
