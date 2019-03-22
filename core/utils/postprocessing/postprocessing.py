@@ -364,7 +364,7 @@ def make_and_run_chain(config):
     # patches_h = PatchesHandler(config=config, debug=False)
     df_h = DataFrameHandler(successor=None, config=config)
     b_h = BagsHandler(config=config, successor=df_h)
-    bags = glob.glob('{}/**/*.csv'.format(config.bags_dir))
+    bags = glob.glob('{}/**/*.bag'.format(config.bags_dir))
 
     list(b_h(bags))
 
@@ -372,7 +372,6 @@ def run_train_val_test_chain(base_dir, base_maps_dir, *args, **kwargs):
     for name in ['train', 'val', 'test']:
         maps_dir = base_maps_dir + '/{}'.format(name)
         config = PostProcessingConfig(base_dir=base_dir + '/{}'.format(name), maps_folder=maps_dir, name=name, *args, **kwargs)
-        print(config.__dict__)
 
         make_and_run_chain(config)
 
