@@ -96,10 +96,6 @@ class InMemoryHandler(PostProcessingHandler):
     the csvs files from DataFrameHandler where already generated
     """
 
-    def __init__(self, from_dir, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.from_dir = from_dir
-
     def add_maps(self, file_name):
         map_name = filename2map(file_name)
         df = pd.read_csv(file_name)
