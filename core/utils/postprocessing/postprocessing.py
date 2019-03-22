@@ -296,51 +296,48 @@ class PatchesHandler(PostProcessingHandler):
 
         os.makedirs(out_dir + '/patches', exist_ok=True)
         os.makedirs(file_path_light, exist_ok=True)
-        try:
-            # df = df[::self.config.skip_every]
-            df = self.df_add_label(df, self.config.advancement_th)
+        df = df[::self.config.skip_every]
+        df = self.df_add_label(df, self.config.advancement_th)
 
-            image_paths = []
+        image_paths = []
 
-            to_show = 1
+        to_show = 1
 
-            for idx, (i, row) in enumerate(df.iterrows()):
-                patch = \
-                    hmpatch(hm, row["hm_x"], row["hm_y"], np.rad2deg(row['pose__pose_e_orientation_z']),
-                            self.config.patch_size,
-                            scale=1)[0]
+        for idx, (i, row) in enumerate(df.iterrows()):
+            patch = \
+                hmpatch(hm, row["hm_x"], row["hm_y"], np.rad2deg(row['pose__pose_e_orientation_z']),
+                        self.config.patch_size,
+                        scale=1)[0]
 
-                if self.debug and to_show > idx:
-                    fig = plt.figure()
-                    sns.heatmap(patch, vmin=0, vmax=1)
-                    plt.title('before saving')
-                    plt.show()
+            if self.debug and to_show > idx:
+                fig = plt.figure()
+                sns.heatmap(patch, vmin=0, vmax=1)
+                plt.title('before saving')
+                plt.show()
 
-                patch = (patch * 255).astype(np.uint8)
+            patch = (patch * 255).astype(np.uint8)
 
-                image_path = path.normpath('{}/patches/{}.png'.format(out_dir, row['timestamp']))
+            image_path = path.normpath('{}/patches/{}.png'.format(out_dir, row['timestamp']))
 
-                cv2.imwrite(image_path, patch)
+            cv2.imwrite(image_path, patch)
 
-                image_paths.append(path.basename(image_path)) # store only name not abs path
+            image_paths.append(path.basename(image_path)) # store only name not abs path
 
-                if self.debug and to_show > idx:
-                    fig = plt.figure()
-                    patch_saved = cv2.imread(image_path)
-                    patch_saved = cv2.cvtColor(patch_saved, cv2.COLOR_BGR2GRAY)
+            if self.debug and to_show > idx:
+                fig = plt.figure()
+                patch_saved = cv2.imread(image_path)
+                patch_saved = cv2.cvtColor(patch_saved, cv2.COLOR_BGR2GRAY)
 
-                    sns.heatmap(patch_saved / 255, vmin=0, vmax=1)
-                    plt.title('after saving')
-                    plt.show()
+                sns.heatmap(patch_saved / 255, vmin=0, vmax=1)
+                plt.title('after saving')
+                plt.show()
 
-            df['image_path'] = image_paths
+        df['image_path'] = image_paths
 
-            # create a new small dataframe with the reference to the image stored
-            df.to_csv(file_path_light + '/{}-patch.csv'.format(name))
+        # create a new small dataframe with the reference to the image stored
+        df.to_csv(file_path_light + '/{}-patch.csv'.format(name))
 
-        except Exception as e:
-            print(e)
-        #
+
         return data
 
     def handle(self, data):
