@@ -20,8 +20,10 @@ from pypeln import thread as th
 class PostProcessingConfig():
     def __init__(self, out_dir, maps_folder, patch_size, advancement_th, time_window, skip_every, translation,
                  resolution=0.02, scale=1, n_workers=16,
-                 bags_dir=None, csv_dir=None,  patch_dir=None, verbose=True, patches=True, name=''):
-        self.maps_folder, self.bags_dir, self.out_dir, self.csv_dir= maps_folder, bags_dir, out_dir, csv_dir
+                 base_dir=None, csv_dir=None,  patch_dir=None, verbose=True, patches=True, name=''):
+        self.maps_folder, self.base_dir, self.out_dir, self.csv_dir= maps_folder, bags_dir, out_dir, csv_dir
+
+        self.bags_dir = self.base_dir + '/bags/'
 
         self.patch_size, self.advancement_th, self.time_window = patch_size, advancement_th, time_window
         self.scale, self.skip_every = scale, skip_every
@@ -153,30 +155,14 @@ class DataFrameHandler(PostProcessingHandler):
             axis=1)
         return df
 
-    def df_add_advancement(self, df, dt):
-        """
-        Project the distance x and y computed using a rolling window
-        into the current line to compute the advancement
-        :param df:
-        :param dt:
-        :return:
-        """
-        # get out the cos and sin component from the euler's w angle
+    def extract_cos_sin(self, df):
         df["S_oX"] = np.cos(df['pose__pose_e_orientation_z'].values)
         df["S_oY"] = np.sin(df['pose__pose_e_orientation_z'].values)
 
         assert (np.allclose(1, np.linalg.norm(df[["S_oX", "S_oY"]], axis=1)))
-        # look dt in the future and compute the distance for booth axis
-        df["S_dX"] = df.rolling(window=(dt + 1))['pose__pose_position_x'].apply(lambda x: x[-1] - x[0], raw=True).shift(
-            -dt)
-        df["S_dY"] = df.rolling(window=(dt + 1))['pose__pose_position_y'].apply(lambda x: x[-1] - x[0], raw=True).shift(
-            -dt)
-        # compute euclidean distance
-        # df["S_d"] = np.linalg.norm(df[["S_dX", "S_dY"]], axis=1)
-        # project x and y in the current line and compute the advancement
-        df["advancement"] = np.einsum('ij,ij->i', df[["S_dX", "S_dY"]], df[["S_oX", "S_oY"]])  # row-wise dot product
 
         return df
+
 
     def df_clean_by_dropping(self, df, max_x, max_y):
         """
@@ -223,7 +209,7 @@ class DataFrameHandler(PostProcessingHandler):
         def make_path(file_path):
             splitted = file_path.split('/')
             map_name, file_name = splitted[-2], splitted[-1]
-            return path.normpath('{}/{}/{}'.format(self.config.out_dir + '/csvs/', map_name, path.splitext(file_name)[0]))
+            return path.normpath('{}/{}/{}'.format(self.config.base_dir + '/csvs/', map_name, path.splitext(file_name)[0]))
 
         map_name = filename2map(file_path)
         map_path = '{}/{}.png'.format(self.config.maps_folder, map_name)
@@ -244,7 +230,7 @@ class DataFrameHandler(PostProcessingHandler):
                                                hm.shape[1] * self.config.resolution)
 
                 if len(df) > 0:
-                    df = self.df_add_advancement(df, self.config.time_window)
+                    df = self.extract_cos_sin(df)
                     df = self.df_add_hm_coords(df, hm)
                     df = self.df_clean_by_removing_outliers(df, hm)
                     df = df.dropna()
@@ -281,6 +267,28 @@ class PatchesHandler(PostProcessingHandler):
         df["label"] = df["advancement"] > advancement_th
         return df
 
+    def df_add_advancement(self, df, dt):
+        """
+        Project the distance x and y computed using a rolling window
+        into the current line to compute the advancement
+        :param df:
+        :param dt:
+        :return:
+        """
+        # get out the cos and sin component from the euler's w angle
+
+        # look dt in the future and compute the distance for booth axis
+        df["S_dX"] = df.rolling(window=(dt + 1))['pose__pose_position_x'].apply(lambda x: x[-1] - x[0], raw=True).shift(
+            -dt)
+        df["S_dY"] = df.rolling(window=(dt + 1))['pose__pose_position_y'].apply(lambda x: x[-1] - x[0], raw=True).shift(
+            -dt)
+        # compute euclidean distance
+        # df["S_d"] = np.linalg.norm(df[["S_dX", "S_dY"]], axis=1)
+        # project x and y in the current line and compute the advancement
+        df["advancement"] = np.einsum('ij,ij->i', df[["S_dX", "S_dY"]], df[["S_oX", "S_oY"]])  # row-wise dot product
+
+        return df
+
     def df2patches(self, data):
         """
         Given a dataframe, and heightmap and the file path, this function extracts a patch
@@ -300,8 +308,10 @@ class PatchesHandler(PostProcessingHandler):
 
         os.makedirs(out_dir + '/patches', exist_ok=True)
         os.makedirs(file_path_light, exist_ok=True)
-        df = df[::self.config.skip_every]
         # df = self.df_add_label(df, self.config.advancement_th)
+        df = self.df_add_advancement(df, self.config.time_window)
+
+        df = df[::self.config.skip_every]
 
         image_paths = []
 
@@ -353,7 +363,7 @@ class PatchesHandler(PostProcessingHandler):
 def make_and_run_chain(config):
     patches_h = PatchesHandler(config=config, debug=False)
     df_h = DataFrameHandler(successor=patches_h, config=config)
-    b_h = InMemoryHandler(config=config, successor=patches_h)
+    b_h = BagsHandler(config=config, successor=df_h)
     bags = glob.glob('{}/**/*.csv'.format(config.bags_dir))
 
     list(b_h(bags))
@@ -363,14 +373,13 @@ def run_train_val_test_chain(base_dir, base_maps_dir, *args, **kwargs):
         bags_dir = base_dir + '/{}'.format(name) + '/csvs/'
         maps_dir = base_maps_dir + '/{}'.format(name)
 
-        config = PostProcessingConfig(bags_dir=bags_dir, maps_folder=maps_dir, name=name, *args, **kwargs)
+        config = PostProcessingConfig(base_dir=base_dir, maps_folder=maps_dir, name=name, *args, **kwargs)
 
         make_and_run_chain(config)
 
 if __name__ == '__main__':
     run_train_val_test_chain(base_dir='/media/francesco/saetta/krock-dataset/92/',
                              base_maps_dir='/home/francesco/Documents/Master-Thesis/core/maps/',
-                             csv_dir='/media/francesco/saetta/krock-dataset/92/',
                              out_dir='/media/francesco/saetta/85-750/',
                              patch_size=85,
                               advancement_th=0.45,
