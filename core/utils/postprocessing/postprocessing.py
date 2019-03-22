@@ -99,7 +99,11 @@ class InMemoryHandler(PostProcessingHandler):
     def add_maps(self, file_name):
         map_name = filename2map(file_name)
         df = pd.read_csv(file_name)
-        return (df, map_name, file_name)
+
+        map_path = '{}/{}.png'.format(self.config.maps_folder, map_name)
+
+        hm = read_image(map_path)
+        return (df, hm, file_name)
 
     def handle(self, csvs):
         stage = th.map(self.add_maps, csvs, workers=self.config.n_workers)
