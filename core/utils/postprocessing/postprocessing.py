@@ -21,7 +21,7 @@ class PostProcessingConfig():
     def __init__(self, out_dir, maps_folder, patch_size, advancement_th, time_window, skip_every, translation,
                  resolution=0.02, scale=1, n_workers=16,
                  base_dir=None, csv_dir=None,  patch_dir=None, verbose=True, patches=True, name=''):
-        self.maps_folder, self.base_dir, self.out_dir, self.csv_dir= maps_folder, bags_dir, out_dir, csv_dir
+        self.maps_folder, self.base_dir, self.out_dir, self.csv_dir= maps_folder, base_dir, out_dir, csv_dir
 
         self.bags_dir = self.base_dir + '/bags/'
 
