@@ -372,8 +372,8 @@ def run_train_val_test_chain(base_dir, base_maps_dir, *args, **kwargs):
     for name in ['train', 'val', 'test']:
         base_dir = base_dir + '/{}'.format(name)
         maps_dir = base_maps_dir + '/{}'.format(name)
-        print(config.__dict__)
         config = PostProcessingConfig(base_dir=base_dir, maps_folder=maps_dir, name=name, *args, **kwargs)
+        print(config.__dict__)
 
         make_and_run_chain(config)
 
