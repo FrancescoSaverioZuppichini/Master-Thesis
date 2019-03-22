@@ -383,16 +383,16 @@ def make_and_run_chain(config):
 
 
 if __name__ == '__main__':
-    # config = PostProcessingConfig(base_dir='/home/francesco/Desktop/bars1-run-recorded/',
-    #                               maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/train/',
-    #                               # csv_dir='/home/francesco/Desktop/data/92/train/csvs/',
-    #                               # out_dir='/home/francesco/Desktop/data/92/train/',
-    #                               patch_size=92,
-    #                               advancement_th=0.12,
-    #                               skip_every=25,
-    #                               translation=[5, 5],
-    #                               time_window=125,
-    #                               name='train')
+    config = PostProcessingConfig(bags_dir='./test/bags/',
+                                  maps_folder='../../maps/test/',
+                                  # csv_dir='/home/francesco/Desktop/data/92/train/csvs/',
+                                  out_dir='./test/',
+                                  patch_size=85,
+                                  advancement_th=0.45,
+                                  skip_every=12,
+                                  translation=[5, 5],
+                                  time_window=750,
+                                  name='train')
 
     make_and_run_chain(config)
 
