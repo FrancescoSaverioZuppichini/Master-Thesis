@@ -297,7 +297,7 @@ class PatchesHandler(PostProcessingHandler):
         os.makedirs(out_dir + '/patches', exist_ok=True)
         os.makedirs(file_path_light, exist_ok=True)
         try:
-            df = df[::self.config.skip_every]
+            # df = df[::self.config.skip_every]
             df = self.df_add_label(df, self.config.advancement_th)
 
             image_paths = []
