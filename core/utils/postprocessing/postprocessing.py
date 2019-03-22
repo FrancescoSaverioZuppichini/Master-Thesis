@@ -310,6 +310,7 @@ class PatchesHandler(PostProcessingHandler):
         os.makedirs(file_path_light, exist_ok=True)
         # df = self.df_add_label(df, self.config.advancement_th)
         df = self.df_add_advancement(df, self.config.time_window)
+        df = df.dropna()
 
         df = df[::self.config.skip_every]
 
@@ -361,12 +362,13 @@ class PatchesHandler(PostProcessingHandler):
 
 
 def make_and_run_chain(config):
-    # patches_h = PatchesHandler(config=config, debug=False)
-    df_h = DataFrameHandler(successor=None, config=config)
-    b_h = BagsHandler(config=config, successor=df_h)
-    bags = glob.glob('{}/**/*.bag'.format(config.bags_dir))
+    patches_h = PatchesHandler(config=config, debug=False)
+    m_h = InMemoryHandler(config=config, successor=patches_h)
+    # df_h = DataFrameHandler(successor=None, config=config)
+    # b_h = BagsHandler(config=config, successor=df_h)
+    bags = glob.glob('{}/csvs/**/*.csv'.format(config.base_dir))
 
-    list(b_h(bags))
+    list(m_h(bags))
 
 def run_train_val_test_chain(base_dir, base_maps_dir, *args, **kwargs):
     for name in ['train', 'val', 'test']:
