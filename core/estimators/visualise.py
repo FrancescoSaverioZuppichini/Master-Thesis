@@ -26,13 +26,13 @@ class GradCamVisualization():
         self.grad_cam = GradCam(model.to(self.device), self.device)
 
     def __call__(self, patch):
-        img = torch.from_numpy(patch).unsqueeze(0).unsqueeze(0).to(self.device).float()
+        img = patch.unsqueeze(0)
 
         _, info = self.grad_cam(img, None, target_class=None)
         print(info['predictions'])
 
         cam = info['cam'].cpu().numpy()
-        cam = cv2.resize(cam, patch.shape)
+        cam = cv2.resize(cam, (patch.shape[1], patch.shape[2]))
         cam = (cam - cam.min()) / (cam.max() - cam.min())
         cam *= 255
 
@@ -42,84 +42,59 @@ class GradCamVisualization():
         plt.show()
 
 
-# model_dir = path.abspath('../../resources/assets/models/microresnet#4-gate=3x3-n=2-se=True-750-0.001-None-1552582563.7411294/')
+model_dir = path.abspath('../../resources/assets/models/microresnet#4-gate=3x3-n=2-se=True-750-0.001-None-1552582563.7411294/')
 
-model_dir ='/home/francesco/Desktop/carino/vaevictis/data/microresnet#4-gate=3x3-n=2-se=True-750-0.001-None-1552582563.7411294/'
+# model_dir ='/home/francesco/Desktop/carino/vaevictis/data/microresnet#4-gate=3x3-n=2-se=True-750-0.001-None-1552582563.7411294/'
 # model_dir = '/home/francesco/Documents/Master-Thesis/resources/assets/models/microresnet#4-gate=3x3-n=2-se=True-750-0.001-None-1552582563.7411294'
 
 model_name = 'microresnet#4-gate=3x3-n=2-se=True'
 
 # learner = get_learner(model_name, model_dir, callbacks=[vis], root=root, transform=get_transform(None, scale=1),  tr=0.45)
 
-model = load_model_from_name(model_dir + '/roc_auc.pth', model_name).cuda()
-
-def test():
-    # root = path.abspath(
-    #     '../../resources/assets/datasets/test/')
-
-    root = '/media/francesco/saetta/test/'
-    df = root + '/df/querry-big-10/1550308203.5360308-patch.csv'
-
-    ds = TraversabilityDataset(df, root=root, transform=get_transform(None, False, scale=10, debug=True), debug=True, tr=0.45, n=10)
-
-    for i in  range(0, 100, 10):
-        img, y = ds[i]
-        res = model(img.unsqueeze(0).cuda())
-        print(softmax(res, dim=1))
-        print('class={}'.format(y))
+model = load_model_from_name(model_dir + '/roc_auc.pth', model_name)
 
 
-# test()
+
+mod_vis = GradCamVisualization(model)
+
+p = BumpsPatch((92,92))
+p(strength=0.01)
+p.hm *= 255
+p.plot2d()
+
+tr = get_transform(resize=None, debug=False)
+x = tr(p.hm)
+
+model.eval()
+# res = model(x.unsqueeze(0))
+# prob = softmax(res, dim=1)
+# print(prob, torch.argmax(prob, dim=1))
+
+mod_vis(x)
 
 
-# mod_vis = GradCamVisualization(model)
-
-# p = BumpsPatch((92,92))
-# p(strength=10, size=(8,1))
-# p.hm *= 255
-# p.plot2d()
-# #
-# x = p.hm
-#
-# tr = get_transform(resize=None, debug=True)
-# # x = np.zeros((92,92)).astype(np.uint8)
-# print(model)
-# res = model(tr(x).unsqueeze(0))
-# print(softmax(res, dim=1))
-
-res = model(torch.zeros((1,1,92,92)).cuda())
-prob = softmax(res, dim=1)
-print(prob, torch.argmax(prob, dim=1))
-
-print('*********************')
 
 # #
-store_inputs = StoreBestWorstAndSample()
+# store_inputs = StoreBestWorstAndSample()
+# #
+# # root = path.abspath('../../resources/assets/datasets/test/')
+# root = '/media/francesco/saetta/test/'
 #
-# root = path.abspath('../../resources/assets/datasets/test/')
-root = '/media/francesco/saetta/test/'
-
-df = root + '/df/querry-big-10/1550307709.2522066-patch.csv'
-
-ds = TraversabilityDataset(df, root=root, transform=get_transform(None, False, scale=10, debug=False), debug=True,
-                           tr=0.45)
-
-learner = get_learner(model_name, model_dir, callbacks=[store_inputs], dataset=ds)
-loss, roc = learner.validate(learner.data.test_dl, metrics=[ROC_AUC()])
-
-best  = store_inputs.df.sort_values(['output_1'], ascending=False).head(10)
+# df = root + '/df/querry-big-10/1550307709.2522066-patch.csv'
+#
+# ds = TraversabilityDataset(df, root=root, transform=get_transform(None, False, scale=10, debug=False), debug=True,
+#                            tr=0.45)
+#
+# learner = get_learner(model_name, model_dir, callbacks=[store_inputs], dataset=ds)
+# loss, roc = learner.validate(learner.data.test_dl, metrics=[ROC_AUC()])
+#
+# best  = store_inputs.df.sort_values(['output_1'], ascending=False).head(10)
 # worst  = store_inputs.df.sort_values(['output_0'], ascending=False).head(30)
 #
 # random = vis.df_sample.head(100)
 #
 # print(best['output_1'], worst['output_0'])
 
-res = model(torch.zeros((1,1,92,92)).cuda())
-prob = softmax(res, dim=1)
-print(prob, torch.argmax(prob, dim=1))
-
-print('*********************')
-store_inputs.plot(store_inputs.df)
 
 
 # store_inputs.plot(worst)

@@ -12,7 +12,7 @@ from fastai.train import Learner, DataBunch, DatasetType
 from torch.nn.functional import softmax
 
 def load_model(path: str, model: Module):
-    state = torch.load(path)
+    state = torch.load(path, map_location='cpu')
     model.load_state_dict(state['model'])
 
     return model

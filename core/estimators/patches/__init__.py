@@ -40,15 +40,20 @@ class Patch():
         p = cls(hm.shape)
         p.hm =hm
         return p
+    
+    @classmethod
+    def from_tensor(cls, tensor):
+        hm = tensor.squeeze().cpu().numpy()
+        return cls.from_hm(hm)
 
 
 class BarPatch(Patch):
     def make(self, offset=16, size=4, strength=1):
-        self.hm[offset: offset + size] = strength
-        self.hm[-offset: -offset + size] = strength
+        self.hm[offset: offset + size, :] = strength
+        print(-offset - size, -offset)
+        self.hm[-offset - size: -offset:, :] = strength
 
         return self.hm
-
 
 class BumpsPatch(Patch):
     def make(self, strength=1.0, resolution=(4,4), size=(1,1)):
@@ -70,13 +75,14 @@ class HolesPatch(BumpsPatch):
 
 
 if __name__ == '__main__':
-#     little tests
-    # p = BarPatch((92,92))
-    # p()
-    # p.plot2d()
-
-    p = HolesPatch((92,92))
-    p(strength=0.5)
+#     little test
+    p = BarPatch((92,92))
+    p(offset=2)
     p.plot2d()
     p.plot3d()
+    #
+    # p = HolesPatch((92,92))
+    # p(strength=0.5)
+    # p.plot2d()
+    # p.plot3d()
 
