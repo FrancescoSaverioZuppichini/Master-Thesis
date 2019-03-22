@@ -349,7 +349,7 @@ class PatchesHandler(PostProcessingHandler):
 def make_and_run_chain(config):
     patches_h = PatchesHandler(config=config, debug=False)
     df_h = DataFrameHandler(successor=patches_h, config=config)
-    b_h = InMemoryHandler(config=config, successor=df_h)
+    b_h = InMemoryHandler(config=config, successor=patches_h)
     bags = glob.glob('{}/**/*.csv'.format(config.bags_dir))
 
     list(b_h(bags))
