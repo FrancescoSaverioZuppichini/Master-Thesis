@@ -41,9 +41,9 @@ def train_and_evaluate(params, train=True, load_model=None):
     criterion = CrossEntropyFlat()
 
     train_dl, val_dl, test_dl = get_dataloaders(
-        train_root='/home/francesco/Desktop/data/{}/train/df/'.format(params['dataset']),
-        val_root='/home/francesco/Desktop/data/{}/val/df/'.format(params['dataset']),
-        test_root='/home/francesco/Desktop/data/{}/test/df/'.format(params['dataset']),
+        train_root='/media/francesco/saetta/{}/train/df/'.format(params['dataset']),
+        val_root='/media/francesco/saetta/{}/val/df/'.format(params['dataset']),
+        test_root='/media/francesco/saetta/{}/test/df/'.format(params['dataset']),
         train_transform=get_transform(params['resize'], should_aug=params['data-aug']),
         val_transform=get_transform(params['resize'], scale=1, should_aug=False),
         test_transform=get_transform(params['resize'], scale=10, should_aug=False),

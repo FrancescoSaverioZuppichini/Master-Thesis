@@ -15,7 +15,7 @@ from torch.utils.data import DataLoader, random_split, RandomSampler, ConcatData
 from torchvision.transforms import Resize, ToPILImage, ToTensor, Grayscale, Compose
 from torch.utils.data import Dataset
 from torch.nn import Dropout
-
+from utils.postprocessing.utils import hmpatch
 
 class ImgaugWrapper():
     """
@@ -133,7 +133,7 @@ class TraversabilityDataset(Dataset):
     def __getitem__(self, item):
         row = self.df.iloc[item]
         img_path = path.normpath(self.image_dir + row['image_path'])
-        # img = Image.open(img_path)
+
         y = row['advancement']
         y = torch.tensor(y)
 

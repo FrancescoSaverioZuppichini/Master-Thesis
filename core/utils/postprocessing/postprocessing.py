@@ -102,22 +102,12 @@ class InMemoryHandler(PostProcessingHandler):
 
     def add_maps(self, file_name):
         map_name = filename2map(file_name)
-        return (None, map_name, file_name)
+        df = pd.read_csv(file_name)
+        return (df, map_name, file_name)
 
-        # file_path = make_path(file_name, self.from_dir)
-        # df = pd.read_csv(file_path + '-complete.csv')
-        #
-        # map_name = filename2map(file_path)
-        # map_path = '{}/{}.png'.format(self.config.maps_folder, map_name)
-        # # print(map_path)
-        #
-        # hm = read_image(map_path)
-        #
-        # return (df, hm, file_name)
-
-    def handle(self, names):
-        stage = th.map(self.add_maps, names, workers=self.config.n_workers)
-        return tqdm(stage, total=len(names), desc='[INFO] Memory handler')
+    def handle(self, csvs):
+        stage = th.map(self.add_maps, csvs, workers=self.config.n_workers)
+        return tqdm(stage, total=len(csvs), desc='[INFO] Memory handler')
 
 
 class DataFrameHandler(PostProcessingHandler):
@@ -223,7 +213,6 @@ class DataFrameHandler(PostProcessingHandler):
         return df
 
     def df_adjust_robot_center(self, df):
-        # df['hm_x'] += 15
         df['pose__pose_position_x'] = df['pose__pose_position_x'] + 0.3
 
         return df
@@ -238,7 +227,6 @@ class DataFrameHandler(PostProcessingHandler):
 
         map_name = filename2map(file_path)
         map_path = '{}/{}.png'.format(self.config.maps_folder, map_name)
-        # print(map_path)
 
         hm = read_image(map_path)
         file_path = make_path(file_path)
@@ -313,16 +301,8 @@ class PatchesHandler(PostProcessingHandler):
         os.makedirs(out_dir + '/patches', exist_ok=True)
         os.makedirs(file_path_light, exist_ok=True)
         try:
-
+            df = df[::self.config.skip_every]
             df = self.df_add_label(df, self.config.advancement_th)
-            # df = self.remove_negative_advancement(df)
-            # reset the index to int so we can take only on row every Config.SKIP_EVERY
-            # since the stored rate was really high, 250hz, we will end up with lots of almost
-            # identical patches
-            df = df.reset_index()
-            df = df.loc[list(range(0, len(df), self.config.skip_every)), :]
-            df = df.set_index(df.columns[0])
-            df = df.dropna()
 
             image_paths = []
 
@@ -346,7 +326,7 @@ class PatchesHandler(PostProcessingHandler):
 
                 cv2.imwrite(image_path, patch)
 
-                image_paths.append(image_path)
+                image_paths.append(path.basename(image_path)) # store only name not abs path
 
                 if self.debug and to_show > idx:
                     fig = plt.figure()
@@ -376,8 +356,8 @@ class PatchesHandler(PostProcessingHandler):
 def make_and_run_chain(config):
     patches_h = PatchesHandler(config=config, debug=False)
     df_h = DataFrameHandler(successor=patches_h, config=config)
-    b_h = BagsHandler(config=config, successor=df_h)
-    bags = glob.glob('{}/**/*.bag'.format(config.bags_dir))
+    b_h = InMemoryHandler(config=config, successor=df_h)
+    bags = glob.glob('{}/**/*.csv'.format(config.bags_dir))
 
     list(b_h(bags))
 
@@ -393,6 +373,7 @@ def run_train_val_test_chain(base_dir, base_maps_dir, *args, **kwargs):
 if __name__ == '__main__':
     run_train_val_test_chain(base_dir='/media/francesco/saetta/krock-dataset/92/',
                              base_maps_dir='/home/francesco/Documents/Master-Thesis/core/maps/',
+                             csv_dir='/media/francesco/saetta/krock-dataset/92/',
                              out_dir='/media/francesco/saetta/85-750/',
                              patch_size=85,
                               advancement_th=0.45,
