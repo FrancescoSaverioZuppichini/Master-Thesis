@@ -20,8 +20,8 @@ from pypeln import thread as th
 class PostProcessingConfig():
     def __init__(self, out_dir, maps_folder, patch_size, advancement_th, time_window, skip_every, translation,
                  resolution=0.02, scale=1, n_workers=16,
-                 base_dir=None, csv_dir=None,  patch_dir=None, verbose=True, patches=True, name=''):
-        self.maps_folder, self.base_dir, self.out_dir, self.csv_dir= maps_folder, base_dir, out_dir, csv_dir
+                 base_dir=None, csv_dir=None, patch_dir=None, verbose=True, patches=True, name=''):
+        self.maps_folder, self.base_dir, self.out_dir, self.csv_dir = maps_folder, base_dir, out_dir, csv_dir
 
         self.bags_dir = self.base_dir + '/bags/'
 
@@ -39,7 +39,6 @@ class PostProcessingConfig():
 
     @classmethod
     def from_args(cls, args):
-
         return cls(**vars(args))
 
 
@@ -66,11 +65,12 @@ class PostProcessingHandler(Handler):
         super().__init__(successor=successor)
         self.config = config
 
+
 def make_path(file_path, out_dir):
-        splitted = file_path.split('/')
-        map_name, file_name = splitted[-2], splitted[-1]
-        return path.normpath(
-            '{}/{}/{}'.format(out_dir + '/csvs/', map_name, path.splitext(file_name)[0]))
+    splitted = file_path.split('/')
+    map_name, file_name = splitted[-2], splitted[-1]
+    return path.normpath(
+        '{}/{}/{}'.format(out_dir + '/csvs/', map_name, path.splitext(file_name)[0]))
 
 
 class BagsHandler(PostProcessingHandler):
@@ -89,7 +89,6 @@ class BagsHandler(PostProcessingHandler):
     def handle(self, bags):
         stage = th.map(self.bag2df, bags, workers=self.config.n_workers)
         return tqdm(stage, total=len(bags), desc='[INFO] Bags handler')
-
 
 
 class InMemoryHandler(PostProcessingHandler):
@@ -163,7 +162,6 @@ class DataFrameHandler(PostProcessingHandler):
 
         return df
 
-
     def df_clean_by_dropping(self, df, max_x, max_y):
         """
         Clean the given dataframe by dropping the rows
@@ -209,7 +207,8 @@ class DataFrameHandler(PostProcessingHandler):
         def make_path(file_path):
             splitted = file_path.split('/')
             map_name, file_name = splitted[-2], splitted[-1]
-            return path.normpath('{}/{}/{}'.format(self.config.base_dir + '/csvs/', map_name, path.splitext(file_name)[0]))
+            return path.normpath(
+                '{}/{}/{}'.format(self.config.base_dir + '/csvs/', map_name, path.splitext(file_name)[0]))
 
         map_name = filename2map(file_path)
         map_path = '{}/{}.png'.format(self.config.maps_folder, map_name)
@@ -298,7 +297,7 @@ class PatchesHandler(PostProcessingHandler):
 
         :return:
         """
-        df, hm, file_path = data #TODO create a function that takes a df and hm and produces the patches
+        df, hm, file_path = data  # TODO create a function that takes a df and hm and produces the patches
         dirs, name = path.split(file_path)
 
         out_dir = self.config.out_dir
@@ -336,7 +335,7 @@ class PatchesHandler(PostProcessingHandler):
 
             cv2.imwrite(image_path, patch)
 
-            image_paths.append(path.basename(image_path)) # store only name not abs path
+            image_paths.append(path.basename(image_path))  # store only name not abs path
 
             if self.debug and to_show > idx:
                 fig = plt.figure()
@@ -352,7 +351,6 @@ class PatchesHandler(PostProcessingHandler):
         # create a new small dataframe with the reference to the image stored
         df.to_csv(file_path_light + '/{}-patch.csv'.format(name))
 
-
         return data
 
     def handle(self, data):
@@ -361,31 +359,37 @@ class PatchesHandler(PostProcessingHandler):
         return tqdm(stage, total=len(data), desc='[INFO] Patches handler')
 
 
-def make_and_run_chain(config):
+def make_and_run_chain(config, memory=True):
     patches_h = PatchesHandler(config=config, debug=False)
-    m_h = InMemoryHandler(config=config, successor=patches_h)
-    # df_h = DataFrameHandler(successor=None, config=config)
-    # b_h = BagsHandler(config=config, successor=df_h)
-    bags = glob.glob('{}/csvs/**/*.csv'.format(config.base_dir))
+    mem_h = InMemoryHandler(config=config, successor=patches_h)
+    df_h = DataFrameHandler(config=config, successor=mem_h, )
+    bag_h = BagsHandler(config=config, successor=df_h)
 
-    list(m_h(bags))
+    files = glob.glob('{}/{}/**/*.csv'.format(config.base_dir, 'csvs' if memory else 'bags'))
+
+    pip = mem_h if memory else bag_h
+
+    list(pip(files))
+
 
 def run_train_val_test_chain(base_dir, base_maps_dir, *args, **kwargs):
     for name in ['train', 'val', 'test']:
         maps_dir = base_maps_dir + '/{}'.format(name)
-        config = PostProcessingConfig(base_dir=base_dir + '/{}'.format(name), maps_folder=maps_dir, name=name, *args, **kwargs)
+        config = PostProcessingConfig(base_dir=base_dir + '/{}'.format(name), maps_folder=maps_dir, name=name, *args,
+                                      **kwargs)
 
         make_and_run_chain(config)
+
 
 if __name__ == '__main__':
     run_train_val_test_chain(base_dir='/media/francesco/saetta/krock-dataset/92/',
                              base_maps_dir='/home/francesco/Documents/Master-Thesis/core/maps/',
                              out_dir='/media/francesco/saetta/85-750/',
                              patch_size=85,
-                              advancement_th=0.45,
-                              skip_every=12,
-                              translation=[5, 5],
-                              time_window=750)
+                             advancement_th=0.45,
+                             skip_every=12,
+                             translation=[5, 5],
+                             time_window=750)
 
     #
     # config = PostProcessingConfig(bags_dir='./test/bags/',
