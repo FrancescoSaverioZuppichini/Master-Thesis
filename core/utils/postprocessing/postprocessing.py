@@ -29,7 +29,9 @@ class PostProcessingConfig():
         self.scale, self.skip_every = scale, skip_every
         self.resolution, self.translation = resolution, translation
         self.n_workers = n_workers
-        self.name = name if name is not None else ''
+        self.name = name
+        if out_dir is None: self.out_dir = base_dir
+
 
         self.out_dir = os.path.normpath(self.out_dir + name)
 
