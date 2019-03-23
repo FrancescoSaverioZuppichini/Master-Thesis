@@ -67,7 +67,6 @@ parser.add_argument(
 args = parser.parse_args()
 
 
-
 parser.add_argument('--memory',
                     type=bool,
                     help='If True, we assume the csvs were already created and we will load them',

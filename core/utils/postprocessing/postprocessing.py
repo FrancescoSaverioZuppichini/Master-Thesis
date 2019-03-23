@@ -4,7 +4,6 @@ import os
 import glob
 import cv2
 import dateutil
-import rosbag_pandas
 
 import pandas as pd
 import numpy as np
@@ -384,6 +383,8 @@ def run_train_val_test_chain(base_dir, base_maps_dir, *args, **kwargs):
 
 
 if __name__ == '__main__':
+    import rosbag_pandas
+
     run_train_val_test_chain(base_dir='/media/francesco/saetta/krock-dataset/92/',
                              base_maps_dir='/home/francesco/Documents/Master-Thesis/core/maps/',
                              out_dir='/media/francesco/saetta/85-750/',

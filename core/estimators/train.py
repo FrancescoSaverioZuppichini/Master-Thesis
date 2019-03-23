@@ -124,12 +124,12 @@ def train_and_evaluate(params, train=True, load_model=None):
         print(loss, acc, roc)
 
 if __name__ == '__main__':
-    params = {'epochs': 10,
+    params = {'epochs': 20,
               'lr': 0.001,
               'batch_size': 128,
               # 'model': 'omar',
               'model': 'microresnet#4-gate=3x3-n=2-se=True',
-              'dataset': '750',
+              'dataset': '80=750',
               'sampler': '',
               'num_samples': None,
               'samper_type': 'random',
@@ -147,4 +147,6 @@ if __name__ == '__main__':
     train_and_evaluate(params)
     train_and_evaluate(params)
     train_and_evaluate(params)
+    train_and_evaluate(params)
+
 
