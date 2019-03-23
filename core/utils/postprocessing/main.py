@@ -12,10 +12,9 @@ pprint.pprint(config.__dict__)
 
 patches_h = PatchesHandler(config=config)
 df_h = DataFrameHandler(successor=patches_h, config=config)
-first_handler = BagsHandler
-if utility_args.memory: first_handler = InMemoryHandler
-b_h = first_handler(config=config, successor=df_h)
+b_h = BagsHandler(config=config, successor=df_h)
 
 bags = glob.glob('{}/**/*.bag'.format(config.bags_dir))
 
+print(len(bags))
 list(b_h(bags))
