@@ -15,7 +15,6 @@ from torch.utils.data import DataLoader, random_split, RandomSampler, ConcatData
 from torchvision.transforms import Resize, ToPILImage, ToTensor, Grayscale, Compose
 from torch.utils.data import Dataset
 from torch.nn import Dropout
-from utils.postprocessing.utils import hmpatch
 
 class ImgaugWrapper():
     """
@@ -149,8 +148,9 @@ class TraversabilityDataset(Dataset):
 
     @classmethod
     def from_root(cls, root, n=None, *args, **kwargs):
-        dfs = glob.glob(root + '/df/*-patch.csv')
-        if len(dfs) == 0: dfs = glob.glob(root + '/df/**/*-patch.csv')
+        dfs = glob.glob(root + '/df/*.csv')
+        if len(dfs) == 0:
+            dfs = glob.glob(root + '/df/**/*.csv')
         if n is not None: dfs = dfs[:n]
 
         concat_ds = ConcatDataset([cls(df, root, *args, **kwargs) for df in dfs])

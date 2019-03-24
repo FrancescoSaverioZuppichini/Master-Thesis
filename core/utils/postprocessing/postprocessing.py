@@ -336,7 +336,7 @@ class PatchesHandler(PostProcessingHandler):
 
             cv2.imwrite(image_path, patch)
 
-            image_paths.append(path.basename(image_path))  # store only name not abs path
+            image_paths.append('/patches/{}.png'.format(row['timestamp']))  # store only name not abs path
 
             if self.debug and to_show > idx:
                 fig = plt.figure()
@@ -348,7 +348,7 @@ class PatchesHandler(PostProcessingHandler):
                 plt.show()
 
         df['image_path'] = image_paths
-
+        # TODO the name is wrong!
         # create a new small dataframe with the reference to the image stored
         df.to_csv(file_path_light + '/{}-patch.csv'.format(name))
 
@@ -387,8 +387,8 @@ if __name__ == '__main__':
 
     run_train_val_test_chain(base_dir='/media/francesco/saetta/krock-dataset/92/',
                              base_maps_dir='/home/francesco/Documents/Master-Thesis/core/maps/',
-                             out_dir='/media/francesco/saetta/85-750/',
-                             patch_size=85,
+                             out_dir='/media/francesco/saetta/125-750/',
+                             patch_size=125,
                              advancement_th=0.45,
                              skip_every=12,
                              translation=[5, 5],

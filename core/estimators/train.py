@@ -41,9 +41,9 @@ def train_and_evaluate(params, train=True, load_model=None):
     criterion = CrossEntropyFlat()
 
     train_dl, val_dl, test_dl = get_dataloaders(
-        train_root='/media/francesco/saetta/{}/train/df/'.format(params['dataset']),
-        val_root='/media/francesco/saetta/{}/val/df/'.format(params['dataset']),
-        test_root='/media/francesco/saetta/{}/test/df/'.format(params['dataset']),
+        train_root='/media/francesco/saetta/{}/train/'.format(params['dataset']),
+        val_root='/media/francesco/saetta/{}/val/'.format(params['dataset']),
+        test_root='/media/francesco/saetta/{}/test/'.format(params['dataset']),
         train_transform=get_transform(params['resize'], should_aug=params['data-aug']),
         val_transform=get_transform(params['resize'], scale=1, should_aug=False),
         test_transform=get_transform(params['resize'], scale=10, should_aug=False),
@@ -129,7 +129,7 @@ if __name__ == '__main__':
               'batch_size': 128,
               # 'model': 'omar',
               'model': 'microresnet#4-gate=3x3-n=2-se=True',
-              'dataset': '80=750',
+              'dataset': '85-750',
               'sampler': '',
               'num_samples': None,
               'samper_type': 'random',
@@ -139,7 +139,7 @@ if __name__ == '__main__':
               'info': 'scale before center',
               'tr': 0.45,
               'more_than': -0.5,
-              'downsample_factor': None,
+              'downsample_factor': None
               'time_window': 750,
               'resize': None}
 
@@ -148,5 +148,7 @@ if __name__ == '__main__':
     train_and_evaluate(params)
     train_and_evaluate(params)
     train_and_evaluate(params)
+    train_and_evaluate(params)
+
 
 
