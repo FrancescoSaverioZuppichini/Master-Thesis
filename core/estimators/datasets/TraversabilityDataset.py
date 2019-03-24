@@ -117,7 +117,7 @@ class TraversabilityDataset(Dataset):
     def __init__(self, df, root, transform, tr=None, more_than=None, should_aug=False, debug=False, downsample_factor=None, only_forward=False):
         self.df = pd.read_csv(df)
         self.df = self.df.dropna()  # to be sure
-        if downsample_factor is not None: self.df = self.df[0:-1:downsample_factor]
+        if downsample_factor is not None: self.df = self.df[::downsample_factor]
         if more_than is not None:  self.df = self.df[self.df['advancement'] >= more_than]
         self.transform = transform
         self.tr = tr
@@ -140,6 +140,7 @@ class TraversabilityDataset(Dataset):
 
         img = cv2.imread(img_path)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
         if self.only_forward: img = img[:, img.shape[-1] // 2: ]
 
         return self.transform(img), y

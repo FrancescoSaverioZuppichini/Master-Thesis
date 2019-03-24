@@ -194,7 +194,7 @@ class ResNetEncoder(nn.Module):
             for i, (in_c, out_c) in enumerate(self.blocks_sizes)
         ])
 
-        self.initialise(self.modules())
+        # self.initialise(self.modules())
 
     @staticmethod
     def initialise(modules):

@@ -35,10 +35,10 @@ def train_and_evaluate(params, train=True, load_model=None):
     # model = OmarCNN()
     model = zoo[params['model']]
 
-    summary(model.cuda(), (1, 92, 92))
+    summary(model.cuda(), (1, 125, 125))
     pprint.pprint(params)
 
-    criterion = CrossEntropyFlat()
+    criterion = CrossEntropyFlat() if params['tr'] is not None else MSELossFlat()
 
     train_dl, val_dl, test_dl = get_dataloaders(
         train_root='/media/francesco/saetta/{}/train/'.format(params['dataset']),
@@ -137,20 +137,17 @@ if __name__ == '__main__':
               'callbacks': '[ReduceLROnPlateauCallback]',
               'data-aug': True,
               'optim': 'sdg',
-              'info': 'scale before center',
+              'info': 'no resnet init',
               'tr': 0.45,
               'more_than': -0.5,
               'downsample_factor': None,
               'time_window': 750,
-              'only_forward': True,
+              'only_forward': False,
               'resize': None}
 
+    for _ in range(5):
+        train_and_evaluate(params)
 
-    train_and_evaluate(params)
-    train_and_evaluate(params)
-    train_and_evaluate(params)
-    train_and_evaluate(params)
-    train_and_evaluate(params)
 
 
 
