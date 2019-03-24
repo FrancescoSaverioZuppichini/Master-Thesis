@@ -30,7 +30,7 @@ class Patch():
     def plot3d(self):
         fig = plt.figure()
         ax = fig.gca(projection='3d')
-        X,Y = np.meshgrid(range(self.hm.shape[0]), range(self.hm.shape[1]))
+        X,Y = np.meshgrid(range(self.hm.shape[1]), range(self.hm.shape[0]))
 
         ax.set_zlim3d(-1, 1)
         surf = ax.plot_surface(X, Y, self.hm,
@@ -90,8 +90,9 @@ if __name__ == '__main__':
 #     p.plot2d()
 #     p.plot3d()
     #
-    p = RampPatch((92,92))
+    p = BumpsPatch((125,125))
     p(strength=1)
+    print(p.hm.shape)
     p.plot2d()
     p.plot3d()
 

@@ -110,12 +110,11 @@ class CenterAndScalePatch():
             self.show_heatmap(x, 'aug', ax)
 
         if self.debug: plt.show()
-
         return  x.astype(np.float32)
 
 
 class TraversabilityDataset(Dataset):
-    def __init__(self, df, root, transform, tr=None, more_than=None, should_aug=False, debug=False, downsample_factor=None):
+    def __init__(self, df, root, transform, tr=None, more_than=None, should_aug=False, debug=False, downsample_factor=None, only_forward=False):
         self.df = pd.read_csv(df)
         self.df = self.df.dropna()  # to be sure
         if downsample_factor is not None: self.df = self.df[0:-1:downsample_factor]
@@ -125,6 +124,7 @@ class TraversabilityDataset(Dataset):
         self.image_dir =root
         self.idx2class = {'False': 0,
                           'True': 1}
+        self.only_forward = only_forward
 
         self.should_aug = should_aug
         self.debug = debug
@@ -140,6 +140,7 @@ class TraversabilityDataset(Dataset):
 
         img = cv2.imread(img_path)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        if self.only_forward: img = img[:, img.shape[-1] // 2: ]
 
         return self.transform(img), y
 
@@ -191,6 +192,7 @@ def get_dataloaders(train_root, test_root, val_root=None,
                     val_transform=None, test_transform=None,
                     more_than=None, should_aug=False,
                     downsample_factor=None,
+                    only_forward=False,
                     *args,
                     **kwargs):
     """
@@ -203,7 +205,8 @@ def get_dataloaders(train_root, test_root, val_root=None,
                                            transform=train_transform, tr=tr,
                                            should_aug=should_aug,
                                            downsample_factor=downsample_factor,
-                                           more_than=more_than)
+                                           more_than=more_than,
+                                           only_forward=only_forward)
 
     train_size = int(len(train_ds) * (1 - val_size))
 
@@ -249,14 +252,15 @@ def visualise(dl, n=10):
 
 
 if __name__ == '__main__':
-    # df = '/home/francesco/Desktop/querry-high/df/querry-big-10/1552309429.462741-patch.csv'
+    df = '/media/francesco/saetta/125-750/train/df/bars1/1550616864.0286052-complete.csv-patch.csv'
     from torch.nn.functional import softmax
 
-    root = path.abspath(
-        '../../../resources/assets/datasets/test/')
+    # root = path.abspath(
+    #     '.. /../../resources/assets/datasets/test/')
 
-    df = root + '/df/querry-big-10/1550307709.2522066-patch.csv'
-    ds = TraversabilityDataset(df, root=root, transform=get_transform(None, False, scale=10, debug=True), debug=True, tr=0.45)
+    root = '/media/francesco/saetta/125-750/train/'
+    # df = root + '/df/querry-big-10/1550307709.2522066-patch.csv'
+    ds = TraversabilityDataset(df, root=root, transform=get_transform(None, False, scale=10, debug=True), debug=True, tr=0.45, only_forward=True)
 
     for i in  range(2):
         img, y = ds[i]

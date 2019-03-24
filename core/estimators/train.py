@@ -53,6 +53,7 @@ def train_and_evaluate(params, train=True, load_model=None):
         tr=params['tr'],
         more_than=params['more_than'],
         downsample_factor=params['downsample_factor'],
+        only_forward=params['only_forward'],
         pin_memory=True)
 
     timestamp = time.time()
@@ -129,7 +130,7 @@ if __name__ == '__main__':
               'batch_size': 128,
               # 'model': 'omar',
               'model': 'microresnet#4-gate=3x3-n=2-se=True',
-              'dataset': '85-750',
+              'dataset': '125-750',
               'sampler': '',
               'num_samples': None,
               'samper_type': 'random',
@@ -139,8 +140,9 @@ if __name__ == '__main__':
               'info': 'scale before center',
               'tr': 0.45,
               'more_than': -0.5,
-              'downsample_factor': None
+              'downsample_factor': None,
               'time_window': 750,
+              'only_forward': True,
               'resize': None}
 
 
