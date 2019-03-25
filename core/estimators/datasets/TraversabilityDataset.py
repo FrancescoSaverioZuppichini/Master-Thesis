@@ -101,10 +101,11 @@ class CenterAndScalePatch():
     depending on the map, we need to multiply the patch by a scaling factor.
     """
 
-    def __init__(self, scale=1.0, debug=False, should_aug=False):
+    def __init__(self, scale=1.0, debug=False, should_aug=False, resize=None):
         self.scale = scale
         self.debug = debug
         self.should_aug = should_aug
+        self.resize = resize
 
     def show_heatmap(self, x, title, ax):
         ax.set_title(title)
@@ -134,6 +135,7 @@ class CenterAndScalePatch():
 
         x = x.astype(np.double)
         x = x / 255
+
         if self.debug:
             ax = plt.subplot(2, 2, 1)
             self.show_heatmap(x, 'original', ax)
@@ -156,9 +158,12 @@ class CenterAndScalePatch():
             x = (x - min) / (max - min)  # norm to 0,1 -> imgaug does not accept neg values
             x = aug.augment_image(x )
             x = x * (max - min) + min  # go back
+
+        if self.resize is not None:
+            x = cv2.resize(x, self.resize)
         if self.debug:
             ax = plt.subplot(2, 2, 4)
-            self.show_heatmap(x, 'aug', ax)
+            self.show_heatmap(x, 'final', ax)
 
         if self.debug: plt.show()
         return  x.astype(np.float32)
@@ -219,7 +224,7 @@ class FastAIImageFolder(TraversabilityDataset):
     classes = 'False', 'True'
 
 
-def get_transform(resize, should_aug=False, scale=1, debug=False):
+def get_transform(should_aug=False, scale=1, debug=False, resize=None):
     """
     Return a `Compose` transformation to be applied to the input of the model
     :param resize: size in pixel of the wanted final patch size
@@ -230,7 +235,7 @@ def get_transform(resize, should_aug=False, scale=1, debug=False):
     transformations = []
     # if resize is not None: transformations.append(Resize((resize, resize)))
     # transformations.append(ToTensor())
-    transformations.append(CenterAndScalePatch(scale=scale, debug=debug, should_aug=should_aug))
+    transformations.append(CenterAndScalePatch(scale=scale, debug=debug, should_aug=should_aug, resize=resize))
     # if should_aug: transformations.append(ImgaugWrapper(aug, debug))
     transformations.append(ToTensor())
     # if should_aug: transformations.append(Dropout(0.1))
@@ -306,14 +311,17 @@ def visualise(dl, n=10):
 
 if __name__ == '__main__':
     df = '/media/francesco/saetta/125-750/test/df/querry-big-10/1550308680.946694-complete.csv-patch.csv'
+    df = '/media/francesco/saetta/125-750/train/df/bars1/1550616885.070434-complete.csv-patch.csv'
     from torch.nn.functional import softmax
 
     # root = path.abspath(
     #     '.. /../../resources/assets/datasets/test/')
 
-    root = '/media/francesco/saetta/125-750/test/'
+    # root = '/media/francesco/saetta/125-750/test/'
+    root = '/media/francesco/saetta/125-750/train/'
+
     # df = root + '/df/querry-big-10/1550307709.2522066-patch.csv'
-    ds = TraversabilityDataset(df, root=root, transform=get_transform(None, True, scale=10,
+    ds = TraversabilityDataset(df, root=root, transform=get_transform(resize=(32,32), should_aug=True, scale=10,
                                                                       debug=True),
                               tr=0.45, only_forward=False, downsample_factor=2)
 

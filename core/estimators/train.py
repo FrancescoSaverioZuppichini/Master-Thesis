@@ -35,7 +35,7 @@ def train_and_evaluate(params, train=True, load_model=None):
     # model = OmarCNN()
     model = zoo[params['model']]
 
-    summary(model.cuda(), (1, 125, 125))
+    summary(model.cuda(), (1, *params['resize']))
     pprint.pprint(params)
 
     criterion = CrossEntropyFlat() if params['tr'] is not None else MSELossFlat()
@@ -44,9 +44,9 @@ def train_and_evaluate(params, train=True, load_model=None):
         train_root='/media/francesco/saetta/{}/train/'.format(params['dataset']),
         val_root='/media/francesco/saetta/{}/val/'.format(params['dataset']),
         test_root='/media/francesco/saetta/{}/test/'.format(params['dataset']),
-        train_transform=get_transform(params['resize'], should_aug=params['data-aug']),
-        val_transform=get_transform(params['resize'], scale=1, should_aug=False),
-        test_transform=get_transform(params['resize'], scale=10, should_aug=False),
+        train_transform=get_transform(resize=params['resize'], should_aug=params['data-aug']),
+        val_transform=get_transform(resize=params['resize'], scale=1, should_aug=False),
+        test_transform=get_transform(resize=params['resize'], scale=10, should_aug=False),
         num_samples=params['num_samples'],
         batch_size=params['batch_size'],
         num_workers=16,
@@ -125,10 +125,10 @@ def train_and_evaluate(params, train=True, load_model=None):
 if __name__ == '__main__':
     params = {'epochs': 20,
               'lr': 0.001,
-              'batch_size': 128,
+              'batch_size': 1024,
               # 'model': 'omar',
-              'model': 'micro2resnet#4-gate=3x3-n=2-se=True',
-              'dataset': '85-750',
+              'model': 'microresnet#4-gate=3x3-n=2-se=True',
+              'dataset': '125-750',
               'sampler': '',
               'num_samples': None,
               'samper_type': 'random',
@@ -141,7 +141,7 @@ if __name__ == '__main__':
               'downsample_factor': None,
               'time_window': 750,
               'only_forward': False,
-              'resize': None}
+              'resize': (64, 64)}
 
     train_and_evaluate(params)
     train_and_evaluate(params)

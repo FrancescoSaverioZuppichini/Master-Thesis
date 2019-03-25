@@ -15,13 +15,28 @@ from utils.webots2ros import Supervisor, Node
 
 rospy.init_node("traversability_simulation")
 # create our env
-env = KrockWebotsEnv.from_image(
-    MAP,
+
+import cv2
+
+image = cv2.imread(MAP)
+image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+# image = cv2.copyMakeBorder(image,50,50,50,50,cv2.BORDER_REPLICATE)
+
+env = KrockWebotsEnv.from_numpy(
+    image,
     '/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock_no_tail.wbt',
     {'height': 10,
      'resolution': 0.02},
     # agent_callbacks=[RosBagSaver('~/Desktop/querry-high/bags', topics=['pose'])],
-    output_dir='/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock2_ros/worlds/')
+    output_path='/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock2_ros/worlds/tmp.wbt')
+
+# env = KrockWebotsEnv.from_image(
+#     MAP,
+#     '/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock_no_tail.wbt',
+#     {'height': 10,
+#      'resolution': 0.02},
+#     # agent_callbacks=[RosBagSaver('~/Desktop/querry-high/bags', topics=['pose'])],
+#     output_dir='/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock2_ros/worlds/')
 
 # env = KrockWebotsEnv(WORLD_PATH, load_world=True)
 
@@ -45,9 +60,13 @@ def spawn_points2webots_pose(spawn_point, env):
 # print('Initial observations:')
 # pprint.pprint(init_obs)
 #
+tr = np.array([5,5])
+print(np.array(image.shape) / 100 / 2 / 2 )
+x,y = -tr + ( np.array(image.shape) * 0.02 / 2) + 0.03
+print(x,y)
 # print(env.x, env.y)
 for i in range(1):
-    init_obs = env.reset(pose=[[-4 , env.get_height(-4,-4), -4],
+    init_obs = env.reset(pose=[[x , env.get_height(x,y), y],
                                [0,0,0,0]])
     for _ in range(20000):
         obs, r, done, _ = env.step(env.GO_FORWARD)
