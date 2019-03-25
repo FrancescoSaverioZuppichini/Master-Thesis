@@ -8,7 +8,7 @@ def fix_path(x):
     name = path.basename(x)
     return '/patches/{}'.format(name)
 
-csv_paths = glob.glob('/media/francesco/saetta/85-750/test/df/**/*.csv')
+csv_paths = glob.glob('/media/francesco/saetta/85-750/train/df/**/*.csv')
 
 def fix_df(csv_path):
     df = pd.read_csv(csv_path)

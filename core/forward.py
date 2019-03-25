@@ -8,21 +8,22 @@ import time
 import numpy as np
 
 WORLD_PATH = '/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock2_ros/worlds/bars1.wbt'
-MAP = '/home/francesco/Documents/Master-Thesis/core/maps/test/querry-big-10.png'
+# MAP = '/home/francesco/Documents/Master-Thesis/core/maps/test/querry-big-10.png'
+MAP = '/media/francesco/saetta/test/patches/1550305091.702912.png'
 N_STEPS = 4
 from utils.webots2ros import Supervisor, Node
 
 rospy.init_node("traversability_simulation")
 # create our env
-# env = KrockWebotsEnv.from_image(
-#     MAP,
-#     '/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock_no_tail.wbt',
-#     {'height': 10,
-#      'resolution': 0.02},
-#     agent_callbacks=[RosBagSaver('~/Desktop/querry-high/bags', topics=['pose'])],
-#     output_dir='/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock2_ros/worlds/')
+env = KrockWebotsEnv.from_image(
+    MAP,
+    '/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock_no_tail.wbt',
+    {'height': 10,
+     'resolution': 0.02},
+    # agent_callbacks=[RosBagSaver('~/Desktop/querry-high/bags', topics=['pose'])],
+    output_dir='/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock2_ros/worlds/')
 
-# env = KrockWebotsEnv(WORLD_PATH, load_world=True, agent_callbacks=[RosBagSaver('~/Desktop/test_tail/', topics=['pose'])])
+# env = KrockWebotsEnv(WORLD_PATH, load_world=True)
 
 # spawn_strategy = FlatGroundSpawnStrategy(MAP, scale = 1 )
 # spawn_points = spawn_strategy(k=30, tol=1e-2, size=45)
@@ -37,18 +38,19 @@ def spawn_points2webots_pose(spawn_point, env):
 
     return pose
 
-env = KrockWebotsEnv(None,
-                     agent_callbacks=[RosBagSaver('/home/francesco/Desktop/querry-high/bags/', topics=['pose'])],
-                     )
+# env = KrockWebotsEnv(None,
+#                      agent_callbacks=[RosBagSaver('/home/francesco/Desktop/querry-high/bags/', topics=['pose'])],
+#                      )
 # #
 # print('Initial observations:')
 # pprint.pprint(init_obs)
 #
 # print(env.x, env.y)
 for i in range(1):
-    init_obs = env.reset(spawn=False)
-    for _ in range(200):
-        obs, r, done, _ = env.step(env.STOP)
+    init_obs = env.reset(pose=[[-4 , env.get_height(-4,-4), -4],
+                               [0,0,0,0]])
+    for _ in range(20000):
+        obs, r, done, _ = env.step(env.GO_FORWARD)
         pprint.pprint(obs)
         if done: break
     env.agent.die(env)

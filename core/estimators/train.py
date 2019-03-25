@@ -119,25 +119,23 @@ def train_and_evaluate(params, train=True, load_model=None):
             print(loss, acc, roc)
             experiment.log_metric("roc_auc-from-best", roc.item())
 
-    if load_model is not None:
-        learner.load(load_model)
-        loss, acc, roc = learner.validate(data.test_dl, metrics=[accuracy, ROC_AUC()])
-        print(loss, acc, roc)
+    del learner.model
+    del learner
 
 if __name__ == '__main__':
     params = {'epochs': 20,
               'lr': 0.001,
               'batch_size': 128,
               # 'model': 'omar',
-              'model': 'microresnet#4-gate=3x3-n=2-se=True',
-              'dataset': '125-750',
+              'model': 'micro2resnet#4-gate=3x3-n=2-se=True',
+              'dataset': '85-750',
               'sampler': '',
               'num_samples': None,
               'samper_type': 'random',
               'callbacks': '[ReduceLROnPlateauCallback]',
               'data-aug': True,
               'optim': 'sdg',
-              'info': 'no resnet init',
+              'info': '',
               'tr': 0.45,
               'more_than': -0.5,
               'downsample_factor': None,
@@ -145,8 +143,13 @@ if __name__ == '__main__':
               'only_forward': False,
               'resize': None}
 
-    for _ in range(5):
-        train_and_evaluate(params)
+    train_and_evaluate(params)
+    train_and_evaluate(params)
+    train_and_evaluate(params)
+    train_and_evaluate(params)
+    train_and_evaluate(params)
+
+
 
 
 

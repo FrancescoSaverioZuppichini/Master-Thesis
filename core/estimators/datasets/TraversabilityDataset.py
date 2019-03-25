@@ -8,6 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
+import torchvision
 
 from os import path
 from imgaug import augmenters as iaa
@@ -34,17 +35,63 @@ aug = iaa.Sometimes(0.8,
                         [
                             iaa.Dropout(p=(0.05, 0.1)),
                             iaa.CoarseDropout((0.02, 0.05),
-                                              size_percent=(0.3, 0.5))
+                                              size_percent=(0.3 , 0.5))
 
                         ], random_order=True)
                     )
 
 
-def random_scale(x):
-    random_scale = np.random.choice(np.arange(1, 5, 0.5))
-    x *= random_scale
-    return x, random_scale
 
+
+class ImbalancedDatasetSampler(torch.utils.data.sampler.Sampler):
+    """Samples elements randomly from a given list of indices for imbalanced dataset
+    Arguments:
+        indices (list, optional): a list of indices
+        num_samples (int, optional): number of samples to draw
+    """
+
+    def __init__(self, dataset, indices=None, num_samples=None):
+        super().__init__(dataset)
+
+        # if indices is not provided,
+        # all elements in the dataset will be considered
+        self.indices = list(range(len(dataset))) \
+            if indices is None else indices
+
+        # if num_samples is not provided,
+        # draw `len(indices)` samples in each iteration
+        self.num_samples = len(self.indices) \
+            if num_samples is None else num_samples
+
+        # distribution of classes in the dataset
+        label_to_count = {}
+        for idx in self.indices:
+            label = self._get_label(dataset, idx)
+            if label in label_to_count:
+                label_to_count[label] += 1
+            else:
+                label_to_count[label] = 1
+
+        # weight for each sample
+        weights = [1.0 / label_to_count[self._get_label(dataset, idx)]
+                   for idx in self.indices]
+        self.weights = torch.DoubleTensor(weights)
+
+    def _get_label(self, dataset, idx):
+        dataset_type = type(dataset)
+        if dataset_type is torchvision.datasets.MNIST:
+            return dataset.train_labels[idx].item()
+        elif dataset_type is torchvision.datasets.ImageFolder:
+            return dataset.imgs[idx][1]
+        else:
+            return dataset[idx][1]
+
+    def __iter__(self):
+        return (self.indices[i] for i in torch.multinomial(
+            self.weights, self.num_samples, replacement=True))
+
+    def __len__(self):
+        return self.num_samples
 
 class CenterAndScalePatch():
     """
@@ -83,13 +130,17 @@ class CenterAndScalePatch():
     def __call__(self, x, debug=False):
         if self.debug: fig = plt.figure()
         # is_traversable = y == 1
-        if self.debug:
-            ax = plt.subplot(2, 2, 1)
-            self.show_heatmap(x, 'original', ax)
+
 
         x = x.astype(np.double)
         x = x / 255
+        if self.debug:
+            ax = plt.subplot(2, 2, 1)
+            self.show_heatmap(x, 'original', ax)
         x *= self.scale
+        if self.debug:
+            ax = plt.subplot(2, 2, 2)
+            self.show_heatmap(x, 'scale', ax)
 
         center = x[x.shape[0] // 2, x.shape[1] // 2]
         x -= center
@@ -98,15 +149,15 @@ class CenterAndScalePatch():
 
         if self.debug:
             print(max, min)
-            ax = plt.subplot(2, 2, 2)
-            self.show_heatmap(x, 'centered', ax)
+            ax = plt.subplot(2, 2, 3)
+            self.show_heatmap(x, 'centered {}'.format(center), ax)
 
         if self.should_aug:
             x = (x - min) / (max - min)  # norm to 0,1 -> imgaug does not accept neg values
-            x = aug.augment_image(x)
+            x = aug.augment_image(x )
             x = x * (max - min) + min  # go back
         if self.debug:
-            ax = plt.subplot(2, 2, 3)
+            ax = plt.subplot(2, 2, 4)
             self.show_heatmap(x, 'aug', ax)
 
         if self.debug: plt.show()
@@ -222,12 +273,13 @@ def get_dataloaders(train_root, test_root, val_root=None,
     if num_samples is not None:
         print('sampling')
         train_dl = DataLoader(train_ds,
+                              # sampler=ImbalancedDatasetSampler(train_ds, num_samples=num_samples),
+
                               sampler=RandomSampler(train_ds, num_samples=num_samples, replacement=True),
                               *args, **kwargs)
     else:
         train_dl = DataLoader(train_ds,
                               shuffle=True,
-                              # sampler=ImbalancedDatasetSampler(train_ds),
                               *args, **kwargs)
     val_dl = DataLoader(val_ds, shuffle=False, *args, **kwargs)
 
@@ -253,19 +305,22 @@ def visualise(dl, n=10):
 
 
 if __name__ == '__main__':
-    df = '/media/francesco/saetta/125-750/train/df/bars1/1550616864.0286052-complete.csv-patch.csv'
+    df = '/media/francesco/saetta/125-750/test/df/querry-big-10/1550308680.946694-complete.csv-patch.csv'
     from torch.nn.functional import softmax
 
     # root = path.abspath(
     #     '.. /../../resources/assets/datasets/test/')
 
-    root = '/media/francesco/saetta/125-750/train/'
+    root = '/media/francesco/saetta/125-750/test/'
     # df = root + '/df/querry-big-10/1550307709.2522066-patch.csv'
-    ds = TraversabilityDataset(df, root=root, transform=get_transform(None, False, scale=10, debug=True), debug=True, tr=0.45, only_forward=True)
+    ds = TraversabilityDataset(df, root=root, transform=get_transform(None, True, scale=10,
+                                                                      debug=True),
+                              tr=0.45, only_forward=False, downsample_factor=2)
 
-    for i in  range(2):
+    for i in  range(3):
         img, y = ds[i]
-
+        plt.imshow(img.cpu().squeeze().numpy())
+        plt.show()
         print(y)
 
     # from torch.nn import Dropout

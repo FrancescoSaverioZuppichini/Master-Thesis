@@ -4,6 +4,7 @@ import os
 import glob
 import cv2
 import dateutil
+import rosbag_pandas
 
 import pandas as pd
 import numpy as np
@@ -30,7 +31,6 @@ class PostProcessingConfig():
         self.n_workers = n_workers
         self.name = name
         if out_dir is None: self.out_dir = base_dir
-
 
         self.out_dir = os.path.normpath(self.out_dir + name)
 
@@ -61,6 +61,14 @@ class Handler():
         raise NotImplementedError
 
 
+class MultiThreadWrapper():
+    def __init__(self, n_workers):
+        self.n_workers = n_workers
+
+    def __call__(self, pip, data):
+        return list(tqdm(th.map(pip, data, workers=self.n_workers), total=len(data)))
+
+
 class PostProcessingHandler(Handler):
     def __init__(self, config: PostProcessingConfig, successor=None):
         super().__init__(successor=successor)
@@ -77,19 +85,15 @@ def make_path(file_path, out_dir):
 class BagsHandler(PostProcessingHandler):
     """
     This class loads the bags file and converted them to Pandas' dataframe. In addition,
-    it opens each map for each file and add it to the return.
+    it opens each map for each file and add it to the return tuple.
     """
 
-    def bag2df(self, file_name):
+    def handle(self, file_name):
         df = rosbag_pandas.bag_to_dataframe(file_name)
 
         map_name = filename2map(file_name)
 
         return (df, map_name, file_name)
-
-    def handle(self, bags):
-        stage = th.map(self.bag2df, bags, workers=self.config.n_workers)
-        return tqdm(stage, total=len(bags), desc='[INFO] Bags handler')
 
 
 class InMemoryHandler(PostProcessingHandler):
@@ -98,7 +102,7 @@ class InMemoryHandler(PostProcessingHandler):
     the csvs files from DataFrameHandler where already generated
     """
 
-    def add_maps(self, file_name):
+    def handle(self, file_name):
         map_name = filename2map(file_name)
         df = pd.read_csv(file_name)
 
@@ -106,10 +110,6 @@ class InMemoryHandler(PostProcessingHandler):
 
         hm = read_image(map_path)
         return (df, hm, file_name)
-
-    def handle(self, csvs):
-        stage = th.map(self.add_maps, csvs, workers=self.config.n_workers)
-        return tqdm(stage, total=len(csvs), desc='[INFO] Memory handler')
 
 
 class DataFrameHandler(PostProcessingHandler):
@@ -133,11 +133,9 @@ class DataFrameHandler(PostProcessingHandler):
         :param df:
         :return:
         """
-        df = df.reset_index()  # we need to drop the index since the time column is used for it
-        df[df.columns[0]] = df[df.columns[0]].apply(lambda x: dateutil.parser.parse(str(x)).timestamp())
-        df['timestamp'] = df[df.columns[0]]
-        df[df.columns[0]] -= min(df[df.columns[0]])
-        df = df.set_index(df.columns[0])  # reset back the index to the time
+        # df = df.reset_index()  # we need to drop the index since the time column is used for it
+        df['timestamp'] = df.index.apply(lambda x: dateutil.parser.parse(x).timestamp())
+        df = df.set_index(df['timestamp'])  # reset back the index to the time
 
         return df
 
@@ -202,7 +200,7 @@ class DataFrameHandler(PostProcessingHandler):
 
         return df
 
-    def df2traversability_df(self, data):
+    def handle(self, data):
         df, map_name, file_path = data
 
         def make_path(file_path):
@@ -218,25 +216,25 @@ class DataFrameHandler(PostProcessingHandler):
         file_path = make_path(file_path)
 
         try:
-            if path.isfile(file_path + '-complete.csv'):
-                # print('file exist, loading...')
-                df = pd.read_csv(file_path + '-complete.csv')
+            # if path.isfile(file_path + '-complete.csv'):
+            #     print('file exist, loading...')
+            #     df = pd.read_csv(file_path + '-complete.csv')
+            #
+            # else:
+            df = df_convert_date2timestamp(df)
+            df = self.df_adjust_robot_center(df)
+            df = df_convert_quaterion2euler(df)
+            df = self.df_clean_by_dropping(df, hm.shape[0] * self.config.resolution,
+                                           hm.shape[1] * self.config.resolution)
 
-            else:
-                df = df_convert_date2timestamp(df)
-                df = self.df_adjust_robot_center(df)
-                df = df_convert_quaterion2euler(df)
-                df = self.df_clean_by_dropping(df, hm.shape[0] * self.config.resolution,
-                                               hm.shape[1] * self.config.resolution)
-
-                if len(df) > 0:
-                    df = self.extract_cos_sin(df)
-                    df = self.df_add_hm_coords(df, hm)
-                    df = self.df_clean_by_removing_outliers(df, hm)
-                    df = df.dropna()
-                    # TODO add flag to decide if store the csv or not
-                    os.makedirs(path.dirname(file_path), exist_ok=True)
-                    df.to_csv(file_path + '-complete.csv')
+            if len(df) > 0:
+                df = self.extract_cos_sin(df)
+                df = self.df_add_hm_coords(df, hm)
+                df = self.df_clean_by_removing_outliers(df, hm)
+                df = df.dropna()
+                # TODO add flag to decide if store the csv or not
+                os.makedirs(path.dirname(file_path), exist_ok=True)
+                df.to_csv(file_path + '-complete.csv')
                 # else:
                 # print('{} contains 0 rows, dropping...'.format(file_path))
 
@@ -244,10 +242,6 @@ class DataFrameHandler(PostProcessingHandler):
             print(e)
 
         return df, hm, file_path
-
-    def handle(self, data):
-        stage = th.map(self.df2traversability_df, data, workers=self.config.n_workers)
-        return tqdm(stage, total=len(data), desc='[INFO] Dataframe handler')
 
 
 class PatchesHandler(PostProcessingHandler):
@@ -289,7 +283,7 @@ class PatchesHandler(PostProcessingHandler):
 
         return df
 
-    def df2patches(self, data):
+    def handle(self, data):
         """
         Given a dataframe, and heightmap and the file path, this function extracts a patch
         every `Config.SKIP_EVERY` rows. This is done due to the big rate that we used to
@@ -354,23 +348,24 @@ class PatchesHandler(PostProcessingHandler):
 
         return data
 
-    def handle(self, data):
-        stage = th.map(self.df2patches, data, workers=self.config.n_workers)
-
-        return tqdm(stage, total=len(data), desc='[INFO] Patches handler')
-
 
 def make_and_run_chain(config, memory=True):
     patches_h = PatchesHandler(config=config, debug=False)
-    mem_h = InMemoryHandler(config=config, successor=patches_h)
-    df_h = DataFrameHandler(config=config, successor=mem_h, )
-    bag_h = BagsHandler(config=config, successor=df_h)
+    df_h = DataFrameHandler(successor=patches_h, config=config)
+    b_h = BagsHandler(config=config, successor=df_h)
 
-    files = glob.glob('{}/{}/**/*.csv'.format(config.base_dir, 'csvs' if memory else 'bags'))
+    files = glob.glob('{}/csvs/**/*.csv'.format(config.base_dir))
 
-    pip = mem_h if memory else bag_h
+    if len(files) > 0:
+        pip = InMemoryHandler(config=config, successor=patches_h)
+    else:
+        files = glob.glob('{}/**/*.bag'.format(config.bags_dir))
+        pip = b_h
 
-    list(pip(files))
+    th_wrap = MultiThreadWrapper(16)
+    data = th_wrap(pip, files)
+
+    return data
 
 
 def run_train_val_test_chain(base_dir, base_maps_dir, *args, **kwargs):
@@ -383,11 +378,9 @@ def run_train_val_test_chain(base_dir, base_maps_dir, *args, **kwargs):
 
 
 if __name__ == '__main__':
-    import rosbag_pandas
-
     run_train_val_test_chain(base_dir='/media/francesco/saetta/krock-dataset/92/',
                              base_maps_dir='/home/francesco/Documents/Master-Thesis/core/maps/',
-                             out_dir='/media/francesco/saetta/125-750/',
+                             out_dir='/tmp/test/',
                              patch_size=125,
                              advancement_th=0.45,
                              skip_every=12,
