@@ -34,8 +34,10 @@ if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
 def train_and_evaluate(params, train=True, load_model=None):
     # model = OmarCNN()
     model = zoo[params['model']]
-
+    print(model)
     summary(model.cuda(), (1, *params['resize']))
+    # summary(model.cuda(), (1, 125, 125))
+
     pprint.pprint(params)
 
     criterion = CrossEntropyFlat() if params['tr'] is not None else MSELossFlat()
@@ -125,23 +127,23 @@ def train_and_evaluate(params, train=True, load_model=None):
 if __name__ == '__main__':
     params = {'epochs': 20,
               'lr': 0.001,
-              'batch_size': 1024,
+              'batch_size': 256,
               # 'model': 'omar',
-              'model': 'microresnet#4-gate=3x3-n=2-se=True',
+              'model': 'microresnet#4-gate=3x3-n=5-se=True',
               'dataset': '125-750',
               'sampler': '',
-              'num_samples': None,
+              'num_samples': 100000,
               'samper_type': 'random',
               'callbacks': '[ReduceLROnPlateauCallback]',
-              'data-aug': True,
+              'data-aug': False,
               'optim': 'sdg',
-              'info': '',
+              'info': 'true se',
               'tr': 0.45,
               'more_than': -0.5,
               'downsample_factor': None,
               'time_window': 750,
               'only_forward': False,
-              'resize': (64, 64)}
+              'resize': (64,64)}
 
     train_and_evaluate(params)
     train_and_evaluate(params)

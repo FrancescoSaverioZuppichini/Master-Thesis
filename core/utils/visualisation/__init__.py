@@ -16,7 +16,7 @@ class VisualiseSimulation():
     """
     def __init__(self, hm, patch_size=100):
         self.hm = hm
-        self.patch_size = 92
+        self.patch_size = patch_size
 
     @property
     def hm_ax(self):
@@ -216,8 +216,9 @@ class VisualiseSimulation():
     def show_classes(self, df, tr):
         fig = plt.figure()
 
-        temp = df['label']
         if tr is not None: temp = df['advancement'] > tr
+        else: temp = df['label']
+
         temp.value_counts().plot.bar()
         plt.show()
 

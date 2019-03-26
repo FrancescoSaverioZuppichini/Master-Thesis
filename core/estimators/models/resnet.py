@@ -187,7 +187,8 @@ class ResNetEncoder(nn.Module):
             nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         )
         # if the user passed a single instance of block, use it for each layer
-        if type(blocks) is not list: self.blocks = [blocks] * len(self.blocks_sizes)
+        if type(blocks) is not list:
+            self.blocks = [blocks] * len(self.blocks_sizes)
         # stack a number of layers together equal to the len of depth
         self.layers = nn.ModuleList([
             ResNetLayer(in_c, out_c, depth=depths[i], block=self.blocks[i],  *args, **kwargs)

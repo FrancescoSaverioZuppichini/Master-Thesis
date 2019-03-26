@@ -76,8 +76,8 @@ class WebotsEnv(gym.Env, Supervisor):
 
 
         idx = int(x  + (self.x_dim * y))
-
-        h = self.grid['height'][idx].value
+        print(idx)
+        h = self.grid['height'][idx + 1].value
 
         return h
 

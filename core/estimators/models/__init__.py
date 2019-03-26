@@ -4,14 +4,14 @@ zoo = {
     'microresnet#4-gate=3x3-n=2-se=True': MicroResnet.micro(1,
                                                             n=2,
                                                             encoder=Encoder3x3,
-                                                            blocks=[BasicBlock, BasicBlock, BasicBlock,
+                                                            blocks=[BasicBlock, BasicBlock,
                                                                     BasicBlockSE],
                                                             preactivate=True,
                                                             activation='leaky_relu'),
     'microresnet#4-gate=3x3-n=1-se=True': MicroResnet.micro(1,
                                                             n=1,
                                                             encoder=Encoder3x3,
-                                                            blocks=[BasicBlock, BasicBlock, BasicBlock,
+                                                            blocks=[BasicBlock, BasicBlock,
                                                                     BasicBlockSE],
                                                             preactivate=True,
                                                             activation='leaky_relu'),
@@ -55,3 +55,6 @@ zoo = {
 
 
 }
+
+
+

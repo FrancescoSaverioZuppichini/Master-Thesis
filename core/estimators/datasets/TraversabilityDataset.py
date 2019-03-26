@@ -35,7 +35,7 @@ aug = iaa.Sometimes(0.8,
                         [
                             iaa.Dropout(p=(0.05, 0.1)),
                             iaa.CoarseDropout((0.02, 0.05),
-                                              size_percent=(0.3 , 0.5))
+                                              size_percent=(0.2 , 0.4))
 
                         ], random_order=True)
                     )
@@ -197,6 +197,8 @@ class TraversabilityDataset(Dataset):
         img = cv2.imread(img_path)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
+        # img = cv2.resize(img, (64,64))
+
         if self.only_forward: img = img[:, img.shape[-1] // 2: ]
 
         return self.transform(img), y
@@ -256,10 +258,10 @@ def get_dataloaders(train_root, test_root, val_root=None,
     Get train, val and test dataloader.
     :return: train, val and test dataloaders
     """
-    print('tr={}'.format(tr))
     print(train_transform, val_transform, test_transform)
     train_ds = FastAIImageFolder.from_root(root=train_root,
-                                           transform=train_transform, tr=tr,
+                                           transform=train_transform,
+                                           tr=tr,
                                            should_aug=should_aug,
                                            downsample_factor=downsample_factor,
                                            more_than=more_than,
@@ -272,11 +274,12 @@ def get_dataloaders(train_root, test_root, val_root=None,
 
     else:
         val_ds = FastAIImageFolder.from_root(root=val_root,
-                                             transform=val_transform, tr=tr,
+                                             transform=val_transform,
+                                             tr=tr,
                                              more_than=more_than)
 
     if num_samples is not None:
-        print('sampling')
+        print('[INFO] Sampling')
         train_dl = DataLoader(train_ds,
                               # sampler=ImbalancedDatasetSampler(train_ds, num_samples=num_samples),
 
@@ -286,14 +289,14 @@ def get_dataloaders(train_root, test_root, val_root=None,
         train_dl = DataLoader(train_ds,
                               shuffle=True,
                               *args, **kwargs)
-    val_dl = DataLoader(val_ds, shuffle=False, *args, **kwargs)
+    val_dl = DataLoader(val_ds, shuffle=True, *args, **kwargs)
 
     test_ds = FastAIImageFolder.from_root(root=test_root,
                                           transform=test_transform,
                                           tr=tr,
                                           more_than=more_than)
 
-    test_dl = DataLoader(test_ds, shuffle=False, *args, **kwargs)
+    test_dl = DataLoader(test_ds, shuffle=True, *args, **kwargs)
 
     return train_dl, val_dl, test_dl
 
@@ -321,7 +324,7 @@ if __name__ == '__main__':
     root = '/media/francesco/saetta/125-750/train/'
 
     # df = root + '/df/querry-big-10/1550307709.2522066-patch.csv'
-    ds = TraversabilityDataset(df, root=root, transform=get_transform(resize=(32,32), should_aug=True, scale=10,
+    ds = TraversabilityDataset(df, root=root, transform=get_transform(resize=(64,64), should_aug=True, scale=10,
                                                                       debug=True),
                               tr=0.45, only_forward=False, downsample_factor=2)
 
@@ -333,30 +336,38 @@ if __name__ == '__main__':
 
     # from torch.nn import Dropout
     # img = Dropout(0.1)(img)
+    dataset = '125-750'
+    resize = None
 
-    # train_dl, val_dl, test_dl = get_dataloaders(
-    #     train_root='/home/francesco/Desktop/bars1-run-recorded/csvs-light/',
-    #     test_root='/home/francesco/Desktop/data/92/test/',
-    #     val_root='/home/francesco/Desktop/data/92/val',
-    #     train_transform=get_transform(92, should_aug=True),
-    #     val_transform=get_transform(92),
-    #     test_transform=get_transform(92, scale=10),
-    #     batch_size=5,
-    #     num_samples=None,
-    #     num_workers=1,
-    #     pin_memory=True)
+    train_dl, val_dl, test_dl = get_dataloaders(
+        train_root='/media/francesco/saetta/{}/train/'.format(dataset),
+        val_root='/media/francesco/saetta/{}/val/'.format(dataset),
+        test_root='/media/francesco/saetta/{}/test/'.format(dataset),
+        train_transform=get_transform(resize=resize, should_aug=True),
+        val_transform=get_transform(resize=resize, scale=1, should_aug=False),
+        test_transform=get_transform(resize=resize, scale=10, should_aug=False),
+        batch_size=5,
+        num_samples=None,
+        num_workers=1,
+        pin_memory=True)
     #
     # #
     # visualise(train_dl)
     # visualise(train_dl)
-    # visualise(train_dl)
-    # visualise(train_dl)
+    visualise(train_dl)
+    visualise(train_dl)
     #
-    # visualise(val_dl)
-    # visualise(val_dl)
+    visualise(val_dl)
+    visualise(val_dl)
+    visualise(val_dl)
+    visualise(val_dl)
+    visualise(val_dl)
 
-    # visualise(test_dl)
-    # visualise(test_dl)
+    visualise(test_dl)
+    visualise(test_dl)
+    visualise(test_dl)
+    visualise(test_dl)
+
     # visualise(test_dl)
     # visualise(test_dl)
 #

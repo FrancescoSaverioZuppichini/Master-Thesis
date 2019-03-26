@@ -18,9 +18,9 @@ from pypeln import thread as th
 
 
 class PostProcessingConfig():
-    def __init__(self, out_dir, maps_folder, patch_size, advancement_th, time_window, skip_every, translation,
+    def __init__(self, maps_folder, patch_size, advancement_th, time_window, skip_every, translation,
                  resolution=0.02, scale=1, n_workers=16,
-                 base_dir=None, csv_dir=None, patch_dir=None, verbose=True, patches=True, name=''):
+                 base_dir=None, csv_dir=None, out_dir=None, patch_dir=None, verbose=True, patches=True, name=''):
         self.maps_folder, self.base_dir, self.out_dir, self.csv_dir = maps_folder, base_dir, out_dir, csv_dir
 
         self.bags_dir = self.base_dir + '/bags/'
@@ -196,7 +196,7 @@ class DataFrameHandler(PostProcessingHandler):
         return df
 
     def df_adjust_robot_center(self, df):
-        df['pose__pose_position_x'] = df['pose__pose_position_x'] + 0.3
+        df['hm_x'] = df['hm_x'] - 14
 
         return df
 
@@ -216,30 +216,34 @@ class DataFrameHandler(PostProcessingHandler):
         file_path = make_path(file_path)
 
         try:
-            # if path.isfile(file_path + '-complete.csv'):
-            #     print('file exist, loading...')
-            #     df = pd.read_csv(file_path + '-complete.csv')
+            if path.isfile(file_path + '-complete.csv'):
+                print('file exist, loading...')
+                df = pd.read_csv(file_path + '-complete.csv')
             #
-            # else:
-            df = df_convert_date2timestamp(df)
-            df = self.df_adjust_robot_center(df)
-            df = df_convert_quaterion2euler(df)
-            df = self.df_clean_by_dropping(df, hm.shape[0] * self.config.resolution,
-                                           hm.shape[1] * self.config.resolution)
+            else:
+                df = df_convert_date2timestamp(df)
+                df = df_convert_quaterion2euler(df)
+                df = self.df_clean_by_dropping(df, hm.shape[0] * self.config.resolution,
+                                               hm.shape[1] * self.config.resolution)
 
-            if len(df) > 0:
-                df = self.extract_cos_sin(df)
-                df = self.df_add_hm_coords(df, hm)
-                df = self.df_clean_by_removing_outliers(df, hm)
-                df = df.dropna()
-                # TODO add flag to decide if store the csv or not
-                os.makedirs(path.dirname(file_path), exist_ok=True)
-                df.to_csv(file_path + '-complete.csv')
+                # print(len(df))
+
+                if len(df) > 0:
+                    df = self.extract_cos_sin(df)
+                    df = self.df_add_hm_coords(df, hm)
+                    df = self.df_adjust_robot_center(df)
+                    df = self.df_clean_by_removing_outliers(df, hm)
+                    df = df.dropna()
+                    # TODO add flag to decide if store the csv or not
+                    os.makedirs(path.dirname(file_path), exist_ok=True)
+                    df.to_csv(file_path + '-complete.csv')
                 # else:
                 # print('{} contains 0 rows, dropping...'.format(file_path))
 
         except Exception as e:
+            print('DATAFRAME')
             print(e)
+            pass
 
         return df, hm, file_path
 
@@ -293,6 +297,7 @@ class PatchesHandler(PostProcessingHandler):
         :return:
         """
         df, hm, file_path = data  # TODO create a function that takes a df and hm and produces the patches
+        if len(df) <= 0:  return data
         dirs, name = path.split(file_path)
 
         out_dir = self.config.out_dir
@@ -355,13 +360,13 @@ def make_and_run_chain(config, memory=True):
     df_h = DataFrameHandler(successor=patches_h, config=config)
     b_h = BagsHandler(config=config, successor=df_h)
 
-    files = glob.glob('{}/csvs/**/*.csv'.format(config.base_dir))
-
-    if len(files) > 0:
-        pip = InMemoryHandler(config=config, successor=patches_h)
-    else:
-        files = glob.glob('{}/**/*.bag'.format(config.bags_dir))
-        pip = b_h
+    # files = glob.glob('{}/csvs/**/*.csv'.format(config.base_dir))
+    #
+    # if len(files) > 0:
+    #     pip = InMemoryHandler(config=config, successor=patches_h)
+    # else:
+    files = glob.glob('{}/**/*.bag'.format(config.bags_dir))
+    pip = b_h
 
     th_wrap = MultiThreadWrapper(16)
     data = th_wrap(pip, files)
@@ -381,14 +386,22 @@ def run_train_val_test_chain(base_dir, base_maps_dir, *args, **kwargs):
 if __name__ == '__main__':
     run_train_val_test_chain(base_dir='/media/francesco/saetta/krock-dataset/92/',
                              base_maps_dir='/home/francesco/Documents/Master-Thesis/core/maps/',
-                             out_dir='/tmp/test/',
-                             patch_size=125,
+                             out_dir='/media/francesco/saetta/correct-90-750/',
+                             patch_size=90,
                              advancement_th=0.45,
                              skip_every=12,
                              translation=[5, 5],
                              time_window=750)
-
     #
+    # config = PostProcessingConfig(base_dir='/home/francesco/Desktop/krock-center-tail/',
+    #                         maps_folder='/home/francesco/Desktop/krock-center/',
+    #                          patch_size=48,
+    #                          advancement_th=0.45,
+    #                          skip_every=12,
+    #                          translation=[5, 5],
+    #                          time_window=100)
+
+    # make_and_run_chain(config)
     # config = PostProcessingConfig(bags_dir='./test/bags/',
     #                               maps_folder='../../maps/test/',
     #                               # csv_dir='/home/francesco/Desktop/data/92/train/csvs/',

@@ -7,8 +7,8 @@ class Encoder3x3(ResNetEncoder):
         super().__init__(in_channel, depths, *args, **kwargs)
 
         self.gate = nn.Sequential(
-            nn.Conv2d(in_channel, 8, kernel_size=3, stride=1, bias=False, padding=1),
-            nn.BatchNorm2d(8),
+            nn.Conv2d(in_channel, 16, kernel_size=3, stride=1, bias=False, padding=1),
+            nn.BatchNorm2d(16),
             nn.LeakyReLU(inplace=True),
             nn.MaxPool2d(kernel_size=2)
         )
