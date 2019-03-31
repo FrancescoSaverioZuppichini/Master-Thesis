@@ -14,7 +14,7 @@ from skimage.util.shape import view_as_windows
 
 class InferenceDataset(Dataset):
     """
-    This class creates a dataset from an heightmap that can be used during inference
+    This class creates a dataset from an height map that can be used during inference
     to test the model.
     """
     def __init__(self, hm_path, patch_size=92, step=1, transform=None, rotate=None, debug=False):
@@ -29,7 +29,6 @@ class InferenceDataset(Dataset):
         self.patch_size = patch_size
         self.rotate = rotate
         self.debug = debug
-        print(self.images_shape)
 
     def show_patch(self, patch, title):
         fig = plt.figure()

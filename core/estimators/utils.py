@@ -30,7 +30,7 @@ def get_learner(model_name, model_dir, callbacks, load_metric='roc_auc', dataset
 
     learner.load(load_metric)
 
-    return learner
+    return learner, dataset
 
 
 def load_model_from_name(model_path, model_name):

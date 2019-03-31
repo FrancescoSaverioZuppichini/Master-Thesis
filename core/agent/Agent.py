@@ -63,7 +63,7 @@ class AgentState(dict):
     The knapsack of an agent. It notify the Agent when something
     it is updated using the 'on_state_change' event. Use it wisely.
     """
-    def __init__(self, agent: Agent):
+    def __init__(self, agent):
         super().__init__()
         self.agent = agent
 

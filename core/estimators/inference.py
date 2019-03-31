@@ -10,13 +10,13 @@ from torch.nn.functional import softmax
 
 class HeightMapInference():
     """
-    This class create and evaluate a given model checkpoint on a given heightmaps by producing
+    This class create and evaluate a given model checkpoint on a given heightmap by producing
     a texture in which each pixel x,y represent the traversable probability.
     """
-    def __init__(self, hm_path, transform):
+    def __init__(self, hm_path, transform, learner=None):
         self.hm_path = hm_path
         self.transform = transform
-        self.learner, self.ds = None, None
+        self.learner, self.ds = learner, None
 
 
     def __call__(self, model_dir, model_name, rotate=None, *args, **kwargs):
@@ -28,10 +28,6 @@ class HeightMapInference():
 
         probs, labels = get_probs_and_labels_from_preds(self.learner.get_preds(self.learner.data.test_dl))
         path = self.ds.make_texture(probs.numpy(), labels.numpy(), 'querry-big-10')
-        # x = torch.ones((1, 1, 92, 92))
-        # res = self.learner.model(x).float()
-
-        # print(softmax(res, dim=1))
 
         return path
 

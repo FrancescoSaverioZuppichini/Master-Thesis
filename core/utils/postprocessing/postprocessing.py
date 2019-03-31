@@ -180,25 +180,7 @@ class DataFrameHandler(PostProcessingHandler):
         df = df.loc[df['pose__pose_e_orientation_y'] <= 2.0].dropna()
         return df
 
-    def df_clean_by_removing_outliers(self, df, hm):
-        offset = self.config.patch_size // 2
 
-        index = df[(df['hm_y'] > (hm.shape[0] - offset)) | (df['hm_y'] < offset)
-                   | (df['hm_x'] > (hm.shape[1] - offset)) | (df['hm_x'] < offset)
-                   ].index
-
-        # print('removing {} outliers'.format(len(index)))
-        # if there are some outliers, we remove all the rows after the first one
-        if len(index) > 0:
-            idx = index[0]
-            df = df.loc[0:idx]
-
-        return df
-
-    def df_adjust_robot_center(self, df):
-        df['hm_x'] = df['hm_x'] - 14
-
-        return df
 
     def handle(self, data):
         df, map_name, file_path = data
@@ -226,13 +208,11 @@ class DataFrameHandler(PostProcessingHandler):
                 df = self.df_clean_by_dropping(df, hm.shape[0] * self.config.resolution,
                                                hm.shape[1] * self.config.resolution)
 
-                # print(len(df))
 
                 if len(df) > 0:
                     df = self.extract_cos_sin(df)
                     df = self.df_add_hm_coords(df, hm)
-                    df = self.df_adjust_robot_center(df)
-                    df = self.df_clean_by_removing_outliers(df, hm)
+                    # df = self.df_clean_by_removing_outliers(df, hm)
                     df = df.dropna()
                     # TODO add flag to decide if store the csv or not
                     os.makedirs(path.dirname(file_path), exist_ok=True)
@@ -253,6 +233,21 @@ class PatchesHandler(PostProcessingHandler):
     def __init__(self, debug=False, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.debug = debug
+
+    def df_clean_by_removing_outliers(self, df, hm):
+        offset = 22
+
+        index = df[(df['hm_y'] > (hm.shape[0] - offset)) | (df['hm_y'] < offset)
+                   | (df['hm_x'] > (hm.shape[1] - offset)) | (df['hm_x'] < offset)
+                   ].index
+
+        # print('removing {} outliers'.format(len(index)))
+        # if there are some outliers, we remove all the rows after the first one
+        if len(index) > 0:
+            idx = index[0]
+            df = df.loc[0:idx]
+
+        return df
 
     def df_add_label(self, df, advancement_th):
         """
@@ -287,6 +282,12 @@ class PatchesHandler(PostProcessingHandler):
 
         return df
 
+
+    def df_adjust_robot_center(self, df):
+        # df['hm_x'] = df['hm_x'] - 14
+
+        return df
+
     def handle(self, data):
         """
         Given a dataframe, and heightmap and the file path, this function extracts a patch
@@ -296,7 +297,7 @@ class PatchesHandler(PostProcessingHandler):
 
         :return:
         """
-        df, hm, file_path = data  # TODO create a function that takes a df and hm and produces the patches
+        df, hm, file_path = data
         if len(df) <= 0:  return data
         dirs, name = path.split(file_path)
 
@@ -308,15 +309,17 @@ class PatchesHandler(PostProcessingHandler):
         os.makedirs(out_dir + '/patches', exist_ok=True)
         os.makedirs(file_path_light, exist_ok=True)
         # df = self.df_add_label(df, self.config.advancement_th)
+        df = self.df_clean_by_removing_outliers(df, hm)
         df = self.df_add_advancement(df, self.config.time_window)
         df = df.dropna()
 
         df = df[::self.config.skip_every]
 
+        df = self.df_adjust_robot_center(df)
+
         image_paths = []
 
         to_show = 1
-
         for idx, (i, row) in enumerate(df.iterrows()):
             patch = \
                 hmpatch(hm, row["hm_x"], row["hm_y"], np.rad2deg(row['pose__pose_e_orientation_z']),
@@ -360,15 +363,17 @@ def make_and_run_chain(config, memory=True):
     df_h = DataFrameHandler(successor=patches_h, config=config)
     b_h = BagsHandler(config=config, successor=df_h)
 
-    # files = glob.glob('{}/csvs/**/*.csv'.format(config.base_dir))
-    #
-    # if len(files) > 0:
-    #     pip = InMemoryHandler(config=config, successor=patches_h)
-    # else:
-    files = glob.glob('{}/**/*.bag'.format(config.bags_dir))
-    pip = b_h
+    files = glob.glob('{}/csvs/**/*.csv'.format(config.base_dir))
 
-    th_wrap = MultiThreadWrapper(16)
+    if len(files) > 0:
+        print('[INFO] Loading from memory.')
+        pip = InMemoryHandler(config=config, successor=patches_h)
+    else:
+        print('[INFO] Loading bags.')
+        files = glob.glob('{}/**/*.bag'.format(config.bags_dir))
+        pip = b_h
+
+    th_wrap = MultiThreadWrapper(14)
     data = th_wrap(pip, files)
 
     return data
@@ -384,84 +389,33 @@ def run_train_val_test_chain(base_dir, base_maps_dir, *args, **kwargs):
 
 
 if __name__ == '__main__':
-    run_train_val_test_chain(base_dir='/media/francesco/saetta/krock-dataset/92/',
-                             base_maps_dir='/home/francesco/Documents/Master-Thesis/core/maps/',
-                             out_dir='/media/francesco/saetta/correct-90-750/',
-                             patch_size=90,
-                             advancement_th=0.45,
-                             skip_every=12,
-                             translation=[5, 5],
-                             time_window=750)
-    #
+    # run_train_val_test_chain(base_dir='/media/francesco/saetta/krock-dataset/92/',
+    #                          base_maps_dir='/home/francesco/Documents/Master-Thesis/core/maps/',
+    #                          out_dir='/media/francesco/saetta/no-shift-88-750/',
+    #                          patch_size=88,
+    #                          advancement_th=0.45,
+    #                          skip_every=12,
+    #                          translation=[5, 5],
+    #                          time_window=750)
+    # #
     # config = PostProcessingConfig(base_dir='/home/francesco/Desktop/krock-center-tail/',
-    #                         maps_folder='/home/francesco/Desktop/krock-center/',
-    #                          patch_size=48,
+    #                         maps_folder='/home/francesco/Desktop/krock-center-tail/',
+    #                          patch_size=88,
     #                          advancement_th=0.45,
     #                          skip_every=12,
     #                          translation=[5, 5],
     #                          time_window=100)
+    # make_and_run_chain(config)
+    #
 
-    # make_and_run_chain(config)
-    # config = PostProcessingConfig(bags_dir='./test/bags/',
-    #                               maps_folder='../../maps/test/',
-    #                               # csv_dir='/home/francesco/Desktop/data/92/train/csvs/',
-    #                               out_dir='./test/',
-    #                               patch_size=85,
-    #                               advancement_th=0.45,
-    #                               skip_every=12,
-    #                               translation=[5, 5],
-    #                               time_window=750,
-    #                               name='train')
-    #
-    # make_and_run_chain(config)
+    config = PostProcessingConfig(base_dir='/media/francesco/saetta/krock-dataset/92/val_new/',
+                                  maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/val/',
+                                  patch_size=88,
+                                  out_dir='/media/francesco/saetta/no-shift-88-750/',
+                                name = 'val_new',
+                                  advancement_th=0.45,
+                             skip_every=12,
+                             translation=[5, 5],
+                             time_window=750)
+    make_and_run_chain(config)
 
-    # config = PostProcessingConfig(bags_dir='/home/francesco/Desktop/carino/vaevictis/krock-dataset/92/train/bags/',
-    #                               maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/train/',
-    #                               out_dir='/home/francesco/Desktop/data/750/',
-    #                               patch_size=92,
-    #                               advancement_th=0.45,
-    #                               skip_every=12,
-    #                               translation=[5, 5],
-    #                               time_window=750,
-    #                               name='train')
-    # #
-    # make_and_run_chain(config)
-    # # #
-    # config = PostProcessingConfig(bags_dir='/home/francesco/Desktop/carino/vaevictis/krock-dataset/92/val/bags/',
-    #                               maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/val/',
-    #                               out_dir='/home/francesco/Desktop/data/750/',
-    #                               patch_size=92,
-    #                               advancement_th=0.12,
-    #                               skip_every=12,
-    #                               translation=[5, 5],
-    #                               time_window=750,
-    #                               name='val')
-    # make_and_run_chain(config)
-    #
-    # config = PostProcessingConfig(bags_dir='/home/francesco/Desktop/carino/vaevictis/krock-dataset/92/test/bags/',
-    #                               maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/test/',
-    #                               out_dir='/home/francesco/Desktop/data/750/',
-    #                               patch_size=92,
-    #                               advancement_th=0.45,
-    #                               skip_every=12,
-    #                               translation=[5, 5],
-    #                               time_window=750,
-    #                               scale=1,
-    #                               name='test')
-    #
-    # make_and_run_chain(config)
-
-    #
-    # config = PostProcessingConfig(base_dir='/home/francesco/Desktop/carino/vaevictis/krock-dataset/flat/',
-    #                               maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/test/',
-    #                               # csv_dir='/home/francesco/Desktop/data/750/test/csvs/',
-    #                               # out_dir='/home/francesco/Desktop/data/750/test/',
-    #                               patch_size=92,
-    #                               advancement_th=0.12,
-    #                               skip_every=12,
-    #                               translation=[5, 5],
-    #                               time_window=750,
-    #                               scale=10,
-    #                               name='flat')
-    #
-    # make_and_run_chain(config)

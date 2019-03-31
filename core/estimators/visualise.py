@@ -57,21 +57,6 @@ model = load_model_from_name(model_dir + '/roc_auc.pth', model_name)
 
 mod_vis = GradCamVisualization(model)
 
-p = BarPatch((92, 92))
-p(strength=0.05, offset=4, size=24)
-p.plot3d()
-p.hm *= 255
-
-tr = get_transform(resize=None, debug=False)
-x = tr(p.hm)
-
-model.eval()
-res = model(x.unsqueeze(0))
-prob = softmax(res, dim=1)
-print(prob, torch.argmax(prob, dim=1))
-#
-# mod_vis(x)
-
 
 
 # #

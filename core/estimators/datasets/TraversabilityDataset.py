@@ -33,8 +33,8 @@ class ImgaugWrapper():
 aug = iaa.Sometimes(0.8,
                     iaa.Sequential(
                         [
-                            iaa.Dropout(p=(0.05, 0.1)),
-                            iaa.CoarseDropout((0.02, 0.05),
+                            iaa.Dropout(p=(0.05, 0.15)),
+                            iaa.CoarseDropout((0.02, 0.1),
                                               size_percent=(0.2 , 0.4))
 
                         ], random_order=True)
@@ -172,6 +172,7 @@ class CenterAndScalePatch():
 class TraversabilityDataset(Dataset):
     def __init__(self, df, root, transform, tr=None, more_than=None, should_aug=False, debug=False, downsample_factor=None, only_forward=False):
         self.df = pd.read_csv(df)
+        self.df_path = df
         self.df = self.df.dropna()  # to be sure
         if downsample_factor is not None: self.df = self.df[::downsample_factor]
         if more_than is not None:  self.df = self.df[self.df['advancement'] >= more_than]
@@ -181,6 +182,8 @@ class TraversabilityDataset(Dataset):
         self.idx2class = {'False': 0,
                           'True': 1}
         self.only_forward = only_forward
+
+        if tr is not None: self.df["label"] = (self.df["advancement"] > tr) * 1
 
         self.should_aug = should_aug
         self.debug = debug
@@ -206,12 +209,27 @@ class TraversabilityDataset(Dataset):
     def __len__(self):
         return len(self.df)
 
+    def false_something(self, something):
+        correct = self.df.loc[self.df['label'] == something]
+        return correct.loc[correct['prediction'] != something]
+
+    @property
+    def false_pos(self):
+        return self.false_something(1)
+
+    @property
+    def false_neg(self):
+        return self.false_something(0)
+
     @classmethod
     def from_root(cls, root, n=None, *args, **kwargs):
+
         dfs = glob.glob(root + '/df/*.csv')
         if len(dfs) == 0:
             dfs = glob.glob(root + '/df/**/*.csv')
-        if n is not None: dfs = dfs[:n]
+        if n is not None:
+            dfs = dfs[:n]
+            print(dfs)
 
         concat_ds = ConcatDataset([cls(df, root, *args, **kwargs) for df in dfs])
         # needed for fastAI
@@ -219,6 +237,12 @@ class TraversabilityDataset(Dataset):
         concat_ds.classes = 'False', 'True'
         print(len(concat_ds))
         return concat_ds
+
+    @classmethod
+    def from_paths(cls, root, paths, args, **kwargs):
+        concat_ds = ConcatDataset([cls(df, root, *args, **kwargs) for df in paths])
+
+
 
 
 class FastAIImageFolder(TraversabilityDataset):

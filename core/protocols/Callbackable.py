@@ -7,7 +7,7 @@ class Callbackable():
         self.callbacks.append(callback)
         return self
 
-    def add_callbacks(self, callbacks : list):
+    def add_callbacks(self, callbacks):
         for cb in callbacks:
             self.add_callback(cb)
         return self

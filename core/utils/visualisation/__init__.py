@@ -110,13 +110,15 @@ class VisualiseSimulation():
             ax_hm.add_patch(rect)
 
             patch, _ = hmpatch(self.hm, x, y, np.rad2deg(ang), self.patch_size, scale=1)
+            patch = patch.astype(np.float32)
+            patch = patch - patch[patch.shape[0]//2, patch.shape[1]//2]
             hm_patches.append((patch, ad))
 
         for i in range(n_show // 2):
             for j in range(n_show // 2):
                 ax_patch = plt.subplot2grid((size), (2 + i, j), colspan=1, rowspan=1)
                 patch, ad = hm_patches[i + j]
-                sns.heatmap(patch, ax=ax_patch, vmin=0, vmax=1)
+                sns.heatmap(patch, ax=ax_patch)
                 ax_patch.set_title(ad)
 
 
@@ -222,20 +224,36 @@ class VisualiseSimulation():
         temp.value_counts().plot.bar()
         plt.show()
 
+
+    def show_patches_raw(self, df):
+        for img_path,advancement in zip(df['image_path'][::10], df['advancement'][::10]):
+            patch = cv2.imread('/media/francesco/saetta/correct-88-750/test/' + img_path)
+            patch = cv2.cvtColor(patch, cv2.COLOR_BGR2GRAY)
+            patch = patch.astype(np.float32)
+            patch = patch - patch[patch.shape[0]//2, patch.shape[1]//2]
+            fig = plt.figure()
+            sns.heatmap(patch)
+            plt.title(advancement)
+            plt.show()
+
+
     def __call__(self, df, tr=None):
         self.show_patches_on_the_map(df)
         self.plot_rotation(df)
         self.plot_position(df)
         self.show_traversability_in_time(df)
-        # self.show_labeled_patches(df)
         self.show_classes(df, tr)
+        # self.show_patches_raw(df)
+        # self.show_labeled_patches(df)
 
 
 if __name__ == '__main__':
 
-    hm = cv2.imread('/home/francesco/Documents/Master-Thesis/core/maps/train/bars1.png')
+    hm = cv2.imread('/home/francesco/Documents/Master-Thesis/core/maps/test/querry-big-10.png')
     hm = cv2.cvtColor(hm, cv2.COLOR_BGR2GRAY)
 
-    deb_pip = VisualiseSimulation(hm, patch_size=92)
-    df = pd.read_csv('/home/francesco/Desktop/bars1-run-recorded/csvs-light/bars1/1551992796.2643805-patch.csv')
-    deb_pip.show_labeled_patches(df.dropna())
+
+    deb_pip = VisualiseSimulation(hm, patch_size=88)
+    df = pd.read_csv('/media/francesco/saetta/correct-88-750/test//df/querry-big-10/1550307811.488546-complete.csv-patch.csv')
+    # deb_pip(df, tr=0.45)
+    deb_pip.show_patches_raw(df)

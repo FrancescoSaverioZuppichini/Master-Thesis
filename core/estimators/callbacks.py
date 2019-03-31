@@ -1,14 +1,19 @@
 import torch
 import time
 
+import cv2
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import pickle
+
+from os import path
 
 from sklearn.metrics import roc_auc_score
 from torch.nn.functional import softmax
 from fastai.callback import Callback
+from fastai.train import LearnerCallback
 
 
 class ROC_AUC(Callback):
@@ -49,16 +54,18 @@ class Timer(Callback):
 
         return {'last_metrics': last_metrics + [self.metric]}
 
-
-class StoreBestWorstAndSample(Callback):
+class StoreResults(Callback):
     """
     Store each input, target and prediction into a Dataframe in order to
     perform custom queries on the dataset.
     """
 
+    def __init__(self, memory_size=30,):
+        self.memory_size = memory_size
+        self.save_dir = '/tmp/inputs.csv'
+
     def on_epoch_begin(self, **kwargs):
         self.df = None
-        self.df_sample = None
 
     def on_batch_end(self, last_input, last_output, last_target, train, **kwargs):
         if not train:
@@ -78,12 +85,22 @@ class StoreBestWorstAndSample(Callback):
 
             if self.df is None:
                 self.df = df
-                self.df_sample = df.sample(1)
             else:
                 self.df = pd.concat([self.df, df])
-                self.df_sample = pd.concat([self.df_sample, df.sample(1)])
 
             self.free_memory()
+
+    @property
+    def exist(self):
+        return path.isfile(self.save_dir)
+
+    def plot(self, sample):
+        for img, pred, target, out0, out1 in zip(sample['input'], sample['prediction'], sample['target'], sample['output_0'], sample['output_1']):
+            img = np.array(img).squeeze()
+            fig = plt.figure()
+            plt.title('pred={}, target={} ouputs=[{:.2f}, {:.2f}]'.format(pred, target, out0, out1))
+            sns.heatmap(img)
+            plt.show()
 
     def free_memory(self):
         """
@@ -91,21 +108,31 @@ class StoreBestWorstAndSample(Callback):
         If we store everything we will run out of RAM!
         :return:
         """
+        n = len(self.df) if self.memory_size > len(self.df) else  self.memory_size
+        print(len(self.df), n)
+        self.df = self.df.sample(self.memory_size)
 
-        best = self.df.sort_values(['output_1'], ascending=False).head(30)
-        worst = self.df.sort_values(['output_0'], ascending=False).head(30)
+class StoreBestWorstAndSample(StoreResults):
 
-        self.df = pd.concat([best, worst])
+    @property
+    def best(self):
+        return self.df.sort_values(['output_1'], ascending=False)
+
+    @property
+    def worst(self):
+        return self.df.sort_values(['output_0'], ascending=False)
+
+    def false_something(self, something):
+        neg = self.df.loc[self.df['label'] == something]
+        return neg.loc[neg['prediction'] != something]
+
+    @property
+    def false_pos(self):
+        return self.false_something(0)
+
+    @property
+    def false_neg(self):
+        return self.false_something(1)
 
 
-    def plot(self, sample):
-        for img, pred, target in zip(sample['input'], sample['prediction'], sample['target']):
-            img = np.array(img).squeeze()
-            fig = plt.figure()
-            plt.title('pred={}, target={}'.format(pred, target))
-            sns.heatmap(img,
-                        vmin=0,
-                        # annot=True,
-                        # linewidths=.5,
-                        fmt='0.2f')
-            plt.show()
+

@@ -34,9 +34,9 @@ if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
 def train_and_evaluate(params, train=True, load_model=None):
     # model = OmarCNN()
     model = zoo[params['model']]
-    print(model)
-    summary(model.cuda(), (1, *params['resize']))
-    # summary(model.cuda(), (1, 125, 125))
+    # print(model)
+    if params['resize'] is not None: summary(model.cuda(), (1, *params['resize']))
+    else: summary(model.cuda(), (1, 88, 88))
 
     pprint.pprint(params)
 
@@ -99,14 +99,14 @@ def train_and_evaluate(params, train=True, load_model=None):
                  SaveModelCallback(learn=learner, name=model_name_loss)]
 
     if train:
-        try:
-            with experiment.train():
-                learner.fit(epochs=params['epochs'], lr=params['lr'],
-                            callbacks=callbacks)  # SaveModelCallback load the best model after training!
+        # try:
+        with experiment.train():
+            learner.fit(epochs=params['epochs'], lr=params['lr'],
+                        callbacks=callbacks)  # SaveModelCallback load the best model after training!
 
-        except Exception as e:
-            print(e)
-            pass
+        # except Exception as e:
+        #     print(e)
+        #     pass
 
         with experiment.test():
             learner.load(model_name_loss)
@@ -127,29 +127,31 @@ def train_and_evaluate(params, train=True, load_model=None):
 if __name__ == '__main__':
     params = {'epochs': 20,
               'lr': 0.001,
-              'batch_size': 256,
+              'batch_size': 128,
               # 'model': 'omar',
-              'model': 'microresnet#4-gate=3x3-n=5-se=True',
-              'dataset': '125-750',
+              'model': 'microresnet#4-gate=3x3-n=2-se=False',
+              'dataset': 'no-shift-88-750',
               'sampler': '',
-              'num_samples': 100000,
+              'num_samples': None,
               'samper_type': 'random',
               'callbacks': '[ReduceLROnPlateauCallback]',
-              'data-aug': False,
+              'data-aug': True,
               'optim': 'sdg',
-              'info': 'true se',
+              'info': 'aggreassive data aug-val new',
               'tr': 0.45,
               'more_than': -0.5,
               'downsample_factor': None,
               'time_window': 750,
               'only_forward': False,
-              'resize': (64,64)}
+              'resize': None  }
 
     train_and_evaluate(params)
     train_and_evaluate(params)
     train_and_evaluate(params)
     train_and_evaluate(params)
     train_and_evaluate(params)
+    train_and_evaluate(params)
+
 
 
 
