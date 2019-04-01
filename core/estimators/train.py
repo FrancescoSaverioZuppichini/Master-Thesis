@@ -139,7 +139,7 @@ if __name__ == '__main__':
               'optim': 'sdg',
               'info': 'aggreassive data aug-val new',
               'tr': 0.45,
-              'more_than': -0.5,
+              'more_than': 0,
               'downsample_factor': None,
               'time_window': 750,
               'only_forward': False,

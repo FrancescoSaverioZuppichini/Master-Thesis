@@ -53,6 +53,10 @@ class Patch():
         hm = tensor.squeeze().cpu().numpy()
         return cls.from_hm(hm)
 
+    def store(self, out_path):
+        cv2.imwrite(self.hm, out_path)
+
+
 
 class BarPatch(Patch):
     def make(self, offset=16, size=4, strength=1):
@@ -82,6 +86,7 @@ class RampPatch(BumpsPatch):
     def make(self, strength=1, orientation=- 1):
         self.hm = orientation * super().make(strength=strength,  size=(2,1), resolution=(2,1))
         return self.hm
+
 
 if __name__ == '__main__':
 #     little test

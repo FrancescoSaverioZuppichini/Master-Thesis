@@ -1,53 +1,38 @@
 import torch
 import cv2
 
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
 
 from os import path
-from torch.nn.functional import softmax
-from fastai.train import Learner, DataBunch, DatasetType
-from fastai.callback import Callback
 from mirror.visualisations.core import GradCam
-from utils import load_model_from_name, get_learner
+from utils import load_model_from_name, get_learner, hmshow, device
 from patches import *
 from datasets.TraversabilityDataset import get_transform, CenterAndScalePatch, TraversabilityDataset
-from torch.nn.functional import softmax
-from callbacks import ROC_AUC, StoreBestWorstAndSample
-
 
 class GradCamVisualization():
 
     def __init__(self, model):
         self.model = model
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.device = device
         self.grad_cam = GradCam(model.to(self.device), self.device)
 
     def __call__(self, patch):
-        img = patch.unsqueeze(0)
+        img = patch.unsqueeze(0).to(self.device)
 
         _, info = self.grad_cam(img, None, target_class=None)
-        print(info['predictions'])
 
         cam = info['cam'].cpu().numpy()
         cam = cv2.resize(cam, (patch.shape[1], patch.shape[2]))
         cam = (cam - cam.min()) / (cam.max() - cam.min())
         cam *= 255
 
-        fig = plt.figure()
-        plt.title(info['predictions'])
-        sns.heatmap(cam)
-        plt.show()
+        return patch, cam
 
-
-model_dir = path.abspath('../../resources/assets/models/microresnet#4-gate=3x3-n=2-se=True-750-0.001-None-1552582563.7411294/')
+model_dir = '/home/francesco/Desktop/carino/vaevictis/data/microresnet#4-gate=3x3-n=2-se=False-no-shift-88-750-0.001-None-1554052968.796346'
 
 # model_dir ='/home/francesco/Desktop/carino/vaevictis/data/microresnet#4-gate=3x3-n=2-se=True-750-0.001-None-1552582563.7411294/'
 # model_dir = '/home/francesco/Documents/Master-Thesis/resources/assets/models/microresnet#4-gate=3x3-n=2-se=True-750-0.001-None-1552582563.7411294'
 
-model_name = 'microresnet#4-gate=3x3-n=2-se=True'
+model_name = 'microresnet#4-gate=3x3-n=2-se=False'
 
 # learner = get_learner(model_name, model_dir, callbacks=[vis], root=root, transform=get_transform(None, scale=1),  tr=0.45)
 
@@ -58,6 +43,19 @@ model = load_model_from_name(model_dir + '/roc_auc.pth', model_name)
 mod_vis = GradCamVisualization(model)
 
 
+root = '/media/francesco/saetta/no-shift-88-750/test/'
+df = '/media/francesco/saetta/no-shift-88-750/test/df/querry-big-10/1550307709.2522066-complete.csv-patch.csv'
+
+
+
+
+ds = TraversabilityDataset(df, root, tr=0.45, transform=get_transform(scale=10))
+
+
+patch, cam = mod_vis(ds[0][0])
+
+hmshow(patch.cpu().numpy())
+hmshow(cam)
 
 # #
 # store_inputs = StoreBestWorstAndSample()

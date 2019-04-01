@@ -3,6 +3,8 @@ import random
 
 import imgaug as ia
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 from torch.nn import Module
 from torch.utils.data import DataLoader
@@ -17,7 +19,6 @@ def load_model(path: str, model: Module):
 
     return model
 
-
 def get_learner(model_name, model_dir, callbacks, load_metric='roc_auc', dataset=None, *args, **kwargs):
     model = zoo[model_name]
     if dataset is None: dataset = TraversabilityDataset.from_root(*args, **kwargs)
@@ -31,7 +32,6 @@ def get_learner(model_name, model_dir, callbacks, load_metric='roc_auc', dataset
     learner.load(load_metric)
 
     return learner, dataset
-
 
 def load_model_from_name(model_path, model_name):
     model = zoo[model_name]
@@ -54,4 +54,16 @@ def get_probs_and_labels_from_preds(preds):
 
     return probs, labels
 
+def false_something(self, something):
+    correct = self.df.loc[self.df['label'] == something]
+    return correct.loc[correct['prediction'] != something]
 
+def hmshow(hm, title='', *args, **kwargs):
+    fig = plt.figure()
+    plt.title(title)
+    sns.heatmap(hm.squeeze(), *args, **kwargs)
+    plt.show()
+    return fig
+
+
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')

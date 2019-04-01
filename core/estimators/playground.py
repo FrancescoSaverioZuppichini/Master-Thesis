@@ -19,7 +19,7 @@ df = '/media/francesco/saetta/correct-88-750/test/df/querry-big-10/1550307709.25
 
 # learner, dataset = get_learner('microresnet#4-gate=3x3-n=2-se=False', model_dir, callbacks=[], dataset=dataset)
 
-concat = TraversabilityDataset.from_root(root, tr=0.45, transform=get_transform(scale=10),)
+concat = TraversabilityDataset.from_root(root, tr=0.45, transform=get_transform(scale=10))
 
 # def model_visualize(*args, **kwargs):
 #     dataset = TraversabilityDataset(*args, **kwargs)
@@ -41,6 +41,8 @@ false_neg_df = None
 
 bar = tqdm.tqdm(concat.datasets)
 
+total_df = None
+
 for dataset in bar:
     bar.set_description('[INFO] Reading {}'.format(dataset.df_path))
     learner, _ = get_learner('microresnet#4-gate=3x3-n=2-se=False', model_dir, callbacks=[], dataset=dataset)
@@ -56,6 +58,8 @@ for dataset in bar:
 
     false_pos_df = pd.concat([false_pos_df,  dataset.false_pos])
     false_neg_df = pd.concat([false_neg_df, dataset.false_neg])
+
+    total_df = pd.concat([total_df, dataset.df])
 
 
 print('***********************')
