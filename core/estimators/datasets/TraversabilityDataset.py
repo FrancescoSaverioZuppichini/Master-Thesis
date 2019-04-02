@@ -299,8 +299,7 @@ def get_dataloaders(train_root, test_root, val_root=None,
     else:
         val_ds = FastAIImageFolder.from_root(root=val_root,
                                              transform=val_transform,
-                                             tr=tr,
-                                             more_than=more_than)
+                                             tr=tr)
 
     if num_samples is not None:
         print('[INFO] Sampling')
@@ -317,8 +316,7 @@ def get_dataloaders(train_root, test_root, val_root=None,
 
     test_ds = FastAIImageFolder.from_root(root=test_root,
                                           transform=test_transform,
-                                          tr=tr,
-                                          more_than=more_than)
+                                          tr=tr)
 
     test_dl = DataLoader(test_ds, shuffle=True, *args, **kwargs)
 
