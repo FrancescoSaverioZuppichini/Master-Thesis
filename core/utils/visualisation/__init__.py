@@ -175,6 +175,21 @@ class VisualiseSimulation():
         df['pose__pose_position_y'].plot(label='y')
         plt.legend()
 
+    def plot_box_on_hm(self, row):
+        fig = plt.figure()
+        ax = plt.gca()
+        x, y, ang, ad = row["hm_x"], \
+                        row["hm_y"], \
+                        row["pose__pose_e_orientation_z"], \
+                        row["advancement"]
+
+        sns.heatmap(self.hm / 255, vmin=0, vmax=1, ax=ax)
+
+        rect = mpatches.Rectangle((x - self.patch_size // 2, y - self.patch_size // 2), self.patch_size,
+                                  self.patch_size, linewidth=1, edgecolor='r', facecolor='none')
+        ax.add_patch(rect)
+        plt.show()
+
     def plot_patch_map_advancement_in_time(self, df):
         fig = plt.figure(figsize=(8, 8))
 
@@ -249,11 +264,11 @@ class VisualiseSimulation():
 
 if __name__ == '__main__':
 
-    hm = cv2.imread('/home/francesco/Documents/Master-Thesis/core/maps/test/querry-big-10.png')
+    hm = cv2.imread('/home/francesco/Documents/Master-Thesis/core/maps/train/bars1.png')
     hm = cv2.cvtColor(hm, cv2.COLOR_BGR2GRAY)
 
 
     deb_pip = VisualiseSimulation(hm, patch_size=88)
-    df = pd.read_csv('/media/francesco/saetta/correct-88-750/test//df/querry-big-10/1550307811.488546-complete.csv-patch.csv')
+    df = pd.read_csv('/media/francesco/saetta/no-shift-88-750/train/df/bars1/1550614988.2771952-patch.csv')
     # deb_pip(df, tr=0.45)
-    deb_pip.show_patches_raw(df)
+    deb_pip.plot_box_on_hm(df.iloc[10])

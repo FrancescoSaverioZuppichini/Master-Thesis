@@ -350,9 +350,10 @@ class PatchesHandler(PostProcessingHandler):
                 plt.show()
 
         df['image_path'] = image_paths
+        df['map_name'] = map_name
         # TODO the name is wrong!
         # create a new small dataframe with the reference to the image stored
-        df.to_csv(file_path_light + '/{}-patch.csv'.format(name))
+        df.to_csv(file_path_light + '/{}-patch.csv'.format(name.split('-')[0]))
 
         return data
 
@@ -389,14 +390,14 @@ def run_train_val_test_chain(base_dir, base_maps_dir, *args, **kwargs):
 
 
 if __name__ == '__main__':
-    # run_train_val_test_chain(base_dir='/media/francesco/saetta/krock-dataset/92/',
-    #                          base_maps_dir='/home/francesco/Documents/Master-Thesis/core/maps/',
-    #                          out_dir='/media/francesco/saetta/no-shift-88-750/',
-    #                          patch_size=88,
-    #                          advancement_th=0.45,
-    #                          skip_every=12,
-    #                          translation=[5, 5],
-    #                          time_window=750)
+    run_train_val_test_chain(base_dir='/media/francesco/saetta/krock-dataset/92/',
+                             base_maps_dir='/home/francesco/Documents/Master-Thesis/core/maps/',
+                             out_dir='/media/francesco/saetta/no-shift-88-750/',
+                             patch_size=88,
+                             advancement_th=0.45,
+                             skip_every=12,
+                             translation=[5, 5],
+                             time_window=750)
     # #
     # config = PostProcessingConfig(base_dir='/home/francesco/Desktop/krock-center-tail/',
     #                         maps_folder='/home/francesco/Desktop/krock-center-tail/',
@@ -408,14 +409,14 @@ if __name__ == '__main__':
     # make_and_run_chain(config)
     #
 
-    config = PostProcessingConfig(base_dir='/media/francesco/saetta/krock-dataset/92/val_new/',
-                                  maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/val/',
-                                  patch_size=88,
-                                  out_dir='/media/francesco/saetta/no-shift-88-750/',
-                                name = 'val_new',
-                                  advancement_th=0.45,
-                             skip_every=12,
-                             translation=[5, 5],
-                             time_window=750)
+    # config = PostProcessingConfig(base_dir='/media/francesco/saetta/krock-dataset/92/val_new/',
+    #                               maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/val/',
+    #                               patch_size=88,
+    #                               out_dir='/media/francesco/saetta/no-shift-88-750/',
+    #                             name = 'val_new',
+    #                               advancement_th=0.45,
+    #                          skip_every=12,
+    #                          translation=[5, 5],
+    #                          time_window=750)
     make_and_run_chain(config)
 

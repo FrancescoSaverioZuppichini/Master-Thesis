@@ -5,6 +5,7 @@ import imgaug as ia
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+import cv2
 
 from torch.nn import Module
 from torch.utils.data import DataLoader
@@ -64,6 +65,16 @@ def hmshow(hm, title='', *args, **kwargs):
     sns.heatmap(hm.squeeze(), *args, **kwargs)
     plt.show()
     return fig
+
+def get_patches_form_df(df, image_dir):
+    patches = []
+    for img_path in df['image_path']:
+        img = cv2.imread(image_dir + img_path)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        patches.append(img)
+
+    return patches
+
 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')

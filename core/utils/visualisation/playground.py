@@ -1,13 +1,11 @@
 import pandas as pd
 
-from utils.visualisation import show_advancement, show_trajectory
+from utils.visualisation import *
 
 from utils.postprocessing.utils import read_image
-from utils.postprocessing.config import Config
 
-df = pd.read_csv('/home/francesco/Desktop/carino/vaevictis/data/dataset/bars1/1548510453.5639887.csv')
+df = pd.read_csv('/media/francesco/saetta/no-shift-88-750/train/df/bars1/1550614988.2771952-patch.csv')
 hm = read_image('/home/francesco/Desktop/carino/vaevictis/data/maps/bars1.png')
 
-show_advancement(df, hm, Config)
 #
 # show_trajectory(df.iterrows(), hm)

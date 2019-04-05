@@ -200,8 +200,6 @@ class TraversabilityDataset(Dataset):
         img = cv2.imread(img_path)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-        # img = cv2.resize(img, (64,64))
-
         if self.only_forward: img = img[:, img.shape[-1] // 2: ]
 
         return self.transform(img), y
@@ -209,21 +207,9 @@ class TraversabilityDataset(Dataset):
     def __len__(self):
         return len(self.df)
 
-    def false_something(self, something):
-        correct = self.df.loc[self.df['label'] == something]
-        return correct.loc[correct['prediction'] != something]
-
-    @property
-    def false_pos(self):
-        return self.false_something(1)
-
-    @property
-    def false_neg(self):
-        return self.false_something(0)
 
     @classmethod
     def from_root(cls, root, n=None, *args, **kwargs):
-
         dfs = glob.glob(root + '/df/*.csv')
         if len(dfs) == 0:
             dfs = glob.glob(root + '/df/**/*.csv')
@@ -235,14 +221,14 @@ class TraversabilityDataset(Dataset):
         # needed for fastAI
         concat_ds.c = 2
         concat_ds.classes = 'False', 'True'
-        print(len(concat_ds))
+
         return concat_ds
 
     @classmethod
-    def from_paths(cls, root, paths, args, **kwargs):
+    def from_paths(cls, root, paths, *args, **kwargs):
         concat_ds = ConcatDataset([cls(df, root, *args, **kwargs) for df in paths])
 
-
+        return concat_ds
 
 
 class FastAIImageFolder(TraversabilityDataset):
