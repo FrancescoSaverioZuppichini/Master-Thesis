@@ -27,7 +27,7 @@ class Patch():
         min, max = self.hm.min(), self.hm.max()
         return (self.hm - min) / ( max - min )
 
-    def plot3d(self):
+    def plot3d(self, texture):
         fig = plt.figure()
         ax = fig.gca(projection='3d')
         X,Y = np.meshgrid(range(self.hm.shape[1]), range(self.hm.shape[0]))
@@ -37,6 +37,7 @@ class Patch():
                         cmap=plt.cm.viridis,
                         vmax=1.0,
                         linewidth=0.2)
+
         fig.colorbar(surf, shrink=0.5, aspect=5)
 
 
@@ -52,6 +53,14 @@ class Patch():
     def from_tensor(cls, tensor):
         hm = tensor.squeeze().cpu().numpy()
         return cls.from_hm(hm)
+
+    @classmethod
+    def from_tensors(cls, tensors):
+        return [Patch.from_tensor(tensor) for tensor in tensors]
+
+    @classmethod
+    def from_hms(cls, hms):
+        return [Patch.from_hm(hm) for hm in hms]
 
     def store(self, out_path):
         cv2.imwrite(self.hm, out_path)
