@@ -7,18 +7,21 @@ import pandas as pd
 import cv2
 
 from mirror.visualisations.core import GradCam
-from models import *
-from utils import get_learner, get_probs_and_labels_from_preds, get_patches_form_df, load_model_from_name, device
-from callbacks import StoreBestWorstAndSample, ROC_AUC
+from estimators.models import *
+from estimators.utils import get_learner, get_probs_and_labels_from_preds, get_patches_form_df, load_model_from_name, \
+    device
+from estimators.datasets.TraversabilityDataset import TraversabilityDataset, get_transform
+
 from os import path
-from datasets.TraversabilityDataset import TraversabilityDataset, get_transform
 from Config import Config
-from patches import *
+from utilities.patches import *
 
-from utils.postprocessing.postprocessing import Handler
+from utilities.postprocessing.postprocessing import Handler, Compose
 
-class StorePredictions():
-    def __init__(self, model_name, model_dir, store_dir):
+
+class StorePredictions(Handler):
+    def __init__(self, model_name, model_dir, store_dir, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.model_name = model_name
         self.model_dir = model_dir
         self.dfs = []
@@ -54,10 +57,11 @@ class StorePredictions():
             self.df_path2df[df_path] = df
             self.dfs.append(df)
 
-    def __call__(self, datasets):
+    def handle(self, datasets):
         bar = tqdm.tqdm(datasets)
         for dataset in bar:
-            if type(dataset) is not TraversabilityDataset: raise ValueError('inputs must be of type TraversabilityDataset')
+            if type(dataset) is not TraversabilityDataset: raise ValueError(
+                'inputs must be of type TraversabilityDataset')
             bar.set_description('[INFO] Reading {}'.format(dataset.df_path))
             if len(dataset) > 0:
                 df = self.handle_dataset(dataset)
@@ -71,31 +75,40 @@ def false_something(df, something):
     neg = df.loc[df['label'] == something]
     return neg.loc[neg['prediction'] != something]
 
+
 class Best():
     name = 'best'
+
     def __call__(self, df):
         df = df.loc[df['label'] == 1]
         return df.sort_values(['out_1'], ascending=False)
 
+
 class Worst():
     name = 'worst'
+
     def __call__(self, df):
         df = df.loc[df['label'] == 0]
         return df.sort_values(['out_0'], ascending=False)
 
+
 class FalseNegative():
     name = 'false_negative'
+
     def __call__(self, df):
         return false_something(df, 0)
 
+
 class FalsePositive():
     name = 'false_positive'
+
     def __call__(self, df):
         return false_something(df, 1)
 
 
-class FilterPatches():
-    def __init__(self, transform=None):
+class FilterPatches(Handler):
+    def __init__(self, transform=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.df = None
         self.transform = transform
 
@@ -105,20 +118,24 @@ class FilterPatches():
     def filter_patches(self, df, image_dir):
         return self.transform_patches(get_patches_form_df(df, image_dir))
 
-    def __call__(self, df, image_dir, filter_fn, n=2):
+    def handle(self, df, image_dir, filter_fn, n=2):
         filtered_df = filter_fn(df)
         filtered_df = filtered_df.head(n)
         return filtered_df, self.filter_patches(filtered_df, image_dir),
 
-
 class Convert2Patches():
     def __call__(self, data):
-        df, patches = data
-        return df, Patch.from_tensors(patches)
+        df, patches, grad_cams = data
+        patches = Patch.from_tensors(patches)
 
-class GradCamVisualization():
+        for (patch, grad_cam) in zip(patches, grad_cams):
+            patch.add_texture(grad_cam)
 
-    def __init__(self, model, device):
+        return df, patches
+
+class GradCamVisualization(Handler):
+    def __init__(self, model, device, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.model = model
         self.device = device
         self.grad_cam = GradCam(model.to(self.device), self.device)
@@ -134,7 +151,7 @@ class GradCamVisualization():
 
         return cam
 
-    def __call__(self, data):
+    def handle(self, data):
         df, patches = data
 
         grad_cams = [self.get_grad_cam(patch) for patch in patches]
@@ -142,42 +159,52 @@ class GradCamVisualization():
         return df, patches, grad_cams
 
 
-class PlotInterestingPatches():
-    def plot_all(self, patches, title):
-        for patch in patches:
-            patch.plot3d(title)
-
+class PlotInterestingPatches(Handler):
     def make_title(self, metric, row):
-        return '{} advancement={:.2f} prediction = {} ground truth = {}'.format(metric, row['advancement'], row['prediction'],
-                                                                             row['label'])
+        return '{} advancement={:.2f} prediction = {} ground truth = {}'.format(metric, row['advancement'],
+                                                                                row['prediction'],
+                                                                                row['label'])
 
-    def __call__(self, data):
+    def handle(self, data):
         for metric, (df, patches) in data.items():
             for (idx, row), patch in zip(df.iterrows(), patches):
-                patch.plot3d(self.make_title(metric, row))
+                patch.plot2d(self.make_title(metric, row))
+                patch.texture.plot2d()
 
-def get_all_interesting_patches(transform, df, image_dir):
-    filters = [Best(), Worst(), FalseNegative(), FalsePositive()]
-    result = {}
 
-    f_patch = FilterPatches(transform=transform)
-    c_patch = Convert2Patches()
 
-    for f in filters:
-        result[f.name] = c_patch(f_patch(df, image_dir, f))
+class GetInterestingPatches(Handler):
+    def __init__(self, transform, image_dir, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.transform = transform
+        self.image_dir = image_dir
+        self.filters = [Best(), Worst(), FalseNegative(), FalsePositive()]
 
-    return result
+    def handle(self, data):
+        df = pd.concat(data)
+        result = {}
+
+
+        f_patch = FilterPatches(transform=transform)
+        c_patch = Convert2Patches()
+        g_patch  = GradCamVisualization(load_model_from_name(Config.BEST_MODEL_DIR + '/roc_auc.pth', Config.BEST_MODEL_NAME), device)
+
+        filter_convert_and_grad_cam = Compose([f_patch, g_patch, c_patch])
+
+        for f in self.filters:
+            result[f.name] = filter_convert_and_grad_cam(df, self.image_dir, f)
+
+        return result
+
 
 transform = get_transform(scale=1)
 
 concat = TraversabilityDataset.from_paths(Config.DATA_ROOT, [Config.DATA_DIR], tr=0.45, transform=transform)
-store = StorePredictions(Config.BEST_MODEL_NAME, Config.BEST_MODEL_DIR, '/home/francesco/Desktop/store-test/')
-dfs = store(concat.datasets)
-
-data = get_all_interesting_patches(transform, dfs[0], Config.DATA_ROOT)
 
 plot_patches = PlotInterestingPatches()
-plot_patches(data)
+get_patches = GetInterestingPatches(transform, Config.DATA_ROOT)
+store_prediction = StorePredictions(Config.BEST_MODEL_NAME, Config.BEST_MODEL_DIR,
+                                    '/home/francesco/Desktop/store-test/')
 
-
-
+pip = Compose([store_prediction, get_patches, plot_patches])
+pip(concat.datasets)

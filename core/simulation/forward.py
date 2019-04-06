@@ -17,7 +17,7 @@ image = cv2.imread(MAP)
 image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
 
-from estimators.patches import *
+from utilities.patches import *
 
 p = BarPatch((125,125))
 p()

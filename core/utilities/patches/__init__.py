@@ -9,6 +9,7 @@ class Patch():
     def __init__(self, size):
         self.hm = np.zeros(size)
         self.size = size
+        self.texture = None
 
     def __call__(self, *args, **kwargs):
         self.hm = self.make(*args, **kwargs)
@@ -31,11 +32,11 @@ class Patch():
     def plot3d(self, title='', texture=None):
         fig = plt.figure()
         ax = fig.gca(projection='3d')
-        X,Y = np.meshgrid(range(self.hm.shape[1]), range(self.hm.shape[0]))
+        X,Y = np.meshgrid(range(self.hm.shape[0]), range(self.hm.shape[1]))
 
         ax.set_zlim3d(-1, 1)
-
-        surf = ax.plot_surface(X, Y, self.hm,
+        # I have to transpose the heightmap to correctly show it -> I am not sure why
+        surf = ax.plot_surface(X, Y, self.hm.T,
                         cmap=plt.cm.viridis,
                         linewidth=0.2)
 
@@ -66,7 +67,8 @@ class Patch():
     def store(self, out_path):
         cv2.imwrite(self.hm, out_path)
 
-
+    def add_texture(self, tex):
+        self.texture = Patch.from_hm(tex)
 
 class BarPatch(Patch):
     def make(self, offset=16, size=4, strength=1):
@@ -99,13 +101,7 @@ class RampPatch(BumpsPatch):
 
 
 if __name__ == '__main__':
-#     little test
-#     p = BarPatch((92,92))
-#     p(strength=0.2, offset=8, size=34)
-#     p.plot2d()
-#     p.plot3d()
-    #
-    p = BumpsPatch((125,125))
+    p = BumpsPatch((88,88))
     p(strength=1)
     print(p.hm.shape)
     p.plot2d()

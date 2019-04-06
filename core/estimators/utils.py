@@ -9,8 +9,8 @@ import cv2
 
 from torch.nn import Module
 from torch.utils.data import DataLoader
-from datasets.TraversabilityDataset import get_dataloaders, get_transform, TraversabilityDataset
-from models import zoo
+from estimators.datasets.TraversabilityDataset import get_dataloaders, get_transform, TraversabilityDataset
+from estimators.models import zoo
 from fastai.train import Learner, DataBunch, DatasetType
 from torch.nn.functional import softmax
 
