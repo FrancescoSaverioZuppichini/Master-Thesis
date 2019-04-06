@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 
 from tqdm import tqdm
 from os import path
-from utils import *
+from utilities.postprocessing.utils import *
 from pypeln import thread as th
 
 
@@ -418,5 +418,5 @@ if __name__ == '__main__':
     #                          skip_every=12,
     #                          translation=[5, 5],
     #                          time_window=750)
-    make_and_run_chain(config)
+    # make_and_run_chain(config)
 

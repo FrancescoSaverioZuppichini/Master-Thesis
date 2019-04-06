@@ -6,8 +6,8 @@ from webots_ros.msg import Int8Stamped, Float64ArrayStamped
 from sensor_msgs.msg import Joy, Image
 from std_msgs.msg import String
 
-from agent import RospyAgent
-from utils.webots2ros import Supervisor
+from simulation.agent import RospyAgent
+from utilities.webots2ros import Supervisor
 
 from cv_bridge import CvBridge
 
@@ -39,8 +39,7 @@ class Krock(RospyAgent):
         return {
             'pose': rospy.Subscriber(self.POSE_SUB, PoseStamped, self.callback_pose),
             'touch_sensor': rospy.Subscriber(self.TOUCH_SENSOR, Float64ArrayStamped, self.callback_touch_sensors),
-            'toques_feedback': rospy.Subscriber(self.TORQUES_FEEDBACK, Float64ArrayStamped,
-                                                self.callback_torques_feedback),
+            'toques_feedback': rospy.Subscriber(self.TORQUES_FEEDBACK, Float64ArrayStamped, self.callback_torques_feedback),
             'frontal_camera': rospy.Subscriber(self.FRONTAL_CAMERA, Image, self.callbacks_frontal_camera)
         }
 

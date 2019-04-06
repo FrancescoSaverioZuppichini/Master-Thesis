@@ -13,8 +13,6 @@ from os import path
 from sklearn.metrics import roc_auc_score
 from torch.nn.functional import softmax
 from fastai.callback import Callback
-from fastai.train import LearnerCallback
-
 
 class ROC_AUC(Callback):
     """

@@ -2,10 +2,10 @@ import glob
 import random
 
 from os import makedirs
-from agent.callbacks import *
-from env.webots.krock.KrockWebotsEnv import KrockWebotsEnv
-from env.spawn.SpawnStragety import FlatGroundSpawnStrategy
-from env.spawn import spawn_points2webots_pose
+from simulation.agent.callbacks import *
+from simulation.env.webots.krock import KrockWebotsEnv
+from simulation.env import FlatGroundSpawnStrategy
+from simulation.env import spawn_points2webots_pose
 
 def make_env(map, args):
     agent = None

@@ -1,23 +1,15 @@
-import rospy
-import pprint
-from agent.callbacks import *
+from simulation.agent.callbacks import *
 
-from env.spawn.SpawnStragety import FlatGroundSpawnStrategy
-from env.webots.krock import Krock, KrockWebotsEnv
-import time
-import numpy as np
+from simulation.env.webots.krock import KrockWebotsEnv
 from tf import transformations
-import random
 
 WORLD_PATH = '/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock2_ros/worlds/bars1.wbt'
-# MAP = '/home/francesco/Documents/Master-Thesis/core/maps/train/bars1.png'
-MAP = '/home/francesco/Desktop/center.png'
+MAP = '/home/francesco/Documents/Master-Thesis/core/maps/train/bars1.png'
+# MAP = '/home/francesco/Desktop/center.png'
 N_STEPS = 4
-from utils.webots2ros import Supervisor, Node
 
 rospy.init_node("traversability_simulation")
 # create our env
-from geometry_msgs.msg import PoseStamped
 
 import cv2
 
@@ -44,12 +36,12 @@ image = p.hm
 
 env = KrockWebotsEnv.from_image(
     MAP,
-    '/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock.wbt',
+    '/home/francesco/Documents/Master-Thesis/core/simulation/env/webots/krock/krock.wbt',
     {'height': 1,
      'resolution': 0.02 },
-    agent_callbacks=[RosBagSaver('/home/francesco/Desktop/krock-center-tail/bags/center/',
-                                 topics=['pose'])],
-    output_dir='/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock2_ros/worlds/')
+    # agent_callbacks=[RosBagSaver('/home/francesco/Desktop/krock-center-tail/bags/center/',
+    #                              topics=['pose'])],
+    output_dir='/home/francesco/Documents/Master-Thesis/core/simulation/env/webots/krock/krock2_ros/worlds/')
 
 # env = KrockWebotsEnv(WORLD_PATH, load_world=True)
 

@@ -15,14 +15,11 @@ from fastai.train import Learner, DataBunch, \
     EarlyStoppingCallback, \
     SaveModelCallback, DatasetType
 
-from fastai.callback import Callback
 from fastai.metrics import accuracy, dice
 from fastai.layers import CrossEntropyFlat, MSELossFlat
-from datasets.TraversabilityDataset import TraversabilityDataset
-from sklearn.metrics import roc_auc_score
-from datasets.TraversabilityDataset import get_dataloaders, get_transform, TraversabilityDataset
-from models import zoo
-from callbacks import ROC_AUC, Timer
+from estimators.datasets.TraversabilityDataset import get_dataloaders, get_transform, TraversabilityDataset
+from estimators.models import zoo
+from estimators.callbacks import ROC_AUC, Timer
 
 # torch.manual_seed(0)
 torch.backends.cudnn.benchmark = True
@@ -135,7 +132,7 @@ def train_and_evaluate(params, train=True, load_model=None):
     del learner
 
 if __name__ == '__main__':
-    params = {'epochs': 20,
+    params = {'epochs': 0,
               'lr': 0.001,
               'batch_size': 128,
               # 'model': 'omar',

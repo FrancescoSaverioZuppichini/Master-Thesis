@@ -1,14 +1,10 @@
-import gym
-
-from env.webots.krock import Krock
-from gym import spaces
-from cv_bridge import CvBridge
-
+import numpy as np
 import cv2
 
-from env.conditions import  *
-
-from env.webots.WebotsEnv import WebotsEnv
+from simulation.env.webots.krock import Krock
+from gym import spaces
+from cv_bridge import CvBridge
+from simulation.env.webots import WebotsEnv
 
 class KrockWebotsEnv(WebotsEnv):
     metadata = {'render_modes': ['human']}

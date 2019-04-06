@@ -6,3 +6,5 @@ def spawn_points2webots_pose(spawn_point, env):
     pose = [[x, z + 0.5, y], orientation]
 
     return pose
+
+from .SpawnStragety import FlatGroundSpawnStrategy

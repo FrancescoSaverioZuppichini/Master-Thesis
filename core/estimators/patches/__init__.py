@@ -17,9 +17,10 @@ class Patch():
     def make(self, *args, **kwargs):
         raise NotImplementedError
 
-    def plot2d(self):
+    def plot2d(self, title=''):
         fig = plt.figure()
         sns.heatmap(self.hm)
+        plt.title(title)
         plt.show()
 
     @property
@@ -27,19 +28,19 @@ class Patch():
         min, max = self.hm.min(), self.hm.max()
         return (self.hm - min) / ( max - min )
 
-    def plot3d(self, texture):
+    def plot3d(self, title='', texture=None):
         fig = plt.figure()
         ax = fig.gca(projection='3d')
         X,Y = np.meshgrid(range(self.hm.shape[1]), range(self.hm.shape[0]))
 
         ax.set_zlim3d(-1, 1)
+
         surf = ax.plot_surface(X, Y, self.hm,
                         cmap=plt.cm.viridis,
-                        vmax=1.0,
                         linewidth=0.2)
 
         fig.colorbar(surf, shrink=0.5, aspect=5)
-
+        plt.title(title)
 
         plt.show()
 

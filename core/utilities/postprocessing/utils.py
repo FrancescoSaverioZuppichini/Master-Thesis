@@ -15,20 +15,6 @@ from os import path
 from pypeln import thread as th
 from tf.transformations import euler_from_quaternion
 
-
-def file2df_map(file):
-    df = pd.read_csv(file)
-    map_name = filename2map(file)
-    map = read_image(Config.MAPS_FOLDER + map_name + '.png')
-    return df, map
-
-
-def files2dfs_maps(files):
-    stage = th.map(file2df_map, files)
-    data = list(stage)
-    return data
-
-
 def csvs2dfs(files):
     stage = th.map(pd.read_csv, files)
     data = list(stage)

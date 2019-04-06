@@ -1,10 +1,9 @@
 import numpy as np
 import cv2
 import os
-
 import gym
 
-from utils.webots2ros import Supervisor, Node
+from utilities.webots2ros import Supervisor, Node
 from geometry_msgs.msg import Pose
 from tf import transformations
 from .utils import image2webots_terrain

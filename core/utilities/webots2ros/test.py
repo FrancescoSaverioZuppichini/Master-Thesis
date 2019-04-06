@@ -1,4 +1,4 @@
-from env.webots.krock import Krock
+from simulation.env.webots.krock import Krock
 from utils.webots2ros.Supervisor import *
 
 rospy.init_node("traversability_simulation")

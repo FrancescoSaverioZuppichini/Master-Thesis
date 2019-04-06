@@ -3,7 +3,7 @@ from tqdm import tqdm
 import time
 
 from pypeln import thread as th
-from postprocessing import BagsHandler, InMemoryHandler, DataFrameHandler, PatchesHandler, PostProcessingConfig, MultiThreadWrapper
+from utilities.postprocessing.postprocessing import BagsHandler, InMemoryHandler, DataFrameHandler, PatchesHandler, PostProcessingConfig, MultiThreadWrapper
 
 config = PostProcessingConfig(base_dir='./test/',
                               maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/test/',
