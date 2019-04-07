@@ -201,12 +201,11 @@ class TraversabilityDataset(Dataset):
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
         if self.only_forward: img = img[:, img.shape[-1] // 2: ]
-
-        return self.transform(img), y
+        img = self.transform(img)
+        return img, y
 
     def __len__(self):
         return len(self.df)
-
 
     @classmethod
     def from_root(cls, root, n=None, *args, **kwargs):
@@ -227,9 +226,22 @@ class TraversabilityDataset(Dataset):
     @classmethod
     def from_paths(cls, root, paths, *args, **kwargs):
         concat_ds = ConcatDataset([cls(df, root, *args, **kwargs) for df in paths])
-
         return concat_ds
 
+class PatchesDataset(Dataset):
+    def __init__(self, patches, transform=None):
+        self.patches = [(p.hm * 255).astype(np.uint8) for p in patches]
+        self.transform = transform
+        self.df = pd.DataFrame()
+
+    def __getitem__(self, item):
+        patch =  self.patches[item]
+        if self.transform is not None: patch = self.transform(patch)
+
+        return patch, 0
+
+    def __len__(self):
+        return len(self.patches)
 
 class FastAIImageFolder(TraversabilityDataset):
     c = 2

@@ -4,6 +4,7 @@ import numpy as np
 from mpl_toolkits.mplot3d import Axes3D # This import has side effects required for the kwarg projection='3d' in the call to fig.add_subplot
 import matplotlib.pyplot as plt
 import seaborn as sns
+from collections.abc import Iterable
 
 class Patch():
     def __init__(self, size):
@@ -13,7 +14,7 @@ class Patch():
 
     def __call__(self, *args, **kwargs):
         self.hm = self.make(*args, **kwargs)
-        return self.hm
+        return self
 
     def make(self, *args, **kwargs):
         raise NotImplementedError
@@ -52,6 +53,20 @@ class Patch():
         return p
 
     @classmethod
+    def from_range(cls, size,  **kwargs):
+        patches = []
+
+        static_fields = {k:v for k,v in kwargs.items() if not isinstance(v, Iterable)}
+
+        for key, range in kwargs.items():
+            if isinstance(range, Iterable):
+                for value in range:
+                    p  = cls(size)
+                    p(**static_fields, **{key: value})
+                    patches.append(p)
+        return patches
+
+    @classmethod
     def from_tensor(cls, tensor):
         hm = tensor.squeeze().cpu().numpy()
         return cls.from_hm(hm)
@@ -71,9 +86,16 @@ class Patch():
         self.texture = Patch.from_hm(tex)
 
 class BarPatch(Patch):
-    def make(self, offset=16, size=4, strength=1):
-        self.hm[offset: offset + size, :] = strength
-        self.hm[-offset - size: -offset:, :] = strength
+    def make(self, offset=16, size=4, strength=1, up=True, down=True):
+        if up: self.hm[offset: offset + size, :] = strength
+        if down: self.hm[-offset - size: -offset:, :] = strength
+
+        return self.hm
+
+class WallPatch(BarPatch):
+    def make(self, front=True, back=True, *args, **kwargs):
+        super().make(up=back, down=front, *args, **kwargs)
+        self.hm = self.hm.T
 
         return self.hm
 
@@ -101,9 +123,11 @@ class RampPatch(BumpsPatch):
 
 
 if __name__ == '__main__':
-    p = BumpsPatch((88,88))
-    p(strength=1)
-    print(p.hm.shape)
-    p.plot2d()
-    p.plot3d()
+    patches = WallPatch.from_range(size=(88,88), offset=list(range(2)))
+    print(patches)
+    for p in patches:
+        p.plot2d()
+    # p(back=False, offset=18, size=20)
+    # p.plot2d()
+    # p.plot3d()
 

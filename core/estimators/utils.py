@@ -68,10 +68,13 @@ def hmshow(hm, title='', *args, **kwargs):
 
 def get_patches_form_df(df, image_dir):
     patches = []
-    for img_path in df['image_path']:
-        img = cv2.imread(image_dir + img_path)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        patches.append(img)
+
+    if 'images' in df.columns: patches = df['images']
+    else:
+        for img_path in df['image_path']:
+            img = cv2.imread(image_dir + img_path)
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            patches.append(img)
 
     return patches
 
