@@ -19,7 +19,7 @@ from utilities.patches import *
 from utilities.postprocessing.postprocessing import Handler, Compose
 
 
-class StorePredictions(Handler):
+class StorePredictionsHandler(Handler):
     def __init__(self, model_name, model_dir, store_dir, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.model_name = model_name
@@ -69,7 +69,7 @@ class StorePredictions(Handler):
                 if isinstance(dataset, PatchesDataset): df['images'] = dataset.patches
                 if hasattr(dataset, 'df_patch'): self.df_path2df[dataset.df_path] = self.dfs[-1]
 
-        return self.dfs
+        return pd.concat(self.dfs)
 
 
 def false_something(df, something):
@@ -109,14 +109,15 @@ class FalsePositive():
         return false_something(df, 1)
 
 
-class FilterPatches(Handler):
+class FilterPatchesHandler(Handler):
 
-    def handle(self, df, filter_fn, n=2):
+    def handle(self, data):
+        df, filter_fn, n = data
         filtered_df = filter_fn(df)
         filtered_df = filtered_df.head(n)
         return filtered_df
 
-class GetPatches(Handler):
+class GetPatchesFromDataframeHandler(Handler):
     def __init__(self, transform=None, image_dir=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.transform = transform
@@ -140,7 +141,7 @@ class GetPatches(Handler):
         return df, patches
 
 
-class Convert2Patches():
+class Convert2PatchesHandler():
     def __call__(self, data):
         df, patches, grad_cams = data
         patches = Patch.from_tensors(patches)
@@ -176,7 +177,7 @@ class GradCamHandler(Handler):
         return df, patches, grad_cams
 
 
-class PlotInterestingPatches(Handler):
+class PlotFilteredPatchesHandler(Handler):
     def make_title(self, metric, row):
         advancement = row['advancement'] if 'advancement' in row else np.nan
         label = row['label'] if 'label' in row else ''
@@ -189,49 +190,64 @@ class PlotInterestingPatches(Handler):
         for metric, (df, patches) in data.items():
             for (idx, row), patch in zip(df.iterrows(), patches):
                 patch.plot3d(self.make_title(metric, row))
-                # patch.texture.plot3d()
+                patch.texture.plot3d()
 
-class GetInterestingPatches(Handler):
-    def __init__(self, transform, image_dir, filters=None, *args, **kwargs):
+class GroupByFiltersPatchesHandler(Handler):
+    def __init__(self, transform, image_dir, filters=None, n=4, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.transform = transform
         self.image_dir = image_dir
         self.filters = filters
+        self.n = n
 
-    def handle(self, data):
-        df = pd.concat(data)
+    def handle(self, df):
         result = {}
 
-        f_patch = FilterPatches()
-        get_patch = GetPatches(transform=transform)
-        c_patch = Convert2Patches()
+        f_patch = FilterPatchesHandler()
+        get_patch = GetPatchesFromDataframeHandler(self.transform, self.image_dir)
+        c_patch = Convert2PatchesHandler()
         g_patch  = GradCamHandler(load_model_from_name(Config.BEST_MODEL_DIR + '/roc_auc.pth', Config.BEST_MODEL_NAME), device)
 
         filter_convert_and_grad_cam = Compose([f_patch, get_patch, g_patch, c_patch])
 
         for f in self.filters:
-            result[f.name] = filter_convert_and_grad_cam(df, f, n=4)
+
+            result[f.name] = filter_convert_and_grad_cam((df, f, self.n))
 
         return result
 
+class PlotPatches():
+
+    def __call__(self, data):
+        df, patches = data
+
+        for (idx, row), patch in zip(df.iterrows(), patches):
+            patch.plot3d('Prediction = {} Confidence = [{:.2f} {:.2f}] Between = {}'.format(
+                row['prediction'],
+                row['out_0'],
+                row['out_1'],
+                patch.between))
 
 transform = get_transform(scale=1, debug=False)
 #
-concat = TraversabilityDataset.from_paths(Config.DATA_ROOT, [Config.DATA_DIR], tr=0.45, transform=transform)
-#
-plot_patches = PlotInterestingPatches()
-get_patches = GetInterestingPatches(transform, Config.DATA_ROOT, filters=[Best(), Worst()])
-store_prediction = StorePredictions(Config.BEST_MODEL_NAME, Config.BEST_MODEL_DIR,
+
+
+plot_filtered_patches = PlotFilteredPatchesHandler()
+plot_patches = PlotPatches()
+filter_patches = GroupByFiltersPatchesHandler(transform, Config.DATA_ROOT, filters=[Best(), Worst()])
+get_patches = GetPatchesFromDataframeHandler()
+store_prediction = StorePredictionsHandler(Config.BEST_MODEL_NAME, Config.BEST_MODEL_DIR,
                                     '/home/francesco/Desktop/store-test/')
 
 pip = Compose([store_prediction, get_patches, plot_patches])
 
-patches = BarPatch.from_range(size=(88,88), strength=0.15, offset=list(range(8, 44, 4)))
+patches = BarPatch.from_range(shape=(88,88), strength=0.3, offset=list(range(20, 44, 4)))
+
+concat = TraversabilityDataset.from_paths(Config.DATA_ROOT, [Config.DATA_DIR], tr=0.45, transform=transform)
 ds = PatchesDataset(patches, transform=transform)
 
-# pip([ds])
 
-pip(concat.datasets)
-#
-# for p in patches:
-#     print(p.plot3d())
+run_model_on_custom_patches = Compose([store_prediction, get_patches, plot_patches])
+run_model_on_dataset = Compose([store_prediction, filter_patches, plot_filtered_patches])
+
+run_model_on_dataset([concat.datasets[0]])

@@ -7,9 +7,9 @@ import seaborn as sns
 from collections.abc import Iterable
 
 class Patch():
-    def __init__(self, size):
-        self.hm = np.zeros(size)
-        self.size = size
+    def __init__(self, shape, *args, **kwargs):
+        self.hm = np.zeros(shape)
+        self.shape = shape
         self.texture = None
 
     def __call__(self, *args, **kwargs):
@@ -30,18 +30,22 @@ class Patch():
         min, max = self.hm.min(), self.hm.max()
         return (self.hm - min) / ( max - min )
 
-    def plot3d(self, title='', texture=None):
+    def plot3d(self, title=None, texture=None):
         fig = plt.figure()
         ax = fig.gca(projection='3d')
         X,Y = np.meshgrid(range(self.hm.shape[0]), range(self.hm.shape[1]))
 
         ax.set_zlim3d(-1, 1)
+
+
         # I have to transpose the heightmap to correctly show it -> I am not sure why
         surf = ax.plot_surface(X, Y, self.hm.T,
                         cmap=plt.cm.viridis,
                         linewidth=0.2)
 
         fig.colorbar(surf, shrink=0.5, aspect=5)
+
+        title = title if title is not None else self.__repr__()
         plt.title(title)
 
         plt.show()
@@ -53,7 +57,7 @@ class Patch():
         return p
 
     @classmethod
-    def from_range(cls, size,  **kwargs):
+    def from_range(cls, shape,  **kwargs):
         patches = []
 
         static_fields = {k:v for k,v in kwargs.items() if not isinstance(v, Iterable)}
@@ -61,8 +65,10 @@ class Patch():
         for key, range in kwargs.items():
             if isinstance(range, Iterable):
                 for value in range:
-                    p  = cls(size)
-                    p(**static_fields, **{key: value})
+                    print(static_fields)
+                    p  = cls(shape, **static_fields, **{key: value})
+                    p()
+                    print(p)
                     patches.append(p)
         return patches
 
@@ -85,48 +91,95 @@ class Patch():
     def add_texture(self, tex):
         self.texture = Patch.from_hm(tex)
 
+    def shift(self, px):
+        self.hm = np.roll(self.hm, px)
+
+    def __repr__(self):
+        return "Shape = {}".format(self.shape)
+
+
 class BarPatch(Patch):
-    def make(self, offset=16, size=4, strength=1, up=True, down=True):
-        if up: self.hm[offset: offset + size, :] = strength
-        if down: self.hm[-offset - size: -offset:, :] = strength
+    def __init__(self, shape, offset=16, size=4, strength=1, up=True, down=True):
+        super().__init__(shape)
+        self.offset, self.size, self.strength = offset, size, strength
+        self.up, self.down = up, down
+
+    def make(self):
+        if self.up: self.hm[self.offset: self.offset + self.size, :] = self.strength
+        if self.down: self.hm[-self.offset -self. size: -self.offset:, :] = self.strength
 
         return self.hm
 
-class WallPatch(BarPatch):
-    def make(self, front=True, back=True, *args, **kwargs):
-        super().make(up=back, down=front, *args, **kwargs)
-        self.hm = self.hm.T
+    @property
+    def between(self):
+        from_border = self.offset + self.size
+        between = self.shape[0] - (from_border) * 2
+        return between
 
+    def __repr__(self):
+
+        return "{} Offset = {} Size = {} Strength = {} Between = {}".format(super().__repr__(),
+                                                                           self.offset,
+                                                                           self.size,
+                                                                           self.strength,
+                                                                           self.between)
+
+class WallPatch(BarPatch):
+    def __init__(self, shape, front=True, back=True, *args, **kwargs):
+        super().__init__(shape, up=back, down=front, *args, **kwargs)
+
+    def make(self, *args, **kwargs):
+        super().make(*args, **kwargs)
+        self.hm = self.hm.T
         return self.hm
 
 class BumpsPatch(Patch):
-    def make(self, strength=1.0, resolution=(4,4), size=(1,1)):
-        self.hm = cv2.resize(self.hm, resolution, interpolation = cv2.INTER_LINEAR)
+    def __init__(self, shape, resolution=(4,4), size=(1,1), strength=1):
+        super().__init__(shape)
+        self.resolution, self.size, self.strength = resolution, size, strength
 
-        self.hm[self.hm.shape[0] //2 - size[0] :
-                self.hm.shape[0] //2 + size[0], - size[1] : ] = strength
+    def make(self):
+        self.hm = cv2.resize(self.hm, self.resolution, interpolation = cv2.INTER_LINEAR)
 
-        self.hm = cv2.resize(self.hm, self.size)
+        self.hm[self.hm.shape[0] //2 - self.size[0] :
+                self.hm.shape[0] //2 + self.size[0], - self.size[1] : ] = self.strength
+
+        self.hm = cv2.resize(self.hm, self.shape)
 
         return self.hm
 
 class HolesPatch(BumpsPatch):
-    def make(self, *args, **kwargs):
-        self.hm = -1 * super().make(*args, **kwargs)
+    def make(self):
+        self.hm = -1 * super().make()
 
         return self.hm
 
 class RampPatch(BumpsPatch):
-    def make(self, strength=1, orientation=- 1):
-        self.hm = orientation * super().make(strength=strength,  size=(2,1), resolution=(2,1))
+    def __init__(self, shape, strength=1, orientation=-1):
+        super().__init__(shape, strength=strength,  size=(2,1), resolution=(2,1))
+        self.orientation = orientation
+
+    def make(self):
+        self.hm = self.orientation * super().make()
         return self.hm
 
 
 if __name__ == '__main__':
-    patches = WallPatch.from_range(size=(88,88), offset=list(range(2)))
-    print(patches)
-    for p in patches:
-        p.plot2d()
+    p = BarPatch((88,88))
+    p()
+    p.plot3d()
+
+    WallPatch((88,88))().plot3d()
+
+    BumpsPatch((88,88))().plot3d()
+    HolesPatch((88,88))().plot3d()
+    RampPatch((88,88))().plot3d()
+    RampPatch((88,88), orientation=1)().plot3d()
+
+    # patches = WallPatch.from_range(size=(88,88), offset=list(range(2)))
+    # print(patches)
+    # for p in patches:
+    #     p.plot2d()
     # p(back=False, offset=18, size=20)
     # p.plot2d()
     # p.plot3d()

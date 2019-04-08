@@ -230,12 +230,12 @@ class TraversabilityDataset(Dataset):
 
 class PatchesDataset(Dataset):
     def __init__(self, patches, transform=None):
-        self.patches = [(p.hm * 255).astype(np.uint8) for p in patches]
+        self.patches = patches
         self.transform = transform
         self.df = pd.DataFrame()
 
     def __getitem__(self, item):
-        patch =  self.patches[item]
+        patch =  (self.patches[item].hm * 255).astype(np.uint8)
         if self.transform is not None: patch = self.transform(patch)
 
         return patch, 0
