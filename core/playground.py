@@ -20,7 +20,7 @@ from utilities.postprocessing.postprocessing import Handler, Compose
 
 
 class StorePredictionsHandler(Handler):
-    def __init__(self, model_name, model_dir, store_dir, *args, **kwargs):
+    def __init__(self, model_name, model_dir, store_dir=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.model_name = model_name
         self.model_dir = model_dir
@@ -217,7 +217,6 @@ class GroupByFiltersPatchesHandler(Handler):
         return result
 
 class PlotPatches():
-
     def __call__(self, data):
         df, patches = data
 
@@ -229,17 +228,13 @@ class PlotPatches():
                 patch.between))
 
 transform = get_transform(scale=1, debug=False)
-#
-
 
 plot_filtered_patches = PlotFilteredPatchesHandler()
 plot_patches = PlotPatches()
 filter_patches = GroupByFiltersPatchesHandler(transform, Config.DATA_ROOT, filters=[Best(), Worst()])
 get_patches = GetPatchesFromDataframeHandler()
-store_prediction = StorePredictionsHandler(Config.BEST_MODEL_NAME, Config.BEST_MODEL_DIR,
-                                    '/home/francesco/Desktop/store-test/')
 
-pip = Compose([store_prediction, get_patches, plot_patches])
+store_prediction = StorePredictionsHandler(Config.BEST_MODEL_NAME, Config.BEST_MODEL_DIR)
 
 patches = BarPatch.from_range(shape=(88,88), strength=0.3, offset=list(range(20, 44, 4)))
 
@@ -248,6 +243,7 @@ ds = PatchesDataset(patches, transform=transform)
 
 
 run_model_on_custom_patches = Compose([store_prediction, get_patches, plot_patches])
+
 run_model_on_dataset = Compose([store_prediction, filter_patches, plot_filtered_patches])
 
 run_model_on_dataset([concat.datasets[0]])

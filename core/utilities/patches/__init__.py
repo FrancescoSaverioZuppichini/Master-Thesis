@@ -165,22 +165,9 @@ class RampPatch(BumpsPatch):
 
 
 if __name__ == '__main__':
-    p = BarPatch((88,88))
-    p()
-    p.plot3d()
-
     WallPatch((88,88))().plot3d()
-
     BumpsPatch((88,88))().plot3d()
     HolesPatch((88,88))().plot3d()
     RampPatch((88,88))().plot3d()
     RampPatch((88,88), orientation=1)().plot3d()
-
-    # patches = WallPatch.from_range(size=(88,88), offset=list(range(2)))
-    # print(patches)
-    # for p in patches:
-    #     p.plot2d()
-    # p(back=False, offset=18, size=20)
-    # p.plot2d()
-    # p.plot3d()
 

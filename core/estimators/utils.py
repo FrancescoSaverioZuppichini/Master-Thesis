@@ -66,6 +66,12 @@ def hmshow(hm, title='', *args, **kwargs):
     plt.show()
     return fig
 
+def read_patch(patch_path):
+    patch = cv2.imread(patch_path)
+    patch = cv2.cvtColor(patch, cv2.COLOR_BGR2GRAY)
+
+    return patch
+
 def get_patches_form_df(df, image_dir):
     patches = []
 
