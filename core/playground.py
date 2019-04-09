@@ -8,7 +8,8 @@ import cv2
 
 from mirror.visualisations.core import GradCam
 from estimators.models import *
-from estimators.utils import get_learner, get_probs_and_labels_from_preds, get_patches_form_df, load_model_from_name, \
+from estimators.utils import get_learner, get_probs_and_labels_from_preds, read_patch, get_patches_form_df, \
+    load_model_from_name, \
     device
 from estimators.datasets.TraversabilityDataset import TraversabilityDataset, get_transform, PatchesDataset
 
@@ -19,7 +20,7 @@ from utilities.patches import *
 from utilities.postprocessing.postprocessing import Handler, Compose
 
 
-class StorePredictionsHandler(Handler):
+class StoreModelPredictionsOnDataframe(Handler):
     def __init__(self, model_name, model_dir, store_dir=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.model_name = model_name
@@ -109,141 +110,72 @@ class FalsePositive():
         return false_something(df, 1)
 
 
-class FilterPatchesHandler(Handler):
-
-    def handle(self, data):
-        df, filter_fn, n = data
-        filtered_df = filter_fn(df)
-        filtered_df = filtered_df.head(n)
-        return filtered_df
-
-class GetPatchesFromDataframeHandler(Handler):
-    def __init__(self, transform=None, image_dir=None, *args, **kwargs):
+class FilterDataframe(Handler):
+    def __init__(self, filters=None, after_filter=lambda x: x, n=4, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.transform = transform
-        self.image_dir = image_dir
-
-    def handle(self, df):
-        patches = []
-
-        if 'images' in df.columns:
-            for img in df['images']:
-                if self.transform is not None: img = self.transform(img)
-                patches.append(img)
-        else:
-            for img_path in df['image_path']:
-                print(self.image_dir + img_path)
-                img = cv2.imread(self.image_dir + img_path)
-                img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-                if self.transform is not None: img = self.transform(img)
-                patches.append(img)
-
-        return df, patches
-
-
-class Convert2PatchesHandler():
-    def __call__(self, data):
-        df, patches, grad_cams = data
-        patches = Patch.from_tensors(patches)
-
-        for (patch, grad_cam) in zip(patches, grad_cams):
-            patch.add_texture(grad_cam)
-
-        return df, patches
-
-class GradCamHandler(Handler):
-    def __init__(self, model, device, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.model = model
-        self.device = device
-        self.grad_cam = GradCam(model.to(self.device), self.device)
-
-    def get_grad_cam(self, patch):
-        img = patch.unsqueeze(0).to(self.device)
-
-        _, info = self.grad_cam(img, None, target_class=None)
-
-        cam = info['cam'].cpu().numpy()
-        cam = cv2.resize(cam, (patch.shape[1], patch.shape[2]))
-        cam = (cam - cam.min()) / (cam.max() - cam.min())
-
-        return cam
-
-    def handle(self, data):
-        df, patches = data
-
-        grad_cams = [self.get_grad_cam(patch) for patch in patches]
-
-        return df, patches, grad_cams
-
-
-class PlotFilteredPatchesHandler(Handler):
-    def make_title(self, metric, row):
-        advancement = row['advancement'] if 'advancement' in row else np.nan
-        label = row['label'] if 'label' in row else ''
-
-        return '{} advancement={:.2f} prediction = {} ground truth = {} outputs=[{:0.2f},{:0.2f}]'.format(metric, advancement,
-                                                                                row['prediction'],
-                                                                                label, row['out_0'], row['out_1'])
-
-    def handle(self, data):
-        for metric, (df, patches) in data.items():
-            for (idx, row), patch in zip(df.iterrows(), patches):
-                patch.plot3d(self.make_title(metric, row))
-                patch.texture.plot3d()
-
-class GroupByFiltersPatchesHandler(Handler):
-    def __init__(self, transform, image_dir, filters=None, n=4, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.transform = transform
-        self.image_dir = image_dir
+        self.after_filter = after_filter
         self.filters = filters
         self.n = n
 
     def handle(self, df):
-        result = {}
+        if self.filters is None: return {'all': self.after_filter(df).head(self.n)}
+        res = {f.name: self.after_filter(f(df).head(self.n)) for f in self.filters}
+        return res
 
-        f_patch = FilterPatchesHandler()
-        get_patch = GetPatchesFromDataframeHandler(self.transform, self.image_dir)
-        c_patch = Convert2PatchesHandler()
-        g_patch  = GradCamHandler(load_model_from_name(Config.BEST_MODEL_DIR + '/roc_auc.pth', Config.BEST_MODEL_NAME), device)
 
-        filter_convert_and_grad_cam = Compose([f_patch, get_patch, g_patch, c_patch])
+class MergePatchesInDataframe(Handler):
+    def __init__(self, image_dir, transform, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.image_dir = image_dir
+        self.transform = transform
 
-        for f in self.filters:
+    def handle(self, df):
+        if 'images' not in df.columns:  df['images'] = [
+            Patch.from_tensor(transform(read_patch(self.image_dir + img_path)))
+            for img_path in df['image_path']]
+        return df
 
-            result[f.name] = filter_convert_and_grad_cam((df, f, self.n))
 
-        return result
+class PlotPatchesFromDataframe(Handler):
+    def __init__(self, title='', *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.title = title
 
-class PlotPatches():
-    def __call__(self, data):
-        df, patches = data
+    def plot_df(self, df, title=''):
+        for idx, row in df.iterrows():
+            patch = row['images']
+            patch.plot3d('[{}] Prediction = {} Confidence = [{:.2f} {:.2f}] Between = {}'.format(title,
+                                                                                                 row['prediction'],
+                                                                                                 row['out_0'],
+                                                                                                 row['out_1'],
+                                                                                                 ""))  # TODO __repr__ can be too long!
 
-        for (idx, row), patch in zip(df.iterrows(), patches):
-            patch.plot3d('Prediction = {} Confidence = [{:.2f} {:.2f}] Between = {}'.format(
-                row['prediction'],
-                row['out_0'],
-                row['out_1'],
-                patch.between))
+    def plot_dict(self, dict):
+        for metric, df in dict.items():
+            self.plot_df(df, metric)
+
+    def handle(self, data):
+        if type(data) is dict:
+            self.plot_dict(data)
+        else:
+            self.plot_df(data)
+
 
 transform = get_transform(scale=1, debug=False)
 
-plot_filtered_patches = PlotFilteredPatchesHandler()
-plot_patches = PlotPatches()
-filter_patches = GroupByFiltersPatchesHandler(transform, Config.DATA_ROOT, filters=[Best(), Worst()])
-get_patches = GetPatchesFromDataframeHandler()
 
-store_prediction = StorePredictionsHandler(Config.BEST_MODEL_NAME, Config.BEST_MODEL_DIR)
+def visualize_model_on_dataset(ds, filters, transform):
+    pip = Compose([StoreModelPredictionsOnDataframe(Config.BEST_MODEL_NAME, Config.BEST_MODEL_DIR),
+                   FilterDataframe(filters=filters, after_filter=MergePatchesInDataframe(image_dir=Config.DATA_ROOT,
+                                                                                         transform=transform)),
+                   PlotPatchesFromDataframe()])
 
-patches = BarPatch.from_range(shape=(88,88), strength=0.3, offset=list(range(20, 44, 4)))
+    pip([ds])
+
 
 concat = TraversabilityDataset.from_paths(Config.DATA_ROOT, [Config.DATA_DIR], tr=0.45, transform=transform)
+
+patches = BarPatch.from_range(shape=(88, 88), strength=0.3, offset=list(range(20, 44, 4)))
 ds = PatchesDataset(patches, transform=transform)
 
-
-run_model_on_custom_patches = Compose([store_prediction, get_patches, plot_patches])
-
-run_model_on_dataset = Compose([store_prediction, filter_patches, plot_filtered_patches])
-
-run_model_on_dataset([concat.datasets[0]])
+visualize_model_on_dataset(ds, filters=[Best()], transform=transform)

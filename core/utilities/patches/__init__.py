@@ -1,10 +1,24 @@
 import cv2
 
 import numpy as np
-from mpl_toolkits.mplot3d import Axes3D # This import has side effects required for the kwarg projection='3d' in the call to fig.add_subplot
+from mpl_toolkits.mplot3d import \
+    Axes3D  # This import has side effects required for the kwarg projection='3d' in the call to fig.add_subplot
 import matplotlib.pyplot as plt
 import seaborn as sns
 from collections.abc import Iterable
+from matplotlib.colors import LinearSegmentedColormap
+from matplotlib import colors
+
+import numpy as np
+from matplotlib import colors
+
+
+def array2cmap(X):
+    # Assuming array is Nx3, where x3 gives RGB values
+    # Append 1's for the alpha channel, to make X Nx4
+
+    return colors.LinearSegmentedColormap.from_list('my_colormap', X)
+
 
 class Patch():
     def __init__(self, shape, *args, **kwargs):
@@ -28,21 +42,27 @@ class Patch():
     @property
     def norm(self):
         min, max = self.hm.min(), self.hm.max()
-        return (self.hm - min) / ( max - min )
+        return (self.hm - min) / (max - min)
 
     def plot3d(self, title=None, texture=None):
         fig = plt.figure()
-        ax = fig.gca(projection='3d')
-        X,Y = np.meshgrid(range(self.hm.shape[0]), range(self.hm.shape[1]))
+        ax = fig.add_subplot(111, projection='3d')
+        X, Y = np.meshgrid(range(self.hm.shape[0]), range(self.hm.shape[1]))
 
         ax.set_zlim3d(-1, 1)
 
+        # colours = plt.cm.viridis(self.texture)
 
         # I have to transpose the heightmap to correctly show it -> I am not sure why
         surf = ax.plot_surface(X, Y, self.hm.T,
-                        cmap=plt.cm.viridis,
-                        linewidth=0.2)
+                               # facecolors=colours,
+                               cmap=plt.cm.viridis,
+                               linewidth=0.2, norm=plt.Normalize(0, 1))
 
+        # import matplotlib.cm as cm
+        # m = cm.ScalarMappable(cmap=plt.cm.viridis)
+        # m.set_array(self.hm.T)
+        # fig.colorbar(m)
         fig.colorbar(surf, shrink=0.5, aspect=5)
 
         title = title if title is not None else self.__repr__()
@@ -53,22 +73,20 @@ class Patch():
     @classmethod
     def from_hm(cls, hm):
         p = cls(hm.shape)
-        p.hm =hm
+        p.hm = hm
         return p
 
     @classmethod
-    def from_range(cls, shape,  **kwargs):
+    def from_range(cls, shape, **kwargs):
         patches = []
 
-        static_fields = {k:v for k,v in kwargs.items() if not isinstance(v, Iterable)}
+        static_fields = {k: v for k, v in kwargs.items() if not isinstance(v, Iterable)}
 
         for key, range in kwargs.items():
             if isinstance(range, Iterable):
                 for value in range:
-                    print(static_fields)
-                    p  = cls(shape, **static_fields, **{key: value})
+                    p = cls(shape, **static_fields, **{key: value})
                     p()
-                    print(p)
                     patches.append(p)
         return patches
 
@@ -106,7 +124,7 @@ class BarPatch(Patch):
 
     def make(self):
         if self.up: self.hm[self.offset: self.offset + self.size, :] = self.strength
-        if self.down: self.hm[-self.offset -self. size: -self.offset:, :] = self.strength
+        if self.down: self.hm[-self.offset - self.size: -self.offset:, :] = self.strength
 
         return self.hm
 
@@ -119,10 +137,11 @@ class BarPatch(Patch):
     def __repr__(self):
 
         return "{} Offset = {} Size = {} Strength = {} Between = {}".format(super().__repr__(),
-                                                                           self.offset,
-                                                                           self.size,
-                                                                           self.strength,
-                                                                           self.between)
+                                                                            self.offset,
+                                                                            self.size,
+                                                                            self.strength,
+                                                                            self.between)
+
 
 class WallPatch(BarPatch):
     def __init__(self, shape, front=True, back=True, *args, **kwargs):
@@ -133,20 +152,22 @@ class WallPatch(BarPatch):
         self.hm = self.hm.T
         return self.hm
 
+
 class BumpsPatch(Patch):
-    def __init__(self, shape, resolution=(4,4), size=(1,1), strength=1):
+    def __init__(self, shape, resolution=(4, 4), size=(1, 1), strength=1):
         super().__init__(shape)
         self.resolution, self.size, self.strength = resolution, size, strength
 
     def make(self):
-        self.hm = cv2.resize(self.hm, self.resolution, interpolation = cv2.INTER_LINEAR)
+        self.hm = cv2.resize(self.hm, self.resolution, interpolation=cv2.INTER_LINEAR)
 
-        self.hm[self.hm.shape[0] //2 - self.size[0] :
-                self.hm.shape[0] //2 + self.size[0], - self.size[1] : ] = self.strength
+        self.hm[self.hm.shape[0] // 2 - self.size[0]:
+                self.hm.shape[0] // 2 + self.size[0], - self.size[1]:] = self.strength
 
         self.hm = cv2.resize(self.hm, self.shape)
 
         return self.hm
+
 
 class HolesPatch(BumpsPatch):
     def make(self):
@@ -154,9 +175,10 @@ class HolesPatch(BumpsPatch):
 
         return self.hm
 
+
 class RampPatch(BumpsPatch):
     def __init__(self, shape, strength=1, orientation=-1):
-        super().__init__(shape, strength=strength,  size=(2,1), resolution=(2,1))
+        super().__init__(shape, strength=strength, size=(2, 1), resolution=(2, 1))
         self.orientation = orientation
 
     def make(self):
@@ -165,9 +187,10 @@ class RampPatch(BumpsPatch):
 
 
 if __name__ == '__main__':
-    WallPatch((88,88))().plot3d()
-    BumpsPatch((88,88))().plot3d()
-    HolesPatch((88,88))().plot3d()
-    RampPatch((88,88))().plot3d()
-    RampPatch((88,88), orientation=1)().plot3d()
-
+    p = WallPatch((88, 88))
+    p.texture = np.random.random(p.shape)
+    p().plot3d()
+    # BumpsPatch((88,88))().plot3d()
+    # HolesPatch((88,88))().plot3d()
+    # RampPatch((88,88))().plot3d()
+    # RampPatch((88,88), orientation=1)().plot3d()
