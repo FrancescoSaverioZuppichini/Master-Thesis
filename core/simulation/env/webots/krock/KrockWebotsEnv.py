@@ -5,6 +5,8 @@ from simulation.env.webots.krock import Krock
 from gym import spaces
 from cv_bridge import CvBridge
 from simulation.env.webots import WebotsEnv
+from simulation.env.conditions import *
+
 
 class KrockWebotsEnv(WebotsEnv):
     metadata = {'render_modes': ['human']}
@@ -58,7 +60,6 @@ class KrockWebotsEnv(WebotsEnv):
         self.bridge = CvBridge()
 
         self.last_frame = None
-
 
     def make_obs_from_agent_state(self, agent):
         """
@@ -124,13 +125,12 @@ class KrockWebotsEnv(WebotsEnv):
                 cv2.imshow('env', self.last_frame)
                 cv2.waitKey(1)
 
-
-    def reset(self, pose=None, hard=True, spawn=True):
+    def reset(self, pose=None, hard=True, spawn=True, conditions=None):
         if spawn: self.spawn(self.agent, pose=pose)
         # We need to re-initialise the agent since it may have lost the ROS connection
         self.agent()
         self.agent.sleep()
         # Reinitialise the stopping conditions
-        self.should_stop = IfOneFalseOf([IsNotStuck(n_last=50), IsInside()])
-
+        conditions = [IsInside()] if conditions is None else conditions
+        self.should_stop = IfOneFalseOf(conditions)
         return self.make_obs_from_agent_state(self.agent)

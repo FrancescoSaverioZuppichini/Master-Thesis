@@ -16,12 +16,12 @@ from os import path
 class WebotsEnv(gym.Env, Supervisor):
     name = '/krock'
 
-    def __init__(self, world_path, load_world=True,*args, **kwargs):
+    def __init__(self, world_path, load_world=True, *args, **kwargs):
         self.world_path = world_path
         # TODO refactor
         print(self.world_path)
         # self.load_world('/home/francesco/Documents/Master-Thesis/core/webots/' + self.world_path)
-        if load_world: self.load_world( self.world_path)
+        if load_world: self.load_world(self.world_path)
 
         self.retry_service(self.get_world_node)
         self.retry_service(self.get_robot_node)
@@ -46,7 +46,7 @@ class WebotsEnv(gym.Env, Supervisor):
         self.y = (self.translation.z, self.y + self.translation.z)
         self.z = 0
 
-        with open(path.abspath('./env/webots/children_no_tail'), 'r') as f:
+        with open('/home/francesco/Documents/Master-Thesis/core/simulation/env/webots/children_no_tail', 'r') as f:
             self.children = f.read()
 
     def reanimate(self):
@@ -73,8 +73,7 @@ class WebotsEnv(gym.Env, Supervisor):
         x = x + abs(self.translation.x) // self.x_spac
         y = y + abs(self.translation.z) // self.y_spac
 
-
-        idx = int(x  + (self.x_dim * y))
+        idx = int(x + (self.x_dim * y))
         print(idx)
         h = self.grid['height'][idx + 1].value
 
@@ -96,7 +95,6 @@ class WebotsEnv(gym.Env, Supervisor):
         position = [rx, h + 0.5, ry]
 
         return position, [qto[0], qto[2], qto[1], qto[3]]
-
 
     def spawn(self, agent, pose=None, *args, **kwargs):
         pose = self.random_position if pose is None else pose

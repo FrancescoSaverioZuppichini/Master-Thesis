@@ -135,6 +135,16 @@ class MergePatchesInDataframe(Handler):
             for img_path in df['image_path']]
         return df
 
+class PlotPatch(Handler):
+    def handle(self, data):
+        i, row = data
+        patch = row['images']
+        patch.plot3d('[{}] Prediction = {} Confidence = [{:.2f} {:.2f}] Between = {}'.format('',
+                                                                                             row['prediction'],
+                                                                                             row['out_0'],
+                                                                                             row['out_1'],
+                                                                                             ""))
+        return data
 
 class PlotPatchesFromDataframe(Handler):
     def __init__(self, title='', *args, **kwargs):
@@ -149,7 +159,6 @@ class PlotPatchesFromDataframe(Handler):
                                                                                                  row['out_0'],
                                                                                                  row['out_1'],
                                                                                                  ""))  # TODO __repr__ can be too long!
-
     def plot_dict(self, dict):
         for metric, df in dict.items():
             self.plot_df(df, metric)
@@ -160,8 +169,71 @@ class PlotPatchesFromDataframe(Handler):
         else:
             self.plot_df(data)
 
-
 transform = get_transform(scale=1, debug=False)
+
+class ForAll(Handler):
+    def __init__(self, handlers, make_iter=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.handlers = handlers
+        self.pip = Compose(self.handlers)
+        self.make_iter = make_iter
+
+    def handle(self, data):
+        iter_data = data
+        if self.make_iter is not None: iter_data = self.make_iter(data)
+        return list(map(self.pip, iter_data))
+
+from simulation.env.webots.krock import KrockWebotsEnv
+from tf import transformations
+from simulation.env.conditions import IsInside
+
+import rospy
+
+class RunSimulationOnPatch(Handler):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        rospy.init_node("traversability_simulation")
+
+    def handle(self, data):
+        i, row = data
+        patch = row['images']
+        patch.plot2d()
+        patch.plot3d('Prediction = {} Confidence = [{:.2f} {:.2f}] Between = {}'.format(row['prediction'],
+                                                                                        row['out_0'],
+                                                                                        row['out_1'],
+                                                                                        ""))  # TODO __repr__ can be too long!
+        env = KrockWebotsEnv.from_numpy(
+            patch.to_gray(),
+            '/home/francesco/Documents/Master-Thesis/core/simulation/env/webots/krock/krock_no_tail_patches.wbt',
+            {'height': 1,
+             'resolution': 0.02},
+            # agent_callbacks=[RosBagSaver('~/Desktop/querry-high/bags', topics=['pose'])],
+            output_path='/home/francesco/Documents/Master-Thesis/core/simulation/env/webots/krock/krock2_ros/worlds/tmp.wbt')
+
+        tr = np.array([5, 5])
+
+        x, y = -tr + (np.array(88) * 0.02 / 2)
+        h = env.get_height(x, y)
+
+        qto = transformations.quaternion_from_euler(0, 0, 0, axes='sxyz')
+
+        qto = [qto[0], qto[2], qto[1], qto[3]]
+        env.agent()
+
+        init_obs = env.reset(pose=[[x, h + 0.2, y],
+                                   qto], conditions=[IsInside(offset=(0.14, 0, 0))])
+
+        done = False
+
+        for _ in range(75):
+            obs, r, done, _ = env.step(env.GO_FORWARD)
+            if done:
+                break
+
+        env.step(env.STOP)
+        env.agent.die(env)
+
+        return data
 
 
 def visualize_model_on_dataset(ds, filters, transform):
@@ -173,9 +245,18 @@ def visualize_model_on_dataset(ds, filters, transform):
     pip([ds])
 
 
+def run_model_on_patches():
+    return Compose([StoreModelPredictionsOnDataframe(Config.BEST_MODEL_NAME, Config.BEST_MODEL_DIR),
+                    MergePatchesInDataframe(image_dir=Config.DATA_ROOT,
+                                            transform=transform),
+                    ForAll([PlotPatch(), RunSimulationOnPatch()], make_iter=lambda x : x.iterrows())
+                    ])
+
+
 concat = TraversabilityDataset.from_paths(Config.DATA_ROOT, [Config.DATA_DIR], tr=0.45, transform=transform)
 
-patches = BarPatch.from_range(shape=(88, 88), strength=0.3, offset=list(range(20, 44, 4)))
+patches = BarPatch.from_range(shape=(88, 88), strength=1, offset=list(range(4, 28, 4)))
 ds = PatchesDataset(patches, transform=transform)
 
-visualize_model_on_dataset(ds, filters=[Best()], transform=transform)
+df = run_model_on_patches()([ds])
+

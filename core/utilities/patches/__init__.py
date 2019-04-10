@@ -112,6 +112,9 @@ class Patch():
     def shift(self, px):
         self.hm = np.roll(self.hm, px)
 
+    def to_gray(self):
+        return (self.hm * 255).astype(np.uint8)
+
     def __repr__(self):
         return "Shape = {}".format(self.shape)
 
