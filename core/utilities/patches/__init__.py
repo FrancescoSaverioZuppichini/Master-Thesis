@@ -57,7 +57,7 @@ class Patch():
         surf = ax.plot_surface(X, Y, self.hm.T,
                                # facecolors=colours,
                                cmap=plt.cm.viridis,
-                               linewidth=0.2, norm=plt.Normalize(0, 1))
+                               linewidth=0.2)
 
         # import matplotlib.cm as cm
         # m = cm.ScalarMappable(cmap=plt.cm.viridis)
@@ -104,7 +104,7 @@ class Patch():
         return [Patch.from_hm(hm) for hm in hms]
 
     def store(self, out_path):
-        cv2.imwrite(self.hm, out_path)
+        cv2.imwrite(out_path, self.to_gray())
 
     def add_texture(self, tex):
         self.texture = Patch.from_hm(tex)

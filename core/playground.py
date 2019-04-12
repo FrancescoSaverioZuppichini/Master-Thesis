@@ -18,7 +18,7 @@ from Config import Config
 from utilities.patches import *
 
 from utilities.postprocessing.postprocessing import Handler, Compose
-
+from utilities.pipeline import *
 
 class StoreModelPredictionsOnDataframe(Handler):
     def __init__(self, model_name, model_dir, store_dir=None, *args, **kwargs):
@@ -58,7 +58,7 @@ class StoreModelPredictionsOnDataframe(Handler):
             self.df_path2df[df_path] = df
             self.dfs.append(df)
 
-    def handle(self, datasets):
+    def __call__(self, datasets):
         bar = tqdm.tqdm(datasets)
         for dataset in bar:
             # if type(dataset) is not Data: raise ValueError(
@@ -117,7 +117,7 @@ class FilterDataframe(Handler):
         self.filters = filters
         self.n = n
 
-    def handle(self, df):
+    def __call__(self, df):
         if self.filters is None: return {'all': self.after_filter(df).head(self.n)}
         res = {f.name: self.after_filter(f(df).head(self.n)) for f in self.filters}
         return res
@@ -129,22 +129,22 @@ class MergePatchesInDataframe(Handler):
         self.image_dir = image_dir
         self.transform = transform
 
-    def handle(self, df):
+    def __call__(self, df):
         if 'images' not in df.columns:  df['images'] = [
             Patch.from_tensor(transform(read_patch(self.image_dir + img_path)))
             for img_path in df['image_path']]
+        else: df['images'] = df['images'].apply(lambda x: Patch.from_tensor(transform(x.to_gray())))
         return df
 
-class PlotPatch(Handler):
-    def handle(self, data):
-        i, row = data
-        patch = row['images']
-        patch.plot3d('[{}] Prediction = {} Confidence = [{:.2f} {:.2f}] Between = {}'.format('',
-                                                                                             row['prediction'],
-                                                                                             row['out_0'],
-                                                                                             row['out_1'],
-                                                                                             ""))
-        return data
+def plot_patch(data):
+    i, row = data
+    patch = row['images']
+    patch.plot3d('[{}] Prediction = {} Confidence = [{:2f} {:2f}] Between = {}'.format('',
+                                                                                         row['prediction'],
+                                                                                         row['out_0'],
+                                                                                         row['out_1'],
+                                                                          ""))
+    return data
 
 class PlotPatchesFromDataframe(Handler):
     def __init__(self, title='', *args, **kwargs):
@@ -153,8 +153,9 @@ class PlotPatchesFromDataframe(Handler):
 
     def plot_df(self, df, title=''):
         for idx, row in df.iterrows():
+            print(row['out_0'],  row['out_1'])
             patch = row['images']
-            patch.plot3d('[{}] Prediction = {} Confidence = [{:.2f} {:.2f}] Between = {}'.format(title,
+            patch.plot3d('[{}] Prediction = {} Confidence = [{} {}] Between = {}'.format(title,
                                                                                                  row['prediction'],
                                                                                                  row['out_0'],
                                                                                                  row['out_1'],
@@ -163,25 +164,14 @@ class PlotPatchesFromDataframe(Handler):
         for metric, df in dict.items():
             self.plot_df(df, metric)
 
-    def handle(self, data):
+    def __call__(self, data):
         if type(data) is dict:
             self.plot_dict(data)
         else:
             self.plot_df(data)
 
-transform = get_transform(scale=1, debug=False)
+transform = get_transform(scale=1, debug=True)
 
-class ForAll(Handler):
-    def __init__(self, handlers, make_iter=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.handlers = handlers
-        self.pip = Compose(self.handlers)
-        self.make_iter = make_iter
-
-    def handle(self, data):
-        iter_data = data
-        if self.make_iter is not None: iter_data = self.make_iter(data)
-        return list(map(self.pip, iter_data))
 
 from simulation.env.webots.krock import KrockWebotsEnv
 from tf import transformations
@@ -194,14 +184,10 @@ class RunSimulationOnPatch(Handler):
         super().__init__(*args, **kwargs)
         rospy.init_node("traversability_simulation")
 
-    def handle(self, data):
+    def __call__(self, data):
         i, row = data
         patch = row['images']
-        patch.plot2d()
-        patch.plot3d('Prediction = {} Confidence = [{:.2f} {:.2f}] Between = {}'.format(row['prediction'],
-                                                                                        row['out_0'],
-                                                                                        row['out_1'],
-                                                                                        ""))  # TODO __repr__ can be too long!
+
         env = KrockWebotsEnv.from_numpy(
             patch.to_gray(),
             '/home/francesco/Documents/Master-Thesis/core/simulation/env/webots/krock/krock_no_tail_patches.wbt',
@@ -222,16 +208,15 @@ class RunSimulationOnPatch(Handler):
 
         init_obs = env.reset(pose=[[x, h + 0.2, y],
                                    qto], conditions=[IsInside(offset=(0.14, 0, 0))])
-
-        done = False
-
-        for _ in range(75):
-            obs, r, done, _ = env.step(env.GO_FORWARD)
-            if done:
-                break
-
-        env.step(env.STOP)
-        env.agent.die(env)
+        # env.step(env.STOP)
+        #
+        # for _ in range(75):
+        #     obs, r, done, _ = env.step(env.STOP)
+        #     if done:
+        #         break
+        #
+        # env.step(env.STOP)
+        # env.agent.die(env)
 
         return data
 
@@ -249,14 +234,16 @@ def run_model_on_patches():
     return Compose([StoreModelPredictionsOnDataframe(Config.BEST_MODEL_NAME, Config.BEST_MODEL_DIR),
                     MergePatchesInDataframe(image_dir=Config.DATA_ROOT,
                                             transform=transform),
-                    ForAll([PlotPatch(), RunSimulationOnPatch()], make_iter=lambda x : x.iterrows())
+                    ForEach([plot_patch, RunSimulationOnPatch()], make_iter=lambda x : x.iterrows())
                     ])
 
 
-concat = TraversabilityDataset.from_paths(Config.DATA_ROOT, [Config.DATA_DIR], tr=0.45, transform=transform)
+# concat = TraversabilityDataset.from_paths(Config.DATA_ROOT, [Config.DATA_DIR], tr=0.45, transform=transform)
 
-patches = BarPatch.from_range(shape=(88, 88), strength=1, offset=list(range(4, 28, 4)))
-ds = PatchesDataset(patches, transform=transform)
-
-df = run_model_on_patches()([ds])
+patches = BarPatch(shape=(88, 88), strength=0.5, size=4, offset=24)
+patches()
+patches.store('/home/francesco/Desktop/krock-test-bar/maps/test.png')
+# ds = PatchesDataset([patches], transform=transform)
+#
+# df = run_model_on_patches()([ds])
 

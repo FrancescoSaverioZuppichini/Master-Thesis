@@ -34,14 +34,14 @@ image = p.hm
 #     # agent_callbacks=[RosBagSaver('~/Desktop/querry-high/bags', topics=['pose'])],
 #     output_path='/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock2_ros/worlds/tmp.wbt')
 
-env = KrockWebotsEnv.from_image(
-    MAP,
-    '/home/francesco/Documents/Master-Thesis/core/simulation/env/webots/krock/krock.wbt',
-    {'height': 1,
-     'resolution': 0.02 },
-    # agent_callbacks=[RosBagSaver('/home/francesco/Desktop/krock-center-tail/bags/center/',
-    #                              topics=['pose'])],
-    output_dir='/home/francesco/Documents/Master-Thesis/core/simulation/env/webots/krock/krock2_ros/worlds/')
+# env = KrockWebotsEnv.from_image(
+#     MAP,
+#     '/home/francesco/Documents/Master-Thesis/core/simulation/env/webots/krock/krock.wbt',
+#     {'height': 1,
+#      'resolution': 0.02 },
+#     agent_callbacks=[RosBagSaver('/home/francesco/Desktop/krock-test-bar/bags/',
+#                                  topics=['pose'])],
+#     output_dir='/home/francesco/Documents/Master-Thesis/core/simulation/env/webots/krock/krock2_ros/worlds/')
 
 # env = KrockWebotsEnv(WORLD_PATH, load_world=True)
 
@@ -58,10 +58,11 @@ def spawn_points2webots_pose(spawn_point, env):
 
     return pose
 
-# env = KrockWebotsEnv(None,
-#                      agent_callbacks=[RosBagSaver('/home/francesco/Desktop/querry-high/bags/', topics=['pose'])],
-#                      )
-# #
+env = KrockWebotsEnv(None,
+                     agent_callbacks=[RosBagSaver('/home/francesco/Desktop/krock-test-bar/bags/test/',
+                                                  topics=['pose'])]
+                     )
+#
 # print('Initial observations:')
 # pprint.pprint(init_obs)
 #
@@ -84,10 +85,10 @@ for i in range(1):
 
     # init_obs = env.reset(pose=spawn_points2webots_pose(spawn_point, env))
 
-    init_obs = env.reset(pose=[[x , h + 0.2, y],
-                               qto])
+    # init_obs = env.reset(pose=[[x , h + 0.2, y],
+    #                            qto])
 
-    for _ in range(100):
+    for _ in range(200):
         env.agent.sleep()
         # time.sleep(0.01)
         # obs, r, done, _ = env.step(env.STOP)

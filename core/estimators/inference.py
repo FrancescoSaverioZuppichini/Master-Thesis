@@ -1,11 +1,11 @@
 import torch
 
 from os import path
-from models import zoo
-from datasets.TraversabilityDataset import get_transform
-from utils import get_learner
-from datasets.InferenceDataset import InferenceDataset
-from utils import get_probs_and_labels_from_preds
+from estimators.models import zoo
+from estimators.datasets.TraversabilityDataset import get_transform
+from estimators.utils import get_learner
+from estimators.datasets.InferenceDataset import InferenceDataset
+from estimators.utils import get_probs_and_labels_from_preds
 from torch.nn.functional import softmax
 
 class HeightMapInference():
@@ -24,7 +24,7 @@ class HeightMapInference():
             self.ds.rotate = rotate
         else:
             self.ds = InferenceDataset(self.hm_path, transform=self.transform, rotate=rotate, *args, **kwargs)
-            self.learner = get_learner(model_name, model_dir, callbacks=[], dataset=self.ds)
+            self.learner, _ = get_learner(model_name, model_dir, callbacks=[], dataset=self.ds)
 
         probs, labels = get_probs_and_labels_from_preds(self.learner.get_preds(self.learner.data.test_dl))
         path = self.ds.make_texture(probs.numpy(), labels.numpy(), 'querry-big-10')
@@ -37,10 +37,10 @@ class HeightMapInference():
 
 hm_infer = HeightMapInference('../maps/test/querry-big-10.png', get_transform(None, scale=10))
 
-model_dir = path.abspath('../../resources/assets/models/microresnet#4-gate=3x3-n=2-se=True-750-0.001-None-1552582563.7411294')
+model_dir = path.abspath('/home/francesco/Desktop/carino/vaevictis/data/microresnet#4-gate=3x3-n=1-se=True-no-shift-88-750-0.001-None-1554153439.464771')
 print(model_dir)
 
 hm_infer.for_all_rotation(model_dir,
-                       'microresnet#4-gate=3x3-n=2-se=True',
-                       step=10,
-                       patch_size=92)
+                       'microresnet#4-gate=3x3-n=1-se=True',
+                       step=3,
+                       patch_size=88)
