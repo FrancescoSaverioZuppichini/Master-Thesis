@@ -4,7 +4,7 @@ Francesco Saverio Zuppichini
 
 [WARNING] In progress
 ![image](https://raw.githubusercontent.com/FrancescoSaverioZuppichini/Master-Thesis/master/resources/images/querry_krock_traversability.png)
-*Map traversability from bottom to top (up-hill) for the Krock robot. The brighter the blue the more traversable *
+*Map traversability from bottom to top (up-hill) for the Krock robot. The brighter the blue the more traversable*
 ![image](https://raw.githubusercontent.com/FrancescoSaverioZuppichini/Master-Thesis/master/resources/images/krock.jpg)
 *Krock*
 
