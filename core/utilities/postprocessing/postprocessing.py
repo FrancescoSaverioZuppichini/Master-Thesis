@@ -15,7 +15,7 @@ from tqdm import tqdm
 from os import path
 from utilities.postprocessing.utils import *
 from pypeln import thread as th
-
+from utilities.pipeline import Compose, Handler
 
 class PostProcessingConfig():
     def __init__(self, maps_folder, patch_size, advancement_th, time_window, skip_every, translation,
@@ -43,34 +43,34 @@ class PostProcessingConfig():
         return cls(**vars(args))
 
 
-class Handler():
-    def __init__(self, successor=None):
-        self.successor = successor
+# class Handler():
+#     def __init__(self, successor=None):
+#         self.successor = successor
+#
+#     def __call__(self, *args, **kwargs):
+#         res = self.handle(*args, **kwargs)
+#
+#         if self.successor is not None: res = self.successor(res)
+#
+#         return res
+#
+#     def handle(self, *args, **kwargs):
+#         raise NotImplementedError
+#
+#     def restore(self, *args, **kwargs):
+#         raise NotImplementedError
 
-    def __call__(self, *args, **kwargs):
-        res = self.handle(*args, **kwargs)
-
-        if self.successor is not None: res = self.successor(res)
-
-        return res
-
-    def handle(self, *args, **kwargs):
-        raise NotImplementedError
-
-    def restore(self, *args, **kwargs):
-        raise NotImplementedError
-
-class Compose(Handler):
-    def __init__(self, handles, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.pip = handles[0]
-        handler = self.pip
-        for next_handler in handles[1:]:
-           handler.successor = next_handler
-           handler = next_handler
-
-    def handle(self, *args, **kwargs):
-        return self.pip(*args, **kwargs)
+# class Compose(Handler):
+#     def __init__(self, handles, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.pip = handles[0]
+#         handler = self.pip
+#         for next_handler in handles[1:]:
+#            handler.successor = next_handler
+#            handler = next_handler
+#
+#     def handle(self, *args, **kwargs):
+#         return self.pip(*args, **kwargs)
 
 class MultiThreadWrapper():
     def __init__(self, n_workers):
@@ -81,8 +81,7 @@ class MultiThreadWrapper():
 
 
 class PostProcessingHandler(Handler):
-    def __init__(self, config: PostProcessingConfig, successor=None):
-        super().__init__(successor=successor)
+    def __init__(self, config: PostProcessingConfig):
         self.config = config
 
 
@@ -99,7 +98,7 @@ class BagsHandler(PostProcessingHandler):
     it opens each map for each file and add it to the return tuple.
     """
 
-    def handle(self, file_name):
+    def __call__(self, file_name):
         df = rosbag_pandas.bag_to_dataframe(file_name)
 
         map_name = filename2map(file_name)
@@ -113,7 +112,7 @@ class InMemoryHandler(PostProcessingHandler):
     the csvs files from DataFrameHandler where already generated
     """
 
-    def handle(self, file_name):
+    def __call__(self, file_name):
         map_name = filename2map(file_name)
         df = pd.read_csv(file_name)
 
@@ -193,7 +192,7 @@ class DataFrameHandler(PostProcessingHandler):
 
 
 
-    def handle(self, data):
+    def __call__(self, data):
         df, map_name, file_path = data
 
         def make_path(file_path):
@@ -299,7 +298,7 @@ class PatchesHandler(PostProcessingHandler):
 
         return df
 
-    def handle(self, data):
+    def __call__(self, data):
         """
         Given a dataframe, and heightmap and the file path, this function extracts a patch
         every `Config.SKIP_EVERY` rows. This is done due to the big rate that we used to
@@ -372,21 +371,22 @@ class PatchesHandler(PostProcessingHandler):
 
 def make_and_run_chain(config, memory=True):
     patches_h = PatchesHandler(config=config, debug=False)
-    df_h = DataFrameHandler(successor=patches_h, config=config)
-    b_h = BagsHandler(config=config, successor=df_h)
+    df_h = DataFrameHandler( config=config)
+
+    first = BagsHandler(config=config)
 
     files = glob.glob('{}/csvs/**/*.csv'.format(config.base_dir))
 
     if len(files) > 0:
         print('[INFO] Loading from memory.')
-        pip = InMemoryHandler(config=config, successor=patches_h)
+        first = InMemoryHandler(config=config)
     else:
         print('[INFO] Loading bags.')
         files = glob.glob('{}/**/*.bag'.format(config.bags_dir))
-        pip = b_h
 
-    th_wrap = MultiThreadWrapper(14)
-    data = th_wrap(pip, files)
+    pipeline = Compose([first, df_h, patches_h])
+    th_wrap = MultiThreadWrapper(2)
+    data = th_wrap(pipeline, files)
 
     return data
 
@@ -401,15 +401,15 @@ def run_train_val_test_chain(base_dir, base_maps_dir, *args, **kwargs):
 
 
 if __name__ == '__main__':
-    run_train_val_test_chain(base_dir='/media/francesco/saetta/krock-dataset/92/',
-                             base_maps_dir='/home/francesco/Documents/Master-Thesis/core/maps/',
-                             out_dir='/media/francesco/saetta/no-shift-88-750/',
-                             patch_size=88,
-                             advancement_th=0.45,
-                             skip_every=12,
-                             translation=[5, 5],
-                             time_window=750)
-    # #
+    # run_train_val_test_chain(base_dir='/media/francesco/saetta/krock-dataset/92/',
+    #                          base_maps_dir='/home/francesco/Documents/Master-Thesis/core/maps/',
+    #                          out_dir='/media/francesco/saetta/no-shift-88-750/',
+    #                          patch_size=88,
+    #                          advancement_th=0.45,
+    #                          skip_every=12,
+    #                          translation=[5, 5],
+    #                          time_window=750)
+    # # #
     # config = PostProcessingConfig(base_dir='/home/francesco/Desktop/krock-center-tail/',
     #                         maps_folder='/home/francesco/Desktop/krock-center-tail/',
     #                          patch_size=88,
@@ -420,14 +420,28 @@ if __name__ == '__main__':
     # make_and_run_chain(config)
     #
 
-    # config = PostProcessingConfig(base_dir='/media/francesco/saetta/krock-dataset/92/val_new/',
-    #                               maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/val/',
-    #                               patch_size=88,
-    #                               out_dir='/media/francesco/saetta/no-shift-88-750/',
-    #                             name = 'val_new',
-    #                               advancement_th=0.45,
-    #                          skip_every=12,
-    #                          translation=[5, 5],
-    #                          time_window=750)
+    # config = PostProcessingConfig(base_dir='./test/',
+    #                               maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/test/',
+    #                               # csv_dir='/home/francesco/Desktop/carino/vaevictis/data/train_no_tail#2/csv/',
+    #                               out_dir='./test/',
+    #                               patch_size=92,
+    #                               advancement_th=0.12,
+    #                               skip_every=12,
+    #                               translation=[5, 5],
+    #                               time_window=125,
+    #                               name='test')
     # make_and_run_chain(config)
+
+
+    config = PostProcessingConfig(base_dir='/home/francesco/Desktop/krock-test-bar/',
+                                  maps_folder='/home/francesco/Desktop/krock-test-bar/maps/',
+                                  # csv_dir='/home/francesco/Desktop/carino/vaevictis/data/train_no_tail#2/csv/',
+                                  # out_dir='./test/',
+                                  patch_size=88,
+                                  advancement_th=0.45,
+                                  skip_every=12,
+                                  translation=[5, 5],
+                                  time_window=750,
+                                  name='test')
+    make_and_run_chain(config)
 

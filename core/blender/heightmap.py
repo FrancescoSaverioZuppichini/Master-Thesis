@@ -81,14 +81,13 @@ if __name__ == '__main__':
     import bpy
     import glob
     from os import path
-    TEX_DIR = '/home/francesco/Desktop/textures/'
+    TEX_DIR = '/home/francesco/Documents/Master-Thesis/resources/assets/textures/'
     MAP_NAME = 'querry-big-10'
     texture_paths = glob.glob('{}/{}-*'.format(TEX_DIR, MAP_NAME))
     print(texture_paths)
     MAP_PATH = '/home/francesco/Documents/Master-Thesis/core/maps/test/{}.png'.format(MAP_NAME)
 
-    TEXT_PATH = '/home/francesco/Desktop/textures/querry-270.png'
-    OUT_DIR = '/home/francesco/Desktop/'
+    OUT_DIR = '/home/francesco/Documents/Master-Thesis/resources/assets/textures-blender/'
     b_vis = BlenderVisualization()
 
     for text_path in texture_paths:
