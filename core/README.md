@@ -2,6 +2,11 @@
 # Masther Thesis
 Francesco Saverio Zuppichini
 
+With this project, we collect and estimate ground traversability for a no-wheel crocodile-like robot. We move the robot in a simulated environment recording its pose. Later, we crop for each height map used to generate the ground a patch such as it includes booth the robot in the center and its footprint in the case of maximum advancement.
+The original approach is based on 
+an already existing methodology that we further expanded with a smaller deep convolutional neural network based on residual connection and the squeeze and excitation operator.
+Then, we evaluate the results by visualizing different datasets and custom patches using GRAD-CAM to highlight and discover the strength and weakness of the model.
+
 [WARNING] In progress
 ![image](https://raw.githubusercontent.com/FrancescoSaverioZuppichini/Master-Thesis/master/resources/images/querry_krock_traversability.png)
 *Map traversability from bottom to top (up-hill) for the Krock robot. The brighter the blue the more traversable *
