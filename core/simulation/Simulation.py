@@ -4,8 +4,7 @@ import random
 from os import makedirs
 from simulation.agent.callbacks import *
 from simulation.env.webots.krock import KrockWebotsEnv
-from simulation.env import FlatGroundSpawnStrategy
-from simulation.env import spawn_points2webots_pose
+from simulation.env.spawn import FlatGroundSpawnStrategy, spawn_points2webots_pose
 
 def make_env(map, args):
     agent = None

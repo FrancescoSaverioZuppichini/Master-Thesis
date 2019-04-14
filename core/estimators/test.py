@@ -1,7 +1,7 @@
-from utils import get_learner, get_transform
+from estimators.utils import get_learner, get_transform
 from Config import Config
 from fastai.metrics import accuracy, dice
-from callbacks import ROC_AUC, Timer
+from estimators.callbacks import ROC_AUC, Timer
 
 test_root = '/media/francesco/saetta/no-shift-88-750/test/'
 

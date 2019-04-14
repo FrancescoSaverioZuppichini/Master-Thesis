@@ -33,14 +33,15 @@ class FlatGroundSpawnStrategy():
 
         return patch
 
-    def show_spawn_pos(self, positions, size):
+    def show_spawn_pos(self, positions, label=''):
         fig = plt.figure()
         ax = plt.subplot(1, 1, 1)
         sns.heatmap(self.hm, ax=ax)
 
-        for pos in positions:
-            x, y = pos
-            ax.plot(x, y, marker='o', color='r', ls='', label='finish')
+        handlers = [ax.plot(x, y, marker='o', color='r', ls='', label=label) for x,y in positions]
+        plt.legend(handles=[handlers[0][0]])
+
+        plt.show()
 
     def find_spawn_points(self, size=40, step=2, tol=1e-3):
         positions = []
@@ -57,10 +58,10 @@ class FlatGroundSpawnStrategy():
 
         return positions
 
-    def reduce_positions_by_clustering(self, positions, k=100):
+    def reduce_positions_by_clustering(self, positions, k=100, *args, **kwargs):
         k = len(positions) if len(positions) < k else k
         X = np.array(positions)
-        self.estimator = KMeans(n_clusters=k)
+        self.estimator = KMeans(n_clusters=k, *args, **kwargs)
         self.estimator.fit(X)
 
         clusters2points = {i: X[np.where(self.estimator.labels_ == i)] for i in range(self.estimator.n_clusters)}
@@ -69,10 +70,10 @@ class FlatGroundSpawnStrategy():
         return new_positions
 
     def __call__(self, k=100, size=40, *args, **kwargs):
-        positions = self.find_spawn_points(size=size, *args, **kwargs)
-        print('found {} spawn points'.format(len(positions)))
-        if self.debug: self.show_spawn_pos(positions, size)
-        new_positions = self.reduce_positions_by_clustering(positions, k=k)
-        if self.debug: self.show_spawn_pos(new_positions, size)
+        positions = self.find_spawn_points(size=size)
+        if self.debug: print('[INFO] Found {} spawn points'.format(len(positions)))
+        if self.debug: self.show_spawn_pos(positions, label='point in the clusters')
+        new_positions = self.reduce_positions_by_clustering(positions, k=k, *args, **kwargs)
+        if self.debug: self.show_spawn_pos(new_positions, label='spawn points')
 
         return new_positions
