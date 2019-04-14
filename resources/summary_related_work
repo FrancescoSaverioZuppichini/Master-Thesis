@@ -1,0 +1,130 @@
+***********************************
+E. Ugur and E. Sahin, “Traversability: A case study for learning and
+perceiving affordances in robots,” Adaptive Behavior, vol. 18, pp. 258–
+284, 2010
+
+
+The verb “traverse” is defined as “to pass or move over, along, or through”. Hence traversability
+refers to the affordance of being able to traverse
+
+
+The learning and perception of traversability is
+a fundamental competence for both organisms and autonomous mobile robots since most of their
+actions depend on their mobility.
+
+If we use just the sensor to make decisions then the output is the same regardless of the obstacle
+
+Uses svm
+
+****************** 
+“On-the-spot Training” for Terrain Classification
+in Autonomous Air-Ground Collaborative Teams
+(https://infoscience.epfl.ch/record/221506/files/ISER16_Delmerico.pdf)
+
+APPEARENCE/GEOMETRY
+
+both the estimated terrain class and elevation
+to determine traversable paths in the map, and estimate their costs in terms
+of response time
+
+First paper the addresse "on the post" clasifier training. They uses a flying drone to gather the data and then train a classifier and build a terrain map in just 60 seconds. Fast and specific trainining
+shows that CNN outperfom by deep learning methods.
+
+**************** 
+Learning Long-Range Perception Using Self-Supervision from Short-Range Sensors and Odometry
+(https://arxiv.org/abs/1809.07207)
+Used to increase the performance of local sensiing
+
+
+************
+Improving Robot Navigation Through
+Self-Supervised Online Learning
+http://www.roboticsproceedings.org/rss02/p04.pdf
+
+Traversal cost prediction
+
+Self-supervised learning method
+that accurately predicts traversal costs over large areas from
+overhead data. 
+
+outdoor robot navigation can benefit from the
+now widespread availability of high quality overhead imagery
+and elevation data from satellite and aircraft 
+
+Presently, nearly the entire world has been surveyed at 1 m accuracy, 
+
+Uses a linear-Gaussian model
+
+
+****************************
+High resolution visual terrain
+classification for outdoor robots
+
+Inputs: Raw images, preprocessed to find interesting points and map them to 64/128 vector
+
+http://www.cogsys.cs.uni-tuebingen.de/publikationen/2011/khan2011iccvworkshop.pdf
+
+Uses local descriptor  to first prepocess the data to train a classifiers
+
+
+******************************
+A Machine Learning Approach to Visual Perception
+of Forest Trails
+
+http://rpg.ifi.uzh.ch/docs/RAL16_Giusti.pdf
+
+Inputs: CNN
+
+Approach based on a Deep Neural Network used as a supervised
+image classifier. Training direcly on the raw RGB imagese bypass the
+need to define characteristic features 
+
+
+**********************
+ Autonomous, vision-based flight and live dense 3d
+mapping with a quadrotor micro aerial vehicle
+
+(http://rpg.ifi.uzh.ch/docs/JFR16_Faessler.pdf)
+
+**************
+Active Autonomous Aerial Exploration for Ground
+Robot Path Planning
+(http://rpg.ifi.uzh.ch/docs/RAL16_Delmerico.pdf)
+
+GEOMETRIC 
+
+Active approach were a ground robot is moved in a search and rescue scenario. A flying dron with onboard visual odometry collected images used
+to generate a elevation maps. The world is discretized in cell and combined with the elveation data, each one is classified.
+ 
+
+************
+Watch your step! terrain traversability for robot control,”
+Robot Control
+
+GEOMETRIC
+
+https://www.intechopen.com/books/robot-control/watch-your-step-terrain-traversability-for-robot-control
+
+-------------------------
+USEDFUL
+
+Geometric
+
+geometric‐based analyses aim to detect traversability using geometric properties of surfaces such as distances in space and shapes.
+
+Whereas appearance methods, to a greater extent related to camera images processing and cognitive analyses, have the objective of recognize colors and patterns not related to the common appearance of terrain, such as grass, rocks or vegetation 
+
+Legged locomotion is capable of traversing more difﬁcultterrain since it only requires isolated feasible footholds. Thedrawback of this locomotion mode is, that motion planningis much more complex.
+
+-------------------------
+********
+
+Navigation planning for legged robots in
+challenging terrain,
+
+
+SIMULATION, legged robot
+https://www.academia.edu/34935046/IROS_2017_Klamt.pdf
+
+planner chooses driving modewhenever possible and takes into account the detailed robotfootprint. 
+

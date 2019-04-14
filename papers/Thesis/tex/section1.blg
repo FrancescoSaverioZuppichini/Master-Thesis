@@ -1,9 +1,0 @@
-[0] Config.pm:302> INFO - This is Biber 2.9
-[0] Config.pm:305> INFO - Logfile is 'section1.blg'
-[23] biber:313> INFO - === sab apr 13, 2019, 15:17:33
-[43] Biber.pm:371> INFO - Reading 'section1.bcf'
-[91] Biber.pm:857> INFO - Found 0 citekeys in bib section 0
-[97] Utils.pm:169> WARN - The file 'section1.bcf' does not contain any citations!
-[102] bbl.pm:617> INFO - Writing 'section1.bbl' with encoding 'UTF-8'
-[102] bbl.pm:720> INFO - Output to section1.bbl
-[103] Biber.pm:110> INFO - WARNINGS: 1

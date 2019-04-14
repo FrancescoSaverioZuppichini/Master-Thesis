@@ -1,9 +1,0 @@
-[0] Config.pm:302> INFO - This is Biber 2.9
-[0] Config.pm:305> INFO - Logfile is 'abstract.blg'
-[17] biber:313> INFO - === sab apr 13, 2019, 13:35:44
-[30] Biber.pm:371> INFO - Reading 'abstract.bcf'
-[75] Biber.pm:857> INFO - Found 0 citekeys in bib section 0
-[81] Utils.pm:169> WARN - The file 'abstract.bcf' does not contain any citations!
-[85] bbl.pm:617> INFO - Writing 'abstract.bbl' with encoding 'UTF-8'
-[85] bbl.pm:720> INFO - Output to abstract.bbl
-[86] Biber.pm:110> INFO - WARNINGS: 1

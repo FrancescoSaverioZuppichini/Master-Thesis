@@ -22,7 +22,7 @@ controller. While in the outdoors scenario the data is usually gather using simu
 Our approach aims to estimate traversability on uneven ground, mostly outdoors scenarios. Our frameworks have two main phases, we first run different simulations by spawning the robot on custom
 created maps with different groud configurations, walls, bumps, and slopes. We record the robot pose at each time, then we crop a patch from the height map used in each run such that it included the robot in the center and its footprint for a selected minimum advancement. This value is calculated by observing the advancement of the given robot on flat ground and taking its half. So, each patch contains the current robot position on the map and the future position in the future if the robot will move at the select value. To create the dataset for the classifier, we label each patch using the selected minimum advancement.
 
-The report is organized as follow, the next chapter  gives introduces the related work, Chapter 2 describes our approach, Chapter 3 talk in deep about the implementation details,
+The report is organized as follow, the next chapter introduces the related work, Chapter 2 describes our approach, Chapter 3 talk in deep about the implementation details,
 Chapter 4 shows the results and Chapter 5 discuss clusion and future work
 % \cite{einstein} asddsa
 \end{document}

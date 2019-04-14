@@ -194,9 +194,6 @@ INPUT /home/francesco/Documents/Master-Thesis/papers/Thesis/document.aux
 INPUT /home/francesco/Documents/Master-Thesis/papers/Thesis/document.aux
 OUTPUT /home/francesco/Documents/Master-Thesis/papers/Thesis/document.aux
 OUTPUT /home/francesco/Documents/Master-Thesis/papers/Thesis/document.bcf
-INPUT /home/francesco/Documents/Master-Thesis/papers/Thesis/document.bbl
-INPUT /home/francesco/Documents/Master-Thesis/papers/Thesis/document.bbl
-INPUT /home/francesco/Documents/Master-Thesis/papers/Thesis/document.bbl
 INPUT /usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 INPUT /usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 INPUT /usr/share/texlive/texmf-dist/tex/latex/oberdiek/epstopdf-base.sty
@@ -212,12 +209,7 @@ INPUT /home/francesco/Documents/Master-Thesis/papers/Thesis/./tex/abstract.tex
 INPUT /usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmr12.tfm
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmbx12.tfm
-INPUT /home/francesco/Documents/Master-Thesis/papers/Thesis/./tex/section1.tex
-INPUT /home/francesco/Documents/Master-Thesis/papers/Thesis/./tex/section1.tex
+INPUT /home/francesco/Documents/Master-Thesis/papers/Thesis/./tex/introduction.tex
+INPUT /home/francesco/Documents/Master-Thesis/papers/Thesis/./tex/introduction.tex
 OUTPUT /home/francesco/Documents/Master-Thesis/papers/Thesis/document.pdf
 INPUT /var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map
-INPUT /home/francesco/Documents/Master-Thesis/papers/Thesis/document.aux
-INPUT /home/francesco/Documents/Master-Thesis/papers/Thesis/document.run.xml
-OUTPUT /home/francesco/Documents/Master-Thesis/papers/Thesis/document.run.xml
-INPUT /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb
-INPUT /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb

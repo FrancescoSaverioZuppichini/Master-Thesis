@@ -132,7 +132,7 @@ def train_and_evaluate(params, train=True, load_model=None):
     del learner
 
 if __name__ == '__main__':
-    params = {'epochs': 0,
+    params = {'epochs': 30,
               'lr': 0.001,
               'batch_size': 128,
               # 'model': 'omar',
@@ -150,12 +150,23 @@ if __name__ == '__main__':
               'downsample_factor': None,
               'time_window': 750,
               'only_forward': False,
-              'resize': None  }
+              'resize': (28,28)  }
 
 
     for _ in range(10):
         train_and_evaluate(params)
 
+    params['resize'] = None
+    params['num_samples'] = 50000
+
+    for _ in range(10):
+        train_and_evaluate(params)
+
+    params['resize'] = None
+    params['num_samples'] = None
+    params['downsample_factor'] = 2
+    for _ in range(10):
+        train_and_evaluate(params)
 
 
 
