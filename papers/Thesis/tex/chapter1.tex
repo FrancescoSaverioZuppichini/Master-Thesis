@@ -1,6 +1,3 @@
-\documentclass[../document.tex]{subfiles}
-\begin{document}
-\section{Related Work}
 The learning and perception of traversability is
 a fundamental competence for both organisms and autonomous mobile robots since most of their
 actions depend on their mobility \cite{ugur2010traversability}. Visual perception is known to be used in most all animals to correctly estimate if an environment can be traversed or not.
@@ -14,11 +11,13 @@ outdoor robot navigation can benefit from the availability of overhead imagery. 
 
 Elevation data can also be estimated by flying drones. \cite{delmerico2016active} proposed a collaborative search and rescue system in which a flying robot that explores the map and creates an elevation map to guide the ground robot to the goal. They utilize an 'on-the-spot training' using a convolutional neural network to segment the terrain in different traversable classes.  
 
-Whereas appearance methods, to a greater extent related to camera images processing and cognitive analyses, have the objective of recognizing colors and patterns not related to the common appearance of terrains, such as grass, rocks or vegetation. Those images can be used to directly estimate the traversability cost. Historically, the collected data is first preprocessed to extract texture features that are used to fit a classic machine learning classified such us an SVM \cite{ugur2010traversability} or Gaussian models \cite{sofman2006improving}. Those techniques rely on texture descriptors, for example, Local Binary Pattern \cite{ojala2002multiresolution}, to extract features from the raw data images obtained from local sensors such as cameras.
+Whereas appearance methods, to a greater extent related to camera images processing and cognitive analyses, have the objective of recognizing colors and patterns not related to the common appearance of terrains, such as grass, rocks or vegetation. Those images can be used to directly estimate the traversability cost. 
+
+Historically, the collected data is first preprocessed to extract texture features that are used to fit a classic machine learning classified such us an SVM \cite{ugur2010traversability} or Gaussian models \cite{sofman2006improving}. Those techniques rely on texture descriptors, for example, Local Binary Pattern \cite{ojala2002multiresolution}, to extract features from the raw data images obtained from local sensors such as cameras.
 With the rise of deep learning methods in computer vision, deep convolution neural network has been trained directly on the raw RGB images bypassing the need to define characteristic features.
-One recent example is \cite{giusti2015amachine} where a deep neural network was training on real-world hiking data collected using head-mounted cameras to teach a flying drone to follow a trail in the forest.
+
+One recent example is \cite{giusti2015amachine} where a deep neural network was training on real-world hiking data collected using head-mounted cameras to teach a flying drone to follow a trail in the forest. 
+Geometric and appearance methods can also be used together to train a traversability classifier. \cite{delmerico2017onthespot} proposes the first on-the-spot training method that uses a flying drone to gather the data and train an estimator in less than 60 seconds. 
 
 Data can also extract in simulations, where an agent interacts in an artificial environment. Usually, no-wheel legged robot that is able to traverse harder ground, can benefits from data gathering in simulations due to the high availability. \cite{tobias2017anytime} proposed a locomotion planning that is learned in a simulation environment. 
 
- 
-\end{document}
