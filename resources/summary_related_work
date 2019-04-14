@@ -1,7 +1,9 @@
 ***********************************
 E. Ugur and E. Sahin, “Traversability: A case study for learning and
 perceiving affordances in robots,” Adaptive Behavior, vol. 18, pp. 258–
-284, 2010
+284, 2010A
+
+(https://pdfs.semanticscholar.org/fc9c/e40f3d35066fe44bb38ca69c4387f629005b.pdf)
 
 
 The verb “traverse” is defined as “to pass or move over, along, or through”. Hence traversability
@@ -27,7 +29,8 @@ both the estimated terrain class and elevation
 to determine traversable paths in the map, and estimate their costs in terms
 of response time
 
-First paper the addresse "on the post" clasifier training. They uses a flying drone to gather the data and then train a classifier and build a terrain map in just 60 seconds. Fast and specific trainining
+First paper the addresse "on the post" clasifier training. 
+They uses a flying drone to gather the data and then train a classifier and build a terrain map in just 60 seconds. Fast and specific trainining
 shows that CNN outperfom by deep learning methods.
 
 **************** 
@@ -67,7 +70,7 @@ http://www.cogsys.cs.uni-tuebingen.de/publikationen/2011/khan2011iccvworkshop.pd
 Uses local descriptor  to first prepocess the data to train a classifiers
 
 
-******************************
+****************************** okay
 A Machine Learning Approach to Visual Perception
 of Forest Trails
 
@@ -86,7 +89,7 @@ mapping with a quadrotor micro aerial vehicle
 
 (http://rpg.ifi.uzh.ch/docs/JFR16_Faessler.pdf)
 
-**************
+************** okay
 Active Autonomous Aerial Exploration for Ground
 Robot Path Planning
 (http://rpg.ifi.uzh.ch/docs/RAL16_Delmerico.pdf)
