@@ -433,8 +433,8 @@ if __name__ == '__main__':
     # make_and_run_chain(config)
 
 
-    config = PostProcessingConfig(base_dir='/home/francesco/Desktop/krock-test-bar/',
-                                  maps_folder='/home/francesco/Desktop/krock-test-bar/maps/',
+    config = PostProcessingConfig(base_dir='/media/francesco/saetta/quarry-ramp/ramp/',
+                                  maps_folder='/home/francesco/Documents/Master-Thesis/core/maps/test/',
                                   # csv_dir='/home/francesco/Desktop/carino/vaevictis/data/train_no_tail#2/csv/',
                                   # out_dir='./test/',
                                   patch_size=88,
@@ -442,6 +442,6 @@ if __name__ == '__main__':
                                   skip_every=12,
                                   translation=[5, 5],
                                   time_window=750,
-                                  name='test')
+                                  name='')
     make_and_run_chain(config)
 

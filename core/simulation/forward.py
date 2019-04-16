@@ -4,25 +4,13 @@ from simulation.env.webots.krock import KrockWebotsEnv
 from tf import transformations
 
 WORLD_PATH = '/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock2_ros/worlds/bars1.wbt'
-MAP = '/home/francesco/Documents/Master-Thesis/core/maps/train/bars1.png'
+MAP = '/home/francesco/Documents/Master-Thesis/core/maps/test/querry-big-10.png'
 # MAP = '/home/francesco/Desktop/center.png'
 N_STEPS = 4
 
 rospy.init_node("traversability_simulation")
 # create our env
 
-import cv2
-
-image = cv2.imread(MAP)
-image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-
-from utilities.patches import *
-
-p = BarPatch((125,125))
-p()
-
-image = p.hm
 
 # image = cv2.copyMakeBorder(image,50,50,50,50,cv2.BORDER_REPLICATE)
 
@@ -36,10 +24,10 @@ image = p.hm
 
 # env = KrockWebotsEnv.from_image(
 #     MAP,
-#     '/home/francesco/Documents/Master-Thesis/core/simulation/env/webots/krock/krock.wbt',
-#     {'height': 1,
+#     '/home/francesco/Documents/Master-Thesis/core/simulation/env/webots/krock/krock_no_tail.wbt',
+#     {'height': 10,
 #      'resolution': 0.02 },
-#     agent_callbacks=[RosBagSaver('/home/francesco/Desktop/krock-test-bar/bags/',
+#     agent_callbacks=[RosBagSaver('/media/francesco/saetta/quarry-ramp/bags',
 #                                  topics=['pose'])],
 #     output_dir='/home/francesco/Documents/Master-Thesis/core/simulation/env/webots/krock/krock2_ros/worlds/')
 
@@ -59,26 +47,12 @@ def spawn_points2webots_pose(spawn_point, env):
     return pose
 
 env = KrockWebotsEnv(None,
-                     agent_callbacks=[RosBagSaver('/home/francesco/Desktop/krock-test-bar/bags/test/',
-                                                  topics=['pose'])]
+                     agent_callbacks=[RosBagSaver('/media/francesco/saetta/quarry-ramp/bags',
+                                                  topics=['pose'])],
                      )
-#
-# print('Initial observations:')
-# pprint.pprint(init_obs)
-#
-tr = np.array([5,5])
-
-
-x,y = -tr + ( np.array(200) * 0.02 / 2)
-print(x,y)
-print(env.x_dim)
-qto = transformations.quaternion_from_euler(0, 0, 0, axes='sxyz')
-
-qto = [qto[0], qto[2], qto[1], qto[3]]
-
-h = env.get_height(x, y)
 
 env.agent()
+env.reset(spawn=False)
 # print(env.x, env.y, h)
 for i in range(1):
     # spawn_point = random.choice(spawn_points)
@@ -89,9 +63,8 @@ for i in range(1):
     #                            qto])
 
     for _ in range(200):
-        env.agent.sleep()
         # time.sleep(0.01)
-        # obs, r, done, _ = env.step(env.STOP)
+        obs, r, done, _ = env.step(env.GO_FORWARD)
         # pprint.pprint(obs)
         # if done: break
     env.agent.die(env)

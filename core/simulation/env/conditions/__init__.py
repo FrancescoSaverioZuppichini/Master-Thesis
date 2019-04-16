@@ -27,6 +27,7 @@ class IsInside(Condition):
 
     @staticmethod
     def is_inside(world, agent, tol=-.01, offsets=[0,0,0]):
+        if offsets is None: offsets=[0,0,0]
         pose = agent.state['pose']
         pos = pose.pose.position
 

@@ -3,7 +3,8 @@ from Config import Config
 from fastai.metrics import accuracy, dice
 from estimators.callbacks import ROC_AUC, Timer
 
-test_root = '/media/francesco/saetta/no-shift-88-750/test/'
+# test_root = '/media/francesco/saetta/no-shift-88-750/test/'
+test_root = '/media/francesco/saetta/no-shift-88-750/train/df/slope_rocks2'
 
 model_name = Config.BEST_MODEL_NAME
 model_dir = Config.BEST_MODEL_DIR

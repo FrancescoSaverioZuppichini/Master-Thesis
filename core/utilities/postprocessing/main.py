@@ -1,7 +1,7 @@
 import pprint
 
-from simulation.parser import args
-from postprocessing import make_and_run_chain, PostProcessingConfig
+from utilities.postprocessing.parser import args
+from utilities.postprocessing.postprocessing import make_and_run_chain, PostProcessingConfig
 
 config = PostProcessingConfig.from_args(args)
 

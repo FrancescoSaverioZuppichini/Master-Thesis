@@ -14,7 +14,7 @@ from fastai.train import Learner, DataBunch, \
     ReduceLROnPlateauCallback, \
     EarlyStoppingCallback, \
     SaveModelCallback, DatasetType
-
+import fastai
 from fastai.metrics import accuracy, dice
 from fastai.layers import CrossEntropyFlat, MSELossFlat
 from estimators.datasets.TraversabilityDataset import get_dataloaders, get_transform, TraversabilityDataset
@@ -26,6 +26,11 @@ torch.backends.cudnn.benchmark = True
 # torch.backends.cudnn.deterministic = True
 # np.random.seed(0)
 # if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
+
+def custom_accuracy(y_pred, y_true, thresh: float = 0.01):
+    distance = (y_pred - y_true).abs()
+    acc = (distance < thresh).float().mean()
+    return acc
 
 
 def train_and_evaluate(params, train=True, load_model=None):
@@ -79,13 +84,15 @@ def train_and_evaluate(params, train=True, load_model=None):
     experiment.log_parameters(params)
     experiment.log_metric("timestamp", timestamp)
 
+    accuracy = fastai.metrics.accuracy if params['tr'] is not None else custom_accuracy
+
     learner = Learner(data=data,
                       model=model,
                       path='/home/francesco/Desktop/carino/vaevictis/data/',
                       model_dir=model_dir,
                       loss_func=criterion,
                       opt_func=partial(torch.optim.SGD, momentum=0.95, weight_decay=1e-4),
-                      metrics=[accuracy, ROC_AUC(), Timer()])
+                      metrics=[Timer()])
 
     model_name_roc_auc = 'roc_auc'
     model_name_acc = 'accuracy'
@@ -93,8 +100,7 @@ def train_and_evaluate(params, train=True, load_model=None):
 
     callbacks = [ReduceLROnPlateauCallback(learn=learner, patience=4),
                  EarlyStoppingCallback(learn=learner, patience=6),
-                 SaveModelCallback(learn=learner, name=model_name_roc_auc, monitor='roc_auc'),
-                 SaveModelCallback(learn=learner, name=model_name_acc, monitor='accuracy'),
+                 # SaveModelCallback(learn=learner, name=model_name_acc, monitor='accuracy'),
                  SaveModelCallback(learn=learner, name=model_name_loss)]
 
     if train:
@@ -107,26 +113,34 @@ def train_and_evaluate(params, train=True, load_model=None):
         #     print(e)
         #     pass
 
+        # with experiment.test():
+        #     learner.load(model_name_loss)
+        #     loss, acc, roc = learner.validate(data.test_dl, metrics=[accuracy, ROC_AUC()])
+        #     print(loss, acc, roc)
+        #     experiment.log_metric("roc_auc_from_loss", roc.item())
+        #     experiment.log_metric("test_loss_from_loss", loss)
+        #
+        # with experiment.test():
+        #     learner.load(model_name_acc)
+        #     loss, acc, roc = learner.validate(data.test_dl, metrics=[accuracy, ROC_AUC()])
+        #     print(loss, acc, roc)
+        #     experiment.log_metric("roc_auc_from_acc", roc.item())
+        #     experiment.log_metric("test_loss_from_acc", loss)
+        #
+        # with experiment.test():
+        #     learner.load(model_name_roc_auc)
+        #     loss, acc, roc = learner.validate(data.test_dl, metrics=[accuracy, ROC_AUC()])
+        #     print(loss, acc, roc)
+        #     experiment.log_metric("roc_auc-from-best", roc.item())
+        #     experiment.log_metric("test_loss_from_roc_auc", loss)
+
         with experiment.test():
             learner.load(model_name_loss)
-            loss, acc, roc = learner.validate(data.test_dl, metrics=[accuracy, ROC_AUC()])
-            print(loss, acc, roc)
-            experiment.log_metric("roc_auc_from_loss", roc.item())
+            loss, acc = learner.validate(data.test_dl, metrics=[accuracy])
+            print(loss, acc)
+            experiment.log_metric("acc_from_loss", acc.item())
             experiment.log_metric("test_loss_from_loss", loss)
 
-        with experiment.test():
-            learner.load(model_name_acc)
-            loss, acc, roc = learner.validate(data.test_dl, metrics=[accuracy, ROC_AUC()])
-            print(loss, acc, roc)
-            experiment.log_metric("roc_auc_from_acc", roc.item())
-            experiment.log_metric("test_loss_from_acc", loss)
-
-        with experiment.test():
-            learner.load(model_name_roc_auc)
-            loss, acc, roc = learner.validate(data.test_dl, metrics=[accuracy, ROC_AUC()])
-            print(loss, acc, roc)
-            experiment.log_metric("roc_auc-from-best", roc.item())
-            experiment.log_metric("test_loss_from_roc_auc", loss)
 
     del learner.model
     del learner
@@ -145,31 +159,31 @@ if __name__ == '__main__':
               'data-aug': True,
               'optim': 'sgd',
               'info': 'aggreassive data aug-val new correct more than se everywhere',
-              'tr': 0.45,
+              'tr': None,
               'more_than': 0,
               'downsample_factor': None,
               'time_window': 750,
               'only_forward': False,
-              'resize': (28,28)  }
+              'resize': None  }
 
 
     for _ in range(10):
         train_and_evaluate(params)
 
-    params['resize'] = None
-    params['num_samples'] = 50000
-
-    for _ in range(10):
-        train_and_evaluate(params)
-
-    params['resize'] = None
-    params['num_samples'] = None
-    params['downsample_factor'] = 2
-    for _ in range(10):
-        train_and_evaluate(params)
-
-
-
+    # params['resize'] = None
+    # params['num_samples'] = 50000
+    #
+    # for _ in range(10):
+    #     train_and_evaluate(params)
+    #
+    # params['resize'] = None
+    # params['num_samples'] = None
+    # params['downsample_factor'] = 2
+    # for _ in range(10):
+    #     train_and_evaluate(params)
+    #
+    #
+    #
 
 
 

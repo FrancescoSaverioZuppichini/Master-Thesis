@@ -2,6 +2,7 @@ class Handler:
     def __call__(self, *args, **kwargs):
         raise NotImplemented
 
+
 class Compose(Handler):
     def __init__(self, handlers=[]):
         self.handlers = handlers
@@ -27,6 +28,7 @@ class ForEach(Handler):
         res = list(map(self.pip, iter_data))
         return data
 
+
 class ForEachApply(ForEach):
     def __call__(self, data):
         iter_data = data
@@ -34,16 +36,20 @@ class ForEachApply(ForEach):
         res = list(map(self.pip, iter_data))
         return res
 
+
 if __name__ == '__main__':
     import numpy as np
+
 
     def power(data):
         print('wee')
         return data ** 2
 
+
     class Sum(Handler):
         def __call__(self, data):
             return data.sum()
+
 
     def foo(data):
         print('data from foo {}'.format(data))
@@ -53,6 +59,6 @@ if __name__ == '__main__':
 
     pipeline = Compose([power, Compose([Sum(), foo])])
 
-    pipeline(np.array([1,2,3,4]))
+    pipeline(np.array([1, 2, 3, 4]))
 
-    list(map(foo, {'wee' : 'test'}.items()))
+    list(map(foo, {'wee': 'test'}.items()))

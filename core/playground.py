@@ -238,12 +238,18 @@ def run_model_on_patches():
                     ])
 
 
+
+ds =  TraversabilityDataset(df='/media/francesco/saetta/quarry-ramp/from_flat_to_ramp/df/querry-big-10/1555314971.4928784-patch.csv',
+                            root='/media/francesco/saetta/quarry-ramp/from_flat_to_ramp/',
+                            tr=0.45,
+                            transform=transform)
 # concat = TraversabilityDataset.from_paths(Config.DATA_ROOT, [Config.DATA_DIR], tr=0.45, transform=transform)
 
-patches = BarPatch(shape=(88, 88), strength=0.5, size=4, offset=24)
-patches()
-patches.store('/home/francesco/Desktop/krock-test-bar/maps/test.png')
+# patches = BarPatch(shape=(88, 88), strength=0.5, size=4, offset=24)
+# patches()
+# patches.store('/home/francesco/Desktop/krock-test-bar/maps/test.png')
 # ds = PatchesDataset([patches], transform=transform)
-#
+
+visualize_model_on_dataset(ds, filters=[Worst(), Best(), FalseNegative(), FalsePositive()], transform=transform)
 # df = run_model_on_patches()([ds])
 

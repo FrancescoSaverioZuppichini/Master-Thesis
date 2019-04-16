@@ -193,7 +193,7 @@ class TraversabilityDataset(Dataset):
         img_path = path.normpath(self.image_dir + row['image_path'])
 
         y = row['advancement']
-        y = torch.tensor(y)
+        y = torch.tensor(y) * 100 # convert to cm
 
         if self.tr is not None: y = 1 if y >= self.tr else 0
 
@@ -209,6 +209,8 @@ class TraversabilityDataset(Dataset):
 
     @classmethod
     def from_root(cls, root, n=None, *args, **kwargs):
+
+
         dfs = glob.glob(root + '/df/*.csv')
         if len(dfs) == 0:
             dfs = glob.glob(root + '/df/**/*.csv')

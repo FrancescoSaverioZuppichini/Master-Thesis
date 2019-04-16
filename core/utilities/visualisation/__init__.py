@@ -4,20 +4,19 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.patches as mpatches
+import cv2
 
-from utils.visualisation import *
-from utils.visualisation import *
-from utils.postprocessing.utils import *
+from utilities.postprocessing.utils import *
 from matplotlib import gridspec
 
 class VisualiseSimulation():
     """
     This class shows different features of one or more dataframes.
     """
-    def __init__(self, hm, patch_size=100):
+    def __init__(self, hm, patch_size=100, image_dir=None):
         self.hm = hm
         self.patch_size = patch_size
-
+        self.image_dir = image_dir
     @property
     def hm_ax(self):
         fig = plt.figure()
@@ -208,7 +207,7 @@ class VisualiseSimulation():
             ax_ad.plot(df['advancement'][:i])
 
             #         ax = plt.subplot2grid((2,2), (1, 0), colspan=1, rowspan=1)
-            patch = cv2.imread(row.loc['image_path'])
+            patch = cv2.imread(self.image_dir + row.loc['image_path'])
             patch = cv2.cvtColor(patch, cv2.COLOR_BGR2GRAY)
 
             ax_patch = plt.subplot2grid((2, 2), (1, 0), colspan=1, rowspan=1)
@@ -242,7 +241,7 @@ class VisualiseSimulation():
 
     def show_patches_raw(self, df):
         for img_path,advancement in zip(df['image_path'][::10], df['advancement'][::10]):
-            patch = cv2.imread('/media/francesco/saetta/correct-88-750/test/' + img_path)
+            patch = cv2.imread(self.image_dir   + img_path)
             patch = cv2.cvtColor(patch, cv2.COLOR_BGR2GRAY)
             patch = patch.astype(np.float32)
             patch = patch - patch[patch.shape[0]//2, patch.shape[1]//2]
@@ -257,18 +256,18 @@ class VisualiseSimulation():
         self.plot_rotation(df)
         self.plot_position(df)
         self.show_traversability_in_time(df)
-        self.show_classes(df, tr)
+        # self.show_classes(df, tr)
         # self.show_patches_raw(df)
         # self.show_labeled_patches(df)
 
 
 if __name__ == '__main__':
 
-    hm = cv2.imread('/home/francesco/Documents/Master-Thesis/core/maps/train/bars1.png')
+    hm = cv2.imread('/home/francesco/Documents/Master-Thesis/core/maps/test/querry-big-10.png')
     hm = cv2.cvtColor(hm, cv2.COLOR_BGR2GRAY)
 
 
-    deb_pip = VisualiseSimulation(hm, patch_size=88)
-    df = pd.read_csv('/media/francesco/saetta/no-shift-88-750/train/df/bars1/1550614988.2771952-patch.csv')
+    deb_pip = VisualiseSimulation(hm, patch_size=88, image_dir='/media/francesco/saetta/quarry-ramp/ramp/')
+    df = pd.read_csv('/media/francesco/saetta/quarry-ramp/ramp/df/querry-big-10/1555315154.8676922-patch.csv')
     # deb_pip(df, tr=0.45)
-    deb_pip.plot_box_on_hm(df.iloc[10])
+    deb_pip(df)

@@ -60,6 +60,7 @@ class KrockWebotsEnv(WebotsEnv):
         self.bridge = CvBridge()
 
         self.last_frame = None
+        self.should_stop = None
 
     def make_obs_from_agent_state(self, agent):
         """

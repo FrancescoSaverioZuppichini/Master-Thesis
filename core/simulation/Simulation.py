@@ -59,7 +59,7 @@ class Simulation():
                     env.render()
                     obs, r, done, _ = env.step(env.GO_FORWARD)
                     if done: break
-                print('Done after {}'.format(i))
+                rospy.loginfo('Done after {}'.format(i))
                 # we want to store after each each spawn
                 env.agent.die(env)
 
