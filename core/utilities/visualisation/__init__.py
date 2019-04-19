@@ -121,6 +121,10 @@ class PatchesAndDataframeVisualization(DataFrameVisualization):
                                       self.patch_size, linewidth=1, edgecolor='r', facecolor='none')
             ax_hm.add_patch(rect)
 
+            # disable axis number
+            ax_hm.get_yaxis().set_visible(False)
+            ax_hm.get_xaxis().set_visible(False)
+
             patch, _ = hmpatch(self.hm, x, y, np.rad2deg(ang), self.patch_size, scale=1)
             patch = patch.astype(np.float32)
             patch = patch - patch[patch.shape[0] // 2, patch.shape[1] // 2]
@@ -131,7 +135,11 @@ class PatchesAndDataframeVisualization(DataFrameVisualization):
                 ax_patch = plt.subplot2grid((size), (2 + i, j), colspan=1, rowspan=1)
                 patch, ad = hm_patches[i + j]
                 sns.heatmap(patch, ax=ax_patch)
-                ax_patch.set_title(ad)
+                ax_patch.set_title('{:.3f}'.format(ad))
+
+                # disable axis number
+                ax_patch.get_yaxis().set_visible(False)
+                ax_patch.get_xaxis().set_visible(False)
 
         plt.show()
 

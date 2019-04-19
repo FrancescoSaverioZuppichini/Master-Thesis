@@ -11,7 +11,7 @@ class RospyAgent(Agent):
     """
     def __init__(self, rate=None):
         super().__init__()
-        self.rate = rospy.Rate(hz=10) if rate == None else rate
+        self.rate = rospy.Rate(hz=100) if rate == None else rate
 
     def __call__(self, *args, **kwargs):
         super().__call__(*args, **kwargs)

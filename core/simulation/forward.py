@@ -47,11 +47,10 @@ def spawn_points2webots_pose(spawn_point, env):
     return pose
 
 env = KrockWebotsEnv(None,
-                     agent_callbacks=[RosBagSaver('/media/francesco/saetta/quarry-ramp/bags',
+                     agent_callbacks=[RosBagSaver('/home/francesco/Desktop/',
                                                   topics=['pose'])],
                      )
 
-env.agent()
 env.reset(spawn=False)
 # print(env.x, env.y, h)
 for i in range(1):
@@ -61,6 +60,7 @@ for i in range(1):
 
     # init_obs = env.reset(pose=[[x , h + 0.2, y],
     #                            qto])
+    env.agent()
 
     for _ in range(200):
         # time.sleep(0.01)

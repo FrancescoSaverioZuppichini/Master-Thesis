@@ -108,7 +108,7 @@ class KrockWebotsEnv(WebotsEnv):
         """
         self.agent.act(action)
 
-        self.agent.sleep()
+        # self.agent.sleep()
 
         obs = self.make_obs_from_agent_state(self.agent)
         # The last frame will be used in the `.render` function

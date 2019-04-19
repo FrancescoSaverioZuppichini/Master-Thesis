@@ -92,7 +92,7 @@ def train_and_evaluate(params, train=True, load_model=None):
                       model_dir=model_dir,
                       loss_func=criterion,
                       opt_func=partial(torch.optim.SGD, momentum=0.95, weight_decay=1e-4),
-                      metrics=[Timer()])
+                      metrics=[accuracy, ROC_AUC(), Timer()])
 
     model_name_roc_auc = 'roc_auc'
     model_name_acc = 'accuracy'
@@ -100,7 +100,8 @@ def train_and_evaluate(params, train=True, load_model=None):
 
     callbacks = [ReduceLROnPlateauCallback(learn=learner, patience=4),
                  EarlyStoppingCallback(learn=learner, patience=6),
-                 # SaveModelCallback(learn=learner, name=model_name_acc, monitor='accuracy'),
+                 SaveModelCallback(learn=learner, name=model_name_roc_auc, monitor='roc_auc'),
+                 SaveModelCallback(learn=learner, name=model_name_acc, monitor='accuracy'),
                  SaveModelCallback(learn=learner, name=model_name_loss)]
 
     if train:
@@ -113,33 +114,27 @@ def train_and_evaluate(params, train=True, load_model=None):
         #     print(e)
         #     pass
 
-        # with experiment.test():
-        #     learner.load(model_name_loss)
-        #     loss, acc, roc = learner.validate(data.test_dl, metrics=[accuracy, ROC_AUC()])
-        #     print(loss, acc, roc)
-        #     experiment.log_metric("roc_auc_from_loss", roc.item())
-        #     experiment.log_metric("test_loss_from_loss", loss)
-        #
-        # with experiment.test():
-        #     learner.load(model_name_acc)
-        #     loss, acc, roc = learner.validate(data.test_dl, metrics=[accuracy, ROC_AUC()])
-        #     print(loss, acc, roc)
-        #     experiment.log_metric("roc_auc_from_acc", roc.item())
-        #     experiment.log_metric("test_loss_from_acc", loss)
-        #
-        # with experiment.test():
-        #     learner.load(model_name_roc_auc)
-        #     loss, acc, roc = learner.validate(data.test_dl, metrics=[accuracy, ROC_AUC()])
-        #     print(loss, acc, roc)
-        #     experiment.log_metric("roc_auc-from-best", roc.item())
-        #     experiment.log_metric("test_loss_from_roc_auc", loss)
-
         with experiment.test():
             learner.load(model_name_loss)
-            loss, acc = learner.validate(data.test_dl, metrics=[accuracy])
-            print(loss, acc)
-            experiment.log_metric("acc_from_loss", acc.item())
+            loss, acc, roc = learner.validate(data.test_dl, metrics=[accuracy, ROC_AUC()])
+            print(loss, acc, roc)
+            experiment.log_metric("roc_auc_from_loss", roc.item())
             experiment.log_metric("test_loss_from_loss", loss)
+
+        with experiment.test():
+            learner.load(model_name_acc)
+            loss, acc, roc = learner.validate(data.test_dl, metrics=[accuracy, ROC_AUC()])
+            print(loss, acc, roc)
+            experiment.log_metric("roc_auc_from_acc", roc.item())
+            experiment.log_metric("test_loss_from_acc", loss)
+
+        with experiment.test():
+            learner.load(model_name_roc_auc)
+            loss, acc, roc = learner.validate(data.test_dl, metrics=[accuracy, ROC_AUC()])
+            print(loss, acc, roc)
+            experiment.log_metric("roc_auc-from-best", roc.item())
+            experiment.log_metric("test_loss_from_roc_auc", loss)
+
 
 
     del learner.model
@@ -159,7 +154,7 @@ if __name__ == '__main__':
               'data-aug': True,
               'optim': 'sgd',
               'info': 'aggreassive data aug-val new correct more than se everywhere',
-              'tr': None,
+              'tr': 0.45,
               'more_than': 0,
               'downsample_factor': None,
               'time_window': 750,

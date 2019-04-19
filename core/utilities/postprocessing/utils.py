@@ -48,11 +48,11 @@ def df_convert_date2timestamp(df):
     :param df:
     :return:
     """
-    df = df.reset_index()  # we need to drop the index since the time column is used for it
-    df[df.columns[0]] = df[df.columns[0]].apply(lambda x: dateutil.parser.parse(str(x)).timestamp())
-    df['timestamp'] = df[df.columns[0]]
-    df[df.columns[0]] -= min(df[df.columns[0]])
-    df = df.set_index(df.columns[0])  # reset back the index to the time
+    df['ros_time'] = df.index
+    df['timestamp'] = df['ros_time'].apply(lambda x: dateutil.parser.parse(str(x)).timestamp())
+    df['timestamp'] -= df['timestamp'][0]
+    df = df.set_index(df['timestamp'])
+    # reset back the index to the time
 
     return df
 

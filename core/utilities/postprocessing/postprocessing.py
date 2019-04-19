@@ -42,36 +42,6 @@ class PostProcessingConfig():
     def from_args(cls, args):
         return cls(**vars(args))
 
-
-# class Handler():
-#     def __init__(self, successor=None):
-#         self.successor = successor
-#
-#     def __call__(self, *args, **kwargs):
-#         res = self.handle(*args, **kwargs)
-#
-#         if self.successor is not None: res = self.successor(res)
-#
-#         return res
-#
-#     def handle(self, *args, **kwargs):
-#         raise NotImplementedError
-#
-#     def restore(self, *args, **kwargs):
-#         raise NotImplementedError
-
-# class Compose(Handler):
-#     def __init__(self, handles, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         self.pip = handles[0]
-#         handler = self.pip
-#         for next_handler in handles[1:]:
-#            handler.successor = next_handler
-#            handler = next_handler
-#
-#     def handle(self, *args, **kwargs):
-#         return self.pip(*args, **kwargs)
-
 class MultiThreadWrapper():
     def __init__(self, n_workers):
         self.n_workers = n_workers
@@ -127,6 +97,12 @@ class DataFrameHandler(PostProcessingHandler):
     This class decorate the dataframe generated from the bags file with
     all the information we need, e.g. 'advancement'
     """
+
+    def reduce_to_rate(self, df,rate):
+        number_of_samples = df[df['timestamp'] < 1].shape[0]
+        skip = number_of_samples // rate
+        return df.iloc[::skip]
+
 
     def df_convert_date2timestamp(self, df):
         """
