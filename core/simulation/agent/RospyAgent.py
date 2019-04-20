@@ -32,6 +32,3 @@ class RospyAgent(Agent):
     def unregister(self):
         [sub.unregister() for sub in self.subscribers.values()]
 
-    def die(self, env, *args, **kwargs):
-        super().die(env)
-

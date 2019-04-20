@@ -19,7 +19,6 @@ class WebotsEnv(gym.Env, Supervisor):
     def __init__(self, world_path, load_world=True, *args, **kwargs):
         self.world_path = world_path
         # TODO refactor
-        print(self.world_path)
         # self.load_world('/home/francesco/Documents/Master-Thesis/core/webots/' + self.world_path)
         if load_world: self.load_world(self.world_path)
 
@@ -70,12 +69,11 @@ class WebotsEnv(gym.Env, Supervisor):
 
     def get_height(self, x, y):
         # to get the 2d index in 1d matrix x + width * y
-        x = x + abs(self.translation.x) // self.x_spac
-        y = y + abs(self.translation.z) // self.y_spac
-
+        # x = x  // self.x_spac
+        # y = y  // self.y_spac
+        # print(x,y)
         idx = int(x + (self.x_dim * y))
-        print(idx)
-        h = self.grid['height'][idx + 1].value
+        h = self.grid['height'][idx].value
 
         return h
 

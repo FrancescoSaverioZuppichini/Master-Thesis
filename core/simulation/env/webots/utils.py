@@ -1,28 +1,28 @@
 import numpy as np
 import time
 import matplotlib.pyplot as plt
-
+import seaborn as sns
 from matplotlib.pyplot import imshow
 from tempfile import NamedTemporaryFile
 
 
 def plot_terrain(terrain):
-    imgplot = imshow(terrain)
-    plt.colorbar()
+    sns.heatmap(terrain)
+    # plt.colorbar()
     plt.show()
 
-def image2webots_terrain(image, src_world, config, output_path=None, verbose=False):
+def image2webots_terrain(image, src_world, config, output_path=None, verbose=True):
 
 
     height, resolution = config['height'], config['resolution']
     image = image.astype(np.float)
     image = image / 255
-    terrain = image * height
-
+    terrain = image * 5
+    # plot_terrain(image)
     if verbose: print('mod image type: ', terrain.dtype, ' height factor: ', height, ' max val (m): ',
                            np.amax(terrain), ' shape', terrain.shape)
 
-    if verbose: plot_terrain(terrain)
+    # if verbose: plot_terrain(terrain)
 
     data = []
     l1 = l2 = -1
