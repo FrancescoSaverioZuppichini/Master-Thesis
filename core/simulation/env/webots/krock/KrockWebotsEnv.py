@@ -6,7 +6,7 @@ from gym import spaces
 from cv_bridge import CvBridge
 from simulation.env.webots import WebotsEnv
 from simulation.env.conditions import *
-
+import time
 
 class KrockWebotsEnv(WebotsEnv):
     metadata = {'render_modes': ['human']}
@@ -131,6 +131,7 @@ class KrockWebotsEnv(WebotsEnv):
         # We need to re-initialise the agent since it may have lost the ROS connection
         self.agent()
         self.agent.sleep()
+        time.sleep(1)
         # Reinitialise the stopping conditions
         conditions = [IsInside()] if conditions is None else conditions
         self.should_stop = IfOneFalseOf(conditions)

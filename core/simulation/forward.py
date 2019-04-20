@@ -52,23 +52,35 @@ env = KrockWebotsEnv(None,
                      )
 
 env.reset(spawn=False)
+import rospy
+
 # print(env.x, env.y, h)
-for i in range(1):
+# for i in range(1):
     # spawn_point = random.choice(spawn_points)
 
-    # init_obs = env.reset(pose=spawn_points2webots_pose(spawn_point, env))
-
+    # init_obs = env.reset(pose=spawn_points2webots_pose(spawn_point, en50
     # init_obs = env.reset(pose=[[x , h + 0.2, y],
     #                            qto])
-    env.agent()
+env.agent()
+elapsed = 0
+start = time.time()
 
-    for _ in range(200):
-        # time.sleep(0.01)
-        obs, r, done, _ = env.step(env.GO_FORWARD)
+# for _ in range(1000):
+while elapsed <= 5:
+    # print(time.time())
+    elapsed = time.time() - start
+    # print('[INFO] elapsed {:.4f}'.format(elapsed))
+
+    # env.agent.sleep()
+    # time.sleep(0.01)
+    obs, r, done, _ = env.step(env.GO_FORWARD)
         # pprint.pprint(obs)
         # if done: break
-    env.agent.die(env)
 
+env.step(env.STOP)
+
+env.agent.die(env)
+print(env.agent.called)
 #     env.step(env.STOP)
 #     break
 #     # env.reset(pose=pose)

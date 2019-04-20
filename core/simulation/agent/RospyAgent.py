@@ -11,10 +11,12 @@ class RospyAgent(Agent):
     """
     def __init__(self, rate=None):
         super().__init__()
-        self.rate = rospy.Rate(hz=100) if rate == None else rate
+        self.rate = rospy.Rate(hz=10) if rate == None else rate
+        self.subscribers = None
 
     def __call__(self, *args, **kwargs):
         super().__call__(*args, **kwargs)
+        if self.subscribers is not None: self.unregister()
         self.subscribers = self.init_subscribers()
         self.publishers = self.init_publishers()
 
@@ -27,7 +29,9 @@ class RospyAgent(Agent):
     def sleep(self):
         self.rate.sleep()
 
-    def die(self, env, *args, **kwargs):
+    def unregister(self):
         [sub.unregister() for sub in self.subscribers.values()]
+
+    def die(self, env, *args, **kwargs):
         super().die(env)
 

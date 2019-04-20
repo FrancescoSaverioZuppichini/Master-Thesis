@@ -2,9 +2,14 @@ import glob
 import random
 
 from os import makedirs
+import sys
+sys.path.append("../")
+
 from simulation.agent.callbacks import *
 from simulation.env.webots.krock import KrockWebotsEnv
 from simulation.env.spawn import FlatGroundSpawnStrategy, spawn_points2webots_pose
+from utilities import run_for
+import tqdm
 
 def make_env(map, args):
     agent = None
@@ -29,7 +34,8 @@ def make_env(map, args):
 
 
 class Simulation():
-    # Todo better add a constructor .from_args
+
+    #TODO # better add a constructor .from_args
     def __call__(self, args, **kwargs):
         rospy.init_node("traversability_simulation")
 
@@ -39,32 +45,37 @@ class Simulation():
 
         print('')
         rospy.loginfo('Simulation starting with {} maps'.format(len(args.maps)))
-
-        for map in args.maps:
+        maps_bar = tqdm.tqdm(args.maps)
+        for map in maps_bar:
             env, _, bags_map_dir = make_env(map, args)
             spawn_strategy = FlatGroundSpawnStrategy(map, scale=args.height)
             spawn_points = spawn_strategy(k=args.n_sim, tol=1e-2, size=45)
 
-            # TODO we should store the state in order to be faulty tolerant
-            for i in range(args.n_sim):
-                if i % 5 == 0:
-                    rospy.loginfo('Reanimate robot')
-                    env.reanimate()
-
+            n_sim_bar = tqdm.tqdm(range(args.n_sim))
+            for i in n_sim_bar:
                 spawn_point = random.choice(spawn_points)
                 if i < len(spawn_points): spawn_point = spawn_points[i]
 
                 env.reset(pose=spawn_points2webots_pose(spawn_point, env))
-                for i in range(int(args.time)):
-                    env.render()
+                if i % 5 == 0:
+                    rospy.loginfo('Reanimate robot')
+                    env.reanimate()
+
+
+                elapsed = 0
+                start = time.time()
+
+                while elapsed <= (int(args.time)):
                     obs, r, done, _ = env.step(env.GO_FORWARD)
+                    elapsed = time.time() - start
+
                     if done: break
-                rospy.loginfo('Done after {}'.format(i))
+
                 # we want to store after each each spawn
                 env.agent.die(env)
+                rospy.loginfo('Done after {:.2f} seconds, callback was called {} times.'.format(elapsed, env.agent.called))
 
-            end = time.time() - start
 
-        rospy.loginfo('Iter={:} Elapsed={:.2f}'.format(str(i), end))
+        rospy.loginfo('Iter={}'.format(str(i)))
         # return all the bags stored
         return glob.glob('{}/**/*.bags'.format(args.save_dir))
