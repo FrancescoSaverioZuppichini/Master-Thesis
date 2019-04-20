@@ -9,7 +9,7 @@ class Agent(Callbackable, AgentCallback):
     """
     def __init__(self):
         self.state = AgentState(self)
-        self.set_callbacks([self])
+        self.set_callbacks([])
 
     def __call__(self,  *args, **kwargs):
         pass
@@ -44,17 +44,16 @@ class Agent(Callbackable, AgentCallback):
         """
         pass
 
-    def die(self, env, *args, **kwargs):
+    def die(self,*args, **kwargs):
         """
-         This function kill the agent. This should be implemented,
-         hook to the simulation instead
+         This function kill the agent.
 
         :param env:
         :param args:
         :param kwargs:
         :return:
         """
-        self.notify('on_shut_down')
+        self.notify('on_shut_down', *args, **kwargs)
         # self.state = AgentState(self)
 
 

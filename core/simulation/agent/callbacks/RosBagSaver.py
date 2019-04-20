@@ -42,8 +42,8 @@ class RosBagSaver(AgentCallback):
             self.bag.write(key, value)
         return True
 
-    def store(self, ctx):
-        file_name = path.normpath(self.save_dir + '/{}.bag'.format(time.time()))
+    def store(self, name):
+        file_name = path.normpath(self.save_dir + '/{}.bag'.format(name))
 
         self.bag = rosbag.Bag(file_name, 'w')
 
@@ -57,15 +57,16 @@ class RosBagSaver(AgentCallback):
 
         self.bag.close()
 
-        rospy.loginfo('Wrote bag file to disk.')
+        # rospy.loginfo('Wrote bag file to disk.')
         # clear cache
         self.cache = {}
         self.size = 0
 
 
-    def on_shut_down(self):
-        print(len(self.cache['pose']))
-        self.tr.start()
-        self.tr.join()
-        self.tr = threading.Thread(target=self.store, args=(self,))
+    def on_shut_down(self, env, name, *args, **kwargs):
+        # print(len(self.cache['pose']))
+        self.store(name)
+        # self.tr.start()
+        # self.tr.join()
+        # self.tr = threading.Thread(target=self.store, args=(*args))
 

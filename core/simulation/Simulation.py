@@ -2,9 +2,14 @@ import glob
 import random
 
 from os import makedirs
+import sys
+sys.path.append("../")
+
 from simulation.agent.callbacks import *
 from simulation.env.webots.krock import KrockWebotsEnv
 from simulation.env.spawn import FlatGroundSpawnStrategy, spawn_points2webots_pose
+from utilities import run_for
+import tqdm
 
 def make_env(map, args):
     agent = None
@@ -22,14 +27,15 @@ def make_env(map, args):
                 {'height': args.height,
                  'resolution': 0.02},
                 output_dir=path.abspath('./env/webots/krock/krock2_ros/worlds/'),
-                agent_callbacks=[RosBagSaver(bags_map_dir, topics=['pose'])]
+                agent_callbacks=[RosBagSaver(args.save_dir, topics=['pose'])]
             )
 
     return env, map_name, bags_map_dir
 
-
 class Simulation():
-    # Todo better add a constructor .from_args
+    def __init__(self):
+        self.meta = None
+    #TODO # better add a constructor .from_args
     def __call__(self, args, **kwargs):
         rospy.init_node("traversability_simulation")
 
@@ -37,34 +43,47 @@ class Simulation():
 
         start = time.time()
 
-        print('')
-        rospy.loginfo('Simulation starting with {} maps'.format(len(args.maps)))
+        maps_bar = tqdm.tqdm(args.maps)
+        for map in maps_bar:
 
-        for map in args.maps:
+            maps_bar.set_description('Running {}'.format(map))
             env, _, bags_map_dir = make_env(map, args)
             spawn_strategy = FlatGroundSpawnStrategy(map, scale=args.height)
             spawn_points = spawn_strategy(k=args.n_sim, tol=1e-2, size=45)
 
-            # TODO we should store the state in order to be faulty tolerant
-            for i in range(args.n_sim):
-                if i % 5 == 0:
-                    rospy.loginfo('Reanimate robot')
-                    env.reanimate()
-
+            n_sim_bar = tqdm.tqdm(range(args.n_sim), leave=False)
+            for i in n_sim_bar:
                 spawn_point = random.choice(spawn_points)
                 if i < len(spawn_points): spawn_point = spawn_points[i]
 
                 env.reset(pose=spawn_points2webots_pose(spawn_point, env))
-                for i in range(int(args.time)):
-                    env.render()
+                if i % 5 == 0:
+                    n_sim_bar.set_description('Reanimate robot')
+                    env.reanimate()
+
+
+                elapsed = 0
+                start = time.time()
+
+                while elapsed <= (int(args.time)):
                     obs, r, done, _ = env.step(env.GO_FORWARD)
+                    elapsed = time.time() - start
+
                     if done: break
-                rospy.loginfo('Done after {}'.format(i))
+
                 # we want to store after each each spawn
-                env.agent.die(env)
+                map_name = path.splitext(path.basename(map))[0]
+                file_name = '{}-{}'.format(map_name, i)
+                env.agent.die(env, file_name)
 
-            end = time.time() - start
+                temp = pd.DataFrame(data={'filename': [file_name], 'map': [map_name], 'height': [1]})
 
-        rospy.loginfo('Iter={:} Elapsed={:.2f}'.format(str(i), end))
+                if self.meta is None:  self.meta = temp
+                else: self.meta = pd.concat([self.meta, temp])
+                self.meta.to_csv('{}/meta.csv'.format(args.save_dir))
+                # rospy.loginfo('Done after {:.2f} seconds, callback was called {} times.'.format(elapsed, env.agent.called))
+
+
+        # rospy.loginfo('Iter={}'.format(str(i)))
         # return all the bags stored
         return glob.glob('{}/**/*.bags'.format(args.save_dir))
