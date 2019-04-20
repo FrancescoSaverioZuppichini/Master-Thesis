@@ -20,11 +20,13 @@ class Krock(RospyAgent):
     STATUS = '{}/status'.format(BASE_TOPIC)
     SPAWN = '{}/spawn_pose'.format(BASE_TOPIC)
     # sub
-    POSE_SUB = '{}/pose'.format(BASE_TOPIC)
+    POSE_SUB = '{}/pose_throttle'.format(BASE_TOPIC)
+    # POSE_SUB = '{}/pose'.format(BASE_TOPIC)
     TOUCH_SENSOR = '{}/touch_sensors'.format(BASE_TOPIC)
     TORQUES_FEEDBACK = '{}/torques_feedback'.format(BASE_TOPIC)
     FRONTAL_CAMERA = '{}/front_camera/image_throttle'.format(BASE_TOPIC)
 
+    called = 0 # added to actually debug one many times the callback was called
 
     def init_publishers(self):
         return {
@@ -45,6 +47,7 @@ class Krock(RospyAgent):
 
     def callback_pose(self, data):
         self.state['pose'] = data
+        self.called += 1
 
     def callback_touch_sensors(self, data):
         self.state['touch_sensors'] = data

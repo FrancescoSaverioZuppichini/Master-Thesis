@@ -105,6 +105,14 @@ class Patch():
     def to_gray(self):
         return (self.hm * 255).astype(np.uint8)
 
+    @classmethod
+    def from_path(cls, path):
+        hm = cv2.imread(path)
+        hm = cv2.cvtColor(hm, cv2.COLOR_BGR2GRAY)
+        p = cls(hm.shape)
+        p.hm = hm / 255
+        return p
+
     def __repr__(self):
         return "Shape = {}".format(self.shape)
 
@@ -177,3 +185,9 @@ class RampPatch(BumpsPatch):
     def make(self):
         self.hm = self.orientation * super().make()
         return self.hm
+
+# hm = cv2.imread('/home/francesco/Documents/Master-Thesis/core/maps/train/slope_rocks3.png')
+# hm = cv2.cvtColor(hm, cv2.COLOR_BGR2GRAY)
+
+# p = Patch.from_path('/home/francesco/Documents/Master-Thesis/core/maps/train/slope_rocks3.png')
+# p.plot3d()
