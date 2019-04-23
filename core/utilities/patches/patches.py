@@ -70,7 +70,8 @@ class Patch():
     def from_range(cls, shape, **kwargs):
         patches = []
 
-        static_fields = {k: v for k, v in kwargs.items() if not isinstance(v, Iterable)}
+        static_fields = {k: v for k,
+                         v in kwargs.items() if not isinstance(v, Iterable)}
 
         for key, range in kwargs.items():
             if isinstance(range, Iterable):
@@ -124,8 +125,10 @@ class BarPatch(Patch):
         self.up, self.down = up, down
 
     def make(self):
-        if self.up: self.hm[self.offset: self.offset + self.size, :] = self.strength
-        if self.down: self.hm[-self.offset - self.size: -self.offset:, :] = self.strength
+        if self.up:
+            self.hm[self.offset: self.offset + self.size, :] = self.strength
+        if self.down:
+            self.hm[-self.offset - self.size: -self.offset:, :] = self.strength
 
         return self.hm
 
@@ -160,7 +163,8 @@ class BumpsPatch(Patch):
         self.resolution, self.size, self.strength = resolution, size, strength
 
     def make(self):
-        self.hm = cv2.resize(self.hm, self.resolution, interpolation=cv2.INTER_LINEAR)
+        self.hm = cv2.resize(self.hm, self.resolution,
+                             interpolation=cv2.INTER_LINEAR)
 
         self.hm[self.hm.shape[0] // 2 - self.size[0]:
                 self.hm.shape[0] // 2 + self.size[0], - self.size[1]:] = self.strength
@@ -186,8 +190,13 @@ class RampPatch(BumpsPatch):
         self.hm = self.orientation * super().make()
         return self.hm
 
-# hm = cv2.imread('/home/francesco/Documents/Master-Thesis/core/maps/train/slope_rocks3.png')
+
+# hm = cv2.imread(
+#     '/home/francesco/Documents/Master-Thesis/core/maps/train/slope_rocks3.png')
 # hm = cv2.cvtColor(hm, cv2.COLOR_BGR2GRAY)
 
-# p = Patch.from_path('/home/francesco/Documents/Master-Thesis/core/maps/train/slope_rocks3.png')
+# p = Patch.from_path(
+#     '/home/francesco/Documents/Master-Thesis/core/maps/train/slope_rocks3.png')
 # p.plot3d()
+
+# w = WallPatch((88, 88))()

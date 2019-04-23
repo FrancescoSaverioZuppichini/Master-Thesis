@@ -19,7 +19,6 @@ class WebotsEnv(gym.Env, Supervisor):
     def __init__(self, world_path, load_world=True, *args, **kwargs):
         self.world_path = world_path
         # TODO refactor
-        # self.load_world('/home/francesco/Documents/Master-Thesis/core/webots/' + self.world_path)
         if load_world: self.load_world(self.world_path)
 
         self.retry_service(self.get_world_node)

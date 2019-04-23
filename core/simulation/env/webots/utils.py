@@ -11,13 +11,13 @@ def plot_terrain(terrain):
     # plt.colorbar()
     plt.show()
 
-def image2webots_terrain(image, src_world, config, output_path=None, verbose=True):
+def image2webots_terrain(image, src_world, config, output_path=None, verbose=False):
 
 
     height, resolution = config['height'], config['resolution']
     image = image.astype(np.float)
     image = image / 255
-    terrain = image * 5
+    terrain = image * height
     # plot_terrain(image)
     if verbose: print('mod image type: ', terrain.dtype, ' height factor: ', height, ' max val (m): ',
                            np.amax(terrain), ' shape', terrain.shape)
