@@ -130,10 +130,10 @@ def hmpatch(hm, x, y, alpha, edge, scale=1):
     """
     tf1 = skimage.transform.SimilarityTransform(translation=[-x, -y])
     tf2 = skimage.transform.SimilarityTransform(rotation=np.deg2rad(alpha))
-    # tf3 = skimage.transform.SimilarityTransform(scale=scale)
+    tf3 = skimage.transform.SimilarityTransform(scale=scale)
     tf4 = skimage.transform.SimilarityTransform(translation=[+edge / 2, +edge / 2])
-    tf = (tf1 + (tf2 + tf4)).inverse
+    tf = (tf1 + (tf2 + (tf3 + tf4))).inverse
 
-    # corners = tf(np.array([[0, 0], [1, 0], [1, 1], [0, 1], [0.5, 0.5]]) * edge)
+    corners = tf(np.array([[0, 0], [1, 0], [1, 1], [0, 1], [0.5, 0.5]]) * edge)
     patch = skimage.transform.warp(hm, tf, output_shape=(edge, edge), mode="edge")
-    return patch, None
+    return patch, corners
