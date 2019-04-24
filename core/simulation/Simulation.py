@@ -52,14 +52,15 @@ class Simulation():
             maps_bar.set_description('Running {}'.format(map))
             spawn_strategy = FlatGroundSpawnStrategy(map, scale=args.height)
             random_spawn = False
+            # todo add a flag for the random spawn
             try:
                 spawn_points = spawn_strategy(k=args.n_sim, tol=1e-2, size=45)
             except ValueError:
                 print('No flat points!.')
             #     there are no flat spawn points, fall back to random spawn
                 random_spawn = True
-            random_spawn = True
-
+            # random_spawn = True
+            print('[INFO] random_spawn = {}'.format(random_spawn))
             env, _, bags_map_dir, height = make_env(map, args)
 
             n_sim_bar = tqdm.tqdm(range(args.n_sim), leave=False)

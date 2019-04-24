@@ -16,6 +16,8 @@ from torch.utils.data import DataLoader, random_split, RandomSampler, ConcatData
 from torchvision.transforms import Resize, ToPILImage, ToTensor, Grayscale, Compose
 from torch.utils.data import Dataset
 from torch.nn import Dropout
+from utilities.postprocessing.postprocessing import AddAdvancement, CleanDataframe, AddHMcoordinates, open_df_and_hm_from_meta_row
+from utilities.postprocessing.utils import hmpatch
 
 class ImgaugWrapper():
     """
@@ -33,7 +35,7 @@ class ImgaugWrapper():
 aug = iaa.Sometimes(0.8,
                     iaa.Sequential(
                         [
-                            iaa.Dropout(p=(0.05, 0.15)),
+                            iaa.Dropout(p=(0.05, 0.1)),
                             iaa.CoarseDropout((0.02, 0.1),
                                               size_percent=(0.2 , 0.4))
 
@@ -134,7 +136,6 @@ class CenterAndScalePatch():
 
 
         x = x.astype(np.double)
-        x = x / 255
 
         if self.debug:
             ax = plt.subplot(2, 2, 1)
@@ -150,7 +151,6 @@ class CenterAndScalePatch():
         min, max = x.min() + 1e-5, x.max()
 
         if self.debug:
-            print(max, min)
             ax = plt.subplot(2, 2, 3)
             self.show_heatmap(x, 'centered {}'.format(center), ax)
 
@@ -170,42 +170,47 @@ class CenterAndScalePatch():
 
 
 class TraversabilityDataset(Dataset):
-    def __init__(self, df, root, transform, tr=None, more_than=None, should_aug=False, debug=False, downsample_factor=None, only_forward=False):
-        self.df = pd.read_csv(df)
-        self.df_path = df
-        self.df = self.df.dropna()  # to be sure
-        if downsample_factor is not None: self.df = self.df[::downsample_factor]
-        if more_than is not None:  self.df = self.df[self.df['advancement'] >= more_than]
-        self.transform = transform
+    def __init__(self, df, hm, time_window, patch_size, tr=None, transform=None, more_than=None):
+        self.df = df
+        self.hm = hm
+        self.patch_size = patch_size
         self.tr = tr
-        self.image_dir =root
-        self.idx2class = {'False': 0,
-                          'True': 1}
-        self.only_forward = only_forward
+        self.transform = transform
+        self.preprocess_df = Compose([AddAdvancement(time_window), lambda x: x.dropna()])
+        self.df = self.preprocess_df(df)
 
-        if tr is not None: self.df["label"] = (self.df["advancement"] > tr) * 1
+        if more_than is not None: self.df = self.df[self.df['advancement'] > more_than]
+        if tr is not None: self.df["label"] = (self.df["advancement"] > tr)
 
-        self.should_aug = should_aug
-        self.debug = debug
+    def __getitem__(self, idx):
+        row = self.df.iloc[int(idx)]
 
-    def __getitem__(self, item):
-        row = self.df.iloc[item]
-        img_path = path.normpath(self.image_dir + row['image_path'])
+        patch = hmpatch(self.hm, row["hm_x"], row["hm_y"], np.rad2deg(row['pose__pose_e_orientation_z']),
+            self.patch_size,
+            scale=1)[0]
 
         y = row['advancement']
-        y = torch.tensor(y) * 100 # convert to cm
 
-        if self.tr is not None: y = 1 if y >= self.tr else 0
+        if 'label' in self.df: y = row['label'].astype(np.long)
 
-        img = cv2.imread(img_path)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        y = torch.tensor(y)
 
-        if self.only_forward: img = img[:, img.shape[-1] // 2: ]
-        img = self.transform(img)
-        return img, y
+        return self.transform(patch), y
 
     def __len__(self):
         return len(self.df)
+
+    @classmethod
+    def from_meta(cls, meta, base_dir, hm_dir, *args, **kwargs):
+        datasets = []
+        #
+        for (idx,row) in meta.iterrows():
+            df, hm = open_df_and_hm_from_meta_row(row, base_dir, hm_dir)
+            if len(df) > 0: datasets.append(cls(df, hm, *args, **kwargs))
+
+        concat_ds = ConcatDataset(datasets)
+
+        return concat_ds
 
     @classmethod
     def from_root(cls, root, n=None, *args, **kwargs):
@@ -269,13 +274,18 @@ def get_transform(should_aug=False, scale=1, debug=False, resize=None):
     return Compose(transformations)
 
 
-def get_dataloaders(train_root, test_root, val_root=None,
+def get_dataloaders(meta_path, train_root, hm_root, val_root=None,
+                    test_meta=None,
+                    test_root=None,
+                    test_hm_root=None,
+                    time_window=None,
                     val_size=0.2, tr=0.45,
                     num_samples=None, train_transform=None,
                     val_transform=None, test_transform=None,
                     more_than=None, should_aug=False,
                     downsample_factor=None,
                     only_forward=False,
+                    patch_size=None,
                     *args,
                     **kwargs):
     """
@@ -283,18 +293,38 @@ def get_dataloaders(train_root, test_root, val_root=None,
     :return: train, val and test dataloaders
     """
     print(train_transform, val_transform, test_transform)
-    train_ds = FastAIImageFolder.from_root(root=train_root,
+    meta = pd.read_csv(meta_path)
+    test_meta = pd.read_csv(test_meta)
+    train_meta = meta
+
+    shuffled_meta = meta.sample(frac=1, random_state=0)
+
+    val_size = int((len(train_meta) // 100) * val_size)
+
+    if val_root is None: train_meta = shuffled_meta[val_size: ]
+    train_ds = FastAIImageFolder.from_meta(train_meta,
+                                           train_root,
+                                           hm_root,
+                                           time_window = time_window,
                                            transform=train_transform,
                                            tr=tr,
-                                           should_aug=should_aug,
-                                           downsample_factor=downsample_factor,
+                                           patch_size = patch_size,
                                            more_than=more_than,
-                                           only_forward=only_forward)
+                                           )
 
-    train_size = int(len(train_ds) * (1 - val_size))
 
     if val_root is None:
-        train_ds, val_ds = random_split(train_ds, [train_size, len(train_ds) - train_size])
+        val_meta = shuffled_meta[:val_size]
+        val_ds = FastAIImageFolder.from_meta(val_meta,
+                                               train_root,
+                                               hm_root,
+                                               time_window=time_window,
+                                               transform=val_transform,
+                                               tr=tr,
+                                               patch_size=patch_size,
+                                               )
+
+        # train_ds, val_ds = random_split(train_ds, [train_size, len(train_ds) - train_size])
 
     else:
         val_ds = FastAIImageFolder.from_root(root=val_root,
@@ -313,12 +343,18 @@ def get_dataloaders(train_root, test_root, val_root=None,
                               shuffle=True,
                               *args, **kwargs)
     val_dl = DataLoader(val_ds, shuffle=True, *args, **kwargs)
+    test_dl = val_dl
 
-    test_ds = FastAIImageFolder.from_root(root=test_root,
-                                          transform=test_transform,
-                                          tr=tr)
-
-    test_dl = DataLoader(test_ds, shuffle=True, *args, **kwargs)
+    if test_root is not None:
+        test_ds = FastAIImageFolder.from_meta(test_meta,
+                                           test_root,
+                                           test_hm_root,
+                                           time_window = time_window,
+                                           transform=test_transform,
+                                           tr=tr,
+                                           patch_size = patch_size,
+                                           )
+        test_dl = DataLoader(test_ds, shuffle=True, *args, **kwargs)
 
     return train_dl, val_dl, test_dl
 
@@ -335,60 +371,34 @@ def visualise(dl, n=10):
 
 
 if __name__ == '__main__':
-    df = '/media/francesco/saetta/125-750/test/df/querry-big-10/1550308680.946694-complete.csv-patch.csv'
-    df = '/media/francesco/saetta/125-750/train/df/bars1/1550616885.070434-complete.csv-patch.csv'
-    from torch.nn.functional import softmax
+    import time
 
-    # root = path.abspath(
-    #     '.. /../../resources/assets/datasets/test/')
+    start = time.time()
+    meta = pd.read_csv('/media/francesco/saetta/krock-dataset/train/bags/meta.csv')
+    meta = meta[meta['map'] == 'bars1']
 
-    # root = '/media/francesco/saetta/125-750/test/'
-    root = '/media/francesco/saetta/125-750/train/'
+    concat_ds = TraversabilityDataset.from_meta(meta,
+                                                '/media/francesco/saetta/krock-dataset/train/csvs_parsed/',
+                                                '/home/francesco/Documents/Master-Thesis/core/maps/train/',
+                                                time_window=50 * 3,
+                                                patch_size=88,
+                                                transform=get_transform(True, debug=False))
 
-    # df = root + '/df/querry-big-10/1550307709.2522066-patch.csv'
-    ds = TraversabilityDataset(df, root=root, transform=get_transform(resize=(64,64), should_aug=True, scale=10,
-                                                                      debug=True),
-                              tr=0.45, only_forward=False, downsample_factor=2)
-
-    for i in  range(3):
-        img, y = ds[i]
-        plt.imshow(img.cpu().squeeze().numpy())
-        plt.show()
-        print(y)
-
-    # from torch.nn import Dropout
-    # img = Dropout(0.1)(img)
-    dataset = '125-750'
-    resize = None
-
-    train_dl, val_dl, test_dl = get_dataloaders(
-        train_root='/media/francesco/saetta/{}/train/'.format(dataset),
-        val_root='/media/francesco/saetta/{}/val/'.format(dataset),
-        test_root='/media/francesco/saetta/{}/test/'.format(dataset),
-        train_transform=get_transform(resize=resize, should_aug=True),
-        val_transform=get_transform(resize=resize, scale=1, should_aug=False),
-        test_transform=get_transform(resize=resize, scale=10, should_aug=False),
-        batch_size=5,
-        num_samples=None,
-        num_workers=1,
-        pin_memory=True)
+    # hm = cv2.imread('/home/francesco/Documents/Master-Thesis/core/maps/train/slope_rocks1.png')
+    # hm = cv2.cvtColor(hm, cv2.COLOR_BGR2GRAY)
     #
-    # #
-    # visualise(train_dl)
-    # visualise(train_dl)
-    visualise(train_dl)
-    visualise(train_dl)
+    # concat_ds = TraversabilityDataset(pd.read_csv('/media/francesco/saetta/krock-dataset/train/csvs_parsed/slope_rocks1-1.0-0.csv'), hm,
+    #                       time_window=50*3, patch_size=88, transform=get_transform(True, debug=True))
     #
-    visualise(val_dl)
-    visualise(val_dl)
-    visualise(val_dl)
-    visualise(val_dl)
-    visualise(val_dl)
+    # for i in range(2):
+    #     p, y = concat_ds[i]
+    #
+    #     print(y)
+    dl = DataLoader(concat_ds, batch_size=16, pin_memory=True, num_workers=16)
 
-    visualise(test_dl)
-    visualise(test_dl)
-    visualise(test_dl)
-    visualise(test_dl)
+    for batch in dl:
+        break
+    print('Elapsed = {:.2f}'.format(time.time() - start))
 
     # visualise(test_dl)
     # visualise(test_dl)

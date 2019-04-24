@@ -20,6 +20,7 @@ class DataFrameVisualization():
 
     def __call__(self, tr):
         self.plot_advancement()
+        self.plot_advancement_box()
         self.plot_rotation()
         self.show_classes(tr)
 
@@ -73,7 +74,8 @@ class DataFrameVisualization():
 
     @classmethod
     def from_dfs(cls, dfs, *args, **kwargs):
-        df_total = pd.concat(filter(lambda x: len(x) > 0, dfs))
+
+        df_total = pd.concat(dfs, sort=False)
         df_total = df_total.dropna()
         df_total = df_total.reset_index(drop=True)
 

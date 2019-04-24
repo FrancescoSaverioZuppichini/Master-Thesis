@@ -17,16 +17,16 @@ from pypeln import thread as th
 from utilities.pipeline import Compose, Handler, Combine, MultiThreadWrapper
 from tf.transformations import euler_from_quaternion
 from utilities.postprocessing.utils import read_image
-
+from utilities.postprocessing.utils import hmpatch
 
 class StoreDataframeKeepingSameName():
     def __init__(self, out_dir):
         self.out_dir = out_dir
 
     def __call__(self, data):
-        df, file_name = data
-        df.to_csv(self.out_dir + file_name + '.csv')
-        return df
+        df, hm, filename = data
+        df.to_csv(self.out_dir + filename + '.csv')
+        return  df, hm, filename
 
 
 class Bags2Dataframe(Handler):
@@ -38,11 +38,20 @@ class Bags2Dataframe(Handler):
     def __init__(self, base_dir, out_dir=None):
         self.base_dir = base_dir
 
-    def __call__(self, file_name):
-        df = rosbag_pandas.bag_to_dataframe(self.base_dir + file_name + '.bag')
-        df.file_name = file_name
-        return df
+    def __call__(self, filename):
+        df = rosbag_pandas.bag_to_dataframe(self.base_dir + filename + '.bag')
+        return df, None, filename
 
+class ReadDataframeFilenameAndHm():
+    def __init__(self, base_dir, hm_dir):
+        self.base_dir = base_dir
+        self.hm_dir = hm_dir
+
+    def __call__(self, data):
+        idx, row = data
+        df, hm = open_df_and_hm_from_meta_row(row, self.base_dir, self.hm_dir)
+
+        return df, hm, row['filename']
 
 class ParseDataframe(Handler):
     def convert_date2timestamp(self, df):
@@ -68,7 +77,7 @@ class ParseDataframe(Handler):
 
         return df
 
-    def convert_quaterion2euler(self, df):
+    def convert_quaterion2euler(self, df, *args, **kwargs):
         """
         Decorate the given dataframe with the euler orientation computed from the existing
         quaternion.
@@ -99,18 +108,20 @@ class ParseDataframe(Handler):
         assert (np.allclose(1, np.linalg.norm(df[["S_oX", "S_oY"]], axis=1)))
         return df
 
-    def __call__(self, df):
+    def __call__(self, data):
+        df, hm, filename = data
+
         df = self.convert_date2timestamp(df)
         df = self.convert_quaterion2euler(df)
         df = self.extract_cos_sin(df)
-        return df
+        return df, hm, filename
 
 
 class AddAdvancement(Handler):
     def __init__(self, dt):
         self.dt = dt
 
-    def __call__(self, df):
+    def __call__(self, data):
         """
         Project the distance x and y computed using a rolling window
         into the current line to compute the advancement
@@ -118,6 +129,8 @@ class AddAdvancement(Handler):
         :param dt:
         :return:
         """
+        df, hm, filename = data
+
         # look dt in the future and compute the distance for booth axis
         df["S_dX"] = df.rolling(window=(self.dt + 1))['pose__pose_position_x'].apply(lambda x: x[-1] - x[0],
                                                                                      raw=True).shift(
@@ -128,12 +141,16 @@ class AddAdvancement(Handler):
         # project x and y in the current line and compute the advancement
         df["advancement"] = np.einsum('ij,ij->i', df[["S_dX", "S_dY"]], df[["S_oX", "S_oY"]])  # row-wise dot product
 
-        return df
+        df = df.dropna()
+
+        return df, hm, filename
 
 
 class CleanDataframe(Handler):
-    def __call__(self, df):
-        df = df.dropna()
+    def __call__(self, data):
+        offset = 22
+
+        df, hm, filename = data
         #       drop first second (spawn time)
         df = df.loc[df.index >= 1]
         # robot upside down
@@ -141,8 +158,19 @@ class CleanDataframe(Handler):
         df = df.loc[df['pose__pose_e_orientation_x'] <= 2.0].dropna()
         df = df.loc[df['pose__pose_e_orientation_y'] >= -2.0].dropna()
         df = df.loc[df['pose__pose_e_orientation_y'] <= 2.0].dropna()
+        df = df.dropna()
 
-        return df
+        index = df[(df['hm_y'] > (hm.shape[0] - offset)) | (df['hm_y'] < offset)
+                   | (df['hm_x'] > (hm.shape[1] - offset)) | (df['hm_x'] < offset)
+                   ].index
+
+        # print('removing {} outliers'.format(len(index)))
+        # if there are some outliers, we remove all the rows after the first one
+        if len(index) > 0:
+            idx = index[0]
+            df = df.loc[0:idx]
+
+        return df, hm, filename
 
 
 class AddHMcoordinates(Handler):
@@ -176,35 +204,142 @@ class AddHMcoordinates(Handler):
         :param hm: heightmap representing the map
         :return: decorated dataframe
         """
-        df, hm = data
+        df, hm, filename = data
         df[['hm_x', 'hm_y']] = df.apply(
             lambda x: self.to_hm_coordinates(x, hm, self.resolution, self.translation),
             axis=1)
+        return df, hm, filename
+
+def drop_uselesss_columns(data):
+    df, hm, filename = data
+
+    df = df.drop(['pose__pose_orientation_y',
+                  'pose__pose_orientation_x',
+                  'pose__pose_orientation_z',
+                  'pose__pose_orientation_w',
+                  'timestamp',
+                  'ros_time'], axis=1)
+
+    return df, hm, filename
+
+class ReadHm(Handler):
+    def __init__(self, base_dir):
+        self.base_dir = base_dir
+
+    def __call__(self, name):
+        return read_image(self.base_dir + name + '.png')
+
+
+def open_df_and_hm_from_meta_row(row, base_dir, hm_dir):
+    filename, map = row['filename'], row['map']
+    df = pd.read_csv(base_dir + '/' + filename + '.csv')
+
+    hm = cv2.imread(hm_dir + '/' + map + '.png')
+    hm = cv2.cvtColor(hm, cv2.COLOR_BGR2GRAY)
+
+    return df, hm
+
+class ReadDataframeAndStoreName():
+    def __init__(self, base_dir):
+        self.base_dir = base_dir
+
+    def __call__(self, path):
+        df = pd.read_csv(self.base_dir + path + '.csv')
         return df
 
-DATASET_DIR = '/media/francesco/saetta/krock-dataset/'
-base_bags_dir = DATASET_DIR + '/train/bags/'
-out_csvs_dir = '/media/francesco/saetta/krock-dataset/train/csvs/'
+class ExtractPatches():
+    def __init__(self, patch_size):
+        self.patch_size = patch_size
 
-meta = pd.read_csv(DATASET_DIR + 'train/bags/meta.csv')
-meta['height'] = 1  # set height to one for now
+    def __call__(self, data):
+        df, hm, filename = data
+
+        patches = []
+
+        for (idx, row) in df.iterrows():
+            patch = hmpatch(hm, row["hm_x"], row["hm_y"], np.rad2deg(row['pose__pose_e_orientation_z']),
+                            self.patch_size,
+                            scale=1)[0]
+            patches.append(patch)
+
+        return df, patches, filename
+
+class StorePatches():
+    def __init__(self, out_dir, meta_df_out_dir):
+        self.out_dir = out_dir
+        self.meta_df_out_dir = meta_df_out_dir
+
+    def __call__(self, data):
+        df, patches, filename = data
+
+        paths = []
+        for idx, patch in enumerate(patches):
+            path = '{}/{}-{}.png'.format(self.out_dir, filename, idx)
+            cv2.imwrite(path, patch)
+            paths.append(path)
 
 
-filename = meta['filename'][0:24]
+        meta_df = df.copy()
+        meta_df['images'] = paths
 
-dfs_from_bags = MultiThreadWrapper(16, Bags2Dataframe(base_bags_dir))(filename)
+        meta_df.to_csv('{}/{}.csv'.format(self.meta_df_out_dir, filename))
 
-save_dfs_from_basgs = MultiThreadWrapper(16, StoreDataframeKeepingSameName(out_csvs_dir))
-save_dfs_from_basgs(Combine()(dfs_from_bags, filename))
+        return meta_df, patches, filename
+
+if __name__ == '__main__':
+
+    DATASET_DIR = '/media/francesco/saetta/krock-dataset/train/'
+    N_WORKERS = 16
+
+    base_bags_dir = DATASET_DIR + '/bags/'
+    # base_bags_dir = '/home/francesco/Desktop/test/'
+
+    # base_bags_dir = base_bags_dir
+    out_csvs_dir = DATASET_DIR + '/csvs/'
+    out_parsed_csvs_dir = DATASET_DIR + '/csvs_parsed/'
+    # out_csvs_dir = '/media/francesco/saetta/krock-dataset/train/csvs/'
+    # out_parsed_csvs_dir = '/media/francesco/saetta/krock-dataset/train/csvs_parsed/'
 
 
-out_parsed_csvs_dir = '/media/francesco/saetta/krock-dataset/train/csvs_parsed/'
+    meta = pd.read_csv(base_bags_dir + 'meta.csv')
+    # meta['height'] = 1  # set height to one for now
+    #
+    # # meta = meta[meta['map'] == 'bars1']
+    # meta = meta.dropna()
+    # filename = meta['filename']
+    #
+    # print(filename)
+    #
+    # convert_bags2dfs_and_store = MultiThreadWrapper(N_WORKERS, Compose([
+    #     Bags2Dataframe(base_bags_dir),
+    #     StoreDataframeKeepingSameName(out_csvs_dir)]))
+    #
+    # save_dfs_from_bags = MultiThreadWrapper(N_WORKERS, StoreDataframeKeepingSameName(out_csvs_dir))
+    #
+    # read_and_parse_dfs =  MultiThreadWrapper(N_WORKERS, Compose([
+    #     ReadDataframeFilenameAndHm(out_csvs_dir, '/home/francesco/Documents/Master-Thesis/core/maps/train/'),
+    #     ParseDataframe(),
+    #     AddHMcoordinates(),
+    #     CleanDataframe(),
+    #     drop_uselesss_columns,
+    #     StoreDataframeKeepingSameName(out_parsed_csvs_dir)
+    # ]))
+    #
+    # dfs_from_bags = convert_bags2dfs_and_store(filename)
+    #
+    # parsed_dfs = read_and_parse_dfs(meta.iterrows())
+    #
+    patches_out_dir = DATASET_DIR + '/patches'
+    meta_df_out_dir = DATASET_DIR + '/csvs_patches/'
+    #
+    extract_patches = MultiThreadWrapper(N_WORKERS, Compose([
+        ReadDataframeFilenameAndHm(out_parsed_csvs_dir,
+                                   '/home/francesco/Documents/Master-Thesis/core/maps/train/'),
+        AddAdvancement(50 * 3),
+        ExtractPatches(patch_size=88),
+        StorePatches(patches_out_dir, meta_df_out_dir)
 
+    ]))
 
-parse_df =  MultiThreadWrapper(16, Compose([lambda x: pd.read_csv(out_csvs_dir + x + '.csv'),
-                    ParseDataframe()]))
+    extract_patches(meta.iterrows())
 
-parsed_dfs = parse_df(filename)
-
-save_parsed_dfs = MultiThreadWrapper(16, StoreDataframeKeepingSameName(out_parsed_csvs_dir))
-save_parsed_dfs(Combine()(parsed_dfs, filename))

@@ -79,14 +79,19 @@ if __name__ == '__main__':
             return data.sum()
 
 
-    def foo(data):
-        print('data from foo {}'.format(data))
+    def first(foo, *args):
+        return foo, 'abc'
 
-        return data
+    def second(foo, baa, *args):
+        print(foo, baa)
+
+        return foo
+                      
+
+    pipeline = Compose([first, second])
+
+    
 
 
-    pipeline = Compose([power, Compose([Sum(), foo])])
 
-    pipeline(np.array([1, 2, 3, 4]))
 
-    list(map(foo, {'wee': 'test'}.items()))

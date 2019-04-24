@@ -37,20 +37,26 @@ def train_and_evaluate(params, train=True, load_model=None):
     # model = OmarCNN()
     model = zoo[params['model']]
     # print(model)
-    if params['resize'] is not None: summary(model.cuda(), (1, *params['resize']))
-    else: summary(model.cuda(), (1, 88, 88))
+    summary(model.cuda(), (1, params['patch_size'], params['patch_size']))
 
     pprint.pprint(params)
 
     criterion = CrossEntropyFlat() if params['tr'] is not None else MSELossFlat()
 
     train_dl, val_dl, test_dl = get_dataloaders(
-        train_root='/media/francesco/saetta/{}/train/'.format(params['dataset']),
-        val_root='/media/francesco/saetta/{}/val/'.format(params['dataset']),
-        test_root='/media/francesco/saetta/{}/test/'.format(params['dataset']),
-        train_transform=get_transform(resize=params['resize'], should_aug=params['data-aug']),
-        val_transform=get_transform(resize=params['resize'], scale=1, should_aug=False),
-        test_transform=get_transform(resize=params['resize'], scale=10, should_aug=False),
+        meta_path = '/media/francesco/saetta/krock-dataset/train/bags/meta.csv',
+        train_root = '/media/francesco/saetta/krock-dataset/train/csvs_parsed/',
+        hm_root= '/home/francesco/Documents/Master-Thesis/core/maps/train/',
+        time_window=params['time_window'],
+        patch_size=params['patch_size'],
+        test_meta='/media/francesco/saetta/krock-dataset/test/bags/meta.csv',
+        test_root='/media/francesco/saetta/krock-dataset/test/csvs_parsed/',
+        test_hm_root='/home/francesco/Documents/Master-Thesis/core/maps/test/',
+        # val_root='/media/francesco/saetta/{}/val/'.format(params['dataset']),
+        val_size = params['val_size'],
+        train_transform=get_transform(should_aug=params['data-aug']),
+        val_transform=get_transform(scale=1, should_aug=False),
+        test_transform=get_transform(scale=10, should_aug=False),
         num_samples=params['num_samples'],
         batch_size=params['batch_size'],
         num_workers=16,
@@ -62,7 +68,7 @@ def train_and_evaluate(params, train=True, load_model=None):
 
     timestamp = time.time()
     model_name = '{}-{}-{}-{}-{}'.format(params['model'], params['dataset'].split('/')[0], params['lr'],
-                                         params['resize'], timestamp)
+                                         params['patch_size'], timestamp)
 
     model_name = load_model if load_model is not None else model_name
 
@@ -79,7 +85,7 @@ def train_and_evaluate(params, train=True, load_model=None):
     data = DataBunch(train_dl=train_dl, valid_dl=val_dl, test_dl=test_dl)
 
     experiment = Experiment(api_key="8THqoAxomFyzBgzkStlY95MOf",
-                            project_name="krock-new", workspace="francescosaveriozuppichini")
+                            project_name="krock-new-new", workspace="francescosaveriozuppichini")
 
     experiment.log_parameters(params)
     experiment.log_metric("timestamp", timestamp)
@@ -141,25 +147,25 @@ def train_and_evaluate(params, train=True, load_model=None):
     del learner
 
 if __name__ == '__main__':
-    params = {'epochs': 30,
+    params = {'epochs': 10,
               'lr': 0.001,
               'batch_size': 128,
               # 'model': 'omar',
+              'val_size' : 10,
               'model': 'microresnet#4-gate=3x3-n=1-se=True',
-              'dataset': 'no-shift-88-750',
+              'dataset': 'no-shift',
               'sampler': '',
               'num_samples': None,
-              'samper_type': 'random',
-              'callbacks': '[ReduceLROnPlateauCallback]',
-              'data-aug': True,
+              'sampler_type': 'random',
+              'data-aug': False,
               'optim': 'sgd',
-              'info': 'aggreassive data aug-val new correct more than se everywhere',
+              'info': '',
               'tr': 0.45,
               'more_than': 0,
               'downsample_factor': None,
-              'time_window': 750,
+              'time_window': 50 * 3,
               'only_forward': False,
-              'resize': None  }
+              'patch_size': 88  }
 
 
     for _ in range(10):
