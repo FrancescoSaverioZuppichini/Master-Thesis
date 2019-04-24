@@ -62,7 +62,7 @@ def train_and_evaluate(params, train=True, load_model=None):
         num_workers=16,
         tr=params['tr'],
         more_than=params['more_than'],
-        downsample_factor=params['downsample_factor'],
+        down_sampling=params['down_sampling'],
         only_forward=params['only_forward'],
         pin_memory=True)
 
@@ -157,18 +157,18 @@ if __name__ == '__main__':
               'sampler': '',
               'num_samples': None,
               'sampler_type': 'random',
-              'data-aug': False,
+              'data-aug': True,
               'optim': 'sgd',
               'info': '',
               'tr': 0.45,
               'more_than': 0,
-              'downsample_factor': None,
+              'down_sampling': 2,
               'time_window': 50 * 3,
               'only_forward': False,
               'patch_size': 88  }
 
 
-    for _ in range(10):
+    for _ in range(4):
         train_and_evaluate(params)
 
     # params['resize'] = None

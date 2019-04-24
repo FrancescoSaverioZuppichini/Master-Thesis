@@ -131,17 +131,19 @@ class AddAdvancement(Handler):
         """
         df, hm, filename = data
 
-        # look dt in the future and compute the distance for booth axis
-        df["S_dX"] = df.rolling(window=(self.dt + 1))['pose__pose_position_x'].apply(lambda x: x[-1] - x[0],
-                                                                                     raw=True).shift(
-            -self.dt)
-        df["S_dY"] = df.rolling(window=(self.dt + 1))['pose__pose_position_y'].apply(lambda x: x[-1] - x[0],
-                                                                                     raw=True).shift(
-            -self.dt)
-        # project x and y in the current line and compute the advancement
-        df["advancement"] = np.einsum('ij,ij->i', df[["S_dX", "S_dY"]], df[["S_oX", "S_oY"]])  # row-wise dot product
+        if len(df) > 0:
 
-        df = df.dropna()
+            # look dt in the future and compute the distance for booth axis
+            df["S_dX"] = df.rolling(window=(self.dt + 1))['pose__pose_position_x'].apply(lambda x: x[-1] - x[0],
+                                                                                         raw=True).shift(
+                -self.dt)
+            df["S_dY"] = df.rolling(window=(self.dt + 1))['pose__pose_position_y'].apply(lambda x: x[-1] - x[0],
+                                                                                         raw=True).shift(
+                -self.dt)
+            # project x and y in the current line and compute the advancement
+            df["advancement"] = np.einsum('ij,ij->i', df[["S_dX", "S_dY"]], df[["S_oX", "S_oY"]])  # row-wise dot product
+
+            df = df.dropna()
 
         return df, hm, filename
 
@@ -278,17 +280,16 @@ class StorePatches():
             cv2.imwrite(path, patch)
             paths.append(path)
 
+        df['images'] = paths
 
-        meta_df = df.copy()
-        meta_df['images'] = paths
+        df.to_csv('{}/{}.csv'.format(self.meta_df_out_dir, filename))
+        del patches # free up memory
 
-        meta_df.to_csv('{}/{}.csv'.format(self.meta_df_out_dir, filename))
-
-        return meta_df, patches, filename
+        return df, filename
 
 if __name__ == '__main__':
 
-    DATASET_DIR = '/media/francesco/saetta/krock-dataset/train/'
+    DATASET_DIR = '/media/francesco/saetta/krock-dataset/test/'
     N_WORKERS = 16
 
     base_bags_dir = DATASET_DIR + '/bags/'
@@ -302,6 +303,7 @@ if __name__ == '__main__':
 
 
     meta = pd.read_csv(base_bags_dir + 'meta.csv')
+    print(meta)
     # meta['height'] = 1  # set height to one for now
     #
     # # meta = meta[meta['map'] == 'bars1']
@@ -317,24 +319,24 @@ if __name__ == '__main__':
     # save_dfs_from_bags = MultiThreadWrapper(N_WORKERS, StoreDataframeKeepingSameName(out_csvs_dir))
     #
     # read_and_parse_dfs =  MultiThreadWrapper(N_WORKERS, Compose([
-    #     ReadDataframeFilenameAndHm(out_csvs_dir, '/home/francesco/Documents/Master-Thesis/core/maps/train/'),
+    #     ReadDataframeFilenameAndHm(out_csvs_dir, '/home/francesco/Documents/Master-Thesis/core/maps/test/'),
     #     ParseDataframe(),
     #     AddHMcoordinates(),
     #     CleanDataframe(),
     #     drop_uselesss_columns,
     #     StoreDataframeKeepingSameName(out_parsed_csvs_dir)
     # ]))
-    #
-    # dfs_from_bags = convert_bags2dfs_and_store(filename)
-    #
+    # #
+    # # dfs_from_bags = convert_bags2dfs_and_store(filename)
+    # #
     # parsed_dfs = read_and_parse_dfs(meta.iterrows())
-    #
+    # #
     patches_out_dir = DATASET_DIR + '/patches'
     meta_df_out_dir = DATASET_DIR + '/csvs_patches/'
     #
     extract_patches = MultiThreadWrapper(N_WORKERS, Compose([
         ReadDataframeFilenameAndHm(out_parsed_csvs_dir,
-                                   '/home/francesco/Documents/Master-Thesis/core/maps/train/'),
+                                   '/home/francesco/Documents/Master-Thesis/core/maps/test/'),
         AddAdvancement(50 * 3),
         ExtractPatches(patch_size=88),
         StorePatches(patches_out_dir, meta_df_out_dir)

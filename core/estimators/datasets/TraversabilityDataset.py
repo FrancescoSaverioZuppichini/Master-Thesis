@@ -170,18 +170,19 @@ class CenterAndScalePatch():
 
 
 class TraversabilityDataset(Dataset):
-    def __init__(self, df, hm, time_window, patch_size, tr=None, transform=None, more_than=None):
+    def __init__(self, df, hm, time_window, patch_size, tr=None, transform=None, more_than=None, down_sampling=None):
         self.df = df
         self.hm = hm
         self.patch_size = patch_size
         self.tr = tr
         self.transform = transform
-        self.preprocess_df = Compose([AddAdvancement(time_window), lambda x: x.dropna()])
-        self.df = self.preprocess_df(df)
+        if down_sampling is not None: self.df = self.df[::down_sampling]
+
+        self.preprocess_df = Compose([AddAdvancement(time_window)])
+        self.df = self.preprocess_df((df, None, None))[0]
 
         if more_than is not None: self.df = self.df[self.df['advancement'] > more_than]
         if tr is not None: self.df["label"] = (self.df["advancement"] > tr)
-
     def __getitem__(self, idx):
         row = self.df.iloc[int(idx)]
 
@@ -283,7 +284,7 @@ def get_dataloaders(meta_path, train_root, hm_root, val_root=None,
                     num_samples=None, train_transform=None,
                     val_transform=None, test_transform=None,
                     more_than=None, should_aug=False,
-                    downsample_factor=None,
+                    down_sampling=None,
                     only_forward=False,
                     patch_size=None,
                     *args,
@@ -310,6 +311,7 @@ def get_dataloaders(meta_path, train_root, hm_root, val_root=None,
                                            tr=tr,
                                            patch_size = patch_size,
                                            more_than=more_than,
+                                           down_sampling=down_sampling,
                                            )
 
 
