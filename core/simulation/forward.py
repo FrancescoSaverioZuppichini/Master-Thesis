@@ -5,7 +5,9 @@ from tf import transformations
 from simulation.env.spawn import FlatGroundSpawnStrategy, spawn_points2webots_pose
 
 WORLD_PATH = '/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock2_ros/worlds/bars1.wbt'
-MAP = '/home/francesco/Documents/Master-Thesis/core/maps/train/slope_rocks1.png'
+# MAP = '/home/francesco/Documents/Master-Thesis/core/maps/train/slope_rocks1.png'
+MAP = '/media/francesco/saetta/krock-dataset/test_with_obstacles/wall.png'
+
 # MAP = '/home/francesco/Desktop/center.png'
 N_STEPS = 4
 
@@ -22,20 +24,20 @@ import random
 #      'resolution': 0.02},
 #     # agent_callbacks=[RosBagSaver('~/Desktop/querry-high/bags', topics=['pose'])],
 #     output_path='/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock2_ros/worlds/tmp.wbt')
-
+#
 # env = KrockWebotsEnv.from_image(
 #     MAP,
 #     '/home/francesco/Documents/Master-Thesis/core/simulation/env/webots/krock/krock_no_tail.wbt',
-#     {'height': 10,
+#     {'height': 1,
 #      'resolution': 0.02 },
-#     agent_callbacks=[RosBagSaver('/media/francesco/saetta/quarry-ramp/bags',
-#                                  topics=['pose'])],
+#     # agent_callbacks=[RosBagSaver('/media/francesco/saetta/krock-dataset/test_with_obstacle_in_center/bags',
+#     #                              topics=['pose'])],
 #     output_dir='/home/francesco/Documents/Master-Thesis/core/simulation/env/webots/krock/krock2_ros/worlds/')
 
 # env = KrockWebotsEnv(WORLD_PATH, load_world=True)
 
-spawn_strategy = FlatGroundSpawnStrategy(MAP, scale = 1, debug=False)
-spawn_points = spawn_strategy(k=20, tol=1e-2, size=45)
+# spawn_strategy = FlatGroundSpawnStrategy(MAP, scale = 1, debug=True)
+# spawn_points = spawn_strategy(k=20, tol=1e-2, size=45)
 
 
 def spawn_points2webots_pose(spawn_point, env):
@@ -44,51 +46,45 @@ def spawn_points2webots_pose(spawn_point, env):
     # x,y = 250, 450
     z = env.get_height(x, y)
     print(z)
-    pose = [[(x * 0.02) - 5, z + 0.5, (y * 0.02) - 5], orientation]
+    pose = [[(x * 0.02) - 5, z + 0.4, (y * 0.02) - 5], orientation]
 
     return pose
-
+#
 env = KrockWebotsEnv(None,
-                     # agent_callbacks=[RosBagSaver('/home/francesco/Desktop/',
-                     #                              topics=['pose'])],
+                     agent_callbacks=[RosBagSaver('/media/francesco/saetta/krock-dataset/test_with_obstacles/bags',
+                                                  topics=['pose'])],
                      )
 
-env.reset(spawn=False)
-import rospy
-
-z = env.get_height(250, 500)
-print(z)
-# print(env.x, env.y, h)
-for i in range(10):
-    spawn_point = random.choice(spawn_points)
-
-    # spawn_points2webots_pose(spawn_point, env)
-    init_obs = env.reset(pose=spawn_points2webots_pose(spawn_point, env))
-    time.sleep(0.2)
-
-
-
-# env.agent()
-# elapsed = 0
-# start = time.time()
+# env.reset(spawn=False)
+# import rospy
 #
-# # for _ in range(1000):
-# while elapsed <= 1:
-#     # print(time.time())
-#     elapsed = time.time() - start
-#     # print('[INFO] elapsed {:.4f}'.format(elapsed))
-#
-#     # env.agent.sleep()
-#     # time.sleep(0.01)
-#     obs, r, done, _ = env.step(env.GO_FORWARD)
-#         # pprint.pprint(obs)
-#         # if done: break
-#
-# env.step(env.STOP)
-#
-# env.agent.die(env, 'diocane')
-# print(env.agent.called)
-# #     env.step(env.STOP)
-# #     break
-# #     # env.reset(pose=pose)
+# z = env.get_height(250, 500)
+# print(z)
+# # print(env.x, env.y, h)
+# for i in range(10):
+#     # spawn_point = random.choice(spawn_points)
+#     spawn_point = [random.randint(22, 513 - 22), random.randint(22, 513 - 22)]
+#     # spawn_points2webots_pose(spawn_point, env)
+#     init_obs = env.reset(pose=spawn_points2webots_pose(spawn_point, env))
+#     time.sleep(0.2)
 # #
+# #
+
+env.agent()
+# env.reset(spawn=False)
+#
+#
+elapsed = 0
+start = time.time()
+# #
+while elapsed <= 3:
+# #     # print(time.time())
+    elapsed = time.time() - start
+#
+    # obs, r, done, _ = env.step(env.STOP)
+    pass
+#
+# #
+# env.step(env.STOP)
+# #
+env.agent.die(env, '1')

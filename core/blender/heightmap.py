@@ -82,6 +82,7 @@ if __name__ == '__main__':
     import glob
     from os import path
     TEX_DIR = '/home/francesco/Documents/Master-Thesis/resources/assets/textures/'
+
     MAP_NAME = 'querry-big-10'
     texture_paths = glob.glob('{}/{}-*'.format(TEX_DIR, MAP_NAME))
     print(texture_paths)

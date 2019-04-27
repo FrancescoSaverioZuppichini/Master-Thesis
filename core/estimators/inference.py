@@ -20,24 +20,23 @@ class HeightMapInference():
 
 
     def __call__(self, model_dir, model_name, rotate=None, *args, **kwargs):
-        if self.learner is not None:
-            self.ds.rotate = rotate
-        else:
-            self.ds = InferenceDataset(self.hm_path, transform=self.transform, rotate=rotate, *args, **kwargs)
-            self.learner, _ = get_learner(model_name, model_dir, callbacks=[], dataset=self.ds)
 
+        self.ds = InferenceDataset(self.hm_path, transform=self.transform, rotate=rotate, debug=False,*args, **kwargs)
+        # if self.learner is None:
+        self.learner, _ = get_learner(model_name, model_dir, callbacks=[], dataset=self.ds, rotate=rotate)
         probs, labels = get_probs_and_labels_from_preds(self.learner.get_preds(self.learner.data.test_dl))
         path = self.ds.make_texture(probs.numpy(), labels.numpy(), 'querry-big-10')
 
         return path
 
     def for_all_rotation(self, *args, **kwargs):
-        for rotation in [0, 90, 180, 270]:
+        for rotation in [0]:
             self(rotate=rotation, *args, **kwargs)
 
-hm_infer = HeightMapInference('../maps/test/querry-big-10.png', get_transform(None, scale=10))
+hm_infer = HeightMapInference('../maps/test/querry-big-10.png',
+                              get_transform(None, scale=10),)
 
-model_dir = path.abspath('/home/francesco/Desktop/carino/vaevictis/data/microresnet#4-gate=3x3-n=1-se=True-no-shift-88-750-0.001-None-1554153439.464771')
+model_dir = path.abspath('/home/francesco/Desktop/carino/vaevictis/data/microresnet#4-gate=3x3-n=1-se=True-no-shift-0.001-88-1556224482.701581')
 print(model_dir)
 
 hm_infer.for_all_rotation(model_dir,

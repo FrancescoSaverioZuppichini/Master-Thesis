@@ -1,15 +1,15 @@
 import glob
-import pandas as pd
+import cv2
 
+import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
-import cv2
+import matplotlib.lines as mlines
+import seaborn as sns
 
 from utilities.postprocessing.utils import *
 from matplotlib import gridspec
-import matplotlib.lines as mlines
-
-import seaborn as sns
+from utilities.postprocessing.postprocessing import AddAdvancement
 
 class DataFrameVisualization():
     """
@@ -18,8 +18,10 @@ class DataFrameVisualization():
     def __init__(self, df, *args, **kwargs):
         self.df = df
 
-    def __call__(self, tr):
+    def __call__(self, tr, time_window=None):
+        if time_window is not None: self.df = AddAdvancement(time_window)((self.df, None, None))[0]
         self.plot_advancement()
+        self.plot_advancement_box()
         self.plot_rotation()
         self.show_classes(tr)
 
@@ -73,7 +75,8 @@ class DataFrameVisualization():
 
     @classmethod
     def from_dfs(cls, dfs, *args, **kwargs):
-        df_total = pd.concat(filter(lambda x: len(x) > 0, dfs))
+
+        df_total = pd.concat(dfs, sort=False)
         df_total = df_total.dropna()
         df_total = df_total.reset_index(drop=True)
 
@@ -145,7 +148,9 @@ class PatchesAndDataframeVisualization(DataFrameVisualization):
 
     def show_patches(self, center=False, n_samples=4, scale=1, random_state=0):
         df = self.df
-        sample = df.sample(n_samples, random_state=random_state)
+        # sample = df.sample(n_samples, random_state=random_state)
+        sample = df[:n_samples]
+
         fig, ax = plt.subplots(nrows=n_samples // 2, ncols=n_samples // 2)
         fig.suptitle('patches center={}'.format(center))
         for row in ax:
@@ -186,7 +191,7 @@ class PatchesAndDataframeVisualization(DataFrameVisualization):
         df['label'] = df['advancement'] > tr
         tmp = df.loc[df['label'] == True]
 
-        sample = tmp.sort_values("advancement").head(4)
+        sample = tmp.sort_values("advancement", ascending=False).head(4)
 
         self.show_patches_on_the_map(df=sample, title='true', compress=False)
 
@@ -235,7 +240,7 @@ class PatchesAndDataframeVisualization(DataFrameVisualization):
             ax_ad.plot(df['advancement'][:i])
 
             #         ax = plt.subplot2grid((2,2), (1, 0), colspan=1, rowspan=1)
-            patch = cv2.imread(self.image_dir + row.loc['image_path'])
+            patch = cv2.imread(self.image_dir + row.loc['images'])
             patch = cv2.cvtColor(patch, cv2.COLOR_BGR2GRAY)
 
             ax_patch = plt.subplot2grid((2, 2), (1, 0), colspan=1, rowspan=1)
