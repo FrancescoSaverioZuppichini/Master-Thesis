@@ -50,7 +50,7 @@ class ReadDataframeFilenameAndHm():
     def __call__(self, data):
         idx, row = data
         df, hm = open_df_and_hm_from_meta_row(row, self.base_dir, self.hm_dir)
-
+        df['height'] = row['height']
         return df, hm, row['filename']
 
 class ParseDataframe(Handler):
@@ -276,9 +276,12 @@ class StorePatches():
 
         paths = []
         for idx, patch in enumerate(patches):
-            path = '{}/{}-{}.png'.format(self.out_dir, filename, idx)
+            patch_file_name = '{}-{}.png'.format(filename, idx)
+            path = '{}/{}'.format(self.out_dir, patch_file_name)
+            patch = patch * 255
+            patch = patch.astype(np.uint8)
             cv2.imwrite(path, patch)
-            paths.append(path)
+            paths.append(patch_file_name)
 
         df['images'] = paths
 
@@ -288,12 +291,14 @@ class StorePatches():
         return df, filename
 
 if __name__ == '__main__':
+    import os
 
-    DATASET_DIR = '/media/francesco/saetta/krock-dataset/test/'
+    DATASET_DIR = '/media/francesco/saetta/krock-dataset/train/'
     N_WORKERS = 16
 
     base_bags_dir = DATASET_DIR + '/bags/'
     # base_bags_dir = '/home/francesco/Desktop/test/'
+    DATASET_DIR = '/media/francesco/saetta/krock-dataset/test_with_obstacles/'
 
     # base_bags_dir = base_bags_dir
     out_csvs_dir = DATASET_DIR + '/csvs/'
@@ -303,42 +308,56 @@ if __name__ == '__main__':
 
 
     meta = pd.read_csv(base_bags_dir + 'meta.csv')
-    print(meta)
     # meta['height'] = 1  # set height to one for now
     #
     # # meta = meta[meta['map'] == 'bars1']
     # meta = meta.dropna()
-    # filename = meta['filename']
+    DATASET_DIR = '/media/francesco/saetta/krock-dataset/test_with_obstacles/'
+
+    base_bags_dir = DATASET_DIR + '/bags/'
+    meta = pd.DataFrame(data={'filename' : ['1'], 'map' : ['wall'], 'height': [1]})
+    filename = meta['filename']
     #
-    # print(filename)
+    print(meta)
+
+    os.makedirs(out_csvs_dir, exist_ok=True)
+    os.makedirs(out_parsed_csvs_dir, exist_ok=True)
+
+    convert_bags2dfs_and_store = MultiThreadWrapper(N_WORKERS, Compose([
+        # lambda x: rosbag_pandas.bag_to_dataframe(x),
+        Bags2Dataframe(base_bags_dir),
+        StoreDataframeKeepingSameName(out_csvs_dir)]))
+
+
+    read_and_parse_dfs =  MultiThreadWrapper(N_WORKERS, Compose([
+        ReadDataframeFilenameAndHm(out_csvs_dir, '/media/francesco/saetta/krock-dataset/test_with_obstacles/'),
+        ParseDataframe(),
+        AddHMcoordinates(),
+        CleanDataframe(),
+        drop_uselesss_columns,
+        StoreDataframeKeepingSameName(out_parsed_csvs_dir)
+    ]))
     #
-    # convert_bags2dfs_and_store = MultiThreadWrapper(N_WORKERS, Compose([
-    #     Bags2Dataframe(base_bags_dir),
-    #     StoreDataframeKeepingSameName(out_csvs_dir)]))
+    dfs_from_bags = convert_bags2dfs_and_store( meta['filename'])
     #
-    # save_dfs_from_bags = MultiThreadWrapper(N_WORKERS, StoreDataframeKeepingSameName(out_csvs_dir))
-    #
-    # read_and_parse_dfs =  MultiThreadWrapper(N_WORKERS, Compose([
-    #     ReadDataframeFilenameAndHm(out_csvs_dir, '/home/francesco/Documents/Master-Thesis/core/maps/test/'),
-    #     ParseDataframe(),
-    #     AddHMcoordinates(),
-    #     CleanDataframe(),
-    #     drop_uselesss_columns,
-    #     StoreDataframeKeepingSameName(out_parsed_csvs_dir)
-    # ]))
+    parsed_dfs = read_and_parse_dfs(meta.iterrows())
+
+
     # #
-    # # dfs_from_bags = convert_bags2dfs_and_store(filename)
-    # #
-    # parsed_dfs = read_and_parse_dfs(meta.iterrows())
-    # #
-    patches_out_dir = DATASET_DIR + '/patches'
+    PATCH_SIZE = 50 * 2 + 2 * 7
+    window = 50 * 1
+    print('[INFO] window={}'.format(window))
+    patches_out_dir = DATASET_DIR + '/patches/{}/'.format(PATCH_SIZE)
     meta_df_out_dir = DATASET_DIR + '/csvs_patches/'
-    #
+
+    os.makedirs(patches_out_dir, exist_ok=True)
+    os.makedirs(meta_df_out_dir, exist_ok=True)
+
     extract_patches = MultiThreadWrapper(N_WORKERS, Compose([
         ReadDataframeFilenameAndHm(out_parsed_csvs_dir,
-                                   '/home/francesco/Documents/Master-Thesis/core/maps/test/'),
-        AddAdvancement(50 * 3),
-        ExtractPatches(patch_size=88),
+                                   '/media/francesco/saetta/krock-dataset/test_with_obstacles/'),
+        AddAdvancement(window),
+        ExtractPatches(patch_size=PATCH_SIZE),
         StorePatches(patches_out_dir, meta_df_out_dir)
 
     ]))

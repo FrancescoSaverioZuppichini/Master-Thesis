@@ -44,19 +44,20 @@ def train_and_evaluate(params, train=True, load_model=None):
     criterion = CrossEntropyFlat() if params['tr'] is not None else MSELossFlat()
 
     train_dl, val_dl, test_dl = get_dataloaders(
-        meta_path = '/media/francesco/saetta/krock-dataset/train/bags/meta.csv',
-        train_root = '/media/francesco/saetta/krock-dataset/train/csvs_parsed/',
+        # meta_path = '/media/francesco/saetta/krock-dataset/train/bags/meta.csv',
+        train_root = '/media/francesco/saetta/krock-dataset/train/',
         hm_root= '/home/francesco/Documents/Master-Thesis/core/maps/train/',
         time_window=params['time_window'],
         patch_size=params['patch_size'],
-        test_meta='/media/francesco/saetta/krock-dataset/test/bags/meta.csv',
-        test_root='/media/francesco/saetta/krock-dataset/test/csvs_parsed/',
+        # test_meta='/media/francesco/saetta/krock-dataset/test/bags/meta.csv',
+        test_root='/media/francesco/saetta/krock-dataset/test/',
         test_hm_root='/home/francesco/Documents/Master-Thesis/core/maps/test/',
         # val_root='/media/francesco/saetta/{}/val/'.format(params['dataset']),
+        generate=False,
         val_size = params['val_size'],
         train_transform=get_transform(should_aug=params['data-aug']),
         val_transform=get_transform(scale=1, should_aug=False),
-        test_transform=get_transform(scale=10, should_aug=False),
+        test_transform=get_transform(scale=1, should_aug=False),
         num_samples=params['num_samples'],
         batch_size=params['batch_size'],
         num_workers=16,
@@ -142,12 +143,12 @@ def train_and_evaluate(params, train=True, load_model=None):
             experiment.log_metric("test_loss_from_roc_auc", loss)
 
 
-
+    print(model_name)
     del learner.model
     del learner
 
 if __name__ == '__main__':
-    params = {'epochs': 10,
+    params = {'epochs': 20,
               'lr': 0.001,
               'batch_size': 128,
               # 'model': 'omar',
@@ -157,18 +158,17 @@ if __name__ == '__main__':
               'sampler': '',
               'num_samples': None,
               'sampler_type': 'random',
-              'data-aug': True,
+              'data-aug': False,
               'optim': 'sgd',
-              'info': '',
+              'info': 'height=1',
               'tr': 0.45,
               'more_than': 0,
-              'down_sampling': 2,
-              'time_window': 50 * 3,
+              'down_sampling': None,
+              'time_window': 150,
               'only_forward': False,
-              'patch_size': 88  }
+              'patch_size': 92  }
 
-
-    for _ in range(4):
+    for _ in range(2):
         train_and_evaluate(params)
 
     # params['resize'] = None

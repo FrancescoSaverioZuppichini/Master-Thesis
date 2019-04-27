@@ -22,7 +22,7 @@ def make_env(map, args):
     if args.engine == 'webots':
         if args.robot == 'krock':
             height = args.height
-            # height = random.randint(1,3)
+            # height = random.randint(2,5)
             # makedirs(bags_map_dir, exist_ok=True)
             env = KrockWebotsEnv.from_image(
                 map,

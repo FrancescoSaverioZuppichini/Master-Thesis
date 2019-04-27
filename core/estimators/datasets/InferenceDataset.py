@@ -11,6 +11,7 @@ import numpy as np
 from torch.utils.data import Dataset
 from torchvision.transforms.functional import rotate
 from skimage.util.shape import view_as_windows
+from PIL import Image
 
 class InferenceDataset(Dataset):
     """
@@ -20,6 +21,7 @@ class InferenceDataset(Dataset):
     def __init__(self, hm_path, patch_size=88, step=1, transform=None, rotate=None, debug=False):
         self.hm = cv2.imread(hm_path)
         self.hm = cv2.cvtColor(self.hm, cv2.COLOR_BGR2GRAY)
+        # self.temp = imutils.rotate(self.hm, rotate)
 
         self.images = view_as_windows(self.hm, (patch_size, patch_size), step)
         self.images_shape = self.images.shape
@@ -38,9 +40,16 @@ class InferenceDataset(Dataset):
 
     def __getitem__(self, item):
         img = self.images[item]
+
+
         if self.debug: self.show_patch(img, 'original')
 
-        if self.rotate is not None: img = imutils.rotate(img, self.rotate)
+        if self.rotate is not None:
+            img = np.array(Image.fromarray(img).rotate(self.rotate))
+
+        img = img.astype(np.float32)
+        img /= 255
+
         if self.transform is not None: img = self.transform(img)
 
         if self.debug: self.show_patch(img, 'transform')
@@ -108,7 +117,8 @@ class InferenceDataset(Dataset):
         texture = np.zeros(self.hm.shape)
 
         fig = plt.figure()
-        sns.heatmap(imutils.rotate(self.hm, self.rotate))
+        hm_rot = np.array(Image.fromarray(self.hm).rotate(self.rotate))
+        sns.heatmap(hm_rot)
         plt.title('rotation = {}'.format(self.rotate))
         plt.show()
 
@@ -120,7 +130,6 @@ class InferenceDataset(Dataset):
         j = 0
 
         pbar = tqdm.tqdm(total=self.images.shape[0])
-
         counter = np.zeros_like(texture)
         counter += 0.00001
         for x in range(0, w, self.step):
@@ -128,16 +137,10 @@ class InferenceDataset(Dataset):
             for y in range(self.step, h, self.step):
                 try:
                     pred = predictions[i, j]
-                    out = outputs[i,j]
+                    out = outputs[i, j]
                     is_traversable = pred == 1
                     # TODO understand why they are swapped
-                    if is_traversable:
-                        texture[y:y + self.patch_size, x: x + self.patch_size] += out[1]
-                        counter[y:y + self.patch_size, x: x + self.patch_size] += 1
-                    # if not is_traversable:
-                    #     # counter[y:y + self.patch_size, x: x + self.patch_size] += 1
-                    #     texture[y:y + self.patch_size, x: x + self.patch_size] -= out[0]
-                    #     counter[y:y + self.patch_size, x: x + self.patch_size] += 1
+                    texture[y:y + self.patch_size, x: x + self.patch_size] += out[1]
 
                     i += 1
                     pbar.update(1)
@@ -147,19 +150,25 @@ class InferenceDataset(Dataset):
 
         pbar.close()
 
-        # texture /= counter
-
-        # texture[texture < 0] = 0
         texture = cv2.normalize(texture, None, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
+
+
+        # texture = imutils.rotate(texture, -self.rotate)
 
         fig = plt.figure()
         sns.heatmap(texture)
         plt.show()
-        texture = (texture * 255).astype(np.uint8)
-        # TODO pass as parameters
+
         path = '/home/francesco/Documents/Master-Thesis/resources/assets/textures/{}-{}.png'.format(name, self.rotate)
 
+        texture = (texture * 255).astype(np.uint8)
         cv2.imwrite(path, texture)
 
         return path
 
+
+if __name__ == '__main__':
+    ds = InferenceDataset('../../maps/test/querry-big-10.png', patch_size=1500, rotate=90, debug=True, step=100)
+
+    ds[0]
+    ds[1]
