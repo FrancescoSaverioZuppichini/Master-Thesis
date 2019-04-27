@@ -94,7 +94,7 @@ class Patch():
     def from_hms(cls, hms):
         return [Patch.from_hm(hm) for hm in hms]
 
-    def store(self, out_path):
+    def save(self, out_path):
         cv2.imwrite(out_path, self.to_gray())
 
     def add_texture(self, tex):
@@ -181,14 +181,26 @@ class HolesPatch(BumpsPatch):
         return self.hm
 
 
-class RampPatch(BumpsPatch):
-    def __init__(self, shape, strength=1, orientation=-1):
-        super().__init__(shape, strength=strength, size=(2, 1), resolution=(2, 1))
-        self.orientation = orientation
+class RampPatch(Patch):
+    def __init__(self, shape, strenght=1, direction='up'):
+        super().__init__(shape)
+        self.strenght = strenght
+        self.direction = direction
 
     def make(self):
-        self.hm = self.orientation * super().make()
+        factors = np.linspace(0, self.strenght, self.hm.shape[0])
+        if self.direction == 'down': factors *= -1
+
+        self.hm = self.hm + factors
         return self.hm
+
+#
+p = WallPatch((513, 513), back=False, offset=513//2 + 2)
+p.hm[220:224] = 0.1
+p()
+
+p.plot2d()
+p.save('/media/francesco/saetta/krock-dataset/test_with_obstacles/wall.png')
 
 
 # hm = cv2.imread(
