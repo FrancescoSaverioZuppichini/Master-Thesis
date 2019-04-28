@@ -37,7 +37,7 @@ def train_and_evaluate(params, train=True, load_model=None):
     # model = OmarCNN()
     model = zoo[params['model']]
     # print(model)
-    summary(model.cuda(), (1, params['patch_size'], params['patch_size']))
+    # summary(model.cuda(), (1, params['patch_size'], params['patch_size']))
 
     pprint.pprint(params)
 
@@ -161,30 +161,21 @@ if __name__ == '__main__':
               'data-aug': False,
               'optim': 'sgd',
               'info': 'height=1',
-              'tr': 0.45,
-              'more_than': 0,
-              'down_sampling': None,
-              'time_window': 150,
+              'tr': 0.2,
+              'more_than': None,
+              'down_sampling': 2,
+              'time_window': 50 * 2,
               'only_forward': False,
-              'patch_size': 92  }
+              'patch_size': 0.66  }
 
-    for _ in range(2):
+    for _ in range(5):
         train_and_evaluate(params)
 
-    # params['resize'] = None
-    # params['num_samples'] = 50000
-    #
-    # for _ in range(10):
-    #     train_and_evaluate(params)
-    #
-    # params['resize'] = None
-    # params['num_samples'] = None
-    # params['downsample_factor'] = 2
-    # for _ in range(10):
-    #     train_and_evaluate(params)
-    #
-    #
-    #
+    params['more_than'] = 0
+
+    for _ in range(5):
+        train_and_evaluate(params)
+
 
 
 
