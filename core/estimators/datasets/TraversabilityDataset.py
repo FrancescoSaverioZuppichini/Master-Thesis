@@ -164,18 +164,22 @@ class TraversabilityDataset(Dataset):
                  more_than=None,
                  down_sampling=None,
                  ):
-        self.df = df
         self.hm = hm
         self.patches_dir = patches_dir
         self.patch_size = patch_size
         self.tr = tr
         self.transform = transform
-        if down_sampling is not None: self.df = self.df[::down_sampling]
+        self.df = df
+
         # self.generate = generate
         self.should_generate_paths = not 'images' in df
 
         self.preprocess_df = Compose([AddAdvancement(time_window)])
-        self.df = self.preprocess_df((df, None, None))[0]
+        self.df = self.preprocess_df((self.df, None, None))[0]
+
+        if down_sampling is not None:
+            self.df = self.df[::down_sampling]
+
 
         if more_than is not None: self.df = self.df[self.df['advancement'] >= more_than]
         if tr is not None: self.df["label"] = (self.df["advancement"] > tr)
@@ -322,8 +326,13 @@ def get_dataloaders(train_root,
 
     # if generate:
     train_meta = pd.read_csv(train_root + '/bags/meta.csv')
+
+
     train_meta = train_meta[train_meta['height'] == 1]
     # train_meta = train_meta.drop(train_meta[(train_meta['map'] == 'slope_rocks1') & (train_meta['height'] == 1)].index)
+
+    print('[INFO] {} simulations for training.'.format(len(train_meta)))
+
     if val_root is None:
         train_meta = train_meta.sample(frac=1, random_state=0)
         val_size = int((len(train_meta) // 100) * val_size)
@@ -349,41 +358,9 @@ def get_dataloaders(train_root,
     train_ds = ConcatDataset(datasets[val_size:])
     val_ds = ConcatDataset(datasets[:val_size])
 
-    # val_root = train_root if val_root is None else val_root
-    # val_ds = FastAIImageFolder.from_meta(val_meta,
-    #                                      val_root + '/csvs_patches/',
-    #                                      hm_root,
-    #                                      patches_dir='{}/patches/{}/'.format(val_root, patch_size),
-    #                                      time_window=time_window,
-    #                                      transform=val_transform,
-    #                                      tr=tr,
-    #                                      patch_size=patch_size)
-
-    # if val_root is None:
-    #     if generate:
-    #         val_ds = dataset_constructor(
-    #                                    val_data,
-    #                                    hm_root,
-    #                                    time_window=time_window,
-    #                                    transform=val_transform,
-    #                                    tr=tr,
-    #                                    patch_size=patch_size,
-    #                                                )
-    #     else:
-    #         train_size = int(len(train_ds) - ((len(train_ds)// 100) * val_size))
-    #
-    #         train_ds, val_ds = random_split(train_ds, [train_size, len(train_ds) - train_size])
-
-    # else:
-    #     val_ds = dataset_constructor(root=val_root,
-    #                                          transform=val_transform,
-    #                                          tr=tr)
-
     if num_samples is not None:
         print('[INFO] Sampling')
         train_dl = DataLoader(train_ds,
-                              # sampler=ImbalancedDatasetSampler(train_ds, num_samples=num_samples),
-
                               sampler=RandomSampler(train_ds, num_samples=num_samples, replacement=True),
                               *args, **kwargs)
     else:
@@ -430,8 +407,9 @@ if __name__ == '__main__':
 
     start = time.time()
     meta = pd.read_csv('/media/francesco/saetta/krock-dataset/train/bags/meta.csv')
-    # meta = meta[meta['height'] == 1]
     meta = meta[meta['map'] == 'bars1']
+    print('[INFO] {} simulations for training.'.format(len(meta)))
+    # meta = meta[meta['map'] == 'bars1']
     print(meta)
     concat_ds = TraversabilityDataset.from_meta(meta,
                                                 '/media/francesco/saetta/krock-dataset/train/csvs_patches/',
@@ -460,7 +438,7 @@ if __name__ == '__main__':
         print(y)
     #
     #     print(y)
-    dl = DataLoader(concat_ds, batch_size=5, pin_memory=True, num_workers=1, shuffle=True)
+    dl = DataLoader(concat_ds, batch_size=5, pin_memory=True, num_workers=1, shuffle=False)
     #
     # for batch in dl:
     #     break
@@ -468,12 +446,12 @@ if __name__ == '__main__':
 
     # visualise(concat_ds)
     visualise(dl)
-    visualise(dl)
-    visualise(dl)
-    visualise(dl)
-    visualise(dl)
-    visualise(dl)
-    visualise(dl)
+    # visualise(dl)
+    # visualise(dl)
+    # visualise(dl)
+    # visualise(dl)
+    # visualise(dl)
+    # visualise(dl)
     # visualise(dl)
     # visualise(dl)
     # visualise(dl)

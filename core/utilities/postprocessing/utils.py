@@ -7,6 +7,7 @@ import skimage.io
 import skimage.feature
 import skimage.novice
 import skimage.transform
+import math
 
 import pandas as pd
 import numpy as np
@@ -115,7 +116,30 @@ def to_hm_coordinates(row, hm, res, tr=[0, 0]):
     return pd.Series([xs / res, ys / res])
 
 
-def hmpatch(hm, x, y, alpha, edge, scale=1):
+# def hmpatch(hm, x, y, alpha, edge, scale=1):
+#     """
+#     Cutout a patch from the image, centered on (x,y), rotated by alpha
+#     degrees (0 means bottom in hm remains bottom in patch, 90 means bottom in hm becomes right in patch),
+#     with a specified edge size (in pixels) and scale (relative).
+#     :param hm:
+#     :param x:
+#     :param y:
+#     :param alpha:
+#     :param edge:
+#     :param scale:
+#     :return:
+#     """
+#     tf1 = skimage.transform.SimilarityTransform(translation=[-x, -y])
+#     tf2 = skimage.transform.SimilarityTransform(rotation=np.deg2rad(alpha))
+#     tf3 = skimage.transform.SimilarityTransform(scale=scale)
+#     tf4 = skimage.transform.SimilarityTransform(translation=[+edge / 2, +edge / 2])
+#     tf = (tf1 + (tf2 + (tf3 + tf4))).inverse
+#
+#     corners = tf(np.array([[0, 0], [1, 0], [1, 1], [0, 1], [0.5, 0.5]]) * edge)
+#     patch = skimage.transform.warp(hm, tf, output_shape=(edge, edge), mode="edge")
+#     return patch, corners
+
+def hmpatch(hm, x, y, alpha, edge, scale=1, offset=(0,0)):
     """
     Cutout a patch from the image, centered on (x,y), rotated by alpha
     degrees (0 means bottom in hm remains bottom in patch, 90 means bottom in hm becomes right in patch),
@@ -131,9 +155,30 @@ def hmpatch(hm, x, y, alpha, edge, scale=1):
     tf1 = skimage.transform.SimilarityTransform(translation=[-x, -y])
     tf2 = skimage.transform.SimilarityTransform(rotation=np.deg2rad(alpha))
     tf3 = skimage.transform.SimilarityTransform(scale=scale)
-    tf4 = skimage.transform.SimilarityTransform(translation=[+edge / 2, +edge / 2])
+    tf4 = skimage.transform.SimilarityTransform(translation=[+(edge / 2) + offset[0],
+                                                             +(edge / 2) + offset[1]])
     tf = (tf1 + (tf2 + (tf3 + tf4))).inverse
 
     corners = tf(np.array([[0, 0], [1, 0], [1, 1], [0, 1], [0.5, 0.5]]) * edge)
-    patch = skimage.transform.warp(hm, tf, output_shape=(edge, edge), mode="edge")
+    patch = skimage.transform.warp(hm, tf, output_shape=(edge + offset[1], edge + offset[0]), mode="edge")
     return patch, corners
+
+
+def krock_hmpatch(hm, x, y, alpha, max_advancement, res=0.02, debug=False):
+    missing_krock_body = KrockDims.KROCK_SIZE - KrockDims.HEAD_OFFSET
+    patch_size = (max_advancement + KrockDims.HEAD_OFFSET) / res * 2
+
+    if debug:
+        print('[INFO] patch_size = {}'.format(patch_size))
+        print('[INFO] missing_krock_body = {}'.format(missing_krock_body))
+
+    offset = (math.ceil((missing_krock_body - max_advancement) / res), 0)
+    if debug: print('[INFO] offset = {}'.format(offset))
+
+    return  hmpatch(hm, x, y, alpha, math.ceil(patch_size), offset=offset)
+
+class KrockDims:
+    KROCK_SIZE = 0.85
+    HEAD_OFFSET = 0.14
+
+
