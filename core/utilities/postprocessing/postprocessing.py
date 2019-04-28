@@ -17,7 +17,7 @@ from pypeln import thread as th
 from utilities.pipeline import Compose, Handler, Combine, MultiThreadWrapper
 from tf.transformations import euler_from_quaternion
 from utilities.postprocessing.utils import read_image
-from utilities.postprocessing.utils import hmpatch, krock_hmpatch
+from utilities.postprocessing.utils import KrockPatchExtractStrategy, PatchExtractStrategy
 
 class StoreDataframeKeepingSameName():
     def __init__(self, out_dir):
@@ -250,9 +250,8 @@ class ReadDataframeAndStoreName():
         return df
 
 class ExtractPatches():
-    def __init__(self, advancement):
-        # self.patch_size = patch_size
-        self.advancement = advancement
+    def __init__(self, patch_extract_stategy):
+        self.patch_extract_stategy = patch_extract_stategy
 
     def __call__(self, data):
         df, hm, filename = data
@@ -260,8 +259,7 @@ class ExtractPatches():
         patches = []
 
         for (idx, row) in df.iterrows():
-            patch = krock_hmpatch(hm, row["hm_x"], row["hm_y"], np.rad2deg(row['pose__pose_e_orientation_z']),
-                            max_advancement=self.advancement)[0]
+            patch = self.patch_extract_stategy(hm, row["hm_x"], row["hm_y"], np.rad2deg(row['pose__pose_e_orientation_z']))[0]
             patches.append(patch)
 
         return df, patches, filename
@@ -349,7 +347,7 @@ if __name__ == '__main__':
         ReadDataframeFilenameAndHm(out_parsed_csvs_dir,
                                    '/home/francesco/Documents/Master-Thesis/core/maps/test/'),
         AddAdvancement(window),
-        ExtractPatches(ADVANCEMENT),
+        ExtractPatches(patch_extract_stategy=KrockPatchExtractStrategy(max_advancement=ADVANCEMENT)),
         StorePatches(patches_out_dir, meta_df_out_dir)
 
     ]))
