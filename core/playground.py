@@ -11,7 +11,7 @@ from estimators.models import *
 from estimators.utils import get_learner, get_probs_and_labels_from_preds, read_patch, get_patches_form_df, \
     load_model_from_name, \
     device
-from estimators.datasets.TraversabilityDataset import TraversabilityDataset, get_transform, PatchesDataset
+from estimators.data.TraversabilityDataset import TraversabilityDataset, get_transform, PatchesDataset
 
 from os import path
 from Config import Config

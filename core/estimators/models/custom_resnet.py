@@ -42,7 +42,7 @@ class MicroResnet(ResNet):
     def micro(cls, in_channel, n=5, *args, **kwargs):
         return cls(in_channel=in_channel, depths=[n, n, n, n],
                    blocks_sizes=[(16, 32), (32, 64), (64, 128)],
-                   n_classes=2, *args, **kwargs)
+                   n_classes=1, *args, **kwargs)
     
     @classmethod
     def micro3(cls, in_channel, n=5, *args, **kwargs):

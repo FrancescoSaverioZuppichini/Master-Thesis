@@ -2,7 +2,7 @@ import glob
 
 import pandas as pd
 
-from estimators.datasets import *
+from estimators.data import *
 from estimators.utils import visualise
 from torch.utils.data import DataLoader, random_split, RandomSampler, ConcatDataset, WeightedRandomSampler
 

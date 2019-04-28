@@ -340,7 +340,8 @@ if __name__ == '__main__':
     patches_out_dir = DATASET_DIR + '/patches/{}/'.format(ADVANCEMENT)
     meta_df_out_dir = DATASET_DIR + '/csvs_patches/'
 
-    os.makedirs(patches_out_dir, exist_ok=True)
+    os.makedirs(patches_out_dir, exist_devrgu18
+    =True)
     os.makedirs(meta_df_out_dir, exist_ok=True)
 
     extract_patches = MultiThreadWrapper(N_WORKERS, Compose([

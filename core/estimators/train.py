@@ -15,9 +15,9 @@ from fastai.train import Learner, DataBunch, \
     EarlyStoppingCallback, \
     SaveModelCallback, DatasetType
 import fastai
-from fastai.metrics import accuracy, dice
+from fastai.metrics import accuracy
 from fastai.layers import CrossEntropyFlat, MSELossFlat
-from estimators.datasets.TraversabilityDataset import get_dataloaders, get_transform, TraversabilityDataset
+from estimators.data import get_dataloaders, get_transform, TraversabilityDataset
 from estimators.models import zoo
 from estimators.callbacks import ROC_AUC, Timer
 
@@ -26,11 +26,6 @@ torch.backends.cudnn.benchmark = True
 # torch.backends.cudnn.deterministic = True
 # np.random.seed(0)
 # if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
-
-def custom_accuracy(y_pred, y_true, thresh: float = 0.01):
-    distance = (y_pred - y_true).abs()
-    acc = (distance < thresh).float().mean()
-    return acc
 
 
 def train_and_evaluate(params, train=True, load_model=None):
@@ -91,7 +86,9 @@ def train_and_evaluate(params, train=True, load_model=None):
     experiment.log_parameters(params)
     experiment.log_metric("timestamp", timestamp)
 
-    accuracy = fastai.metrics.accuracy if params['tr'] is not None else custom_accuracy
+    metrics = []
+
+    if params['tr'] is not None: metrics = [accuracy, ROC_AUC()]
 
     learner = Learner(data=data,
                       model=model,
@@ -99,28 +96,25 @@ def train_and_evaluate(params, train=True, load_model=None):
                       model_dir=model_dir,
                       loss_func=criterion,
                       opt_func=partial(torch.optim.SGD, momentum=0.95, weight_decay=1e-4),
-                      metrics=[accuracy, ROC_AUC(), Timer()])
+                      metrics=[*metrics, Timer()])
 
     model_name_roc_auc = 'roc_auc'
     model_name_acc = 'accuracy'
     model_name_loss = 'loss'
 
     callbacks = [ReduceLROnPlateauCallback(learn=learner, patience=4),
-                 EarlyStoppingCallback(learn=learner, patience=6),
-                 SaveModelCallback(learn=learner, name=model_name_roc_auc, monitor='roc_auc'),
-                 SaveModelCallback(learn=learner, name=model_name_acc, monitor='accuracy'),
-                 SaveModelCallback(learn=learner, name=model_name_loss)]
+                 EarlyStoppingCallback(learn=learner, patience=6)]
+
+    if params['tr'] is not None:
+        callbacks.append(SaveModelCallback(learn=learner, name=model_name_roc_auc, monitor='roc_auc'))
+        callbacks.append(SaveModelCallback(learn=learner, name=model_name_acc, monitor='accuracy'))
+    callbacks.append(SaveModelCallback(learn=learner, name=model_name_loss))
 
     if train:
-        # try:
         with experiment.train():
             learner.fit(epochs=params['epochs'], lr=params['lr'],
                         callbacks=callbacks)  # SaveModelCallback load the best model after training!
-
-        # except Exception as e:
-        #     print(e)
-        #     pass
-
+    if params['tr'] is not None:
         with experiment.test():
             learner.load(model_name_loss)
             loss, acc, roc = learner.validate(data.test_dl, metrics=[accuracy, ROC_AUC()])
@@ -142,6 +136,12 @@ def train_and_evaluate(params, train=True, load_model=None):
             experiment.log_metric("roc_auc-from-best", roc.item())
             experiment.log_metric("test_loss_from_roc_auc", loss)
 
+    else:
+        with experiment.test():
+            learner.load(model_name_loss)
+            loss = learner.validate(data.test_dl, metrics=[accuracy])
+            print(loss)
+            experiment.log_metric("test_acc_from_loss", loss)
 
     print(model_name)
     del learner.model
@@ -160,17 +160,19 @@ if __name__ == '__main__':
               'sampler_type': 'random',
               'data-aug': False,
               'optim': 'sgd',
-              'info': 'height=1',
-              'tr': 0.2,
+              'info': 'all height',
+              'tr': None,
+              'problem' : 'regression',
               'more_than': None,
               'down_sampling': 2,
               'time_window': 50 * 2,
               'only_forward': False,
               'patch_size': 0.66  }
 
-    for _ in range(5):
-        train_and_evaluate(params)
+    # for _ in range(5):
+    #     train_and_evaluate(params)
 
+    params['data-aug'] = True
     params['more_than'] = 0
 
     for _ in range(5):

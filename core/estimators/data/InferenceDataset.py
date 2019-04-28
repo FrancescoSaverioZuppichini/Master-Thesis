@@ -12,20 +12,23 @@ from torch.utils.data import Dataset
 from torchvision.transforms.functional import rotate
 from skimage.util.shape import view_as_windows
 from PIL import Image
+from estimators.data.utils import hm_patch_generator
 
 class InferenceDataset(Dataset):
     """
     This class creates a dataset from an height map that can be used during inference
     to test the model.
     """
-    def __init__(self, hm_path, patch_size=88, step=1, transform=None, rotate=None, debug=False):
+    def __init__(self, hm_path, patch_size=88, step=1, max_advancement=1, transform=None, rotate=None, debug=False, res=0.02):
         self.hm = cv2.imread(hm_path)
         self.hm = cv2.cvtColor(self.hm, cv2.COLOR_BGR2GRAY)
         # self.temp = imutils.rotate(self.hm, rotate)
+        self.images = hm_patch_generator(self.hm, step, rotate, max_advancement=max_advancement, res=res)
 
-        self.images = view_as_windows(self.hm, (patch_size, patch_size), step)
-        self.images_shape = self.images.shape
-        self.images = self.images.reshape(-1, patch_size, patch_size)
+        # self.images = view_as_windows(self.hm, (patch_size, patch_size), step)
+        self.images_shape = (self.hm.shape[0] // step, self.hm.shape[1] // step)
+        # self.images = self.images.reshape(-1, patch_size, patch_size)
+
         self.transform = transform
         self.step = step
         self.patch_size = patch_size
@@ -39,16 +42,16 @@ class InferenceDataset(Dataset):
         plt.show()
 
     def __getitem__(self, item):
-        img = self.images[item]
-
+        # img = self.images[item]
+        img = next(self.images)
 
         if self.debug: self.show_patch(img, 'original')
 
-        if self.rotate is not None:
-            img = np.array(Image.fromarray(img).rotate(self.rotate))
+        # if self.rotate is not None:
+        #     img = np.array(Image.fromarray(img).rotate(self.rotate))
 
         img = img.astype(np.float32)
-        img /= 255
+        # img /= 255
 
         if self.transform is not None: img = self.transform(img)
 
@@ -57,7 +60,7 @@ class InferenceDataset(Dataset):
         return img, torch.tensor(0)
 
     def __len__(self):
-        return len(self.images)
+        return self.images_shape[0] * self.images_shape[1]
 
     def iter_patches(self, predictions, func):
         w, h = self.hm.shape
@@ -129,7 +132,7 @@ class InferenceDataset(Dataset):
         w, h = self.hm.shape
         j = 0
 
-        pbar = tqdm.tqdm(total=self.images.shape[0])
+        pbar = tqdm.tqdm(total=self.__len__())
         counter = np.zeros_like(texture)
         counter += 0.00001
         for x in range(0, w, self.step):
@@ -140,7 +143,8 @@ class InferenceDataset(Dataset):
                     out = outputs[i, j]
                     is_traversable = pred == 1
                     # TODO understand why they are swapped
-                    texture[y:y + self.patch_size, x: x + self.patch_size] += out[1]
+                    texture[y - self.patch_size[0] // 2 :y + self.patch_size[0] // 2,
+                            x - self.patch_size[1]//2: x + self.patch_size[1] // 2] += out[1]
 
                     i += 1
                     pbar.update(1)
@@ -168,7 +172,5 @@ class InferenceDataset(Dataset):
 
 
 if __name__ == '__main__':
-    ds = InferenceDataset('../../maps/test/querry-big-10.png', patch_size=1500, rotate=90, debug=True, step=100)
-
+    ds = InferenceDataset('../../maps/test/querry-big-10.png', patch_size=(80,83), rotate=90, debug=True, step=10, max_advancement=0.66)
     ds[0]
-    ds[1]
