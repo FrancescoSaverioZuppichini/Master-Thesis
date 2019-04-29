@@ -17,11 +17,13 @@ model_dir = Config.BEST_MODEL_DIR
 # vis = DataFrameVisualization.from_root(test_root)
 # vis(tr=0.45)
 
-learner, _ = get_learner(model_name, model_dir, callbacks=[], root=test_root, tr=0.45,
-                         transform=get_transform(scale=1),
-                         time_window=50 * 3,
-                         patch_size=88)
+learner, dl = get_learner(model_name, model_dir, callbacks=[], root=test_root, tr=0.2,
+                         patches_dir='/media/francesco/saetta/krock-dataset/test/patches/0.66/',
+                         transform=get_transform(scale=1, should_aug=False),
+                         time_window=50 * 2,
+                         patch_size=0.66)
 # learner.model.eval()
+print(len(dl))
 loss, acc, roc_auc = learner.validate(metrics=[accuracy, ROC_AUC()])
 
 interp = ClassificationInterpretation.from_learner(learner)

@@ -2,9 +2,9 @@ import torch
 
 from os import path
 from estimators.models import zoo
-from estimators.datasets.TraversabilityDataset import get_transform
+from estimators.data.transformations import get_transform
 from estimators.utils import get_learner
-from estimators.datasets.InferenceDataset import InferenceDataset
+from estimators.data.InferenceDataset import InferenceDataset
 from estimators.utils import get_probs_and_labels_from_preds
 from torch.nn.functional import softmax
 
@@ -30,16 +30,18 @@ class HeightMapInference():
         return path
 
     def for_all_rotation(self, *args, **kwargs):
-        for rotation in [0]:
+        for rotation in [90]:
             self(rotate=rotation, *args, **kwargs)
 
 hm_infer = HeightMapInference('../maps/test/querry-big-10.png',
-                              get_transform(None, scale=10),)
+                              get_transform(None, scale=20, debug=False),)
 
-model_dir = path.abspath('/home/francesco/Desktop/carino/vaevictis/data/microresnet#4-gate=3x3-n=1-se=True-no-shift-0.001-88-1556224482.701581')
+model_dir = path.abspath('/home/francesco/Desktop/carino/vaevictis/data/microresnet#4-gate=3x3-n=1-se=True-no-shift-0.001-0.66-1556484043.8083427')
 print(model_dir)
 
 hm_infer.for_all_rotation(model_dir,
-                       'microresnet#4-gate=3x3-n=1-se=True',
-                       step=3,
-                       patch_size=88)
+                          'microresnet#4-gate=3x3-n=1-se=True',
+                          step=10,
+                          max_advancement = 0.66,
+                        patch_size=(66, 76)
+                          )

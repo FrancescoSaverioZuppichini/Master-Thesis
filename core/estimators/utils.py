@@ -9,10 +9,24 @@ import cv2
 
 from torch.nn import Module
 from torch.utils.data import DataLoader
-from estimators.datasets.TraversabilityDataset import get_dataloaders, get_transform, TraversabilityDataset
+from estimators.data import *
 from estimators.models import zoo
 from fastai.train import Learner, DataBunch, DatasetType
 from torch.nn.functional import softmax
+
+
+def visualise(dl, n=10):
+    fig, axes = plt.subplots(nrows=1, ncols=5, figsize=(20, 4))
+
+    for (x, y) in dl:
+        for i, img, l in zip(range(5), x, y):
+            axes[i].set_title("{}".format(l))
+            sns.heatmap(img.numpy().squeeze(), ax=axes[i])
+
+        plt.show()
+        break
+        return
+
 
 def load_model(path: str, model: Module):
     state = torch.load(path)
