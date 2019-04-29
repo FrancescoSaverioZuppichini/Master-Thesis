@@ -291,7 +291,7 @@ class StorePatches():
 if __name__ == '__main__':
     import os
 
-    DATASET_DIR = '/media/francesco/saetta/krock-dataset/train/'
+    DATASET_DIR = '/media/francesco/saetta/krock-dataset/val/'
     N_WORKERS = 16
 
     base_bags_dir = DATASET_DIR + '/bags/'
@@ -320,7 +320,7 @@ if __name__ == '__main__':
 
 
     read_and_parse_dfs =  MultiThreadWrapper(N_WORKERS, Compose([
-        ReadDataframeFilenameAndHm(out_csvs_dir, '/home/francesco/Documents/Master-Thesis/core/maps/train/'),
+        ReadDataframeFilenameAndHm(out_csvs_dir, '/home/francesco/Documents/Master-Thesis/core/maps/val/'),
         ParseDataframe(),
         AddHMcoordinates(),
         CleanDataframe(),
@@ -345,7 +345,7 @@ if __name__ == '__main__':
 
     extract_patches = MultiThreadWrapper(N_WORKERS, Compose([
         ReadDataframeFilenameAndHm(out_parsed_csvs_dir,
-                                   '/home/francesco/Documents/Master-Thesis/core/maps/train/'),
+                                   '/home/francesco/Documents/Master-Thesis/core/maps/val/'),
         AddAdvancement(window),
         ExtractPatches(patch_extract_stategy=KrockPatchExtractStrategy(max_advancement=ADVANCEMENT)),
         StorePatches(patches_out_dir, meta_df_out_dir)

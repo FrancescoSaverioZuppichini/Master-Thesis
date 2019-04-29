@@ -1,9 +1,0 @@
-[0] Config.pm:354> INFO - This is Biber 2.7
-[0] Config.pm:357> INFO - Logfile is 'chapter1.blg'
-[35] biber-darwin:303> INFO - === Mon Apr 29, 2019, 17:17:41
-[55] Biber.pm:359> INFO - Reading 'chapter1.bcf'
-[130] Biber.pm:835> INFO - Found 10 citekeys in bib section 0
-[143] Biber.pm:3670> INFO - Processing section 0
-[156] Biber.pm:3840> INFO - Looking for bibtex format file 'bibliography.bib' for section 0
-[275] Utils.pm:180> ERROR - Cannot find 'bibliography.bib'!
-[276] Biber.pm:113> INFO - ERRORS: 1
