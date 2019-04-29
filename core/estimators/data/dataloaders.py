@@ -47,8 +47,8 @@ def get_dataloaders(train_root,
     if val_root is None:
         train_meta = train_meta.sample(frac=1, random_state=0)
         val_size = int((len(train_meta) // 100) * val_size)
-        # train_meta = shuffled_meta[val_size:]
-        # val_meta = shuffled_meta[:val_size]
+        train_meta = train_meta[val_size:]
+        val_meta = train_meta[:val_size]
     else:
         val_meta = pd.read_csv(val_root + '/bags/meta.csv')
 
@@ -64,10 +64,17 @@ def get_dataloaders(train_root,
                                            down_sampling=down_sampling
                                            )
 
-    # datasets = random.shuffle(train_ds.datasets)
-    datasets = train_ds.datasets
-    train_ds = ConcatDataset(datasets[val_size:])
-    val_ds = ConcatDataset(datasets[:val_size])
+    val_root = train_root if val_root is None else val_root
+
+    val_ds = FastAIImageFolder.from_meta(val_meta,
+                                           val_root + '/csvs_patches/',
+                                           hm_root,
+                                           patches_dir='{}/patches/{}/'.format(val_root, patch_size),
+                                           time_window=time_window,
+                                           transform=val_transform,
+                                           tr=tr,
+                                           patch_size=patch_size)
+
 
     if num_samples is not None:
         print('[INFO] Sampling')
@@ -101,6 +108,7 @@ def get_dataloaders(train_root,
 
 
 if __name__ == '__main__':
+    from estimators.data.TraversabilityDataset import TraversabilityDataset
     import time
 
     start = time.time()

@@ -333,15 +333,14 @@ if __name__ == '__main__':
 
 
     # #
-    ADVANCEMENT = 0.66
+    ADVANCEMENT = 1
     # PATCH_SIZE = 50 * 2 + 2 * 7
     window = 50 * 3
     print('[INFO] window={}'.format(window))
     patches_out_dir = DATASET_DIR + '/patches/{}/'.format(ADVANCEMENT)
     meta_df_out_dir = DATASET_DIR + '/csvs_patches/'
 
-    os.makedirs(patches_out_dir, exist_devrgu18
-    =True)
+    os.makedirs(patches_out_dir, exist_ok=True)
     os.makedirs(meta_df_out_dir, exist_ok=True)
 
     extract_patches = MultiThreadWrapper(N_WORKERS, Compose([

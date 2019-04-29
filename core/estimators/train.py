@@ -139,7 +139,7 @@ def train_and_evaluate(params, train=True, load_model=None):
     else:
         with experiment.test():
             learner.load(model_name_loss)
-            loss = learner.validate(data.test_dl, metrics=[accuracy])
+            loss = learner.validate(data.test_dl)
             print(loss)
             experiment.log_metric("test_acc_from_loss", loss)
 
@@ -154,26 +154,25 @@ if __name__ == '__main__':
               # 'model': 'omar',
               'val_size' : 10,
               'model': 'microresnet#4-gate=3x3-n=1-se=True',
-              'dataset': 'no-shift',
+              'dataset': '',
               'sampler': '',
               'num_samples': None,
               'sampler_type': 'random',
-              'data-aug': False,
+              'data-aug': True,
               'optim': 'sgd',
               'info': 'all height',
-              'tr': None,
-              'problem' : 'regression',
-              'more_than': None,
+              'tr': 0.2,
+              'problem' : 'classification',
+              'more_than': 0,
               'down_sampling': 2,
               'time_window': 50 * 2,
               'only_forward': False,
               'patch_size': 0.66  }
 
-    # for _ in range(5):
-    #     train_and_evaluate(params)
 
-    params['data-aug'] = True
-    params['more_than'] = 0
+
+    # params['data-aug'] = True
+    # params['more_than'] = 0
 
     for _ in range(5):
         train_and_evaluate(params)

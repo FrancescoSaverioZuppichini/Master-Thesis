@@ -203,11 +203,12 @@ class PatchExtractStrategy():
         tf1 = skimage.transform.SimilarityTransform(translation=[-x, -y])
         tf2 = skimage.transform.SimilarityTransform(rotation=np.deg2rad(alpha))
         tf3 = skimage.transform.SimilarityTransform(scale=scale)
-        tf4 = skimage.transform.SimilarityTransform(translation=[+edge / 2, +edge / 2])
+        tf4 = skimage.transform.SimilarityTransform(translation=[+(edge / 2) + offset[0] ,
+                                                                 +(edge / 2) + offset[1]])
         tf = (tf1 + (tf2 + (tf3 + tf4))).inverse
 
         corners = tf(np.array([[0, 0], [1, 0], [1, 1], [0, 1], [0.5, 0.5]]) * edge)
-        patch = skimage.transform.warp(hm, tf, output_shape=(edge, edge), mode="edge")
+        patch = skimage.transform.warp(hm, tf, output_shape=(edge + offset[1], edge + offset[0]), mode="edge")
         return patch, corners
 
 class KrockPatchExtractStrategy(PatchExtractStrategy):
@@ -219,7 +220,8 @@ class KrockPatchExtractStrategy(PatchExtractStrategy):
     def __call__(self, hm, x, y, alpha, res=0.02, debug=False):
         max_advancement = self.max_advancement
         missing_krock_body = KrockDims.KROCK_SIZE - KrockDims.HEAD_OFFSET
-        patch_size = (max_advancement + KrockDims.HEAD_OFFSET) / res * 2
+        # patch_size = (missing_krock_body + KrockDims.HEAD_OFFSET + max_advancement) / res
+        patch_size = (max_advancement) / res * 2
 
         if debug:
             print('[INFO] patch_size = {}'.format(patch_size))
@@ -227,7 +229,51 @@ class KrockPatchExtractStrategy(PatchExtractStrategy):
 
         offset = (math.ceil((missing_krock_body - max_advancement) / res), 0)
         if debug: print('[INFO] offset = {}'.format(offset))
+
         self.patch_size = math.ceil(patch_size)
-        return super().__call__(hm, x, y, alpha, offset=offset)
+
+        edge = self.patch_size
+        tf1 = skimage.transform.SimilarityTransform(translation=[-x, -y])
+        tf2 = skimage.transform.SimilarityTransform(rotation=np.deg2rad(alpha))
+        tf3 = skimage.transform.SimilarityTransform(scale=1)
+        tf4 = skimage.transform.SimilarityTransform(translation=[+(edge / 2) + offset[0],
+                                                                 +(edge / 2) + offset[1]])
+        tf = (tf1 + (tf2 + (tf3 + tf4))).inverse
+
+        corners = tf(np.array([[0, 0], [1, 0], [1, 1], [0, 1], [0.5, 0.5]]) * edge)
+        patch = skimage.transform.warp(hm, tf, output_shape=(edge + offset[1], edge + offset[0] + (KrockDims.HEAD_OFFSET // res)), mode="edge")
+
+        return patch, corners
 
 
+class KrockPatchExtractStrategyNumpy(KrockPatchExtractStrategy):
+    @staticmethod
+    def fill(im, x, y, value,  max_advancement, res=0.02):
+        missing_krock_body = KrockDims.KROCK_SIZE - KrockDims.HEAD_OFFSET
+        patch_size = (max_advancement) / res * 2
+        offset = (math.ceil((missing_krock_body - max_advancement) / res), 0)
+
+        patch_size = math.ceil(patch_size)
+
+        half = (patch_size // 2)
+        x,y = int(x), int(y)
+
+        im[x - half:x + half, int(y - half - offset[0] -  (KrockDims.HEAD_OFFSET // res)):y + half] += value
+
+        return im
+
+    def __call__(self, hm, x, y, alpha, res=0.02, debug=False):
+        max_advancement = self.max_advancement
+        missing_krock_body = KrockDims.KROCK_SIZE - KrockDims.HEAD_OFFSET
+        patch_size = (max_advancement) / res * 2
+        offset = (math.ceil((missing_krock_body - max_advancement) / res), 0)
+
+        patch_size = math.ceil(patch_size)
+
+        half = (patch_size // 2)
+        x,y = int(x), int(y)
+
+        patch = hm[x - half:x + half,
+                int(y - half - offset[0] -  (KrockDims.HEAD_OFFSET // res)):y + half ]
+
+        return patch, ()
