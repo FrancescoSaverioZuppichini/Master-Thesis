@@ -160,7 +160,7 @@ if __name__ == '__main__':
               'sampler_type': 'random',
               'data-aug': True,
               'optim': 'sgd',
-              'info': 'all height',
+              'info': 'all height also slope1',
               'tr': 0.2,
               'problem' : 'classification',
               'more_than': 0,

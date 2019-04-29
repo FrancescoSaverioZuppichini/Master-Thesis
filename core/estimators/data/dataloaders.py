@@ -40,7 +40,7 @@ def get_dataloaders(train_root,
 
 
     # train_meta = train_meta[train_meta['height'] == 1]
-    train_meta = train_meta.drop(train_meta[(train_meta['map'] == 'slope_rocks1') & (train_meta['height'] == 1)].index)
+    # train_meta = train_meta.drop(train_meta[(train_meta['map'] == 'slope_rocks1') & (train_meta['height'] == 1)].index)
 
     print('[INFO] {} simulations for training.'.format(len(train_meta)))
     print(train_meta)
