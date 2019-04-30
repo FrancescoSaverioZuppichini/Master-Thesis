@@ -159,15 +159,16 @@ if __name__ == '__main__':
               'num_samples': None,
               'sampler_type': 'random',
               'data-aug': True,
+              'data-aug-type': 'coarse-dropout[0.8,1]',
               'optim': 'sgd',
               'info': 'all height',
-              'tr': 0.2,
+              'tr': 0.45,
               'problem' : 'classification',
               'more_than': 0,
               'down_sampling': 2,
-              'time_window': 50 * 2,
+              'time_window': 50 * 3,
               'only_forward': False,
-              'patch_size': 0.66  }
+              'patch_size': 1  }
 
 
 

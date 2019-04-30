@@ -25,7 +25,7 @@ class Patch():
 
     def plot2d(self, title=''):
         fig = plt.figure()
-        sns.heatmap(self.hm)
+        sns.heatmap(self.hm, cmap=plt.cm.viridis)
         plt.title(title)
         plt.show()
 
@@ -34,8 +34,8 @@ class Patch():
         min, max = self.hm.min(), self.hm.max()
         return (self.hm - min) / (max - min)
 
-    def plot3d(self, title=None, texture=None):
-        fig = plt.figure()
+    def plot3d(self, title=None, texture=None, colorbar=True, *args, **kwargs):
+        fig = plt.figure(*args, **kwargs)
         ax = fig.add_subplot(111, projection='3d')
         X, Y = np.meshgrid(range(self.hm.shape[0]), range(self.hm.shape[1]))
 
@@ -45,6 +45,8 @@ class Patch():
 
         # I have to transpose the heightmap to correctly show it -> I am not sure why
         surf = ax.plot_surface(X, Y, self.hm.T,
+                               rstride=1,
+                               cstride=1,
                                # facecolors=colours,
                                cmap=plt.cm.viridis,
                                linewidth=0.2)
@@ -53,12 +55,14 @@ class Patch():
         # m = cm.ScalarMappable(cmap=plt.cm.viridis)
         # m.set_array(self.hm.T)
         # fig.colorbar(m)
-        fig.colorbar(surf, shrink=0.5, aspect=5)
+        if colorbar: fig.colorbar(surf)
 
         title = title if title is not None else self.__repr__()
         plt.title(title)
 
         plt.show()
+
+        return fig, ax
 
     @classmethod
     def from_hm(cls, hm):
@@ -195,12 +199,12 @@ class RampPatch(Patch):
         return self.hm
 
 #
-p = WallPatch((513, 513), back=False, offset=513//2 + 2)
-p.hm[220:224] = 0.1
-p()
-
-p.plot2d()
-p.save('/media/francesco/saetta/krock-dataset/test_with_obstacles/wall.png')
+# p = WallPatch((513, 513), back=False, offset=513//2 + 2)
+# p.hm[220:224] = 0.1
+# p()
+#
+# p.plot2d()
+# p.save('/media/francesco/saetta/krock-dataset/test_with_obstacles/wall.png')
 
 
 # hm = cv2.imread(

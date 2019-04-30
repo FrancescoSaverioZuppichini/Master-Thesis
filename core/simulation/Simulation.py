@@ -51,7 +51,7 @@ class Simulation():
 
             maps_bar.set_description('Running {}'.format(map))
             spawn_strategy = FlatGroundSpawnStrategy(map, scale=args.height)
-            random_spawn = True
+            random_spawn = False
             # todo add a flag for the random spawn
             try:
                 spawn_points = spawn_strategy(k=args.n_sim, tol=1e-2, size=45)

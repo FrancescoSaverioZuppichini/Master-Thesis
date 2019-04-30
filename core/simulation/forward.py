@@ -5,8 +5,8 @@ from tf import transformations
 from simulation.env.spawn import FlatGroundSpawnStrategy, spawn_points2webots_pose
 
 WORLD_PATH = '/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock2_ros/worlds/bars1.wbt'
-# MAP = '/home/francesco/Documents/Master-Thesis/core/maps/train/slope_rocks1.png'
-MAP = '/media/francesco/saetta/krock-dataset/test_with_obstacles/wall.png'
+MAP = '/home/francesco/Documents/Master-Thesis/core/maps/test/flat.png'
+# MAP = '/media/francesco/saetta/krock-dataset/test_with_obstacles/wall.png'
 
 # MAP = '/home/francesco/Desktop/center.png'
 N_STEPS = 4
@@ -25,15 +25,15 @@ import random
 #     # agent_callbacks=[RosBagSaver('~/Desktop/querry-high/bags', topics=['pose'])],
 #     output_path='/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock2_ros/worlds/tmp.wbt')
 #
-# env = KrockWebotsEnv.from_image(
-#     MAP,
-#     '/home/francesco/Documents/Master-Thesis/core/simulation/env/webots/krock/krock_no_tail.wbt',
-#     {'height': 1,
-#      'resolution': 0.02 },
-#     # agent_callbacks=[RosBagSaver('/media/francesco/saetta/krock-dataset/test_with_obstacle_in_center/bags',
-#     #                              topics=['pose'])],
-#     output_dir='/home/francesco/Documents/Master-Thesis/core/simulation/env/webots/krock/krock2_ros/worlds/')
-
+env = KrockWebotsEnv.from_image(
+    MAP,
+    '/home/francesco/Documents/Master-Thesis/core/simulation/env/webots/krock/krock.wbt',
+    {'height': 1,
+     'resolution': 0.02 },
+    # agent_callbacks=[RosBagSaver('/media/francesco/saetta/krock-dataset/test_with_obstacle_in_center/bags',
+    #                              topics=['pose'])],
+    output_dir='/home/francesco/Documents/Master-Thesis/core/simulation/env/webots/krock/krock2_ros/worlds/')
+#
 # env = KrockWebotsEnv(WORLD_PATH, load_world=True)
 
 # spawn_strategy = FlatGroundSpawnStrategy(MAP, scale = 1, debug=True)
@@ -50,10 +50,10 @@ def spawn_points2webots_pose(spawn_point, env):
 
     return pose
 #
-env = KrockWebotsEnv(None,
-                     agent_callbacks=[RosBagSaver('/media/francesco/saetta/krock-dataset/test_with_obstacles/bags',
-                                                  topics=['pose'])],
-                     )
+# env = KrockWebotsEnv(None,
+#                      agent_callbacks=[RosBagSaver('/media/francesco/saetta/krock-dataset/test_with_obstacles/bags',
+#                                                   topics=['pose'])],
+#                      )
 
 # env.reset(spawn=False)
 # import rospy
@@ -71,18 +71,18 @@ env = KrockWebotsEnv(None,
 # #
 
 env.agent()
-# env.reset(spawn=False)
+env.reset(spawn=False)
 #
 #
 elapsed = 0
 start = time.time()
 # #
-while elapsed <= 3:
+while True:
 # #     # print(time.time())
     elapsed = time.time() - start
 #
-    # obs, r, done, _ = env.step(env.STOP)
-    pass
+    obs, r, done, _ = env.step(env.GO_FORWARD)
+    # pass
 #
 # #
 # env.step(env.STOP)
