@@ -2,16 +2,13 @@
 \begin{document}
 \section{Introduction}
 Effective identification of traversable terrain is essential to operate mobile robots in the environment. Today, there two main different approaches
-used today in the industry to correctly move a robot in a new environment: online and offline. The first one uses local sensors to map new surroundings while the second
-equip the mobile robot with an already labeled map of the terrain.
+used today in the industry to correctly move a robot in a new environment: online and offline. The first one uses local sensors to map new surroundings while the second equip the mobile robot with an already labeled map of the terrain. 
 
-In most indoor scenarios, specific hardware such as infrared or LIDAR sensors is used to perform online mapping while the robot is exploring for the first time. This is the case of most vacuum cleaner.  
+In most indoor scenarios, specific hardware such as infrared or LIDAR sensors is used to perform online mapping while the robot is exploring for the first time, this is the case of the most vacuum cleaner.  
 
-Indoor scenarios share similar features across different places shifting the problem from which ground can be traversable to which obstacle must be avoided.
-For example, the floor is always flat without any bumps or holes due to is artificial design. Usually, traversability must be estimated on the fly due to the high number of possible obstacles and to the layout of the objects in each room
-may not be persistent in time. 
+Indoor scenarios share similar features across different places shifting the problem from which ground can be traversable to which obstacle must be avoided. For example, the floor is always flat without any bumps or holes due to is artificial design. Usually, traversability must be estimated on the fly due to the high number of possible obstacles and to the layout of the objects in each room may not be persistent in time. 
 
-On the other hand, outdoor scenarios may have less artificial obstacle but they have a homogeneous ground making challenging to estimate where the robot can properly travel. 
+On the other hand, outdoor scenarios may have less artificial obstacle but a homogeneous ground making challenging to estimate where the robot can properly travel. 
 Moreover, a given patch may not be traversable by all direction due to the not uniform features of the terrain. But, a map of the ground can be obtained easily by using third-party services such as google maps or mapped with a flying drone. 
 
 These two different scenarios have different challenges. Usually, in control environments such us indoor it is easier to move the robot on the ground but harder to perform obstacle
@@ -19,10 +16,12 @@ avoidance while in outdoors scenario it is hard to first estimate where the robo
 Furthermore, data gathering may not be straight forward. In indoors terrain, data is collected most of the times by driving the robot in the environment by a human or an artificial
 controller. While in the outdoors scenario the data is usually gather using simulations since it is faster. 
 
-Our approach aims to estimate traversability on uneven ground, mostly outdoors scenarios. Our frameworks have two main phases, we first run different simulations by spawning the robot on custom
-created maps with different groud configurations, walls, bumps, and slopes. We record the robot pose at each time, then we crop a patch from the height map used in each run such that it included the robot in the center and its footprint for a selected minimum advancement. This value is calculated by observing the advancement of the given robot on flat ground and taking its half. So, each patch contains the current robot position on the map and the future position in the future if the robot will move at the select value. To create the dataset for the classifier, we label each patch using the selected minimum advancement.
+Our approach aims to estimate traversability on uneven ground, mostly outdoors scenarios. Our frameworks have two main phases, we first run different simulations by spawning the robot on synthetically
+created maps with different groud configurations, walls, bumps, and slopes. We record the robot position and orientation, then we crop a patch from the height map used in each run such that it includes the robot's footprint and the maximum advancement in a given time window. This value is calculated by observing the advancement of the given robot on flat ground and taking its half. So, each patch contains the current robot position on the map and the future position if the robot will move at the maximum speed. Later, to create the dataset for the classifier, we label each patch using a threshold. Finally, we train a deep convolutional neural network to fit the dataset and we evaluate it using different metrics.
 
-The report is organized as follow, the next chapter introduces the related work, Chapter 2 describes our approach, Chapter 3 talk in deep about the implementation details,
-Chapter 4 shows the results and Chapter 5 discuss clusion and future work
+To test the strength of the model we adopt model interpretability techniques such as GRAD-CAM with different inputs to better visualize the learning process.
+
+The report is organized as follow, the next chapter introduces the related work, Chapter 2 describes our approach, Chapter 3 talks in deep about the implementation details,
+Chapter 4 shows the results and Chapter 5 discuss conclusion and future work.
 % \cite{einstein} asddsa
 \end{document}
