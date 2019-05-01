@@ -25,7 +25,7 @@ class Patch():
 
     def plot2d(self, title=''):
         fig = plt.figure()
-        sns.heatmap(self.hm, cmap=plt.cm.viridis)
+        sns.heatmap(self.hm, cmap=plt.cm.viridis, vmin=0, vmax=1)
         plt.title(title)
         plt.show()
 
@@ -47,6 +47,8 @@ class Patch():
         surf = ax.plot_surface(X, Y, self.hm.T,
                                rstride=1,
                                cstride=1,
+                               vmax=1,
+                               vmin=0,
                                # facecolors=colours,
                                cmap=plt.cm.viridis,
                                linewidth=0.2)
