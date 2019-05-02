@@ -242,7 +242,7 @@ class KrockPatchExtractStrategy(PatchExtractStrategy):
 
         corners = tf(np.array([[0, 0], [1, 0], [1, 1], [0, 1], [0.5, 0.5]]) * edge)
         patch = skimage.transform.warp(hm, tf, output_shape=(edge + offset[1], edge + offset[0] + (KrockDims.HEAD_OFFSET // res)), mode="edge")
-
+                
         return patch, corners
 
 

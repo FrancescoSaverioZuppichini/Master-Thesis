@@ -10,6 +10,7 @@ import seaborn as sns
 from utilities.postprocessing.utils import *
 from matplotlib import gridspec
 from utilities.postprocessing.postprocessing import AddAdvancement
+from utilities.postprocessing.utils import PatchExtractStrategy
 
 class DataFrameVisualization():
     """
@@ -20,10 +21,10 @@ class DataFrameVisualization():
 
     def __call__(self, tr, time_window=None):
         if time_window is not None: self.df = AddAdvancement(time_window)((self.df, None, None))[0]
-        self.plot_advancement()
-        self.plot_advancement_box()
-        self.plot_rotation()
-        self.show_classes(tr)
+        self.plot_advancement().show()
+        self.plot_advancement_box().show()
+        self.plot_rotation().show()
+        self.show_classes(tr).show()
 
     def plot_rotation(self):
         df = self.df
@@ -39,20 +40,20 @@ class DataFrameVisualization():
         ax3.set_title('roll')
         df['pose__pose_e_orientation_z'].plot(ax=ax3)
         plt.legend()
-        plt.show()
+        return fig
 
     def plot_advancement(self):
         df = self.df
         fig = plt.figure()
         plt.title('advancement')
         df['advancement'].plot.line()
-        plt.show()
+        return fig
 
     def plot_advancement_box(self):
         fig = plt.figure()
         plt.title('advancement box')
         self.df['advancement'].plot.box()
-        plt.show()
+        return fig
 
     def show_classes(self, tr):
         df = self.df
@@ -61,10 +62,9 @@ class DataFrameVisualization():
         else: temp = df['label']
 
         plt.title("tr={:3f}".format(tr))
-
         temp.value_counts().plot.bar()
-        plt.show()
 
+        return fig
 
     @classmethod
     def from_root(cls, root, *args, **kwargs):
@@ -83,15 +83,19 @@ class DataFrameVisualization():
         return cls(df_total, *args, **kwargs)
 
     @classmethod
-    def from_df_path(cls, df_path, *args, **kwargs):
-        return cls(pd.read_csv(df_path), *args, **kwargs)
+    def from_path(cls, path, *args, **kwargs):
+        return cls(pd.read_csv(path), *args, **kwargs)
 
 class PatchesAndDataframeVisualization(DataFrameVisualization):
-    def __init__(self, df, hm, patch_size=100, image_dir=None, *args, **kwargs):
+    def __init__(self, df, hm, max_advancement=1, image_dir=None, patch_extractor=PatchExtractStrategy, *args, **kwargs):
         super().__init__(df, *args, **kwargs)
         self.hm = hm
-        self.patch_size = patch_size
+        self.max_advancement = max_advancement
         self.image_dir = image_dir
+        self.patch_extractor = patch_extractor(max_advancement)
+        # run path extractor one time to get the path_size -> maybe we need later
+        dummy_path, _ = self.patch_extractor(hm, hm.shape[0]//2, hm.shape[1]//2, 0)
+        self.patch_size = dummy_path.shape
 
     @property
     def hm_ax(self):
@@ -99,7 +103,13 @@ class PatchesAndDataframeVisualization(DataFrameVisualization):
         ax = sns.heatmap(self.hm)
         return ax
 
-    def show_patches_on_the_map(self, n_show=4, title='patches', compress=True, df=None):
+
+    def fill_patch_on_ax(self, ax, corners):
+        ax.fill(corners[[0, 1, 2, 3, 0], 0], corners[[0, 1, 2, 3, 0], 1], alpha=0.4,
+                   facecolor='g')
+        return ax
+
+    def show_patches_on_the_map(self, n_show=4, title='patches', compress=True, df=None, res=0.02, disable_patch_axis=True):
         if df is None : df = self.df
         fig = plt.figure(figsize=(4 * 2, 4 * 3))
         size = (2 + n_show // 2, n_show // 2)
@@ -111,6 +121,7 @@ class PatchesAndDataframeVisualization(DataFrameVisualization):
 
         self.show_traces([df], ax=ax_hm)
 
+
         if compress:
             df = df.loc[list(range(0, len(df), len(df) // n_show)), :]
 
@@ -120,15 +131,10 @@ class PatchesAndDataframeVisualization(DataFrameVisualization):
                             row["hm_y"], \
                             row["pose__pose_e_orientation_z"], \
                             row["advancement"]
-            rect = mpatches.Rectangle((x - self.patch_size // 2, y - self.patch_size // 2), self.patch_size,
-                                      self.patch_size, linewidth=1, edgecolor='r', facecolor='none')
-            ax_hm.add_patch(rect)
+            patch, corners = self.patch_extractor(self.hm, x, y, np.rad2deg(ang))
 
-            # disable axis number
-            ax_hm.get_yaxis().set_visible(False)
-            ax_hm.get_xaxis().set_visible(False)
+            self.fill_patch_on_ax(ax_hm, corners)
 
-            patch, _ = hmpatch(self.hm, x, y, np.rad2deg(ang), self.patch_size, scale=1)
             patch = patch.astype(np.float32)
             patch = patch - patch[patch.shape[0] // 2, patch.shape[1] // 2]
             hm_patches.append((patch, ad))
@@ -140,31 +146,34 @@ class PatchesAndDataframeVisualization(DataFrameVisualization):
                 sns.heatmap(patch, ax=ax_patch)
                 ax_patch.set_title('{:.3f}'.format(ad))
 
-                # disable axis number
-                ax_patch.get_yaxis().set_visible(False)
-                ax_patch.get_xaxis().set_visible(False)
+                if disable_patch_axis:
+                    ax_patch.get_yaxis().set_visible(False)
+                    ax_patch.get_xaxis().set_visible(False)
 
-        plt.show()
+        return fig
 
-    def show_patches(self, center=False, n_samples=4, scale=1, random_state=0):
+    def show_patches(self, center=False, n_samples=4, scale=1, random_state=0, sample=None, disable_patch_axis=True):
         df = self.df
         # sample = df.sample(n_samples, random_state=random_state)
-        sample = df[:n_samples]
+        if sample is None: sample = df[:n_samples]
 
         fig, ax = plt.subplots(nrows=n_samples // 2, ncols=n_samples // 2)
         fig.suptitle('patches center={}'.format(center))
         for row in ax:
             for idx, (col, (i, row)) in enumerate(zip(row, sample.iterrows())):
                 x, y = row["hm_x"], row["hm_y"]
-                patch, _ = hmpatch(self.hm, x, y, np.rad2deg(row['pose__pose_e_orientation_z']), self.patch_size, scale=1)
+                patch, corners = self.patch_extractor(self.hm, x, y, np.rad2deg(row['pose__pose_e_orientation_z']))
                 patch = patch.astype(np.float32)
-                if center: patch = patch - patch[patch.shape[0] // 2, patch.shape[1] // 2]
-                col.plot(self.patch_size // 2, self.patch_size // 2, marker='o', color='r', ls='', linewidth=10,
-                         label='finish')
-                col.set_title(row['advancement'])
+                # if center: patch = patch - patch[patch.shape[0] // 2, patch.shape[1] // 2]
+                # col.plot(self.patch_size // 2, self.patch_size // 2, marker='o', color='r', ls='', linewidth=10,
+                #          label='finish')
+                if disable_patch_axis:
+                    col.get_yaxis().set_visible(False)
+                    col.get_xaxis().set_visible(False)
+                col.set_title('{:.2f}m'.format(row['advancement']))
                 sns.heatmap(patch, ax=col)
 
-        plt.show()
+        return fig
 
 
     def show_traces(self, dfs, ax=None):
@@ -185,23 +194,23 @@ class PatchesAndDataframeVisualization(DataFrameVisualization):
 
 
 
-    def show_labeled_patches(self, tr=None):
+    def show_labeled_patches(self, tr=None, n=4):
         df = self.df
         # useful if we want to test an other tr on the fly
         df['label'] = df['advancement'] > tr
         tmp = df.loc[df['label'] == True]
 
-        sample = tmp.sort_values("advancement", ascending=False).head(4)
+        sample = tmp.sort_values("advancement", ascending=False).head(n)
 
-        self.show_patches_on_the_map(df=sample, title='true', compress=False)
+        self.show_patches(sample=sample)
 
         plt.show()
 
         tmp = df[df['label'] == False]
 
-        sample = tmp.sort_values("advancement", ascending=False).tail(4)
+        sample = tmp.sort_values("advancement", ascending=False).tail(n)
 
-        self.show_patches_on_the_map(df=sample, title='false', compress=False)
+        self.show_patches(sample=sample)
 
         plt.show()
 
@@ -239,51 +248,45 @@ class PatchesAndDataframeVisualization(DataFrameVisualization):
 
             ax_ad.plot(df['advancement'][:i])
 
-            #         ax = plt.subplot2grid((2,2), (1, 0), colspan=1, rowspan=1)
-            patch = cv2.imread(self.image_dir + row.loc['images'])
-            patch = cv2.cvtColor(patch, cv2.COLOR_BGR2GRAY)
-
-            ax_patch = plt.subplot2grid((2, 2), (1, 0), colspan=1, rowspan=1)
-            sns.heatmap(patch / 255, vmin=0, vmax=1, ax=ax_patch)
-
             x, y, ang, ad = row["hm_x"], \
                             row["hm_y"], \
                             row["pose__pose_e_orientation_z"], \
                             row["advancement"]
+            patch, corners = self.patch_extractor(self.hm, x, y, np.rad2deg(row['pose__pose_e_orientation_z']))
+            patch = patch.astype(np.float32)
+
+            ax_patch = plt.subplot2grid((2, 2), (1, 0), colspan=1, rowspan=1)
+            sns.heatmap(patch / 255, vmin=0, vmax=1, ax=ax_patch)
+
 
 
             ax_hm = plt.subplot2grid((2, 2), (1, 1), colspan=1, rowspan=1)
             sns.heatmap(self.hm / 255, vmin=0, vmax=1, ax=ax_hm)
 
-            rect = mpatches.Rectangle((x - self.patch_size // 2, y - self.patch_size  // 2), self.patch_size ,
-                                      self.patch_size , linewidth=1, edgecolor='r', facecolor='none')
-            ax_hm.add_patch(rect)
+            self.fill_patch_on_ax(ax_hm, corners)
 
             fig.canvas.draw()
             plt.pause(0.025)
 
 
-    def show_classes(self, tr, df=None):
-        if df is None : df = self.df
+    @classmethod
+    def from_df_path_and_hm_path(cls, df_path, hm_path, *args, **kwargs):
+        df = pd.read_csv(df_path)
 
-        fig = plt.figure()
+        hm = cv2.imread(hm_path)
+        hm = cv2.cvtColor(hm, cv2.COLOR_BGR2GRAY)
 
-        if tr is not None: temp = df['advancement'] > tr
-        else: temp = df['label']
-
-        temp.value_counts().plot.bar()
-        plt.show()
-
+        return cls(df, hm, *args, **kwargs)
 
     @classmethod
-    def from_df_path(cls, df_path, hm_dir, *args, **kwargs):
+    def from_df_path_and_hm_dir(cls, df_path, hm_dir, *args, **kwargs):
         df = pd.read_csv(df_path)
         map_name = df['map_name'][0]
 
         hm = cv2.imread(glob.glob('{}/**/{}.png'.format(hm_dir, map_name))[0])
         hm = cv2.cvtColor(hm, cv2.COLOR_BGR2GRAY)
 
-        return cls(df=df, hm=hm, *args, **kwargs)
+        return cls(df, hm, *args, **kwargs)
 
 def find_tr(df):
     return df['advancement'].mean() / 2

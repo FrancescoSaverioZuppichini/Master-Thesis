@@ -328,14 +328,14 @@ if __name__ == '__main__':
         StoreDataframeKeepingSameName(out_parsed_csvs_dir)
     ]))
 
-    # dfs_from_bags = convert_bags2dfs_and_store( meta['filename'])
-    # parsed_dfs = read_and_parse_dfs(meta.iterrows())
+    dfs_from_bags = convert_bags2dfs_and_store( meta['filename'])
+    parsed_dfs = read_and_parse_dfs(meta.iterrows())
 
 
     # #
-    ADVANCEMENT = 1
+    ADVANCEMENT = 0.66
     # PATCH_SIZE = 50 * 2 + 2 * 7
-    window = 50 * 3
+    window = 50 * 2
     print('[INFO] window={}'.format(window))
     patches_out_dir = DATASET_DIR + '/patches/{}/'.format(ADVANCEMENT)
     meta_df_out_dir = DATASET_DIR + '/csvs_patches/'

@@ -44,15 +44,15 @@ def get_dataloaders(train_root,
     train_meta = train_meta.drop(train_meta[(train_meta['map'] == 'slope_rocks1') & (train_meta['height'] == 1)].index)
 
     print('[INFO] {} simulations for training.'.format(len(train_meta)))
-    print(train_meta)
     if val_root is None:
         train_meta = train_meta.sample(frac=1, random_state=0)
         val_size = int((len(train_meta) // 100) * val_size)
         train_meta = train_meta[val_size:]
         val_meta = train_meta[:val_size]
+        print('[INFO] val_meta')
+        print(val_meta)
     else:
         val_meta = pd.read_csv(val_root + '/bags/meta.csv')
-        print(val_meta)
 
     train_ds = FastAIImageFolder.from_meta(train_meta,
                                            train_root + '/csvs_patches/',
@@ -68,6 +68,7 @@ def get_dataloaders(train_root,
 
     val_root = train_root if val_root is None else val_root
     val_hm_root = hm_root if val_hm_root is None else val_hm_root
+    print('[INFO] val root = {}'.format(val_root))
     val_ds = FastAIImageFolder.from_meta(val_meta,
                                            val_root + '/csvs_patches/',
                                            val_hm_root,

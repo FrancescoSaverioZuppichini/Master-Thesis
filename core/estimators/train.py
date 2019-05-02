@@ -152,7 +152,7 @@ if __name__ == '__main__':
               'batch_size': 128,
               # 'model': 'omar',
               'val_size' : None,
-              'validation': 'arc_rocks',
+              'validation': 'arc_rocks with flat spawn',
               'model': 'microresnet#4-gate=3x3-n=1-se=True',
               'dataset': '',
               'sampler': '',
@@ -162,15 +162,13 @@ if __name__ == '__main__':
               'data-aug-type': 'coarse-dropout[0.8,1]',
               'optim': 'sgd',
               'info': 'all height',
-              'tr': 0.45,
+              'tr': 0.2,
               'problem' : 'classification',
               'more_than': 0,
               'down_sampling': 2,
-              'time_window': 50 * 3,
+              'time_window': 50 * 2,
               'only_forward': False,
-              'patch_size': 1  }
-
-
+              'patch_size': 0.66  }
 
     # params['data-aug'] = True
     # params['more_than'] = 0
@@ -178,7 +176,10 @@ if __name__ == '__main__':
     for _ in range(5):
         train_and_evaluate(params)
 
-
+    params['patch_size'] = 1.0
+    params['time_window'] = 50 * 3
+    for _ in range(5):
+        train_and_evaluate(params)
 
 
 
