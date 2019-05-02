@@ -1,13 +1,13 @@
 \documentclass[../document.tex]{subfiles}
 \begin{document}
 \section{Abstract}
-With this project, we collect and estimate ground traversability for a no-wheel crocodile-like robot. We move the robot in a simulated environment recording its pose. Later, we crop for each height map used to generate the ground a patch such as it includes 
-booth the robot in the center and its footprint in the case of maximum advancement.
+With this project, we estimate ground traversability for a no-wheel crocodile-like robot. We collect the robot's pose in a simulated environment using synthetic heig hmap. Then, we for each data point we crop a patch from the height map. We label them and train a deep convolutional neural network to predict their traversability.
+Later, we evaluate the results by visualizing different datasets and custom patches using model interoperability techniques to highlight and discover the strength and weakness of our network.
 
 Our approach is based on 
 an already existing methodology that we further expanded with a smaller deep convolutional neural network based on residual connection and the squeeze and excitation operator.
-The network is unaware of the robot's locomotion and physical characteristics. 
-Then, we evaluate the results by visualizing different datasets and custom patches using GRAD-CAM to highlight and discover the strength and weakness of the model.
+This network is unaware of the robot's locomotion or its physical characteristics and has to learn to traverse a new environment only through data gather in the simulator.
+
 % \cite{einstein} asddsa
 
 \end{document}
