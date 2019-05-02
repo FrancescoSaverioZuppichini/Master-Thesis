@@ -21,8 +21,8 @@ class Compose(Handler):
 class ForEach(Handler):
     def __init__(self, handlers, make_iter=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.handlers = handlers
-        self.pip = Compose(self.handlers)
+        self.pip = handlers
+        # self.pip = if type(handlers) is list Compose(self.handlers) else handlers
         self.make_iter = make_iter
 
     def __call__(self, data):
