@@ -10,9 +10,9 @@ class Compose(Handler):
     def __init__(self, handlers=[]):
         self.handlers = handlers
 
-    def __call__(self, data):
-        res = data
-        for handle in self.handlers:
+    def __call__(self, *args, **kwargs):
+        res = self.handlers[0](*args, **kwargs)
+        for handle in self.handlers[1:]:
             res = handle(res)
 
         return res

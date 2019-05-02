@@ -153,13 +153,21 @@ class BarPatch(Patch):
                                                                             self.between)
 
 
-class WallPatch(BarPatch):
-    def __init__(self, shape, front=True, back=True, *args, **kwargs):
-        super().__init__(shape, up=back, down=front, *args, **kwargs)
-
-    def make(self, *args, **kwargs):
-        super().make(*args, **kwargs)
-        self.hm = self.hm.T
+class WallPatch(Patch):
+    def __init__(self, shape, front=True, back=True, strength=1, offset=8, size=4):
+        super().__init__(shape)
+        self.back = back
+        self.front = front
+        self.strength = strength
+        self.offset = offset
+        self.size = size
+    def make(self):
+        if self.back:
+            self.hm[:,self.offset: self.offset + self.size] = self.strength
+        if self.front:
+            self.hm[:,-self.offset - self.size: -self.offset] = self.strength
+            
+        self.hm = self.hm
         return self.hm
 
 

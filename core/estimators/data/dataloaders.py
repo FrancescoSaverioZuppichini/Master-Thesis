@@ -1,10 +1,22 @@
 import glob
 
 import pandas as pd
-
+import matplotlib.pyplot as plt
+import seaborn as sns
 from estimators.data import *
-from estimators.utils import visualise
 from torch.utils.data import DataLoader, random_split, RandomSampler, ConcatDataset, WeightedRandomSampler
+
+def visualise(dl, n=10):
+    fig, axes = plt.subplots(nrows=1, ncols=5, figsize=(20, 4))
+
+    for (x, y) in dl:
+        for i, img, l in zip(range(5), x, y):
+            axes[i].set_title("{}".format(l))
+            sns.heatmap(img.numpy().squeeze(), ax=axes[i])
+
+        plt.show()
+        break
+        return
 
 class FastAIImageFolder(TraversabilityDataset):
     c = 2

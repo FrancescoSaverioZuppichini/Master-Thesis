@@ -217,6 +217,14 @@ class KrockPatchExtractStrategy(PatchExtractStrategy):
 
         super().__init__(None)
 
+    @staticmethod
+    def patch_shape(max_advancement, res=0.02):
+        missing_krock_body =  math.ceil(KrockDims.KROCK_SIZE / res)
+        max_advancement = math.ceil(max_advancement / res)
+        shape = (max_advancement *2, missing_krock_body + max_advancement)
+
+        return shape
+
     def __call__(self, hm, x, y, alpha, res=0.02, debug=False):
         max_advancement = self.max_advancement
         missing_krock_body = KrockDims.KROCK_SIZE - KrockDims.HEAD_OFFSET

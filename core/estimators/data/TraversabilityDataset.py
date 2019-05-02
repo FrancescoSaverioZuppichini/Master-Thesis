@@ -16,7 +16,6 @@ from torchvision.transforms import Compose
 from utilities.postprocessing.postprocessing import AddAdvancement, CleanDataframe, AddHMcoordinates, \
     open_df_and_hm_from_meta_row
 from utilities.postprocessing.utils import hmpatch
-from estimators.utils import visualise
 
 random.seed(0)
 np.random.seed(0)
@@ -38,7 +37,6 @@ class TraversabilityDataset(Dataset):
         self.transform = transform
         self.df = df
 
-        # self.generate = generate
         self.should_generate_paths = not 'images' in df
 
         self.preprocess_df = Compose([AddAdvancement(time_window)])
@@ -135,7 +133,7 @@ class PatchesDataset(Dataset):
         self.df = pd.DataFrame()
 
     def __getitem__(self, item):
-        patch = (self.patches[item].hm * 255).astype(np.uint8)
+        patch = self.patches[item].hm
         if self.transform is not None: patch = self.transform(patch)
 
         return patch, 0
