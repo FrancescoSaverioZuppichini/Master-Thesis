@@ -26,12 +26,12 @@ torch.backends.cudnn.benchmark = True
 # torch.backends.cudnn.deterministic = True
 # np.random.seed(0)
 # if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
-
+import matplotlib.pyplot as plt
 
 def train_and_evaluate(params, train=True, load_model=None):
     # model = OmarCNN()
     model = zoo[params['model']]
-    # print(model)
+    print(model)
     # summary(model.cuda(), (1, params['patch_size'], params['patch_size']))
 
     pprint.pprint(params)
@@ -45,8 +45,8 @@ def train_and_evaluate(params, train=True, load_model=None):
         patch_size=params['patch_size'],
         test_root='/media/francesco/saetta/krock-dataset/test/',
         test_hm_root='/home/francesco/Documents/Master-Thesis/core/maps/test/',
-        val_root='/media/francesco/saetta/krock-dataset/val/',
-        val_hm_root='/home/francesco/Documents/Master-Thesis/core/maps/val/',
+        # val_root='/media/francesco/saetta/krock-dataset/val/',
+        # val_hm_root='/home/francesco/Documents/Master-Thesis/core/maps/val/',
         generate=False,
         val_size = params['val_size'],
         train_transform=get_transform(should_aug=params['data-aug']),
@@ -80,7 +80,7 @@ def train_and_evaluate(params, train=True, load_model=None):
     data = DataBunch(train_dl=train_dl, valid_dl=val_dl, test_dl=test_dl)
 
     experiment = Experiment(api_key="8THqoAxomFyzBgzkStlY95MOf",
-                            project_name="krock-new-new", workspace="francescosaveriozuppichini")
+               project_name="krock-patches-square", workspace="francescosaveriozuppichini")
 
     experiment.log_parameters(params)
     experiment.log_metric("timestamp", timestamp)
@@ -101,8 +101,8 @@ def train_and_evaluate(params, train=True, load_model=None):
     model_name_acc = 'accuracy'
     model_name_loss = 'loss'
 
-    callbacks = [ReduceLROnPlateauCallback(learn=learner, patience=4),
-                 EarlyStoppingCallback(learn=learner, patience=6)]
+    callbacks = [ReduceLROnPlateauCallback(learn=learner, patience=3, factor=0.1),
+                 EarlyStoppingCallback(learn=learner, patience=5)]
 
     if params['tr'] is not None:
         callbacks.append(SaveModelCallback(learn=learner, name=model_name_roc_auc, monitor='roc_auc'))
@@ -111,6 +111,14 @@ def train_and_evaluate(params, train=True, load_model=None):
 
     if train:
         with experiment.train():
+            # learner.lr_find()
+            # learner.recorder.plot()
+            # plt.show() # 1e-01
+            # lr = 1e-2
+            # learner.fit_one_cycle(params['epochs'], slice(lr), pct_start=0.8, callbacks=callbacks)
+            # lr =  1e-4,
+            # learner.fit_one_cycle(10, slice(lr), pct_start=0.8, callbacks=callbacks)
+
             learner.fit(epochs=params['epochs'], lr=params['lr'],
                         callbacks=callbacks)  # SaveModelCallback load the best model after training!
     if params['tr'] is not None:
@@ -147,19 +155,19 @@ def train_and_evaluate(params, train=True, load_model=None):
     del learner
 
 if __name__ == '__main__':
-    params = {'epochs': 20,
-              'lr': 0.001,
+    params = {'epochs': 30,
+              'lr': 1e-3,
               'batch_size': 128,
               # 'model': 'omar',
-              'val_size' : None,
-              'validation': 'arc_rocks with flat spawn',
+              'val_size' : 10,
+              'validation': 'from train',
               'model': 'microresnet#4-gate=3x3-n=1-se=True',
               'dataset': '',
               'sampler': '',
               'num_samples': None,
               'sampler_type': 'random',
               'data-aug': True,
-              'data-aug-type': 'coarse-dropout[0.8,1]',
+              'data-aug-type': 'coarse-dropout[0.4,0.8]',
               'optim': 'sgd',
               'info': 'all height',
               'tr': 0.2,
@@ -176,10 +184,10 @@ if __name__ == '__main__':
     for _ in range(5):
         train_and_evaluate(params)
 
-    params['patch_size'] = 1.0
-    params['time_window'] = 50 * 3
-    for _ in range(5):
-        train_and_evaluate(params)
+    # params['patch_size'] = 1.0
+    # params['time_window'] = 50 * 3
+    # for _ in range(5):
+    #     train_and_evaluate(params)
 
 
 

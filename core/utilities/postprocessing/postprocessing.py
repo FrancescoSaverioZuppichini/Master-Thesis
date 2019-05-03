@@ -64,17 +64,19 @@ class ParseDataframe(Handler):
         becomes
 
         0.0,
-        0.1
+        0.1df['timestamp']
 
         :param df:
         :return:
         """
         df.index = df[df.columns[0]]
         df['ros_time'] = df.index
-        df['timestamp'] = df['ros_time'].apply(lambda x: dateutil.parser.parse(str(x)).timestamp())
-        df['timestamp'] -= df['timestamp'][0]
-        df = df.set_index(df['timestamp'])
-
+        try:
+            df['timestamp'] = df['ros_time'].apply(lambda x: dateutil.parser.parse(str(x)).timestamp())
+            df['timestamp'] -= df['timestamp'].iloc[0]
+            df = df.set_index(df['timestamp'])
+        except Exception:
+            print('[INFO] something exploded while converting the ros time.')
         return df
 
     def convert_quaterion2euler(self, df, *args, **kwargs):
@@ -149,12 +151,16 @@ class AddAdvancement(Handler):
 
 
 class CleanDataframe(Handler):
+    def __init__(self, lower_bound, offset=0):
+        self.lower_bound = lower_bound
+        self.offset = offset
+
     def __call__(self, data):
-        offset = 22
+        offset = self.offset
 
         df, hm, filename = data
         #       drop first second (spawn time)
-        df = df.loc[df.index >= 1]
+        df = df.loc[df.index >= self.lower_bound]
         # robot upside down
         df = df.loc[df['pose__pose_e_orientation_x'] >= -2.0].dropna()
         df = df.loc[df['pose__pose_e_orientation_x'] <= 2.0].dropna()
@@ -291,7 +297,9 @@ class StorePatches():
 if __name__ == '__main__':
     import os
 
-    DATASET_DIR = '/media/francesco/saetta/krock-dataset/val/'
+    MODE = 'train'
+
+    DATASET_DIR = '/media/francesco/saetta/krock-dataset/{}/'.format(MODE)
     N_WORKERS = 16
 
     base_bags_dir = DATASET_DIR + '/bags/'
@@ -320,22 +328,22 @@ if __name__ == '__main__':
 
 
     read_and_parse_dfs =  MultiThreadWrapper(N_WORKERS, Compose([
-        ReadDataframeFilenameAndHm(out_csvs_dir, '/home/francesco/Documents/Master-Thesis/core/maps/val/'),
+        ReadDataframeFilenameAndHm(out_csvs_dir, '/home/francesco/Documents/Master-Thesis/core/maps/{}/'.format(MODE)),
         ParseDataframe(),
         AddHMcoordinates(),
-        CleanDataframe(),
+        CleanDataframe(lower_bound=1, offset=22),
         drop_uselesss_columns,
         StoreDataframeKeepingSameName(out_parsed_csvs_dir)
     ]))
 
-    dfs_from_bags = convert_bags2dfs_and_store( meta['filename'])
-    parsed_dfs = read_and_parse_dfs(meta.iterrows())
-
+    # dfs_from_bags = convert_bags2dfs_and_store( meta['filename'])
+    # parsed_dfs = read_and_parse_dfs(meta.iterrows())
+    #
 
     # #
-    ADVANCEMENT = 0.66
+    ADVANCEMENT = 1
     # PATCH_SIZE = 50 * 2 + 2 * 7
-    window = 50 * 2
+    window = 50 * 3
     print('[INFO] window={}'.format(window))
     patches_out_dir = DATASET_DIR + '/patches/{}/'.format(ADVANCEMENT)
     meta_df_out_dir = DATASET_DIR + '/csvs_patches/'
@@ -345,7 +353,7 @@ if __name__ == '__main__':
 
     extract_patches = MultiThreadWrapper(N_WORKERS, Compose([
         ReadDataframeFilenameAndHm(out_parsed_csvs_dir,
-                                   '/home/francesco/Documents/Master-Thesis/core/maps/val/'),
+                                   '/home/francesco/Documents/Master-Thesis/core/maps/{}/'.format(MODE)),
         AddAdvancement(window),
         ExtractPatches(patch_extract_stategy=KrockPatchExtractStrategy(max_advancement=ADVANCEMENT)),
         StorePatches(patches_out_dir, meta_df_out_dir)

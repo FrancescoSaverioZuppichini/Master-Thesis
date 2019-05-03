@@ -152,7 +152,7 @@ class PatchesAndDataframeVisualization(DataFrameVisualization):
 
         return fig
 
-    def show_patches(self, center=False, n_samples=4, scale=1, random_state=0, sample=None, disable_patch_axis=True):
+    def show_patches(self, center=False, n_samples=4, scale=1, random_state=0, sample=None, disable_patch_axis=False):
         df = self.df
         # sample = df.sample(n_samples, random_state=random_state)
         if sample is None: sample = df[:n_samples]

@@ -17,8 +17,8 @@ def image2webots_terrain(image, src_world, config, output_path=None, verbose=Fal
     height, resolution = config['height'], config['resolution']
     image = image.astype(np.float)
     image = image / 255
+    shape = image.shape
     terrain = image * height
-    # plot_terrain(image)
     if verbose: print('mod image type: ', terrain.dtype, ' height factor: ', height, ' max val (m): ',
                            np.amax(terrain), ' shape', terrain.shape)
 
@@ -35,6 +35,7 @@ def image2webots_terrain(image, src_world, config, output_path=None, verbose=Fal
                 l2 = i
 
     terrain_flatted = terrain.reshape((-1))
+
     np.set_printoptions(threshold=terrain.shape[0] * terrain.shape[1])  # default
 
     data[l2 - 9] = '        ]\n'

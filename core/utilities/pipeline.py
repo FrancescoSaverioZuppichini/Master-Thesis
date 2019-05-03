@@ -36,7 +36,7 @@ class ForEachApply(ForEach):
     def __call__(self, data):
         iter_data = data
         if self.make_iter is not None: iter_data = self.make_iter(data)
-        res = list(map(self.pip, iter_data))
+        res = map(self.pip, iter_data)
         return res
 
 

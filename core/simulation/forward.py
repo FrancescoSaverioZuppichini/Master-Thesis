@@ -1,5 +1,4 @@
 from simulation.agent.callbacks import *
-
 from simulation.env.webots.krock import KrockWebotsEnv
 from tf import transformations
 from simulation.env.spawn import FlatGroundSpawnStrategy, spawn_points2webots_pose

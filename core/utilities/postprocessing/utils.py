@@ -221,7 +221,7 @@ class KrockPatchExtractStrategy(PatchExtractStrategy):
     def patch_shape(max_advancement, res=0.02):
         missing_krock_body =  math.ceil(KrockDims.KROCK_SIZE / res)
         max_advancement = math.ceil(max_advancement / res)
-        shape = (max_advancement *2, missing_krock_body + max_advancement)
+        shape = (missing_krock_body + max_advancement, missing_krock_body + max_advancement)
 
         return shape
 
@@ -249,7 +249,8 @@ class KrockPatchExtractStrategy(PatchExtractStrategy):
         tf = (tf1 + (tf2 + (tf3 + tf4))).inverse
 
         corners = tf(np.array([[0, 0], [1, 0], [1, 1], [0, 1], [0.5, 0.5]]) * edge)
-        patch = skimage.transform.warp(hm, tf, output_shape=(edge + offset[1], edge + offset[0] + (KrockDims.HEAD_OFFSET // res)), mode="edge")
+        output_shape = edge + offset[0] + (KrockDims.HEAD_OFFSET // res)
+        patch = skimage.transform.warp(hm, tf, output_shape=(output_shape, output_shape), mode="edge")
                 
         return patch, corners
 
