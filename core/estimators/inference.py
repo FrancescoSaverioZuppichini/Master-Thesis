@@ -41,7 +41,7 @@ print(model_dir)
 
 hm_infer.for_all_rotation(model_dir,
                           'microresnet#4-gate=3x3-n=1-se=True',
-                          step=10,
-                          max_advancement = 0.66,
-                        patch_size=(66, 76)
+                          step=3,
+                          # max_advancement = 0.66,
+                          patch_size=KrockPatchExtractStrategy.patch_shape(0.66)[0]
                           )

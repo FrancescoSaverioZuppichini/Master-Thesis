@@ -102,7 +102,8 @@ def get_dataloaders(train_root,
                               *args, **kwargs)
     val_dl = DataLoader(val_ds, shuffle=False, *args, **kwargs)
     visualise(val_dl)
-    visualise(val_dl)
+    visualise(train_dl)
+    visualise(train_dl)
 
     # test_dl = val_dl
     #
@@ -130,21 +131,21 @@ if __name__ == '__main__':
     import time
 
     start = time.time()
-    meta = pd.read_csv('/media/francesco/saetta/krock-dataset/val/bags/meta.csv')
-    # meta = meta[meta['map'] == 'bars1']
+    meta = pd.read_csv('/media/francesco/saetta/krock-dataset/train/bags/meta.csv')
+    meta = meta[meta['map'] == 'bars1']
     # print('[INFO] {} simulations for training.'.format(len(meta)))
     # meta = meta[meta['map'] == 'bars1']
     print(meta)
     concat_ds = TraversabilityDataset.from_meta(meta,
-                                                '/media/francesco/saetta/krock-dataset/val/csvs_patches/',
-                                                '/home/francesco/Documents/Master-Thesis/core/maps/val/',
-                                                patches_dir='/media/francesco/saetta/krock-dataset/val/patches/0.66',
+                                                '/media/francesco/saetta/krock-dataset/train/csvs_patches/',
+                                                '/home/francesco/Documents/Master-Thesis/core/maps/train/',
+                                                patches_dir='/media/francesco/saetta/krock-dataset/train/patches/0.66',
                                                 n=1,
                                                 down_sampling=2,
                                                 time_window=100,
                                                 patch_size=0.66,
-                                                transform=get_transform(False,
-                                                                        debug=False))
+                                                transform=get_transform(True,
+                                                                        debug=True))
 
     # concat_ds = TraversabilityDataset.from_('/media/francesco/saetta/krock-dataset/train/csvs_patches/',
     #                                             time_window=50 * 3,
@@ -171,7 +172,7 @@ if __name__ == '__main__':
 
     # visualise(concat_ds)
     visualise(dl)
-    visualise(dl)
+    # visualise(dl)
 
     # visualise(dl)
     # visualise(dl)

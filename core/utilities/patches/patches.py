@@ -35,7 +35,7 @@ class Patch():
         min, max = self.hm.min(), self.hm.max()
         return (self.hm - min) / (max - min)
 
-    def plot3d(self, title=None, texture=None, colorbar=True, *args, **kwargs):
+    def plot3d(self, title=None, texture=None, colorbar=True, rstride=10, cstride=10, *args, **kwargs):
         fig = plt.figure(*args, **kwargs)
         ax = fig.add_subplot(111, projection='3d')
         X, Y = np.meshgrid(range(self.hm.shape[0]), range(self.hm.shape[1]))
@@ -45,14 +45,14 @@ class Patch():
         # colours = plt.cm.viridis(self.texture)
 
         # I have to transpose the heightmap to correctly show it -> I am not sure why
-        surf = ax.plot_surface(X, Y, self.hm.T,
-                               rstride=1,
-                               cstride=1,
+        surf = ax.plot_surface(X, Y, self.hm,
+                               rstride=rstride,
+                               cstride=cstride,
                                vmax=1,
                                vmin=0,
                                # facecolors=colours,
                                cmap=plt.cm.viridis,
-                               linewidth=0.2)
+                               linewidth=0.1)
 
         # import matplotlib.cm as cm
         # m = cm.ScalarMappable(cmap=plt.cm.viridis)
@@ -62,8 +62,6 @@ class Patch():
 
         title = title if title is not None else self.__repr__()
         plt.title(title)
-
-        plt.show()
 
         return fig, ax
 

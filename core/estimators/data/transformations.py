@@ -6,7 +6,10 @@ import seaborn as sns
 
 from os import path
 from imgaug import augmenters as iaa
+from imgaug.augmenters import Augmenter
 from torchvision.transforms import Resize, ToPILImage, ToTensor, Grayscale, Compose
+from opensimplex import OpenSimplex
+from tqdm import tqdm
 
 class ImgaugWrapper():
     """
@@ -20,16 +23,70 @@ class ImgaugWrapper():
         x = self.aug.augment_image(x)
         return x
 
+simplex = OpenSimplex()
+def im2simplex(im, feature_size=24, scale=10):
+    h, w = im.shape[0], im.shape[1]
+    for y in range(0, h):
+        for x in range(0, w):
+            value = simplex.noise2d(x / feature_size, y / feature_size)
+            im[x,y] += value / scale
+    return im
+
+class RandomSimplexNoise(Augmenter):
+
+    def __init__(self, shape=(76, 76), *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.images = []
+        self.n = 100
+        image = np.zeros((shape))
+
+        for _ in tqdm(range(self.n)):
+            features_size = np.random.randint(1, 80)
+            im = im2simplex(image.copy(), features_size, 1)
+            im = np.expand_dims(im, -1)
+            self.images.append(im)
+
+    def augment_image(self, img,   *args, **kwargs):
+        idx = np.random.randint(0, self.n)
+        scale = np.random.randint(3, 8)
+
+        return img + (self.images[idx] * scale)
+
+        # features_size = np.random.randint(15, 80)
+        # scale = np.random.randint(5, 10)
+        # return im2simplex(img, features_size, scale)
+
+    def _augment_images(self, images, *args, **kwargs):
+        for i in range(len(images)):
+            images[i] = self.augment_image(images[i], *args, **kwargs)
+
+        return images
+
+
+    def _augment_heatmaps(self, *args, **kwargs):
+        return None
+
+    def _augment_polygons(self, *args, **kwargs):
+        return None
+
+    def get_parameters(self):
+        return None
+
+    def _augment_keypoints(self, *args, **kwargs):
+        return None
 
 aug = iaa.Sometimes(0.8,
                     iaa.Sequential(
                         [
                             iaa.Dropout(p=(0.05, 0.1)),
                             iaa.CoarseDropout((0.02, 0.1),
-                                              size_percent=(0.4, 0.8))
+                                              size_percent=(0.4, 0.8)),
+                            # RandomSimplexNoise()
 
-                        ], random_order=True)
+                        ], random_order=False),
+
                     )
+
 
 
 class CenterAndScalePatch():
