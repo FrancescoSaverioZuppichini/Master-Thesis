@@ -1,7 +1,52 @@
 \documentclass[../document.tex]{subfiles}
 \begin{document}
 \section{Implementation}
-Talk in deep about the implementation
 
+\subsection{Tools}
+The most important tools and libraries used in our work were:
+
+\begin{itemize}
+	\item ROS Melodic
+	\item Numpy
+	\item Matplotlib
+	\item Pandas
+	\item OpenCV
+	\item PyTorch
+	\item FastAI
+	\item Blender
+\end{itemize}
+The framework was entirely developed on Ubuntu 18.10 with Python 3.6.
+
+\subsubsection{ROS Melodic}
+The Robot Operating System (ROS) \cite{ROS} is a flexible framework for writing robot software. It is \emph{de facto} the industry and research standard framework for robotics due to its simple yes effective inferface that facilitates the task of creating robust and complex robot behavior regardless of the platforms. ROS work by generate a peer-to-peer connection where each \emph{node} is to communicate between the others by exposing sockets endpoints to stream data called \emph{topics}. 
+
+Each \emph{node} can subscribe to received the incoming messages or publish new data on a specific \emph{topic}. In our case, \emph{Krock} exposes different topics, for example \texttt{/pose}, in which we can subscribe in order to get the real time informations about the state of the robot.
+Unfortunately, ROS does not natively support Python3, so we had to compile it by hand. Since it was not difficult and time consuming operation we decided to share the ready-to-go binaries as docker image. \todo{where should I place the link to docker}
+
+\subsubsection{Numpy}
+Numpy is a fundamental packages for any scientific use. Thanks to its powerful N-dimensional array object with the sophisticated broadcasting functions, it is possible to express efficiently any matrix operation. We utilised \emph{Numpy} manipulate matrices in an expressive and efficient way.
 \todo[inline]{scrape some text from the previous section}
+
+\subsubsection{Matplotlib}
+Matplotlib is a widely used Python 2D plotting library which generates high  quality figures in a variety of hardcopy formats and interactive environments across platforms. It provides a similar functional interface to MATLAB and a deep ability to customise every region of the figure. Almost every figures made in this report were produced using Matplotlib.
+It is worth citing \emph{seaborn} a data visualization library that we inglobate in our work-flow. It is based on Matplotlib and it provides a high-level interface for drawing attractive and informative statistical graphics.
+\subsubsection{Pandas}
+
+Pandas is a Python library providing fast, flexible, and expressive data structures in a tabular form. It aims to be the fundamental high-level building block for doing practical, real world data analysis in Python. Today, it one of the most flexible open source data manipulation tool available. Pandas is well suited for many different kinds of data such as handle tabular data with heterogeneously-typed columns, similar to SQL table or Excel spreadsheet, time series and matrices. It provides to two primary data structures, \texttt{Series} and \texttt{DataFrame} for representing 1 dimensional and 2 dimensional  data respectively.  
+
+Generally, pandas does not scale well and it is mostly used to handle small dataset while relegating \"big data\" to other frameworks such as Spark or Hadoop. We used Pandas to store the results from the simulator and inside a Thread Queue to parse each \emph{.csv} file efficiently. 
+\subsection{OpenCV}
+Open Source Computer Vision Library, OpenCV, is an open source computer vision library with a rich collection of highly optimized algorithms. It includes classic and state-of-the-art computer vision and machine learning methods applied in a wide array of tasks, such as object detection and face recognition.
+ With a huge community of more than fourtyseven thousand people, the library is a perfect choice to handle image data. 
+In our framework, OpenCV is used to pre and post-proces the heightmaps and the patches.
+\subsection{PyTorch}
+\emph{PyTorch} is Python open source deep learning framework. It provides Tensor computation (like NumPy) with strong GPU acceleration and Deep neural networks built on a tape-based autograd system. Due to its \emph{Python-first} philosophy it has a deep integration into Python allows popular libraries and packages to be used, such as \emph{OpenCV} or \emph{Pillow}.  
+
+Due to its simply yet expressive and beautiful object oriented API it has been adopted be a huge number of researches and enthusiastics all around the world creating a flourishing community. 
+Its main advantage over other mainstream frameworks such as TensorFlow \todo{cite TF} are a cleaner API structure, better debugging, code shareability and enormous number of high quality packages. All the neural network proposed in this project are built using Pytorch.
+
+\subsubsection{FastAI}
+FastAI is  library based on PyTorch that simplifies training fast and accurate neural nets using modern best practices. It provides a high-level API to create train, evaluate and test deep learning models on any type of dataset.
+\subsubsection{Blender}
+Blender is the free and open source 3D creation suite. It supports the entirety of the 3D pipeline modeling, rigging, animation, simulation, rendering, compositing and motion tracking, even video editing and game creation. We used Blender to render some of the 3D terrain used to evaluate the trained model.
 \end{document}
