@@ -45,6 +45,7 @@ def train_and_evaluate(params, train=True, load_model=None):
         patch_size=params['patch_size'],
         test_root='/media/francesco/saetta/krock-dataset/test/',
         test_hm_root='/home/francesco/Documents/Master-Thesis/core/maps/test/',
+        val_root=params['validation'],
         # val_root='/media/francesco/saetta/krock-dataset/val/',
         # val_hm_root='/home/francesco/Documents/Master-Thesis/core/maps/val/',
         generate=False,
@@ -80,7 +81,7 @@ def train_and_evaluate(params, train=True, load_model=None):
     data = DataBunch(train_dl=train_dl, valid_dl=val_dl, test_dl=test_dl)
 
     experiment = Experiment(api_key="8THqoAxomFyzBgzkStlY95MOf",
-                            project_name="krock-new-new-new", workspace="francescosaveriozuppichini")
+                            project_name="krock", workspace="francescosaveriozuppichini")
 
     experiment.log_parameters(params)
     experiment.log_metric("timestamp", timestamp)
@@ -91,7 +92,7 @@ def train_and_evaluate(params, train=True, load_model=None):
 
     learner = Learner(data=data,
                       model=model,
-                      path='/home/francesco/Desktop/carino/vaevictis/data/',
+                      path=model_dir,
                       model_dir=model_dir,
                       loss_func=criterion,
                       opt_func=partial(torch.optim.SGD, momentum=0.95, weight_decay=1e-4),
@@ -161,7 +162,7 @@ if __name__ == '__main__':
               'batch_size': 128,
               # 'model': 'omar',
               'val_size' : 10,
-              'validation': 'from train',
+              'validation': None,
               'model': 'microresnet#4-gate=3x3-n=1-se=True',
               'dataset': '',
               'sampler': '',
@@ -179,20 +180,34 @@ if __name__ == '__main__':
               'only_forward': False,
               'patch_size': 0.66  }
 
-    params['data-aug'] = False
-
-    for _ in range(5):
-        train_and_evaluate(params)
-
+    # params['data-aug'] = False
+    #
+    # for _ in range(5):
+    #     train_and_evaluate(params)
+    #
     params['more_than'] = 0
-
-    for _ in range(5):
-        train_and_evaluate(params)
+    #
+    # for _ in range(5):
+    #     train_and_evaluate(params)
 
     params['data-aug'] = True
+    params['data-aug-type'] = 'Dropout(p=(0.05, 0.1))-RandomSimplexNoise(1, 50)(4,8)',
 
     for _ in range(5):
         train_and_evaluate(params)
+
+    # params['data-aug'] = False
+    #
+    # for _ in range(5):
+    #     train_and_evaluate(params)
+    #
+    # params['more_than'] = None
+    #
+    # for _ in range(5):
+    #     train_and_evaluate(params)
+
+
+
 
     # params['down_sampling'] = None
     #
