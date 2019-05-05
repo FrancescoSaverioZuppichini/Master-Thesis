@@ -87,23 +87,23 @@ We fix the robot's gait in its standard configuration and run fifteen simulation
 
 \begin{figure}[H]
     	\begin{subfigure}[b]{0.5\textwidth}
-			\includegraphics[width=\textwidth]{img/slope_rocks2-3d.png}
+			\includegraphics[width=\textwidth]{img/hm3d/slope_rocks2.png}
 			\caption{height $=1$}
 	    \end{subfigure}
 		\begin{subfigure}[b]{0.5\textwidth}
-			\includegraphics[width=\textwidth]{img/2-slope_rocks2-3d.png}
-			\caption{height $=2$}
+			\includegraphics[width=\textwidth]{img/hm3d/3-slope_rocks2.png}
+			\caption{height $=3$}
 	    \end{subfigure}	
 	   
 	\label{fig: heightmaps-heights}
-	\caption{\emph{Slope rocks 2} map with two different height scaling factor.}	
+	\caption{\emph{Slope\_rocks2} map with two different height scaling factor.}	
 \end{figure}
 
 
 \emph{Krock} is equipped with a controller implemented with the Robotic Operating System (ROS) software that is used as a communication channel between our framework and the simulator. Basically, ROS exposes nodes, called \emph{topics}, in which we can listen for incoming messages. Thus, \emph{Krock} is able to stream its pose to all the clients connected to its pose topic. 
 
 We also generate the test set, by running the robot in real-world environment, such as \emph{Quarry} a cave map, that we later use to test the fitted model. 
-
+\todo[inline]{Update this image, maybe a blender render? }
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{img/querry-big-10.png}
@@ -135,7 +135,7 @@ The second issue was more challenging. If the robot spawns on an obstacle then i
 \caption{\emph{Krock}'s spawns on the \emph{bars1} map.}
 \end{figure}
 We run a total of \todo{add number of simulations} storing the results using ROS's \emph{.bag} files for a total of \todo{add size of all bags.}.
-\section{Postprocessing}
+\subsection{Postprocessing}
 In order to create the training dataset, we need to post process the data stored during the simulation. To train our classifier we need to first compute the advancement for each pose at each time for a specific time window, $pose_{it}$. Then, we can use it to crop a patch from the heightmap that was used in the simulation of the correct size. Such patch must include the whole \emph{Krock} footprint and the maximum possible advancement in a given time window. 
 By keeping this final goal in mind, we quickly describe each step taken to reach it. Figure \ref{fig: pipeline} shows each step applied in the pipeline. 
 \begin{figure}[H]
@@ -159,7 +159,7 @@ Clearly, assuming \emph{Krock} is able to traverse $33$cm of flat ground per sec
 
 \todo[inline]{add figure with the patch computation}
 
-\section{Estimator}
+\subsection{Estimator}
 To classify the patches we need a class associated to each one of them, thus we must label each patch as \emph{traversable} or \emph{not traversable}. So, we selected a threshold, $tr$, and labeled each patch by $patch_{advancement} > tr$. 
 In other words, if \emph{Krock} was able to advance in a patch more than the threshold, then that patch is label as \emph{traversable} and vice-versa. The pair of patches and labels represent the final dataset.
 
