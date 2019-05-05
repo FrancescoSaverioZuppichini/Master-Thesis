@@ -191,7 +191,7 @@ if __name__ == '__main__':
     #     train_and_evaluate(params)
 
     params['data-aug'] = True
-    params['data-aug-type'] = 'Dropout(p=(0.05, 0.1))-RandomSimplexNoise(1, 50)(4,8)',
+    params['data-aug-type'] = 'Dropout(p=(0.05, 0.1))-CoarseDropout((0.02, 0.1),(0.6, 0.8))-RandomSimplexNoise(1, 50)(4,8)',
 
     for _ in range(5):
         train_and_evaluate(params)

@@ -79,8 +79,8 @@ aug = iaa.Sometimes(0.8,
                     iaa.Sequential(
                         [
                             iaa.Dropout(p=(0.05, 0.1)),
-                            # iaa.CoarseDropout((0.02, 0.1),
-                            #                   size_percent=(0.6, 0.8)),
+                            iaa.CoarseDropout((0.02, 0.1),
+                                              size_percent=(0.6, 0.8)),
                             RandomSimplexNoise()
 
                         ], random_order=False),

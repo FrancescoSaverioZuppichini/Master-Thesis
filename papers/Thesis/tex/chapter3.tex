@@ -58,7 +58,25 @@ Blender is the free and open source 3D creation suite. It supports the entirety 
 \subsection{Data Gathering}
 \subsection{Postprocessing}
 \subsection{Estimator}
-\subsubsection{Vanilla Model}
 
+\subsubsection{Vanilla Model}
+We decide to use a Residual Network, ResNet \cite{he2015deep}, variant. Residual network are deep convolutional
+networks with skipped connection. 
+
+Intuitively, a \emph{skip connection}, allows the input 
+of a layer to \emph{skip} it by beeing added to its output. Due to possible different features dimension, the input thought and identify mapping. This allows a stronger gradient flows and mitigates the degradation problem. \emph{Resnet} is composed by a number of blocks stacked in layers. A block is composed by a $3x3$ \emph{Convolution}, \emph{BatchNorm} \cite{ioffe2015batch} and a \emph{Relu} activation function. Formally, a building block is defined as: 
+
+\begin{equation}
+	\mathbf{y}=\mathcal{F}\left(\mathbf{x},\left\{W_{i}\right\}\right)+\mathbf{x}
+	\label{eq : resnet}
+\end{equation}
+Where, $x$ and $y$ are the input and output vector of the layers considered. The function $\mathcal{F}\left(\mathbf{x},\left\{W_{i}\right\}\right)$ is the residual mapping to be learn. The next figure visualise the equation.
+
+\begin{figure}[H]
+\centering
+\includegraphics{}[width=\linewidth]{img/implementation/estimator/resnet_block.png}
+\caption{\emph{Resnet} building block.}
+\end{figure}
+The \emph{skip connection} is added every two blocks, where a block is composed by a $3x3$ \emph{Convolution}, \emph{Batchnorm} and a \emph{Relu} activation function. 
 \subsubsection{Resnet}
 \end{document}
