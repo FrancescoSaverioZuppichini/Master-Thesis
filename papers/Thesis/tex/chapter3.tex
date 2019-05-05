@@ -35,11 +35,11 @@ It is worth citing \emph{seaborn} a data visualization library that we inglobate
 Pandas is a Python library providing fast, flexible, and expressive data structures in a tabular form. It aims to be the fundamental high-level building block for doing practical, real world data analysis in Python. Today, it one of the most flexible open source data manipulation tool available. Pandas is well suited for many different kinds of data such as handle tabular data with heterogeneously-typed columns, similar to SQL table or Excel spreadsheet, time series and matrices. It provides to two primary data structures, \texttt{Series} and \texttt{DataFrame} for representing 1 dimensional and 2 dimensional  data respectively.  
 
 Generally, pandas does not scale well and it is mostly used to handle small dataset while relegating \"big data\" to other frameworks such as Spark or Hadoop. We used Pandas to store the results from the simulator and inside a Thread Queue to parse each \emph{.csv} file efficiently. 
-\subsection{OpenCV}
+\subsubsection{OpenCV}
 Open Source Computer Vision Library, OpenCV, is an open source computer vision library with a rich collection of highly optimized algorithms. It includes classic and state-of-the-art computer vision and machine learning methods applied in a wide array of tasks, such as object detection and face recognition.
  With a huge community of more than fourtyseven thousand people, the library is a perfect choice to handle image data. 
-In our framework, OpenCV is used to pre and post-proces the heightmaps and the patches.
-\subsection{PyTorch}
+In our framework, OpenCV is used to pre and post-process the heightmaps and the patches.
+\subsubsection{PyTorch}
 \emph{PyTorch} is Python open source deep learning framework. It provides Tensor computation (like NumPy) with strong GPU acceleration and Deep neural networks built on a tape-based autograd system. Due to its \emph{Python-first} philosophy it has a deep integration into Python allows popular libraries and packages to be used, such as \emph{OpenCV} or \emph{Pillow}.  
 
 Due to its simply yet expressive and beautiful object oriented API it has been adopted be a huge number of researches and enthusiastics all around the world creating a flourishing community. 
@@ -49,4 +49,9 @@ Its main advantage over other mainstream frameworks such as TensorFlow \todo{cit
 FastAI is  library based on PyTorch that simplifies training fast and accurate neural nets using modern best practices. It provides a high-level API to create train, evaluate and test deep learning models on any type of dataset.
 \subsubsection{Blender}
 Blender is the free and open source 3D creation suite. It supports the entirety of the 3D pipeline modeling, rigging, animation, simulation, rendering, compositing and motion tracking, even video editing and game creation. We used Blender to render some of the 3D terrain used to evaluate the trained model.
+
+\subsection{Data Gathering}
+\subsection{Postprocessing}
+\subsection{Estimator}
+
 \end{document}
