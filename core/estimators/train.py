@@ -13,7 +13,7 @@ from os import path
 from fastai.train import Learner, DataBunch, \
     ReduceLROnPlateauCallback, \
     EarlyStoppingCallback, \
-    SaveModelCallback, DatasetType
+    SaveModelCallback, DatasetType, CSVLogger
 import fastai
 from fastai.metrics import accuracy
 from fastai.layers import CrossEntropyFlat, MSELossFlat
@@ -45,8 +45,8 @@ def train_and_evaluate(params, train=True, load_model=None):
         patch_size=params['patch_size'],
         test_root='/media/francesco/saetta/krock-dataset/test/',
         test_hm_root='/home/francesco/Documents/Master-Thesis/core/maps/test/',
-        val_root='/media/francesco/saetta/krock-dataset/val/',
-        val_hm_root='/home/francesco/Documents/Master-Thesis/core/maps/val/',
+        # val_root='/media/francesco/saetta/krock-dataset/val/',
+        # val_hm_root='/home/francesco/Documents/Master-Thesis/core/maps/val/',
         generate=False,
         val_size = params['val_size'],
         train_transform=get_transform(should_aug=params['data-aug']),
@@ -80,7 +80,7 @@ def train_and_evaluate(params, train=True, load_model=None):
     data = DataBunch(train_dl=train_dl, valid_dl=val_dl, test_dl=test_dl)
 
     experiment = Experiment(api_key="8THqoAxomFyzBgzkStlY95MOf",
-               project_name="krock-patches-square", workspace="francescosaveriozuppichini")
+                            project_name="krock-new-new-new", workspace="francescosaveriozuppichini")
 
     experiment.log_parameters(params)
     experiment.log_metric("timestamp", timestamp)
@@ -102,12 +102,13 @@ def train_and_evaluate(params, train=True, load_model=None):
     model_name_loss = 'loss'
 
     callbacks = [ReduceLROnPlateauCallback(learn=learner, patience=3, factor=0.1),
-                 EarlyStoppingCallback(learn=learner, patience=5)]
+                 EarlyStoppingCallback(learn=learner, patience=5),
+                 CSVLogger(learn=learner)]
 
     if params['tr'] is not None:
         callbacks.append(SaveModelCallback(learn=learner, name=model_name_roc_auc, monitor='roc_auc'))
         callbacks.append(SaveModelCallback(learn=learner, name=model_name_acc, monitor='accuracy'))
-    callbacks.append(SaveModelCallback(learn=learner, name=model_name_loss))
+        callbacks.append(SaveModelCallback(learn=learner, name=model_name_loss))
 
     if train:
         with experiment.train():
@@ -160,29 +161,51 @@ if __name__ == '__main__':
               'batch_size': 128,
               # 'model': 'omar',
               'val_size' : 10,
-              'validation': 'val',
+              'validation': 'from train',
               'model': 'microresnet#4-gate=3x3-n=1-se=True',
               'dataset': '',
               'sampler': '',
               'num_samples': None,
               'sampler_type': 'random',
               'data-aug': True,
-              'data-aug-type': 'coarse-dropout[0.4,0.8], simplex-(1,80)(3,8)',
+              'data-aug-type': 'coarse-dropout[0.6,0.8]',
               'optim': 'sgd',
               'info': 'all height',
               'tr': 0.2,
               'problem' : 'classification',
-              'more_than': 0,
+              'more_than': None,
               'down_sampling': 2,
               'time_window': 50 * 2,
               'only_forward': False,
               'patch_size': 0.66  }
 
-    # params['data-aug'] = True
-    # params['more_than'] = 0
+    params['data-aug'] = False
 
     for _ in range(5):
         train_and_evaluate(params)
+
+    params['more_than'] = 0
+
+    for _ in range(5):
+        train_and_evaluate(params)
+
+    params['data-aug'] = True
+
+    for _ in range(5):
+        train_and_evaluate(params)
+
+    # params['down_sampling'] = None
+    #
+    # for _ in range(5):
+    #     train_and_evaluate(params)
+    #
+    # params['down_sampling'] = 2
+    # params['time_window'] = 50 * 3
+    # params['patch_size'] = 1
+    #
+    # for _ in range(5):
+    #     train_and_evaluate(params)
+
 
     # params['patch_size'] = 1.0
     # params['time_window'] = 50 * 3

@@ -7,11 +7,17 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 
-
 from collections.abc import Iterable
 
 
 class Patch():
+    """
+    Based class for defining a custom patch.
+    When the class is instantiated, it creates a 'tabula rasa'
+    flat patch with size = shape.
+    The patch is built when the Patch.__call__() method is called,
+    internally it calls the .make method that MUST be implemented.
+    """
     def __init__(self, shape, *args, **kwargs):
         self.hm = np.zeros(shape)
         self.shape = shape
@@ -35,29 +41,22 @@ class Patch():
         min, max = self.hm.min(), self.hm.max()
         return (self.hm - min) / (max - min)
 
-    def plot3d(self, title=None, texture=None, colorbar=True, rstride=10, cstride=10, *args, **kwargs):
+    def plot3d(self, title=None, colorbar=True, rstride=2, cstride=2, *args, **kwargs):
         fig = plt.figure(*args, **kwargs)
         ax = fig.add_subplot(111, projection='3d')
         X, Y = np.meshgrid(range(self.hm.shape[0]), range(self.hm.shape[1]))
 
         ax.set_zlim3d(-1, 1)
-        # TODO we should show the texture
-        # colours = plt.cm.viridis(self.texture)
 
-        # I have to transpose the heightmap to correctly show it -> I am not sure why
         surf = ax.plot_surface(X, Y, self.hm,
                                rstride=rstride,
                                cstride=cstride,
                                vmax=1,
-                               vmin=0,
+                               # vmin=0,
                                # facecolors=colours,
                                cmap=plt.cm.viridis,
                                linewidth=0.1)
 
-        # import matplotlib.cm as cm
-        # m = cm.ScalarMappable(cmap=plt.cm.viridis)
-        # m.set_array(self.hm.T)
-        # fig.colorbar(m)
         if colorbar: fig.colorbar(surf)
 
         title = title if title is not None else self.__repr__()
@@ -75,8 +74,7 @@ class Patch():
     def from_range(cls, shape, **kwargs):
         patches = []
 
-        static_fields = {k: v for k,
-                         v in kwargs.items() if not isinstance(v, Iterable)}
+        static_fields = {k: v for k,  v in kwargs.items() if not isinstance(v, Iterable)}
 
         for key, range in kwargs.items():
             if isinstance(range, Iterable):
@@ -160,12 +158,13 @@ class WallPatch(Patch):
         self.strength = strength
         self.offset = offset
         self.size = size
+
     def make(self):
         if self.back:
-            self.hm[:,self.offset: self.offset + self.size] = self.strength
+            self.hm[:, self.offset: self.offset + self.size] = self.strength
         if self.front:
-            self.hm[:,-self.offset - self.size: -self.offset] = self.strength
-            
+            self.hm[:, -self.offset - self.size: -self.offset] = self.strength
+
         self.hm = self.hm
         return self.hm
 
