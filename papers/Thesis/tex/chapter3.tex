@@ -72,23 +72,25 @@ networks constisting of many stacked \"Residual Units \". Intuitively, the resid
 Where, $x$ and $y$ are the input and output vector of the layers considered. The function $\mathcal{F}\left(\mathbf{x},\left\{W_{i}\right\}\right)$ is the residual mapping to be learn and $h$ is the identity mapping. The next figure visualise the equation.
 
 \begin{figure}[H]
-\centering
-\includegraphics[width=\linewidth]{img/implementation/estimator/resnet_block.png}
-\caption{\emph{Resnet} building block.}
+	\centering
+	\includegraphics[scale=0.3]{img/implementation/estimator/resnet_block.png}
+	\caption{\emph{Resnet} building block.}
 \end{figure}
 When the input and output shapes mistmatch, the \emph{residual map} is a $3x3$ Convolution with a stride of 2 to mimic the polling operator. A single block is composed by a $3x3$ \emph{Convolution}, \emph{Batchnorm} and a \emph{Relu} activation function. 
 
-Following the recent work of He et al. \cite{he2015identity} we adopt \emph{pre-activation} in each block. \emph{Pre-activation} just reverse the order of the operation in a block.
+Following the recent work of He et al. \cite{he2015identity} we adopt \emph{pre-activation} in each block
+
+\emph{Pre-activation} just reverse the order of the operation in a block.
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=\linewidth]{img/implementation/estimator/preactivation.png}
+	\includegraphics[scale=0.3]{img/implementation/estimator/preactivation.png}
 	\caption{\emph{Preactivation}}
-	\end{figure}
-To conclude, we also used the \emph{Squeeze and Excitation operator} \cite{hu2017squeeze} a form of attention that weights the channel of each convolutional operation. The next figure visualize the idea.
+\end{figure}
+To conclude, we also used the \emph{Squeeze and Excitation} (SE) module \cite{hu2017squeeze}. A form of attention that weights the channel of each convolutional operation by learnable scaling factors. The next figure visualise the SE module.
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=\linewidth]{img/implementation/estimator/se.png}
 	\caption{\emph{Preactivation}}
-	\end{figure}
+\end{figure}
 
 \end{document}
