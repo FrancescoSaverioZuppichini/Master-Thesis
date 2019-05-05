@@ -1,6 +1,7 @@
 from pypeln import thread as th
 from tqdm import tqdm
 
+
 class Handler:
     def __call__(self, *args, **kwargs):
         raise NotImplemented
@@ -40,30 +41,33 @@ class ForEachApply(ForEach):
         return res
 
 
-
 class MultiThreadWrapper():
     def __init__(self, n_workers, pip):
         self.n_workers = n_workers
-        self.pip= pip
-        
+        self.pip = pip
+
     def __call__(self, data):
         total = None
         if type(data) is list:
             total = len(data)
         return list(tqdm(th.map(self.pip, data, workers=self.n_workers), total=total))
 
+
 class Combine():
     def __call__(self, *results):
         return zip(*results)
 
+
 class Merge():
     def __init__(self, pip):
         self.pip = pip
+
     def __call__(self, *args):
         results = []
         for p, a in zip(self.pip, args):
             results.append(p(a))
         return zip(*results)
+
 
 if __name__ == '__main__':
     import numpy as np
@@ -82,16 +86,11 @@ if __name__ == '__main__':
     def first(foo, *args):
         return foo, 'abc'
 
+
     def second(foo, baa, *args):
         print(foo, baa)
 
         return foo
-                      
+
 
     pipeline = Compose([first, second])
-
-    
-
-
-
-

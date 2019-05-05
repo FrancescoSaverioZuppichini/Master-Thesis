@@ -37,11 +37,11 @@ class RandomSimplexNoise(Augmenter):
     def __init__(self, shape=(76, 76), *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.images = []
-        self.n = 100
+        self.n = 500
         image = np.zeros((shape))
 
         for _ in tqdm(range(self.n)):
-            features_size = np.random.randint(1, 80)
+            features_size = np.random.randint(15, 80)
             im = im2simplex(image.copy(), features_size, 1)
             im = np.expand_dims(im, -1)
             self.images.append(im)
@@ -80,14 +80,12 @@ aug = iaa.Sometimes(0.8,
                         [
                             iaa.Dropout(p=(0.05, 0.1)),
                             iaa.CoarseDropout((0.02, 0.1),
-                                              size_percent=(0.4, 0.8)),
+                                              size_percent=(0.6, 0.8)),
                             # RandomSimplexNoise()
 
                         ], random_order=False),
 
                     )
-
-
 
 class CenterAndScalePatch():
     """
