@@ -63,28 +63,28 @@ Blender is the free and open source 3D creation suite. It supports the entirety 
 \subsubsection{ResNet}
 
 We decide to use a Residual Network, ResNet \cite{he2015deep}, variant. Residual network are deep convolutional
-networks constisting of many stacked \"Residual Units \". Intuitively, the residual unit allows the input of a layer to \emph{skip} it by beeing added to its output. Due to possible different features dimension, the input must go thought and identify map to make the addition possible. This allows a stronger gradient flows and mitigates the degradation problem. A \"Residual Units \" is composed by a two $3x3$ \emph{Convolution}, \emph{BatchNorm} \cite{ioffe2015batch} and a \emph{Relu} block. Formally, it is defined as: 
-
+networks constisting of many stacked \" Residual Units \". Intuitively, the residual unit allows the input of a layer to contribuite to the next layer's input by beeing added to the current layer's output. Due to possible different features dimension, the input must go thought and identify map to make the addition possible. This allows a stronger gradient flows and mitigates the degradation problem. A \"Residual Units \" is composed by a two $3x3$ \emph{Convolution}, \emph{BatchNorm} \cite{ioffe2015batch} and a \emph{Relu} blocks. Formally, it is defined as: 
 \begin{equation}
 	\mathbf{y}=\mathcal{F}\left(\mathbf{x},\left\{W_{i}\right\}\right)+h(\mathbf{x})
 	\label{eq : resnet}
 \end{equation}
-Where, $x$ and $y$ are the input and output vector of the layers considered. The function $\mathcal{F}\left(\mathbf{x},\left\{W_{i}\right\}\right)$ is the residual mapping to be learn and $h$ is the identity mapping. The next figure visualise the equation.
+Where, $x$ and $y$ are the input and output vector of the layers considered. The function $\mathcal{F}\left(\mathbf{x},\left\{W_{i}\right\}\right)$ is the residual mapping to be learn and $h$ is the identity mapping. The next figure visualises the equation.
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[scale=0.3]{img/implementation/estimator/resnet_block.png}
 	\caption{\emph{Resnet} building block.}
 \end{figure}
-When the input and output shapes mistmatch, the \emph{residual map} is a $3x3$ Convolution with a stride of 2 to mimic the polling operator. A single block is composed by a $3x3$ \emph{Convolution}, \emph{Batchnorm} and a \emph{Relu} activation function. 
+When the input and output shapes mistmatch, the \emph{identity map} is applyed to the input as a $3x3$ Convolution with a stride of 2 to mimic the polling operator. A single block is composed by a $3x3$ \emph{Convolution}, \emph{Batchnorm} and a \emph{Relu} activation function. 
 
-Following the recent work of He et al. \cite{he2015identity} we adopt \emph{pre-activation} in each block.\emph{Pre-activation} just reverse the order of the operation in a block.
+Following the recent work of He et al. \cite{he2015identity} we adopt \emph{pre-activation} in each block. Easily, \emph{Pre-activation} reverse the order of the operation in a block.
+
 \begin{figure}[H]
 	\centering
 	\includegraphics[scale=0.2]{img/implementation/estimator/preactivation.png}
 	\caption{\emph{Preactivation}}
 \end{figure}
-To conclude, we also used the \emph{Squeeze and Excitation} (SE) module \cite{hu2017squeeze}. A form of attention that weights the channel of each convolutional operation by learnable scaling factors. The next figure visualise the SE module.
+Finally, we also used the \emph{Squeeze and Excitation} (SE) module \cite{hu2017squeeze}. A form of attention that weights the channel of each convolutional operation by learnable scaling factors. The next figure visualises the SE module.
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=\linewidth]{img/implementation/estimator/se.png}
@@ -92,4 +92,5 @@ To conclude, we also used the \emph{Squeeze and Excitation} (SE) module \cite{hu
 \end{figure}
 \subsubsection{Data Augmentation}
 
+\todo[inline]{add model picture}
 \end{document}

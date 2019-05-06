@@ -34,10 +34,10 @@ def im2simplex(im, feature_size=24, scale=10):
 
 class RandomSimplexNoise(Augmenter):
 
-    def __init__(self, shape=(76, 76), *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, shape=(76, 76), n=10, *args, **kwargs):
+        super().__init__()
         self.images = []
-        self.n = 500
+        self.n = n
         image = np.zeros((shape))
 
         for _ in tqdm(range(self.n)):
@@ -74,14 +74,16 @@ class RandomSimplexNoise(Augmenter):
 
     def _augment_keypoints(self, *args, **kwargs):
         return None
+# TODO this must be in a zoo and be passed as param to CenterAndScalePatch
 
-aug = iaa.Sometimes(0.8,
+def get_aug():
+    return  iaa.Sometimes(0.8,
                     iaa.Sequential(
                         [
                             iaa.Dropout(p=(0.05, 0.1)),
                             iaa.CoarseDropout((0.02, 0.1),
                                               size_percent=(0.6, 0.8)),
-                            RandomSimplexNoise()
+                            # RandomSimplexNoise(n=500)
 
                         ], random_order=False),
 
@@ -95,11 +97,13 @@ class CenterAndScalePatch():
     depending on the map, we need to multiply the patch by a scaling factor.
     """
 
-    def __init__(self, scale=1.0, debug=False, should_aug=False, resize=None):
+    def __init__(self, scale=1.0, debug=False, should_aug=False, resize=None, aug=None):
         self.scale = scale
         self.debug = debug
         self.should_aug = should_aug
         self.resize = resize
+        self.aug = None
+        if self.should_aug: self.aug = get_aug() if aug is None else aug
 
     def show_heatmap(self, x, title, ax):
         ax.set_title(title)
@@ -130,7 +134,7 @@ class CenterAndScalePatch():
 
         if self.should_aug:
             x = (x - min) / (max - min)  # norm to 0,1 -> imgaug does not accept neg values
-            x = aug.augment_image(x)
+            x = self.aug.augment_image(x)
             x = x * (max - min) + min  # go back
 
         if self.resize is not None:
