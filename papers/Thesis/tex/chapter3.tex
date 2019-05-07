@@ -41,22 +41,32 @@ Open Source Computer Vision Library, OpenCV, is an open source computer vision l
  With a huge community of more than fourtyseven thousand people, the library is a perfect choice to handle image data. 
 In our framework, OpenCV is used to pre and post-process the heightmaps and the patches.
 \subsubsection{PyTorch}
-\emph{PyTorch} is Python open source deep learning framework. It provides Tensor computation (like NumPy) with strong GPU acceleration and Deep neural networks built on a tape-based autograd system. Due to its \emph{Python-first} philosophy it has a deep integration into Python allows popular libraries and packages to be used, such as \emph{OpenCV} or \emph{Pillow}.  
+\emph{PyTorch} is Python open source deep learning framework. It allows Tensor computation (like NumPy) with strong GPU acceleration and Deep neural networks built on a tape-based autograd system. Due to its \emph{Python-first} philosophy it has a deep integration into Python allows popular libraries and packages to be used, such as \emph{OpenCV} or \emph{Pillow}.  
 
 Due to its simply yet expressive and beautiful object oriented API it has been adopted be a huge number of researches and enthusiastics all around the world creating a flourishing community. 
 Its main advantage over other mainstream frameworks such as TensorFlow \todo{cite TF} are a cleaner API structure, better debugging, code shareability and enormous number of high quality packages. All the neural network proposed in this project are built using Pytorch.
 
 \subsubsection{FastAI}
-FastAI is  library based on PyTorch that simplifies training fast and accurate neural nets using modern best practices. It provides a high-level API to create train, evaluate and test deep learning models on any type of dataset.
+FastAI is  library based on PyTorch that simplifies fast and accurate neural nets training using modern best practices. It provides a high-level API to create train, evaluate and test deep learning models on any type of dataset.
 
 \subsubsection{imgaug}
-Image augmentation (../imgaug) is a python library to perform image augmenting operations on images. They provide a variety of methodologies, affine transformations, perspective transformations, contrast changes and gaussian noise,  to build sophisticated pipelines. They support images,  heatmaps, segmentation maps, masks, keypoints/landmarks, bounding boxes, polygons and line strings.
+Image augmentation (imgaug) is a python library to perform image augmenting operations on images. It provides a variety of methodologies, such as affine transformations, perspective transformations, contrast changes and gaussian noise, to build sophisticated pipelines. It supports images,  heatmaps, segmentation maps, masks, keypoints/landmarks, bounding boxes, polygons and line strings.
 
 \subsubsection{Blender}
 Blender is the free and open source 3D creation suite. It supports the entirety of the 3D pipeline modeling, rigging, animation, simulation, rendering, compositing and motion tracking, even video editing and game creation. We used Blender to render some of the 3D terrain used to evaluate the trained model.
 
 \subsection{Data Gathering}
 \subsection{Postprocessing}
+We now need to extract the patches for each pose $p_t$ of \emph{Krock} and compute the advancement for a given time window. To create the post processing pipeline, we create an easy to use API \todo{link to the project} to define a cascade stream of function that is applied one after the other using a multi-thread queue to speed-up the process.
+
+First we convert each \emph{.bag} file to a Pandas dataframe and store them as \emph{.csv} files to cache them. We used an open source library that converts the bags file to dataframe to Python3 that we ported to Python3.\todo{library that convert the bags file}.
+Then, we load the dataframes with the respective heightmaps and start the data cleaning process. We need to remove the rows in the first second of the simulation time to account for the robot spawning time. Then we eliminate all the entries where the \emph{Krock} pose was near the edges of a map, we used a threshold of $24$ pixels \todo{check it if it was 24 pixels} since we notice by observing the simulation \emph{Krock} getting stuck in the borders of the terrain.
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.6\textwidth]{img/pipeline}
+\caption{Pipeline}
+\label{fig: pipeline}
+\end{figure}
 \subsection{Estimator}
 
 \subsubsection{Vanilla Model}
@@ -91,8 +101,8 @@ Finally, we also used the \emph{Squeeze and Excitation} (SE) module \cite{hu2017
 	\caption{\emph{Preactivation}}
 \end{figure}
 \todo[inline]{add model picture}
-\subsubsection{Data Augmentation}
-Data augmentation is used to change the input of a model using different techniques to change it in order to produce more training examples. Since our inputs are heightmaps we cannot utilise the classic image manipulations such as shifts, flips and zooms. Imagine that we have a patch with a wall in front of it, if we random rotate the image the wall may go in a position where the patch it is now traversable but its label is still not traversable, we have to be more creative. We decided to apply dropout, coarse dropout and random simplex noise since they are traversability invariant. To illustrate those techniques we are going to use the following example patch of size $100x100$.
+\subsubsection{Normalization}
+Before feeding the data to the models, we need make the patches height invariant. This must be done to correctly normalize different patches taken from different maps with different height scaling factor. We subtract the krock's position height from the patch to correctly center the height.. The following figure shows the normalization process on the patch with the square in the middle.
 \begin{figure}[H]
         \begin{subfigure}[b]{0.5\textwidth}
             \includegraphics[width=\textwidth]{../img/data-aug/2d/square-middle.png}
@@ -102,6 +112,30 @@ Data augmentation is used to change the input of a model using different techniq
         \end{subfigure}    
     \label{fig: square-patch}
     \caption{A patch with a square in the middle}    
+\end{figure}
+
+\subsubsection{Data Augmentation}
+Data augmentation is used to change the input of a model using different techniques to change it in order to produce more training examples. Since our inputs are heightmaps we cannot utilise the classic image manipulations such as shifts, flips and zooms. Imagine that we have a patch with a wall in front of it, if we random rotate the image the wall may go in a position where the patch it is now traversable but its label is still not traversable, we have to be more creative. We decided to apply dropout, coarse dropout and random simplex noise since they are traversability invariant. To illustrate those techniques we are going to use the following example patch of size $100x100$.
+\begin{figure}[H]
+        \begin{subfigure}[b]{0.5\textwidth}
+            \includegraphics[width=\textwidth]{../img/data-aug/2d/square-middle.png}
+            \caption{Input}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.5\textwidth}
+            \includegraphics[width=\textwidth]{../img/data-aug/2d/square-middle-center.png}
+            \caption{Height centered}
+        \end{subfigure}  
+        
+              \begin{subfigure}[b]{0.5\textwidth}
+            \includegraphics[width=\textwidth]{../img/data-aug/3d/square-middle.png}
+            \caption{Input}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.5\textwidth}
+            \includegraphics[width=\textwidth]{../img/data-aug/3d/square-middle-center.png}
+            \caption{Height centered}
+        \end{subfigure}  
+    \label{fig: center}
+    \caption{Normalization process}    
 \end{figure}
 
 \paragraph{Dropout} is a technique to randomly set some pixels to zero, in our case we flat some random pixel in the patch. 

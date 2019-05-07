@@ -136,14 +136,14 @@ The second issue was more challenging. If the robot spawns on an obstacle then i
 \end{figure}
 We run a total of \todo{add number of simulations} storing the results using ROS's \emph{.bag} files for a total of \todo{add size of all bags.}.
 \subsection{Postprocessing}
-In order to create the training dataset, we need to post process the data stored during the simulation. To train our classifier we need to first compute the advancement for each pose at each time for a specific time window, $pose_{it}$. Then, we can use it to crop a patch from the heightmap that was used in the simulation of the correct size. Such patch must include the whole \emph{Krock} footprint and the maximum possible advancement in a given time window. 
-By keeping this final goal in mind, we quickly describe each step taken to reach it. Figure \ref{fig: pipeline} shows each step applied in the pipeline. 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.6\textwidth]{img/pipeline}
-\caption{Pipeline}
-\label{fig: pipeline}
-\end{figure}
+%In order to create the training dataset, we need to post process the data stored during the simulation. To train our classifier we need to first compute the advancement for each pose at each time for a specific time window, $pose_{it}$. Then, we can use it to crop a patch from the heightmap that was used in the simulation of the correct size. Such patch must include the whole \emph{Krock} footprint and the maximum possible advancement in a given time window. 
+%By keeping this final goal in mind, we quickly describe each step taken to reach it. Figure \ref{fig: pipeline} shows each step applied in the pipeline. 
+%\begin{figure}[H]
+%\centering
+%\includegraphics[width=0.6\textwidth]{img/pipeline}
+%\caption{Pipeline}
+%\label{fig: pipeline}
+%\end{figure}
 
 We implemented an easy to use API \todo{link to the project} to define a cascade stream of function that is applied one after the other using a multi-thread queue to speed-up the process.
 First, we convert each \emph{.bag} file into a \emph{.csv} file and store it since this operation must be done only once. Then, we define a time window $t$ and for each entry in one simulation run we compute the future advancement using booth position and angle from the pose, we also store the resulting data frame into a \emph{.csv} file. During the process, we also clean the data by removing the samples in which the robot was upside down or out of the map.
