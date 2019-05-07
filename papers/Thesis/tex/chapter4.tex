@@ -15,7 +15,7 @@ We select as \emph{validation} ten percent of the training data. We remain to th
 The test set is composed by fifty simulations run on the \emph{Quarry} map. 
 \todo[inline]{add more maps if we add them to the test set}
 \subsubsection{Metrics}
-To evaluate the model's performance we used two metrics: \emph{accuracy} and \emph{AUC-ROC Curve}. Accuracy is defined simply by the number of correct predictions made by the network while AUC-ROC Curve represents degree or measure of separability, informally it tells how much model is capable of distinguishing between classes. For each experiment, we select the model with the higher AUC-ROC Curve during training to be evaluated.
+To evaluate the model's performance we used two metrics: \emph{accuracy} and \emph{AUC-ROC Curve}. Accuracy scores the number of correct predictions made by the network while AUC-ROC Curve represents degree or measure of separability, informally it tells how much model is capable of distinguishing between classes. For each experiment, we select the model with the higher AUC-ROC Curve during training to be evaluated.
 \subsection{Quantitative Results}
 The following table shows the final results on various test dataset made by using real-world heightmaps. 
 \todo[inline]{table with results}
@@ -26,6 +26,6 @@ With dropout plus coarse dropout.
 \todo[inline]{table with results}
 \subsection{Qualitative results}
 We qualitative evaluate the models in real world scenarios by computing the traversability probability for each map with different rotation. Specifically, we used a sliding window to extract the patches from the heightmaps and colour by blue the relative region with the coresponding traversability probability. A brighter colour yields an higher probability. The following pictures show the traversability probability on the \emph{Querry} assuming \emph{Krock} is walking from bottom to top.
-
+\todo[inline]{add quarry textures}
 We can notice that the robot has no problems traversing the slopes near the top of the map thanks to its legs.
 \end{document}
