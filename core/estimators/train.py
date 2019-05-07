@@ -176,7 +176,7 @@ if __name__ == '__main__':
               'tr': None,
               'problem' : 'classification',
               'more_than': None,
-              'down_sampling': 2,
+              'down_sampling': None,
               'time_window': 50 * 2,
               'only_forward': False,
               'patch_size': 0.66  }
@@ -219,12 +219,12 @@ if __name__ == '__main__':
     # for _ in range(5):
     #     train_and_evaluate(params)
     #
-    # params['down_sampling'] = 2
-    # params['time_window'] = 50 * 3
-    # params['patch_size'] = 1
-    #
-    # for _ in range(5):
-    #     train_and_evaluate(params)
+    params['down_sampling'] = 2
+    params['time_window'] = 50 * 3
+    params['patch_size'] = 1
+
+    for _ in range(5):
+        train_and_evaluate(params)
 
 
     # params['patch_size'] = 1.0
