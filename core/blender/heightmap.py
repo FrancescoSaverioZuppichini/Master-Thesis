@@ -43,8 +43,8 @@ class BlenderVisualization():
     def render(self, file_path):
         scene = bpy.context.scene
         scene.cycles.samples = 32
-        scene.render.resolution_x = 4096
-        scene.render.resolution_y = 2160
+        scene.render.resolution_x = 7680
+        scene.render.resolution_y = 4320
 
         bpy.context.scene.render.filepath = file_path
         bpy.ops.render.render(use_viewport=True, write_still=True)
@@ -81,7 +81,7 @@ if __name__ == '__main__':
     import bpy
     import glob
     from os import path
-    TEX_DIR = '/home/francesco/Documents/Master-Thesis/resources/assets/textures/'
+    TEX_DIR = '/home/francesco/Documents/Master-Thesis/resources/assets/textures/0.2-0.66/1557073626.4222503'
 
     MAP_NAME = 'querry-big-10'
     texture_paths = glob.glob('{}/{}-*'.format(TEX_DIR, MAP_NAME))

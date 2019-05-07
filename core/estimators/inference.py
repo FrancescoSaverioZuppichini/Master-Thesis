@@ -7,7 +7,7 @@ from estimators.utils import get_learner
 from estimators.data.InferenceDataset import InferenceDataset
 from estimators.utils import get_probs_and_labels_from_preds
 from torch.nn.functional import softmax
-
+from utilities.postprocessing.utils import KrockPatchExtractStrategy
 class HeightMapInference():
     """
     This class create and evaluate a given model checkpoint on a given heightmap by producing
@@ -25,18 +25,19 @@ class HeightMapInference():
         # if self.learner is None:
         self.learner, _ = get_learner(model_name, model_dir, callbacks=[], dataset=self.ds, rotate=rotate)
         probs, labels = get_probs_and_labels_from_preds(self.learner.get_preds(self.learner.data.test_dl))
-        path = self.ds.make_texture(probs.numpy(), labels.numpy(), 'querry-big-10')
+        path = self.ds.make_texture(probs.numpy(), labels.numpy(), 'querry-big-10',
+                                    '/home/francesco/Documents/Master-Thesis/resources/assets/textures/0.2-0.66/')
 
         return path
 
     def for_all_rotation(self, *args, **kwargs):
-        for rotation in [90]:
+        for rotation in [0, 90, 180,270]:
             self(rotate=rotation, *args, **kwargs)
 
 hm_infer = HeightMapInference('../maps/test/querry-big-10.png',
-                              get_transform(None, scale=20, debug=False),)
+                              get_transform(None, scale=10, debug=False),)
 
-model_dir = path.abspath('/home/francesco/Desktop/carino/vaevictis/data/microresnet#4-gate=3x3-n=1-se=True-no-shift-0.001-0.66-1556484043.8083427')
+model_dir = path.abspath('/home/francesco/Desktop/carino/vaevictis/data/microresnet#4-gate=3x3-n=1-se=True--0.001-0.66-1557073626.4222503')
 print(model_dir)
 
 hm_infer.for_all_rotation(model_dir,
