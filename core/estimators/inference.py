@@ -31,7 +31,7 @@ class HeightMapInference():
         return path
 
     def for_all_rotation(self, *args, **kwargs):
-        for rotation in [0, 90, 180,270]:
+        for rotation in [270]:
             self(rotate=rotation, *args, **kwargs)
 
 hm_infer = HeightMapInference('../maps/test/querry-big-10.png',

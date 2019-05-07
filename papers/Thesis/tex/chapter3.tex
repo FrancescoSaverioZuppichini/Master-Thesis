@@ -57,13 +57,25 @@ Blender is the free and open source 3D creation suite. It supports the entirety 
 
 \subsection{Data Gathering}
 \subsection{Postprocessing}
-We now need to extract the patches for each pose $p_t$ of \emph{Krock} and compute the advancement for a given time window. To create the post processing pipeline, we create an easy to use API \todo{link to the project} to define a cascade stream of function that is applied one after the other using a multi-thread queue to speed-up the process.
+We now need to extract the patches for each pose $p_t$ of \emph{Krock} and compute the advancement for a given time window. To create the post processing pipeline, we create an easy to use API \todo{link to the project} to define a cascade stream of function that is applied one after the other using a multi-thread queue to speed-up the process
 
-First we convert each \emph{.bag} file to a Pandas dataframe and store them as \emph{.csv} files to cache them. We used an open source library that converts the bags file to dataframe to Python3 that we ported to Python3.\todo{library that convert the bags file}.
-Then, we load the dataframes with the respective heightmaps and start the data cleaning process. We need to remove the rows in the first second of the simulation time to account for the robot spawning time. Then we eliminate all the entries where the \emph{Krock} pose was near the edges of a map, we used a threshold of $24$ pixels \todo{check it if it was 24 pixels} since we notice by observing the simulation \emph{Krock} getting stuck in the borders of the terrain.
-\begin{figure}[H]
+First we convert each \emph{.bag} file to a Pandas dataframe and cache them into \emph{.csv} files. We used an open source library that converts the bags file to dataframe to Python3 that we ported to Python3.\todo{library that convert the bags file}.
+Then, we load the dataframes with the respective heightmaps and start the data cleaning process. We need to remove the rows in the first second of the simulation time to account for the robot spawning time. Then we eliminate all the entries where the \emph{Krock} pose was near the edges of a map, we used a threshold of $22$ pixels since we notice  \emph{Krock} getting stuck in the borders of the terrain during simulation. 
+After clearning the data, we convert \emph{Krock} rotation express as a quaterion to euler angle using the \emph{tf} packes \todo{link to tf transform} from ROS. Then, we extract the $\sin$ and $\cos$ from the Euler's last component and store them in the dataframe.
+Before caching again resulting dataframes into \emph{.csv} files, we convert the robot's position into heightmap's coordinates to use them later to crop the correct region of the map.
+
+Finally, we load again the last stage and compute the advancement by project the pose's position, $x$ and $y$, in the current line. Then, we select a time window according to the store rate, for if we seclet two seconds we need to multiple the rate by two, so $50*2=100$ since \emph{Krock} published with a $50hz$ frequency. Once the time window is defined, we project $x$ and $y$ on the current line used the $\sin$ and $\cos$ values calculated before to get the advancement.
+
+To create the patches, we first discover the maximum advancement for one second by running some simulations of \emph{Krock} on a flat ground and averaging the advancement. For our robot, the maximum speed is $33cm/s$ Then, we multiply the maximum displacement by the number of seconds we are interested on. With these informations we can now crop the coresponding region in the heightmap by including the whole \emph{Krock}'s footprint and the maximum advancement. The following figure visualise the patch extraction process. 
+
+For each simulation run, a dataframe containing the map coordinates, the advancement and the patch path is created.
+
+The whole pipeline takes less than one hour to run the first time, and, once it is chached, less than fifteen minutes to extract the patches. 
+
+Once we extract the patches, we can always compute again the advancement without re-runnig the whole pipeline. 
+\begin{figure}[H] 
 \centering
-\includegraphics[width=0.6\textwidth]{img/pipeline}
+\includegraphics[width=0.6\textwidth]{../img/pipeline.png}
 \caption{Pipeline}
 \label{fig: pipeline}
 \end{figure}

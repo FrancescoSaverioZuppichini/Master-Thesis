@@ -27,10 +27,13 @@ With dropout plus coarse dropout.
 We qualitative evaluate the models in real world scenarios by computing the traversability probability for each map with different rotation. Specifically, we used a sliding window to extract the patches from the heightmaps and colour by blue the relative region with the corresponding traversability probability. A brighter colour yields an higher probability. For each map we show the traversability from bottom to top, top to bottom, left to right and right to left since those are the most human understandable.
 We will start by showing the traversability probability on the \emph{Quarry} assuming \emph{Krock} is walking from bottom to top.
 \todo[inline]{add quarry textures from bottom to top}
-Thanks to to its legged locomotion, \emph{Krock} can traverse the big slopes in the top part of them map while obliously it is stock by big bumps near the bottom as show in the next figures.
-
+Thanks its special locomotion, \emph{Krock} can traverse the big slopes in the top part of them map while obliously it is stock by big bumps near the bottom as show in the next figures.
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{../img/4/traversability/quarry/querry-big-10-270.png}
+\end{figure}
 \todo[inline]{add figure of krock traversing the big slopes and getting stop near the bottom}
-To convince the reader that those slopes can be traverse, we run \emp{Krock} on them directly from the simulator.
+To convince the reader that those slopes can be traverse, we run \emph{Krock} on them directly from the simulator.
 \todo[inline]{image of one extracted patch from quarry and one run on the simulator} 
 
 \end{document}
