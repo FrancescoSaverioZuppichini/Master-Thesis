@@ -104,12 +104,13 @@ def train_and_evaluate(params, train=True, load_model=None):
 
     callbacks = [ReduceLROnPlateauCallback(learn=learner, patience=3, factor=0.1),
                  EarlyStoppingCallback(learn=learner, patience=5),
-                 CSVLogger(learn=learner)]
+                 CSVLogger(learn=learner),
+                 SaveModelCallback(learn=learner, name=model_name_loss)]
 
     if params['tr'] is not None:
         callbacks.append(SaveModelCallback(learn=learner, name=model_name_roc_auc, monitor='roc_auc'))
         callbacks.append(SaveModelCallback(learn=learner, name=model_name_acc, monitor='accuracy'))
-        callbacks.append(SaveModelCallback(learn=learner, name=model_name_loss))
+        # callbacks.append(SaveModelCallback(learn=learner, name=model_name_loss))
 
     if train:
         with experiment.train():
@@ -162,7 +163,7 @@ if __name__ == '__main__':
               'batch_size': 128,
               # 'model': 'omar',
               'val_size' : 10,
-              'validation': '/media/francesco/saetta/krock-dataset/val/',
+              'validation': None,
               'model': 'microresnet#4-gate=3x3-n=1-se=True',
               'dataset': '',
               'sampler': '',
@@ -172,7 +173,7 @@ if __name__ == '__main__':
               'data-aug-type': 'coarse-dropout[0.6,0.8]',
               'optim': 'sgd',
               'info': 'all height',
-              'tr': 0.2,
+              'tr': None,
               'problem' : 'classification',
               'more_than': None,
               'down_sampling': 2,
@@ -194,9 +195,12 @@ if __name__ == '__main__':
     params['data-aug-type'] = 'Dropout(p=(0.05, 0.1))-CoarseDropout((0.02, 0.1),(0.6, 0.8))-RandomSimplexNoise(1, 50)(6,10)',
     # -RandomSimplexNoise(1, 50)(4, 8)
 
+    # for _ in range(5):
+    #     train_and_evaluate(params)
+
+    params['validation'] = '/media/francesco/saetta/krock-dataset/val/'
     for _ in range(5):
         train_and_evaluate(params)
-
     # params['data-aug'] = False
     #
     # for _ in range(5):
