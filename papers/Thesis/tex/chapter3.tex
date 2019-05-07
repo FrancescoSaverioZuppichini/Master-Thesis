@@ -63,7 +63,7 @@ Blender is the free and open source 3D creation suite. It supports the entirety 
 \subsubsection{ResNet}
 
 We decide to use a Residual Network, ResNet \cite{he2015deep}, variant. Residual network are deep convolutional
-networks constisting of many stacked \" Residual Units \". Intuitively, the residual unit allows the input of a layer to contribuite to the next layer's input by beeing added to the current layer's output. Due to possible different features dimension, the input must go thought and identify map to make the addition possible. This allows a stronger gradient flows and mitigates the degradation problem. A \"Residual Units \" is composed by a two $3x3$ \emph{Convolution}, \emph{BatchNorm} \cite{ioffe2015batch} and a \emph{Relu} blocks. Formally, it is defined as: 
+networks consisting of many stacked \" Residual Units \". Intuitively, the residual unit allows the input of a layer to contribuite to the next layer's input by beeing added to the current layer's output. Due to possible different features dimension, the input must go thought and identify map to make the addition possible. This allows a stronger gradient flows and mitigates the degradation problem. A \"Residual Units \" is composed by a two $3x3$ \emph{Convolution}, \emph{Batchnorm} \cite{ioffe2015batch} and a \emph{Relu} blocks. Formally, it is defined as: 
 \begin{equation}
 	\mathbf{y}=\mathcal{F}\left(\mathbf{x},\left\{W_{i}\right\}\right)+h(\mathbf{x})
 	\label{eq : resnet}
@@ -73,24 +73,59 @@ Where, $x$ and $y$ are the input and output vector of the layers considered. The
 \begin{figure}[H]
 	\centering
 	\includegraphics[scale=0.3]{img/implementation/estimator/resnet_block.png}
-	\caption{\emph{Resnet} building block.}
+	\caption{\emph{Resnet} block.}
 \end{figure}
 When the input and output shapes mistmatch, the \emph{identity map} is applyed to the input as a $3x3$ Convolution with a stride of 2 to mimic the polling operator. A single block is composed by a $3x3$ \emph{Convolution}, \emph{Batchnorm} and a \emph{Relu} activation function. 
 
-Following the recent work of He et al. \cite{he2015identity} we adopt \emph{pre-activation} in each block. Easily, \emph{Pre-activation} reverse the order of the operation in a block.
+Following the recent work of He et al. \cite{he2015identity} we adopt \emph{pre-activation} in each block.\emph{Pre-activation} works by just reverse the order of the operations in a block.
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[scale=0.2]{img/implementation/estimator/preactivation.png}
 	\caption{\emph{Preactivation}}
 \end{figure}
-Finally, we also used the \emph{Squeeze and Excitation} (SE) module \cite{hu2017squeeze}. A form of attention that weights the channel of each convolutional operation by learnable scaling factors. The next figure visualises the SE module.
+Finally, we also used the \emph{Squeeze and Excitation} (SE) module \cite{hu2017squeeze}. It is a form of attention that weights the channel of each convolutional operation by learnable scaling factors. The next figure visualises the SE module.
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=\linewidth]{img/implementation/estimator/se.png}
 	\caption{\emph{Preactivation}}
 \end{figure}
-\subsubsection{Data Augmentation}
-
 \todo[inline]{add model picture}
+\subsubsection{Data Augmentation}
+Data augmentation is used to change the input of a model using different techniques to change it in order to produce more training examples. Since our inputs are heightmaps we cannot utilise the classic image manipulations such as shifts, flips and zooms. Imagine that we have a patch with a wall in front of it, if we random rotate the image the wall may go in a position where the patch it is now traversable but its label is still not traversable, we have to be more creative. We decided to apply dropout, coarse dropout and random simplex noise since they are traversability invariant. To illustrate those techniques we are going to use the following example patch of size $100x100$.
+\begin{figure}[H]
+        \begin{subfigure}[b]{0.5\textwidth}
+            \includegraphics[width=\textwidth]{img/data-aug/2d/square-middle.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.5\textwidth}
+            \includegraphics[width=\textwidth]{img/data-aug/square-middle.png}
+        \end{subfigure}    
+    \label{fig: square-patch}
+    \caption{A patch with a square in the middle}    
+\end{figure}
+
+\paragraph{Dropout} is a technique to randomly set some pixels to zero, in our case we flat some random pixel in the patch. 
+\paragraph{Coarse Dropout} similar to dropout, it sets to zero random regions of pixels.
+\paragraph{Simplex Noise} is a form of Perlin noise that is mostly used in ground generation. Our idea is to add some noise to make the network generalise better since lots of training maps have only obstacles in flat ground. Since it is computational expensive, we randomly fist apply the noise to five hundred images with only zeros. Then, we randomly scaled them and add to the input image. The following images shows the tree data augmentation techniques used applied indipendetly on the input image.
+\todo[inline]{add simplex noise}
+\begin{figure}[H]
+        \begin{subfigure}[b]{0.3\textwidth}
+            \includegraphics[width=\textwidth]{img/data-aug/2d/center-dropout.png}
+            \caption{Dropout}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.3\linewidth}
+            \includegraphics[width=\textwidth]{img/data-aug/2d/center-coarse-dropout.png}
+            \caption{Coarse Dropout}
+            \end{subfigure}    
+
+          \begin{subfigure}[b]{0.3\textwidth}
+            \includegraphics[width=\textwidth]{img/data-aug/2d/center-coarse-dropout.png}
+            \caption{Simplex Noise}
+        \end{subfigure}    
+    \label{fig: square-patch}
+    \caption{Data augmentation}    
+\end{figure}
+It follows an other set of figures that shows the data augmentation we utilised on different inputs.
+\todo[inline]{add the parameters that we set}
+
 \end{document}
