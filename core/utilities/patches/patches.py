@@ -32,9 +32,11 @@ class Patch():
 
     def plot2d(self, title=''):
         fig = plt.figure()
-        sns.heatmap(self.hm, cmap=plt.cm.viridis, vmin=0, vmax=1)
+        sns.heatmap(self.hm, cmap=plt.cm.viridis, vmax=1)
         plt.title(title)
-        plt.show()
+#         plt.show()
+        
+        return fig
 
     @property
     def norm(self):

@@ -83,7 +83,7 @@ def get_aug():
                             iaa.Dropout(p=(0.05, 0.1)),
                             iaa.CoarseDropout((0.02, 0.1),
                                               size_percent=(0.6, 0.8)),
-                            # RandomSimplexNoise(n=500)
+                            RandomSimplexNoise(n=500)
 
                         ], random_order=False),
 

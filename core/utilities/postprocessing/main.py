@@ -1,14 +1,14 @@
 import pprint
-
-from .postprocessing import *
+import pandas as pd
+from utilities.postprocessing.postprocessing import *
 
 import os
 
-MODE = 'train'
+MODE = 'val'
 
 PARSE_DATAFRAMES = False
-ADVANCEMENT = 1
-window = 50 * 3
+ADVANCEMENT = 0.66
+window = 50 * 2
 
 DATASET_DIR = '/media/francesco/saetta/krock-dataset/{}/'.format(MODE)
 N_WORKERS = 16
@@ -50,9 +50,9 @@ if PARSE_DATAFRAMES:
 #
 
 # #
-ADVANCEMENT = 1
+ADVANCEMENT = 0.66
 # PATCH_SIZE = 50 * 2 + 2 * 7
-window = 50 * 3
+window = 50 * 2
 
 print('[INFO] window={}'.format(window))
 patches_out_dir = DATASET_DIR + '/patches/{}/'.format(ADVANCEMENT)

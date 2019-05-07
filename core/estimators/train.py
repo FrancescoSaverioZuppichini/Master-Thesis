@@ -47,7 +47,7 @@ def train_and_evaluate(params, train=True, load_model=None):
         test_hm_root='/home/francesco/Documents/Master-Thesis/core/maps/test/',
         val_root=params['validation'],
         # val_root='/media/francesco/saetta/krock-dataset/val/',
-        # val_hm_root='/home/francesco/Documents/Master-Thesis/core/maps/val/',
+        val_hm_root='/home/francesco/Documents/Master-Thesis/core/maps/val/',
         generate=False,
         val_size = params['val_size'],
         train_transform=get_transform(should_aug=params['data-aug']),
@@ -162,7 +162,7 @@ if __name__ == '__main__':
               'batch_size': 128,
               # 'model': 'omar',
               'val_size' : 10,
-              'validation': None,
+              'validation': '/media/francesco/saetta/krock-dataset/val/',
               'model': 'microresnet#4-gate=3x3-n=1-se=True',
               'dataset': '',
               'sampler': '',
@@ -175,10 +175,10 @@ if __name__ == '__main__':
               'tr': 0.2,
               'problem' : 'classification',
               'more_than': None,
-              'down_sampling': 2,
-              'time_window': 50 * 3,
+              'down_sampling': None,
+              'time_window': 50 * 2,
               'only_forward': False,
-              'patch_size': 1  }
+              'patch_size': 0.66  }
 
     # params['data-aug'] = False
     #
