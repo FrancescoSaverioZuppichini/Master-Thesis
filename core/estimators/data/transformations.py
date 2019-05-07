@@ -34,7 +34,7 @@ def im2simplex(im, feature_size=24, scale=10):
 
 class RandomSimplexNoise(Augmenter):
 
-    def __init__(self, shape=(76, 76), n=10, *args, **kwargs):
+    def __init__(self, shape=(93, 93), n=10, *args, **kwargs):
         super().__init__()
         self.images = []
         self.n = n

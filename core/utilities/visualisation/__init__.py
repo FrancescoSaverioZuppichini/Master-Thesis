@@ -16,8 +16,10 @@ class DataFrameVisualization():
     """
     Visualize a visualization dataframe
     """
-    def __init__(self, df, *args, **kwargs):
+    def __init__(self, df, time_window=None,*args, **kwargs):
+
         self.df = df
+        if time_window is not None: self.df = AddAdvancement(time_window)((self.df, None, None))[0]
 
     def __call__(self, tr, time_window=None):
         if time_window is not None: self.df = AddAdvancement(time_window)((self.df, None, None))[0]
@@ -87,7 +89,7 @@ class DataFrameVisualization():
         return cls(pd.read_csv(path), *args, **kwargs)
 
 class PatchesAndDataframeVisualization(DataFrameVisualization):
-    def __init__(self, df, hm, max_advancement=1, image_dir=None, patch_extractor=PatchExtractStrategy, *args, **kwargs):
+    def __init__(self, df, hm, max_advancement=1, image_dir=None, patch_extractor=KrockPatchExtractStrategy, *args, **kwargs):
         super().__init__(df, *args, **kwargs)
         self.hm = hm
         self.max_advancement = max_advancement

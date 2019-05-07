@@ -7,8 +7,8 @@ import os
 MODE = 'val'
 
 PARSE_DATAFRAMES = False
-ADVANCEMENT = 0.66
-window = 50 * 2
+ADVANCEMENT = 1
+window = 50 * 3
 
 DATASET_DIR = '/media/francesco/saetta/krock-dataset/{}/'.format(MODE)
 N_WORKERS = 16
