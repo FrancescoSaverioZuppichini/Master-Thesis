@@ -44,7 +44,7 @@ In our framework, OpenCV is used to pre and post-process the heightmaps and the 
 \emph{PyTorch} is Python open source deep learning framework. It allows Tensor computation (like NumPy) with strong GPU acceleration and Deep neural networks built on a tape-based autograd system. Due to its \emph{Python-first} philosophy it has a deep integration into Python allows popular libraries and packages to be used, such as \emph{OpenCV} or \emph{Pillow}.  
 
 Due to its simply yet expressive and beautiful object oriented API it has been adopted be a huge number of researches and enthusiastics all around the world creating a flourishing community. 
-Its main advantage over other mainstream frameworks such as TensorFlow \todo{cite TF} are a cleaner API structure, better debugging, code shareability and enormous number of high quality packages. All the neural network proposed in this project are built using Pytorch.
+Its main advantages over other mainstream frameworks such as TensorFlow \todo{cite TF} are a cleaner API structure, better debugging, code shareability and enormous number of high quality packages. All the neural network proposed in this project are built using Pytorch.
 
 \subsubsection{FastAI}
 FastAI is  library based on PyTorch that simplifies fast and accurate neural nets training using modern best practices. It provides a high-level API to create train, evaluate and test deep learning models on any type of dataset.
@@ -56,13 +56,56 @@ Image augmentation (imgaug) is a python library to perform image augmenting oper
 Blender is the free and open source 3D creation suite. It supports the entirety of the 3D pipeline modeling, rigging, animation, simulation, rendering, compositing and motion tracking, even video editing and game creation. We used Blender to render some of the 3D terrain used to evaluate the  trained model.
 
 \subsection{Data Gathering}
-\subsubsection{Heigehtmap generation}
+\subsubsection{Heightmap generation}
+An heightmap is a 2D array, an image, where each pixel's value represent the terrain height.
+
+\begin{figure}[H]
+    \centering
+        \begin{subfigure}[b]{0.45\textwidth}
+            \includegraphics[width=\textwidth]{../img/hm/querry-big-10.png}
+            \caption{\emph{Quarry} heightmap}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.45\linewidth}
+            \includegraphics[width=\textwidth]{../img/quarry-rendered.png}
+            \caption{\emph{Quarry} rendered}
+            \end{subfigure}    
+    \end{figure}
+We generate fifteen terrain using random 2D simplex noise \cite{simplex}, a variant of Perlin noise \cite{perlin}, a widely used technique in terrain generation litterature.
+\todo[inline]{3d rendered heightmap from Blender should visualize better the idea}
+\begin{figure}[H]
+    \centering
+        \begin{subfigure}[b]{0.45\textwidth}
+            \includegraphics[width=\textwidth]{../img/hm/bars1.png}
+            \caption{\emph{bars1}}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.45\linewidth}
+            \includegraphics[width=\textwidth]{../img/hm/holes1.png}
+            \caption{\emph{holes1}}
+            \end{subfigure}    
+          \begin{subfigure}[b]{0.45\textwidth}
+            \includegraphics[width=\textwidth]{../img/hm/slope_rocks1.png}
+            \caption{\emph{slope\_rocks1}}
+        \end{subfigure}    
+        \begin{subfigure}[b]{0.45\textwidth}
+            \includegraphics[width=\textwidth]{../img/hm/steps1.png}
+            \caption{\emph{steps1}}
+        \end{subfigure}    
+    \label{fig: heightmaps}
+    \caption{Some of the synthetic heightmaps}
+\end{figure}
+\subsubsection{Simulator}
+We used Webots to simulate \emph{Krock} behaviour on the previously generated heightmap. The robot controlled was implemented by EPFL \todo{cite them?} and handed to IDSIA \todo{cite?}. The controller implements a ROS' node to publish \emph{Krock} status including its pose at a rate of $250hz$. We decide to reduce it $50hz$ by using ROS build it \texttt{throttle} command. 
+To load the map into the simulator we had to convert to Webots's \emph{.wbt} file. Unfortunately, the simulator lacks of support for images so we had to use a script to read the image and perform the conversion.
+
+To communicate with the simulator, Webots exposes wide number of ROS service, similar to HTTP endpoints, we can ping. To call one service, we first have to get the correct type of the message we wish to send and them we can perfom the call. We decided to implement a litte library called \emph{webots2ros} \todo{link} to perform this call automatically making the code cleaner and more intuitive. 
+
+We also implements one additional library called \emph{agent} \todo{link} to create reusable robot's interfaces independent from the simulator choices. The package supports callback that can be attach to each agent defined using the library to add additional features. Finally, we used \emph{Gym} \cite{gym}, a toolkit to develop and evaluate reinforcement learning algorithm, to define our enviroment in the simulator. Due to the popularity of \emph{Gym}, we  we can easily share our enviroment with other researches or experiment with already made RL algorithm in the future without changing the code.
 
 \subsubsection{Simulation}
 To collect \emph{Krock}'s interection with the enviroment, we spawn it on the ground generated from one heightmap and let it move forward for $20$ seconds. We repeat this process fifty times per each map.
     Unfortunately, spawing the robot is not a trivial task. In certain maps, for example \emph{bars1}, we must be sure to avoid spawing on an obstancle since it will ruin the run and introduce noise in the dataset. To solve the problem, we define a random spawn strategy used in most of the maps without big obstacles such as $slope_rocks$, and a flat ground spawn stragety for the others. The random spawn just select a random position and rotation for the robot. On the other hand, the flat ground strategy first select suitable spawn positions by sliding on the heightmap on a window size equal \emph{Krock}'s footprint and check if the mean pixel value is lower than a small treshold. 
     
-We use K-Means to cluster those points in $k$ clusters where $k$ is the number of spawing points we want, in our case fifty. By clustering we make sure to cover all the importat region of the map. The following pictures shows the proposed spawing points on the \emph{bars1}.
+We clustered those points with K-Means in $k$ clusters where $k$ is the number of spawing points we want, in our case fifty. By clustering we make sure to cover all the importat region of the map. The following pictures shows the proposed spawing points on the \emph{bars1}.
 
 \begin{figure}[H]
     \begin{subfigure}[b]{0.5\textwidth}
@@ -74,7 +117,7 @@ We use K-Means to cluster those points in $k$ clusters where $k$ is the number o
         \caption{K-Means with $k=20$}
     \end{subfigure}  
 \label{fig: spawn-strat}
-\caption{Select $20$ spawning points in \emph{bars1}}    
+\caption{Selecting $20$ spawning points in \emph{bars1}}    
 \end{figure}
 
 
