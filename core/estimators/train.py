@@ -149,7 +149,7 @@ def train_and_evaluate(params, train=True, load_model=None):
     else:
         with experiment.test():
             learner.load(model_name_loss)
-            loss = learner.validate(data.test_dl)
+            loss = learner.validate(data.test_dl)[0]
             print(loss)
             experiment.log_metric("test_acc_from_loss", loss)
 
@@ -173,11 +173,11 @@ if __name__ == '__main__':
               'data-aug-type': 'coarse-dropout[0.6,0.8]',
               'optim': 'sgd',
               'info': 'all height',
-              'tr': None,
+              'tr': 0.2,
               'problem' : 'classification',
               'more_than': None,
-              'down_sampling': None,
-              'time_window': 50 * 2,
+              'down_sampling': 2,
+              'time_window': 50 * 3,
               'only_forward': False,
               'patch_size': 0.66  }
 
@@ -219,12 +219,12 @@ if __name__ == '__main__':
     # for _ in range(5):
     #     train_and_evaluate(params)
     #
-    params['down_sampling'] = 2
-    params['time_window'] = 50 * 3
-    params['patch_size'] = 1
-
-    for _ in range(5):
-        train_and_evaluate(params)
+    # params['down_sampling'] = 2
+    # params['time_window'] = 50 * 3
+    # params['patch_size'] = 1
+    #
+    # for _ in range(5):
+    #     train_and_evaluate(params)
 
 
     # params['patch_size'] = 1.0
