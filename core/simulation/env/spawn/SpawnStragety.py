@@ -36,12 +36,15 @@ class FlatGroundSpawnStrategy():
     def show_spawn_pos(self, positions, label=''):
         fig = plt.figure()
         ax = plt.subplot(1, 1, 1)
-        sns.heatmap(self.hm, ax=ax)
+
+        sns.heatmap(self.hm / 255, ax=ax, cmap=plt.cm.viridis)
 
         handlers = [ax.plot(x, y, marker='o', color='r', ls='', label=label) for x,y in positions]
         plt.legend(handles=[handlers[0][0]])
 
         plt.show()
+
+        return fig
 
     def find_spawn_points(self, size=40, step=2, tol=1e-3):
         positions = []

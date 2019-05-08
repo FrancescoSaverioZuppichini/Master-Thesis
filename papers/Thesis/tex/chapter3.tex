@@ -13,7 +13,7 @@ The most important tools and libraries used in our work were:
 	\item OpenCV
 	\item PyTorch
 	\item FastAI
-	\item ../imgaug
+	\item imgaug
 	\item Blender
 \end{itemize}
 The framework was entirely developed on Ubuntu 18.10 with Python 3.6.
@@ -56,6 +56,28 @@ Image augmentation (imgaug) is a python library to perform image augmenting oper
 Blender is the free and open source 3D creation suite. It supports the entirety of the 3D pipeline modeling, rigging, animation, simulation, rendering, compositing and motion tracking, even video editing and game creation. We used Blender to render some of the 3D terrain used to evaluate the  trained model.
 
 \subsection{Data Gathering}
+\subsubsection{Heigehtmap generation}
+
+\subsubsection{Simulation}
+To collect \emph{Krock}'s interection with the enviroment, we spawn it on the ground generated from one heightmap and let it move forward for $20$ seconds. We repeat this process fifty times per each map.
+    Unfortunately, spawing the robot is not a trivial task. In certain maps, for example \emph{bars1}, we must be sure to avoid spawing on an obstancle since it will ruin the run and introduce noise in the dataset. To solve the problem, we define a random spawn strategy used in most of the maps without big obstacles such as $slope_rocks$, and a flat ground spawn stragety for the others. The random spawn just select a random position and rotation for the robot. On the other hand, the flat ground strategy first select suitable spawn positions by sliding on the heightmap on a window size equal \emph{Krock}'s footprint and check if the mean pixel value is lower than a small treshold. 
+    
+We use K-Means to cluster those points in $k$ clusters where $k$ is the number of spawing points we want, in our case fifty. By clustering we make sure to cover all the importat region of the map. The following pictures shows the proposed spawing points on the \emph{bars1}.
+
+\begin{figure}[H]
+    \begin{subfigure}[b]{0.5\textwidth}
+        \includegraphics[width=\textwidth]{../img/3/spawn/flat-spawn-10.png}
+        \caption{Flat regions}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.5\textwidth}
+        \includegraphics[width=\textwidth]{../img/3/spawn/spawn-10.png}
+        \caption{K-Means with $k=20$}
+    \end{subfigure}  
+\label{fig: spawn-strat}
+\caption{Select $20$ spawning points in \emph{bars1}}    
+\end{figure}
+
+
 \subsection{Postprocessing}
 We now need to extract the patches for each pose $p_t$ of \emph{Krock} and compute the advancement for a given time window. To create the post-processing pipeline, we create an easy to use API \todo{link to the project} to define a cascade stream of function that is applied one after the other using a multi-thread queue to speed-up the process
 
@@ -74,7 +96,7 @@ The whole pipeline takes less than one hour to run the first time with 16 thread
 Once we extract the patches, we can always compute again the advancement without re-running the whole pipeline. The next figure show proposed pipeline.
 \begin{figure}[H] 
 \centering
-\includegraphics[width=0.3\textwidth]{../img/postprocessing-pipeline.jpg}
+\includegraphics[width=0.4\textwidth]{../img/postprocessing-pipeline.jpg}
 \caption{Postprocessing}
 \label{fig: postprocessing-pipeline}
 \end{figure}
@@ -119,17 +141,19 @@ Our network differs is composed by $n$ ResNet blocks, a depth of $d$ and a chann
         \hline
         & micro resnet \\
         \hline 
-        & depth $=1$ \\ 
+        & depth $=3$ \\ 
         \hline 
-        & n $=2$ \\
+        & n $=1$ \\
         \hline
-     &$3 \ x\ 3,\ 16,\ stride\ 1$ \\ 
+     &$3 \ x\ 3,\ 16 \ stride\ 1$ \\ 
+     \hline
+     &$2 \ x\ 2$ max-pool \\ 
      \hline
      & \\
      &$\begin{bmatrix}
       3\ x\ 3, & 16 \\
       3\ x \ 3, & 16 \\  
-     \end{bmatrix} x 2$ \\ 
+     \end{bmatrix}$ x 1 \\ 
      & \\
      \hline     
      & SE-module\\ 
@@ -138,7 +162,7 @@ Our network differs is composed by $n$ ResNet blocks, a depth of $d$ and a chann
      &$\begin{bmatrix}
         3\ x \ 3, & 32 \\
         3\ x\ 3, & 32 \\  
-       \end{bmatrix} x 2$ \\\
+       \end{bmatrix}$ x 1 \\\
        & \\ 
        \hline
        & SE-module\\ 
@@ -147,7 +171,7 @@ Our network differs is composed by $n$ ResNet blocks, a depth of $d$ and a chann
        &$\begin{bmatrix}
         3\ x \ 3, & 64 \\
         3 \ x \ 3, & 64 \\  
-       \end{bmatrix} x 2$ \\  
+       \end{bmatrix}$ x 1 \\  
        & \\
        \hline     
        & SE-module\\ 
@@ -156,47 +180,46 @@ Our network differs is composed by $n$ ResNet blocks, a depth of $d$ and a chann
        \hline
 
     \end{tabular}
-    \caption{micro resnet activaiton}
+    \caption{\emph{micro-resnet} architecture}
 \end{table}
 
 \todo[inline]{add model picture}
 \subsubsection{Normalization}
 Before feeding the data to the models, we need make the patches height invariant. This must be done to correctly normalize different patches taken from different maps with different height scaling factor. We subtract the krock's position height from the patch to correctly center the height.. The following figure shows the normalization process on the patch with the square in the middle.
 \begin{figure}[H]
-        \begin{subfigure}[b]{0.5\textwidth}
-            \includegraphics[width=\textwidth]{../img/data-aug/2d/square-middle.png}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.5\textwidth}
-            \includegraphics[width=\textwidth]{../img/data-aug/square-middle.png}
-        \end{subfigure}    
-    \label{fig: square-patch}
-    \caption{A patch with a square in the middle}    
+    \begin{subfigure}[b]{0.5\textwidth}
+        \includegraphics[width=\textwidth]{../img/data-aug/2d/square-middle.png}
+        \caption{Input}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.5\textwidth}
+        \includegraphics[width=\textwidth]{../img/data-aug/2d/square-middle-center.png}
+        \caption{Height centered}
+    \end{subfigure}  
+    
+          \begin{subfigure}[b]{0.5\textwidth}
+        \includegraphics[width=\textwidth]{../img/data-aug/3d/square-middle.png}
+        \caption{Input}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.5\textwidth}
+        \includegraphics[width=\textwidth]{../img/data-aug/3d/square-middle-center.png}
+        \caption{Height centered}
+    \end{subfigure}  
+\label{fig: center}
+\caption{Normalization process}    
 \end{figure}
 
 \subsubsection{Data Augmentation}
 Data augmentation is used to change the input of a model using different techniques to change it in order to produce more training examples. Since our inputs are heightmaps we cannot utilise the classic image manipulations such as shifts, flips and zooms. Imagine that we have a patch with a wall in front of it, if we random rotate the image the wall may go in a position where the patch it is now traversable but its label is still not traversable, we have to be more creative. We decided to apply dropout, coarse dropout and random simplex noise since they are traversability invariant. To illustrate those techniques we are going to use the following example patch of size $100x100$.
 \begin{figure}[H]
-        \begin{subfigure}[b]{0.5\textwidth}
-            \includegraphics[width=\textwidth]{../img/data-aug/2d/square-middle.png}
-            \caption{Input}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.5\textwidth}
-            \includegraphics[width=\textwidth]{../img/data-aug/2d/square-middle-center.png}
-            \caption{Height centered}
-        \end{subfigure}  
-        
-              \begin{subfigure}[b]{0.5\textwidth}
-            \includegraphics[width=\textwidth]{../img/data-aug/3d/square-middle.png}
-            \caption{Input}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.5\textwidth}
-            \includegraphics[width=\textwidth]{../img/data-aug/3d/square-middle-center.png}
-            \caption{Height centered}
-        \end{subfigure}  
-    \label{fig: center}
-    \caption{Normalization process}    
+    \begin{subfigure}[b]{0.5\textwidth}
+        \includegraphics[width=\textwidth]{../img/data-aug/2d/square-middle.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.5\textwidth}
+        \includegraphics[width=\textwidth]{../img/data-aug/square-middle.png}
+    \end{subfigure}    
+\label{fig: square-patch}
+\caption{A patch with a square in the middle}    
 \end{figure}
-
 \paragraph{Dropout} is a technique to randomly set some pixels to zero, in our case we flat some random pixel in the patch. 
 \paragraph{Coarse Dropout} similar to dropout, it sets to zero random regions of pixels.
 \paragraph{Simplex Noise} is a form of Perlin noise that is mostly used in ground generation. Our idea is to add some noise to make the network generalise better since lots of training maps have only obstacles in flat ground. Since it is computational expensive, we randomly fist apply the noise to five hundred images with only zeros. Then, we randomly scaled them and add to the input image.
@@ -271,5 +294,5 @@ It follows an other set of figures that shows the data augmentation we utilised 
     \caption{Wall}    
 \end{figure}
 \todo[inline]{add the parameters that we set}
-
+In all the traning epochs, we apply data-augmentation to each input image $x$ with a probability of $0.8$. Dropout has a probability between $0.05$ and $0.1$. Coarse dropout with a probability of $0.02$ and $0.1$ with a size of the lower resolution image from which to sample the dropout between $0.6$ and $0.8$. Simplex noise with a feature size between $1$ and $50$ with a random scaling factor between $6$ and $10$. 
 \end{document}
