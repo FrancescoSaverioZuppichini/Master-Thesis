@@ -57,27 +57,26 @@ Blender is the free and open source 3D creation suite. It supports the entirety 
 
 \subsection{Data Gathering}
 \subsection{Postprocessing}
-We now need to extract the patches for each pose $p_t$ of \emph{Krock} and compute the advancement for a given time window. To create the post processing pipeline, we create an easy to use API \todo{link to the project} to define a cascade stream of function that is applied one after the other using a multi-thread queue to speed-up the process
+We now need to extract the patches for each pose $p_t$ of \emph{Krock} and compute the advancement for a given time window. To create the post-processing pipeline, we create an easy to use API \todo{link to the project} to define a cascade stream of function that is applied one after the other using a multi-thread queue to speed-up the process
 
-First we convert each \emph{.bag} file to a Pandas dataframe and cache them into \emph{.csv} files. We used an open source library that converts the bags file to dataframe to Python3 that we ported to Python3.\todo{library that convert the bags file}.
-Then, we load the dataframes with the respective heightmaps and start the data cleaning process. We need to remove the rows in the first second of the simulation time to account for the robot spawning time. Then we eliminate all the entries where the \emph{Krock} pose was near the edges of a map, we used a threshold of $22$ pixels since we notice  \emph{Krock} getting stuck in the borders of the terrain during simulation. 
-After clearning the data, we convert \emph{Krock} rotation express as a quaterion to euler angle using the \emph{tf} packes \todo{link to tf transform} from ROS. Then, we extract the $\sin$ and $\cos$ from the Euler's last component and store them in the dataframe.
+First, we convert each \emph{.bag} file to a Pandas dataframe and cache them into \emph{.csv} files. We used an open source library that converts the bags file to dataframe to Python3 that we ported to Python3.\todo{library that convert the bags file}.
+Then, we load the dataframes with the respective heightmaps and start the data cleaning process. We need to remove the rows in the first second of the simulation time to account for the robot spawning time. Then we eliminate all the entries where the \emph{Krock} pose was near the edges of a map, we used a threshold of $22$ pixels since we notice  \emph{Krock} getting stuck in the borders of the terrain during a simulation. 
+After cleaning the data, we convert \emph{Krock} rotation express as a quaternion to Euler angle using the \emph{tf} package \todo{link to tf transform} from ROS. Then, we extract the $\sin$ and $\cos$ from the Euler orientation last component and store them in the dataframe.
 Before caching again resulting dataframes into \emph{.csv} files, we convert the robot's position into heightmap's coordinates to use them later to crop the correct region of the map.
 
-Finally, we load again the last stage and compute the advancement by project the pose's position, $x$ and $y$, in the current line. Then, we select a time window according to the store rate, for if we seclet two seconds we need to multiple the rate by two, so $50*2=100$ since \emph{Krock} published with a $50hz$ frequency. Once the time window is defined, we project $x$ and $y$ on the current line used the $\sin$ and $\cos$ values calculated before to get the advancement.
+Finally, we load again the last stage and compute the advancement by projecting the pose's position, $x$ and $y$, in the current line. Then, we select a time window according to the store rate, for if we select two seconds we need to multiply the rate by two, so $50*2=100$ since \emph{Krock} published with a $50hz$ frequency. Once the time window is defined, we project $x$ and $y$ on the current line used the $\sin$ and $\cos$ values calculated before to get the advancement.
 
-To create the patches, we first discover the maximum advancement for one second by running some simulations of \emph{Krock} on a flat ground and averaging the advancement. For our robot, the maximum speed is $33cm/s$ Then, we multiply the maximum displacement by the number of seconds we are interested on. With these informations we can now crop the coresponding region in the heightmap by including the whole \emph{Krock}'s footprint and the maximum advancement. The following figure visualise the patch extraction process. 
+To create the patches, we first discover the maximum advancement for one second by running some simulations of \emph{Krock} on flat ground and averaging the advancement. For our robot, the maximum speed is $33cm/s$ Then, we multiply the maximum displacement by the number of seconds we are interested in. We can now crop the corresponding region in the heightmap by including the whole \emph{Krock}'s footprint and the maximum advancement. The following figure visualizes the patch extraction process. 
+\todo[inline]{figure that shows Krock somewhere with the patch bouding boxed}. Lastly, we create a dataframe containing the map coordinates, the advancement, and the patches paths for each simulation run and savewe store them to disk as \emph{.csv} files. 
 
-For each simulation run, a dataframe containing the map coordinates, the advancement and the patch path is created.
+The whole pipeline takes less than one hour to run the first time with 16 threads, and, once it is cached, less than fifteen minutes to extract the patches. 
 
-The whole pipeline takes less than one hour to run the first time, and, once it is chached, less than fifteen minutes to extract the patches. 
-
-Once we extract the patches, we can always compute again the advancement without re-runnig the whole pipeline. 
+Once we extract the patches, we can always compute again the advancement without re-running the whole pipeline. The next figure show proposed pipeline.
 \begin{figure}[H] 
 \centering
-\includegraphics[width=0.6\textwidth]{../img/pipeline.png}
-\caption{Pipeline}
-\label{fig: pipeline}
+\includegraphics[width=0.3\textwidth]{../img/postprocessing-pipeline.jpg}
+\caption{Postprocessing}
+\label{fig: postprocessing-pipeline}
 \end{figure}
 \subsection{Estimator}
 
@@ -112,6 +111,54 @@ Finally, we also used the \emph{Squeeze and Excitation} (SE) module \cite{hu2017
 	\includegraphics[width=\linewidth]{../img/implementation/estimator/se.png}
 	\caption{\emph{Preactivation}}
 \end{figure}
+Our network differs is composed by $n$ ResNet blocks, a depth of $d$ and a channel incrementing factor of $2$. We select $n=1$ and $d=3$ with a starting channel size of $16$, we called this model architecture \emph{micro-resnet}. 
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|lc|}
+        \hline
+        & micro resnet \\
+        \hline 
+        & depth $=1$ \\ 
+        \hline 
+        & n $=2$ \\
+        \hline
+     &$3 \ x\ 3,\ 16,\ stride\ 1$ \\ 
+     \hline
+     & \\
+     &$\begin{bmatrix}
+      3\ x\ 3, & 16 \\
+      3\ x \ 3, & 16 \\  
+     \end{bmatrix} x 2$ \\ 
+     & \\
+     \hline     
+     & SE-module\\ 
+     \hline     
+     & \\
+     &$\begin{bmatrix}
+        3\ x \ 3, & 32 \\
+        3\ x\ 3, & 32 \\  
+       \end{bmatrix} x 2$ \\\
+       & \\ 
+       \hline
+       & SE-module\\ 
+       \hline
+       & \\
+       &$\begin{bmatrix}
+        3\ x \ 3, & 64 \\
+        3 \ x \ 3, & 64 \\  
+       \end{bmatrix} x 2$ \\  
+       & \\
+       \hline     
+       & SE-module\\ 
+       \hline
+       & average pool, $1$-d fc, softmax \\ 
+       \hline
+
+    \end{tabular}
+    \caption{micro resnet activaiton}
+\end{table}
+
 \todo[inline]{add model picture}
 \subsubsection{Normalization}
 Before feeding the data to the models, we need make the patches height invariant. This must be done to correctly normalize different patches taken from different maps with different height scaling factor. We subtract the krock's position height from the patch to correctly center the height.. The following figure shows the normalization process on the patch with the square in the middle.
