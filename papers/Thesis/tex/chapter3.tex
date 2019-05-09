@@ -94,6 +94,29 @@ We generate fifteen terrain using random 2D simplex noise \cite{simplex}, a vari
     \label{fig: heightmaps}
     \caption{Some of the synthetic heightmaps}
 \end{figure}
+
+
+\begin{figure}[H]
+    \centering
+        \begin{subfigure}[b]{0.45\textwidth}
+            \includegraphics[width=\textwidth]{../img/rendered/1.png}
+            \caption{\emph{bars1}}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.45\linewidth}
+            \includegraphics[width=\textwidth]{../img/rendered/2.png}
+            \caption{\emph{holes1}}
+            \end{subfigure}    
+          \begin{subfigure}[b]{0.45\textwidth}
+            \includegraphics[width=\textwidth]{../img/rendered/3.png}
+            \caption{\emph{slope\_rocks1}}
+        \end{subfigure}    
+        \begin{subfigure}[b]{0.45\textwidth}
+            \includegraphics[width=\textwidth]{../img/rendered/4.png}
+            \caption{\emph{steps1}}
+        \end{subfigure}    
+    \label{fig: heightmaps}
+    \caption{Some of the synthetic heightmaps}
+\end{figure}
 \subsubsection{Simulator}
 We used Webots to move \emph{Krock} on the genereted terrain. The robot controlled was implemented by EPFL \todo{cite them?} and handed to IDSIA \todo{cite?}. The controller implements a ROS' node to publish \emph{Krock} status including its pose at a rate of $250hz$. We decide to reduce it $50hz$ by using ROS build it \texttt{throttle} command. 
 To load the map into the simulator we had to convert it to Webots's \emph{.wbt} file. Unfortunately, the simulator lacks support for heightmap so we had to use a script to read the image and perform the conversion.
