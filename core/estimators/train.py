@@ -47,7 +47,7 @@ def train_and_evaluate(params, train=True, load_model=None):
         test_hm_root='/home/francesco/Documents/Master-Thesis/core/maps/test/',
         val_root=params['validation'],
         # val_root='/media/francesco/saetta/krock-dataset/val/',
-        val_hm_root='/home/francesco/Documents/Master-Thesis/core/maps/val/',
+        # val_hm_root='/home/francesco/Documents/Master-Thesis/core/maps/val/',
         generate=False,
         val_size = params['val_size'],
         train_transform=get_transform(should_aug=params['data-aug']),
@@ -68,7 +68,7 @@ def train_and_evaluate(params, train=True, load_model=None):
 
     model_name = load_model if load_model is not None else model_name
 
-    model_dir = path.normpath('/home/francesco/Desktop/carino/vaevictis/data/' + model_name + '/')
+    model_dir = path.normpath('/media/francesco/Carino/vaevictis/data/' + model_name + '/')
 
     os.makedirs(model_dir, exist_ok=True)
 
@@ -103,7 +103,7 @@ def train_and_evaluate(params, train=True, load_model=None):
     model_name_loss = 'loss'
 
     callbacks = [ReduceLROnPlateauCallback(learn=learner, patience=3, factor=0.1),
-                 EarlyStoppingCallback(learn=learner, patience=5),
+                 EarlyStoppingCallback(learn=learner, patience=8),
                  CSVLogger(learn=learner),
                  SaveModelCallback(learn=learner, name=model_name_loss)]
 
@@ -173,20 +173,20 @@ if __name__ == '__main__':
               'data-aug-type': 'coarse-dropout[0.6,0.8]',
               'optim': 'sgd',
               'info': 'all height',
-              'tr': 0.33,
+              'tr': 0.2,
               'problem' : 'classification',
               'more_than': None,
               'down_sampling': 2,
               'time_window': 50 * 2,
               'only_forward': False,
-              'patch_size': 0.66  }
+              'patch_size': 0.66 }
 
     # params['data-aug'] = False
     #
     # for _ in range(5):
     #     train_and_evaluate(params)
     #
-    params['more_than'] = 0
+    # params['more_than'] = 0
     #
     # for _ in range(5):
     #     train_and_evaluate(params)
@@ -198,7 +198,7 @@ if __name__ == '__main__':
     # for _ in range(5):
     #     train_and_evaluate(params)
 
-    params['validation'] = '/media/francesco/saetta/krock-dataset/val/'
+    # params['validation'] = '/media/francesco/saetta/krock-dataset/val/'
     for _ in range(5):
         train_and_evaluate(params)
     # params['data-aug'] = False

@@ -30,12 +30,19 @@ class Patch():
     def make(self, *args, **kwargs):
         raise NotImplementedError
 
-    def plot2d(self, title=''):
+    @property
+    def title(self):
+        return ''
+
+
+    def _plot2d_ax(self, *args, **kwargs):
+        return sns.heatmap(self.hm, cmap=plt.cm.viridis, vmax=1, *args, **kwargs)
+
+    def plot2d(self, title='', *args, **kwargs):
         fig = plt.figure()
-        sns.heatmap(self.hm, cmap=plt.cm.viridis, vmax=1)
-        plt.title(title)
-#         plt.show()
-        
+        self._plot2d_ax(*args, **kwargs)
+        plt.title(self.title)
+
         return fig
 
     @property
@@ -44,31 +51,33 @@ class Patch():
         return (self.hm - min) / (max - min)
 
     def plot3d(self, title=None, colorbar=True, rstride=2, cstride=2, *args, **kwargs):
-        fig = plt.figure(*args, **kwargs)
+        fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
         X, Y = np.meshgrid(range(self.hm.shape[0]), range(self.hm.shape[1]))
 
-        ax.set_zlim3d(-1, 1)
+        # ax.set_zlim3d(-1, 1)
+        # ax.set_zlim3d = (-1, 2)
 
-        surf = ax.plot_surface(X, Y, self.hm,
+
+        surf = ax.plot_surface(X, Y, self.hm.T,
                                rstride=rstride,
                                cstride=cstride,
                                vmax=1,
-                               # vmin=0,
-                               # facecolors=colours,
                                cmap=plt.cm.viridis,
+                               *args, **kwargs,
                                linewidth=0.1)
+        ax.view_init(azim=-20)
 
         if colorbar: fig.colorbar(surf)
 
-        title = title if title is not None else self.__repr__()
+        title = title if title is not None else self.title
         plt.title(title)
 
         return fig, ax
 
     @classmethod
-    def from_hm(cls, hm):
-        p = cls(hm.shape)
+    def from_hm(cls, hm, *args, **kwargs):
+        p = cls(hm.shape, *args, **kwargs)
         p.hm = hm
         return p
 
@@ -87,9 +96,9 @@ class Patch():
         return patches
 
     @classmethod
-    def from_tensor(cls, tensor):
+    def from_tensor(cls, tensor, *args, **kwargs):
         hm = tensor.squeeze().cpu().numpy()
-        return cls.from_hm(hm)
+        return cls.from_hm(hm, *args, **kwargs)
 
     @classmethod
     def from_tensors(cls, tensors):
@@ -118,6 +127,14 @@ class Patch():
         p = cls(hm.shape)
         p.hm = hm / 255
         return p
+
+    @staticmethod
+    def plot_all_2d(patches):
+        return [p.plot2d() for p in patches]
+
+    @staticmethod
+    def plot_all_3d(patches):
+        return [p.plot3d() for p in patches]
 
     def __repr__(self):
         return "Shape = {}".format(self.shape)
@@ -161,6 +178,7 @@ class WallPatch(Patch):
         self.offset = offset
         self.size = size
 
+
     def make(self):
         if self.back:
             self.hm[:, self.offset: self.offset + self.size] = self.strength
@@ -170,6 +188,9 @@ class WallPatch(Patch):
         self.hm = self.hm
         return self.hm
 
+    @property
+    def title(self):
+        return 'height = {}'.format(self.strength)
 
 class BumpsPatch(Patch):
     def __init__(self, shape, resolution=(4, 4), size=(1, 1), strength=1):
