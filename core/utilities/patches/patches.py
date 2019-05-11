@@ -55,7 +55,7 @@ class Patch():
         ax = fig.add_subplot(111, projection='3d')
         X, Y = np.meshgrid(range(self.hm.shape[0]), range(self.hm.shape[1]))
 
-        # ax.set_zlim3d(-1, 1)
+        ax.set_zlim3d(min(np.min(self.hm), -1), max(np.max(self.hm), 1))
         # ax.set_zlim3d = (-1, 2)
 
 

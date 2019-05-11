@@ -47,7 +47,7 @@ def train_and_evaluate(params, train=True, load_model=None):
         test_hm_root='/home/francesco/Documents/Master-Thesis/core/maps/test/',
         val_root=params['validation'],
         # val_root='/media/francesco/saetta/krock-dataset/val/',
-        # val_hm_root='/home/francesco/Documents/Master-Thesis/core/maps/val/',
+        val_hm_root='/home/francesco/Documents/Master-Thesis/core/maps/val/',
         generate=False,
         val_size = params['val_size'],
         train_transform=get_transform(should_aug=params['data-aug']),
@@ -173,9 +173,9 @@ if __name__ == '__main__':
               'data-aug-type': 'coarse-dropout[0.6,0.8]',
               'optim': 'sgd',
               'info': 'all height',
-              'tr': 0.2,
+              'tr': 0.33,
               'problem' : 'classification',
-              'more_than': None,
+              'more_than': 0,
               'down_sampling': 2,
               'time_window': 50 * 2,
               'only_forward': False,
@@ -198,7 +198,7 @@ if __name__ == '__main__':
     # for _ in range(5):
     #     train_and_evaluate(params)
 
-    # params['validation'] = '/media/francesco/saetta/krock-dataset/val/'
+    params['validation'] = '/media/francesco/saetta/krock-dataset/val/'
     for _ in range(5):
         train_and_evaluate(params)
     # params['data-aug'] = False

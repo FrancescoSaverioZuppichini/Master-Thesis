@@ -4,13 +4,13 @@ class Shuffle():
         self.name = f.name
 
     def __call__(self, df):
-        return self.f(df.sample(frac=1))
+        return self.f(df.sample(frac=1, random_state=0))
 
 class Best():
     name = 'best'
 
     def __call__(self, df):
-        df = df.loc[df['prediction'] == 1]
+        df = df.loc[df['label'] == 1]
         df.sort_values(['out_1'], ascending=False)
         return df
 
@@ -18,7 +18,7 @@ class Worst():
     name = 'worst'
 
     def __call__(self, df):
-        df = df.loc[df['prediction'] == 0]
+        df = df.loc[df['label'] == 0]
         df.sort_values(['out_0'], ascending=False)
         return df
 
