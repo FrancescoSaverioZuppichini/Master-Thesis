@@ -31,8 +31,8 @@ import matplotlib.pyplot as plt
 def train_and_evaluate(params, train=True, load_model=None):
     # model = OmarCNN()
     model = zoo[params['model']]
-    print(model)
-    # summary(model.cuda(), (1, params['patch_size'], params['patch_size']))
+    # print(model)
+    summary(model.cuda(), (1, 76,76))
 
     pprint.pprint(params)
 
@@ -102,7 +102,7 @@ def train_and_evaluate(params, train=True, load_model=None):
     model_name_acc = 'accuracy'
     model_name_loss = 'loss'
 
-    callbacks = [ReduceLROnPlateauCallback(learn=learner, patience=3, factor=0.1),
+    callbacks = [ReduceLROnPlateauCallback(learn=learner, patience=3, factor=0.2),
                  EarlyStoppingCallback(learn=learner, patience=8),
                  CSVLogger(learn=learner),
                  SaveModelCallback(learn=learner, name=model_name_loss)]
@@ -117,7 +117,7 @@ def train_and_evaluate(params, train=True, load_model=None):
             # learner.lr_find()
             # learner.recorder.plot()
             # plt.show() # 1e-01
-            # lr = 1e-2
+            # lr = 1e-3
             # learner.fit_one_cycle(params['epochs'], slice(lr), pct_start=0.8, callbacks=callbacks)
             # lr =  1e-4,
             # learner.fit_one_cycle(10, slice(lr), pct_start=0.8, callbacks=callbacks)
@@ -164,19 +164,19 @@ if __name__ == '__main__':
               # 'model': 'omar',
               'val_size' : 10,
               'validation': None,
-              'model': 'microresnet#4-gate=3x3-n=1-se=True',
+              'model': 'microresnet#4-gate=3x3-n=2-se=False',
               'dataset': '',
               'sampler': '',
               'num_samples': None,
               'sampler_type': 'random',
               'data-aug': True,
               'data-aug-type': 'coarse-dropout[0.6,0.8]',
-              'optim': 'sgd',
-              'info': 'all height',
-              'tr': 0.33,
+              'optim': 'sdg',
+              'info': '',
+              'tr': 0.2,
               'problem' : 'classification',
               'more_than': 0,
-              'down_sampling': 2,
+              'down_sampling': None,
               'time_window': 50 * 2,
               'only_forward': False,
               'patch_size': 0.66 }
@@ -201,6 +201,22 @@ if __name__ == '__main__':
     params['validation'] = '/media/francesco/saetta/krock-dataset/val/'
     for _ in range(5):
         train_and_evaluate(params)
+
+    params['model'] = 'microresnet#4-gate=3x3-n=2-se=True'
+    for _ in range(5):
+        train_and_evaluate(params)
+
+    params['model'] = 'microresnet#4-gate=3x3-n=1-se=False'
+    for _ in range(5):
+        train_and_evaluate(params)
+
+    params['model'] = 'microresnet#2-gate=3x3-n=2-se=False'
+    for _ in range(5):
+        train_and_evaluate(params)
+
+    # params['model'] = 'microresnet#4-gate=3x3-n=1-se=True'
+    # for _ in range(5):
+    #     train_and_evaluate(params)
     # params['data-aug'] = False
     #
     # for _ in range(5):
