@@ -176,7 +176,7 @@ if __name__ == '__main__':
               'tr': 0.2,
               'problem' : 'classification',
               'more_than': 0,
-              'down_sampling': 2,
+              'down_sampling': None,
               'time_window': 50 * 2,
               'only_forward': False,
               'patch_size': 0.66 }
