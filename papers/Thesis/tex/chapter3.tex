@@ -148,7 +148,7 @@ Then, we load the dataframes with the respective heightmaps and start the data c
 After cleaning the data, we convert \emph{Krock}quaternion rotation to Euler notation using the \href{https://duckduckgo.com/?q=ros+tf&atb=v154-1__&ia=web}{\texttt{tf}} package from ROS. Then, we extract the $\sin$ and $\cos$ from the Euler orientation last component and store them in a column.
 Before caching again the resulting dataframes into \emph{.csv} files, we convert the robot's position into heightmap's coordinates used later to crop the correct region of the map.
 
-Finally, we load again the last stage and compute the advancement by projecting the pose's position, $x$ and $y$, in the current line. Then, we select a time window according to the store rate, for if we select two seconds we need to multiply the rate by two, so $50*2=100$ since \emph{Krock} published with a $50hz$ frequency. Once the time window is defined, we project $x$ and $y$ on the current line used the $\sin$ and $\cos$ values calculated before to get the advancement.
+Finally, we load again the last stage and compute the advancement by projecting the pose's position, $x$ and $y$, in the current line. Then, we select a time window according to the store rate, for if we select two seconds we need to multiply the rate by two, so $50*2=100$ since \emph{Krock} published with a $50hz$ frequency. Once the time window is defined, we project $x$ and $y$ on the current line The Robot Operating System (ROS) \cite{ROS} is a flexible framework for writing robot software. It is \emph{de facto} the industry and research standard framework for robotics due to its simple yet effective interface that facilitates the task of creating a robust and complex robot behavior regardless of the platforms. ROS works by establishing a peer-to-peer connection where each \emph{node} is to communicate between the others by exposing sockets endpoints, called \emph{topics}, to stream data or send \emph{messages}. used the $\sin$ and $\cos$ values calculated before to get the advancement.
 \subsubsection{Extract patches}
 To create the patches, we first discover the maximum advancement for one second by running some simulations of \emph{Krock} on flat ground and averaging the advancement. For our robot, the maximum speed is $33cm/s$ Then, we multiply the maximum displacement by the number of seconds we are interested in. We can now crop the corresponding region in the heightmap by including the whole \emph{Krock}'s footprint and the maximum advancement. The following figure visualizes the patch extraction process. 
 \todo[inline]{figure that shows Krock somewhere with the patch bounding boxed}. Lastly, we create a final dataframe containing the map coordinates, the advancement, and the patches paths for each simulation and store them to disk as \emph{.csv} files. 
@@ -191,7 +191,6 @@ Following the recent work of He et al. \cite{he2015identity} we adopt \emph{pre-
 \end{figure}
 \subsubsection{Sqeeze and Excitation}
 Finally, we also used the \emph{Squeeze and Excitation} (SE) module \cite{hu2017squeeze}. It is a form of attention that weights the channel of each convolutional operation by learnable scaling factors. Formally, for a given transformation, e.g. Convolution, defined as $\bm{F}_{tr}  : \bm{X} \mapsto \bm{U}$, $\bm{X} \in mathbb{R}^{H' \times W' \times C'}$, $\bm{U} \in \mathbb{R}^{H \times W \times C}$, the SE module first squeeze the information by using average pooling, $\bm{F}_{sq}$, the it excitates them using learnable weights, $\bm{F}_{ex}$ and finally, adaptive recalibration is performed, $\bm{F}_{scale}$.
-\todo[inline]{explain notation}
 The next figure visualises the SE module.
 \begin{figure}[H]
     \centering
@@ -199,56 +198,61 @@ The next figure visualises the SE module.
     \caption{\emph{Squeeze and Excitation} \cite{hu2017squeeze}}
 \end{figure}
 \subsubsection{Micro resnet}
-Our network differs is composed by $n$ ResNet blocks, a depth of $d$ and a channel incrementing factor of $2$. We select $n=1$ and $d=3$ with a starting channel size of $16$, we called this model architecture \emph{micro-resnet}. 
+Our network differs is composed by $n$ ResNet blocks, a depth of $d$ and a channel incrementing factor of $2$. We evaluate $n=[1,2], d=3$ with and without SE module all with a starting channel size of $16$ and finally select $n=1$ and $d=3$ with a starting channel size of $16$, we called this model architecture \emph{micro-resnet}. 
 
 \begin{table}[H]
     \centering
-    \begin{tabular}{|lc|}
+    \ra{1.2}
+        \begin{tabular}{@{}lc|cccc@{}}
         \hline
-        & micro resnet \\
+        & depth   &  \multicolumn{4}{c}{3}  \\ 
         \hline 
-        & depth $=3$ \\ 
-        \hline 
-        & n $=1$ \\
+        & n   & \multicolumn{2}{c}{1} & \multicolumn{2}{c}{2}\\
         \hline
-     &$3 \ x\ 3,\ 16 \ stride\ 1$ \\ 
-     \hline
-     &$2 \ x\ 2$ max-pool \\ 
-     \hline
-     & \\
-     &$\begin{bmatrix}
+    \multirow{12}{*}{Layers}
+     & &\multicolumn{4}{c}{$3 \ x\ 3,\ 16 \ stride\ 1$} \\ 
+     \cline{3-6}
+     & &\multicolumn{4}{c}{$2 \ x\ 2$ max-pool} \\ 
+     \cline{3-6}
+     & & \multicolumn{2}{c}{$\begin{bmatrix}
       3\ x\ 3, & 16 \\
       3\ x \ 3, & 16 \\  
-     \end{bmatrix}$ x 1 \\ 
-     & \\
-     \hline     
-     & SE-module\\ 
-     \hline     
-     & \\
-     &$\begin{bmatrix}
+     \end{bmatrix}$ x 1} & \multicolumn{2}{c}{$\begin{bmatrix}
+        3\ x\ 3, & 16 \\
+        3\ x \ 3, & 16 \\  
+       \end{bmatrix}$ x 2}\\ 
+       \cline{3-6}
+     & & SE & - & SE & -\\ 
+     \cline{3-6}
+     & & \multicolumn{2}{c}{$\begin{bmatrix}
         3\ x \ 3, & 32 \\
         3\ x\ 3, & 32 \\  
-       \end{bmatrix}$ x 1 \\\
-       & \\ 
-       \hline
-       & SE-module\\ 
-       \hline
-       & \\
-       &$\begin{bmatrix}
+       \end{bmatrix}$ x 1} & \multicolumn{2}{c}{$\begin{bmatrix}
+        3\ x\ 3, & 32 \\
+        3\ x \ 3, & 32 \\  
+       \end{bmatrix}$ x 2} \\
+       \cline{3-6}
+       & & SE & - & SE & -\\ 
+       \cline{3-6}
+       & & \multicolumn{2}{c}{$\begin{bmatrix}
         3\ x \ 3, & 64 \\
         3 \ x \ 3, & 64 \\  
-       \end{bmatrix}$ x 1 \\  
-       & \\
-       \hline     
-       & SE-module\\ 
-       \hline
-       & average pool, $1$-d fc, softmax \\ 
+       \end{bmatrix}$ x 1} & \multicolumn{2}{c}{$\begin{bmatrix}
+        3\ x\ 3, & 64 \\
+        3\ x \ 3, & 64 \\  
+       \end{bmatrix}$ x 2}\\  
+       \cline{3-6}
+       & & SE & - & SE & -\\ 
+       \cline{3-6}
+       & & \multicolumn{4}{c}{average pool, $1$-d fc, softmax} \\ 
        \hline
 
+       Parameters & & TODO & 302,610  & TODO & TODO \\
+       \hline
     \end{tabular}
-    \caption{\emph{micro-resnet} architecture}
+    \caption{\emph{micro-resnet} architectures evaluated}
 \end{table}
-
+\todo[inline]{ask omar help to add margin in the rows}
 \todo[inline]{add model picture}
 \subsubsection{Normalization}
 Before feeding the data to the models, we need to make the patches height invariant. This must be done to correctly normalize different patches taken from different maps with different height scaling factor. We subtract the height of the map corresponding \emph{Krock}'s position from the patch to correctly center it. The following figure shows the normalization process on the patch with the square in the middle.
@@ -360,6 +364,5 @@ It follows an other set of figures that shows the data augmentation we utilised 
     \label{fig: others-aug}
     \caption{Wall}    
 \end{figure}
-\todo[inline]{add the parameters that we set}
 In all the traning epochs, we apply data-augmentation to each input image $x$ with a probability of $0.8$. Dropout has a probability between $0.05$ and $0.1$. Coarse dropout with a probability of $0.02$ and $0.1$ with a size of the lower resolution image from which to sample the dropout between $0.6$ and $0.8$. Simplex noise with a feature size between $1$ and $50$ with a random scaling factor between $6$ and $10$. 
 \end{document}

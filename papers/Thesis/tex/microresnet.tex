@@ -1,0 +1,73 @@
+\documentclass{article}
+\usepackage{subfiles}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{biblatex}
+\usepackage{todonotes}
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{todonotes}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage{multirow, multicol, makecell, booktabs}
+\usepackage{array,multirow}
+\usepackage{bm}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand{\cs}[1]{\renewcommand{\tabcolsep}{#1pt}}
+\begin{document}
+\begin{table}[H]
+    \centering
+    \ra{1.2}
+        \begin{tabular}{@{}lc|cccc@{}}
+        \hline
+        & depth   &  \multicolumn{4}{c}{3}  \\ 
+        \hline 
+        & n   & \multicolumn{2}{c}{1} & \multicolumn{2}{c}{2}\\
+        \hline
+    \multirow{12}{*}{Layers}
+     & &\multicolumn{4}{c}{$3 \ x\ 3,\ 16 \ stride\ 1$} \\ 
+     \cline{3-6}
+     & &\multicolumn{4}{c}{$2 \ x\ 2$ max-pool} \\ 
+     \cline{3-6}
+     & & \multicolumn{2}{c}{$\begin{bmatrix}
+      3\ x\ 3, & 16 \\
+      3\ x \ 3, & 16 \\  
+     \end{bmatrix}$ x 1} & \multicolumn{2}{c}{$\begin{bmatrix}
+        3\ x\ 3, & 16 \\
+        3\ x \ 3, & 16 \\  
+       \end{bmatrix}$ x 2}\\ 
+       \cline{3-6}
+     & & SE & - & SE & -\\ 
+     \cline{3-6}
+     & & \multicolumn{2}{c}{$\begin{bmatrix}
+        3\ x \ 3, & 32 \\
+        3\ x\ 3, & 32 \\  
+       \end{bmatrix}$ x 1} & \multicolumn{2}{c}{$\begin{bmatrix}
+        3\ x\ 3, & 32 \\
+        3\ x \ 3, & 32 \\  
+       \end{bmatrix}$ x 2} \\
+       \cline{3-6}
+       & & SE & - & SE & -\\ 
+       \cline{3-6}
+       & & \multicolumn{2}{c}{$\begin{bmatrix}
+        3\ x \ 3, & 64 \\
+        3 \ x \ 3, & 64 \\  
+       \end{bmatrix}$ x 1} & \multicolumn{2}{c}{$\begin{bmatrix}
+        3\ x\ 3, & 64 \\
+        3\ x \ 3, & 64 \\  
+       \end{bmatrix}$ x 2}\\  
+       \cline{3-6}
+       & & SE & - & SE & -\\ 
+       \cline{3-6}
+       & & \multicolumn{4}{c}{average pool, $1$-d fc, softmax} \\ 
+       \hline
+
+       Parameters & & TODO & 302,610  & TODO & TODO \\
+       \hline
+    \end{tabular}
+    \caption{\emph{micro-resnet} architecture}
+\end{table}
+\end{document}

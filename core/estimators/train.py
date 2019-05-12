@@ -47,7 +47,7 @@ def train_and_evaluate(params, train=True, load_model=None):
         test_hm_root='/home/francesco/Documents/Master-Thesis/core/maps/test/',
         val_root=params['validation'],
         # val_root='/media/francesco/saetta/krock-dataset/val/',
-        val_hm_root='/home/francesco/Documents/Master-Thesis/core/maps/val/',
+        # val_hm_root='/home/francesco/Documents/Master-Thesis/core/maps/val/',
         generate=False,
         val_size = params['val_size'],
         train_transform=get_transform(should_aug=params['data-aug']),
@@ -176,7 +176,7 @@ if __name__ == '__main__':
               'tr': 0.2,
               'problem' : 'classification',
               'more_than': 0,
-              'down_sampling': None,
+              'down_sampling': 2,
               'time_window': 50 * 2,
               'only_forward': False,
               'patch_size': 0.66 }
@@ -198,21 +198,21 @@ if __name__ == '__main__':
     # for _ in range(5):
     #     train_and_evaluate(params)
 
-    params['validation'] = '/media/francesco/saetta/krock-dataset/val/'
-    for _ in range(5):
-        train_and_evaluate(params)
-
-    params['model'] = 'microresnet#4-gate=3x3-n=2-se=True'
-    for _ in range(5):
-        train_and_evaluate(params)
+    # params['validation'] = '/media/francesco/saetta/krock-dataset/val/'
+    # for _ in range(5):
+    #     train_and_evaluate(params)
+    #
+    # params['model'] = 'microresnet#4-gate=3x3-n=2-se=True'
+    # for _ in range(5):
+    #     train_and_evaluate(params)
 
     params['model'] = 'microresnet#4-gate=3x3-n=1-se=False'
     for _ in range(5):
         train_and_evaluate(params)
-
-    params['model'] = 'microresnet#2-gate=3x3-n=2-se=False'
-    for _ in range(5):
-        train_and_evaluate(params)
+    #
+    # params['model'] = 'microresnet#2-gate=3x3-n=2-se=False'
+    # for _ in range(5):
+    #     train_and_evaluate(params)
 
     # params['model'] = 'microresnet#4-gate=3x3-n=1-se=True'
     # for _ in range(5):

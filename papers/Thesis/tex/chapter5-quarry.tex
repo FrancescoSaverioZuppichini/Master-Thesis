@@ -1,0 +1,284 @@
+\documentclass[./chapter5.tex]{subfiles}
+\begin{document}
+\section{Interpretability}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/best/patch-2d-0.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/best/patch-2d-1.png}
+    \end{subfigure}  
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/best/patch-2d-2.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/best/patch-2d-3.png}
+    \end{subfigure}  
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/best/patch-2d-4.png}
+    \end{subfigure}  
+
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/best/heatmap-2d-0.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/best/heatmap-2d-1.png}
+    \end{subfigure}  
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/best/heatmap-2d-2.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/best/heatmap-2d-3.png}
+    \end{subfigure}  
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/best/heatmap-2d-4.png}
+    \end{subfigure}  
+
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/best/grad-cam-2d-0.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/best/grad-cam-2d-1.png}
+    \end{subfigure}  
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/best/grad-cam-2d-2.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/best/grad-cam-2d-3.png}
+    \end{subfigure}  
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/best/grad-cam-2d-4.png}
+    \end{subfigure}  
+
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/best/patch-3d-0.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/best/patch-3d-1.png}
+    \end{subfigure}  
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/best/patch-3d-2.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/best/patch-3d-3.png}
+    \end{subfigure}  
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/best/patch-3d-4.png}
+    \end{subfigure}  
+
+\caption{Best}    
+\end{figure}
+
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/worst/patch-2d-0.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/worst/patch-2d-1.png}
+    \end{subfigure}  
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/worst/patch-2d-2.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/worst/patch-2d-3.png}
+    \end{subfigure}  
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/worst/patch-2d-4.png}
+    \end{subfigure}  
+
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/worst/heatmap-2d-0.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/worst/heatmap-2d-1.png}
+    \end{subfigure}  
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/worst/heatmap-2d-2.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/worst/heatmap-2d-3.png}
+    \end{subfigure}  
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/worst/heatmap-2d-4.png}
+    \end{subfigure}  
+
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/worst/grad-cam-2d-0.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/worst/grad-cam-2d-1.png}
+    \end{subfigure}  
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/worst/grad-cam-2d-2.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/worst/grad-cam-2d-3.png}
+    \end{subfigure}  
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/worst/grad-cam-2d-4.png}
+    \end{subfigure}  
+
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/worst/patch-3d-0.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/worst/patch-3d-1.png}
+    \end{subfigure}  
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/worst/patch-3d-2.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/worst/patch-3d-3.png}
+    \end{subfigure}  
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/worst/patch-3d-4.png}
+    \end{subfigure}  
+
+\caption{Worst}    
+\end{figure}
+
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/patch-2d-0.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/patch-2d-1.png}
+    \end{subfigure}  
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/patch-2d-2.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/patch-2d-3.png}
+    \end{subfigure}  
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/patch-2d-4.png}
+    \end{subfigure}  
+
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/heatmap-2d-0.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/heatmap-2d-1.png}
+    \end{subfigure}  
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/heatmap-2d-2.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/heatmap-2d-3.png}
+    \end{subfigure}  
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/heatmap-2d-4.png}
+    \end{subfigure}  
+
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/grad-cam-2d-0.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/grad-cam-2d-1.png}
+    \end{subfigure}  
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/grad-cam-2d-2.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/grad-cam-2d-3.png}
+    \end{subfigure}  
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/grad-cam-2d-4.png}
+    \end{subfigure}  
+
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/patch-3d-0.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/patch-3d-1.png}
+    \end{subfigure}  
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/patch-3d-2.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/patch-3d-3.png}
+    \end{subfigure}  
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/patch-3d-4.png}
+    \end{subfigure}  
+
+\caption{False Positive}    
+\end{figure}
+
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/patch-2d-0.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/patch-2d-1.png}
+    \end{subfigure}  
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/patch-2d-2.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/patch-2d-3.png}
+    \end{subfigure}  
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/patch-2d-4.png}
+    \end{subfigure}  
+
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/heatmap-2d-0.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/heatmap-2d-1.png}
+    \end{subfigure}  
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/heatmap-2d-2.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/heatmap-2d-3.png}
+    \end{subfigure}  
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/heatmap-2d-4.png}
+    \end{subfigure}  
+
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/grad-cam-2d-0.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/grad-cam-2d-1.png}
+    \end{subfigure}  
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/grad-cam-2d-2.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/grad-cam-2d-3.png}
+    \end{subfigure}  
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/grad-cam-2d-4.png}
+    \end{subfigure}  
+
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/patch-3d-0.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/patch-3d-1.png}
+    \end{subfigure}  
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/patch-3d-2.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/patch-3d-3.png}
+    \end{subfigure}  
+    \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/patch-3d-4.png}
+    \end{subfigure}  
+
+\caption{False Negative}    
+\end{figure}
+
+\end{document}
