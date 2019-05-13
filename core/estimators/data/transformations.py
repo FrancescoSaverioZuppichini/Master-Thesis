@@ -24,6 +24,7 @@ class ImgaugWrapper():
         return x
 
 simplex = OpenSimplex()
+
 def im2simplex(im, feature_size=24, scale=10):
     h, w = im.shape[0], im.shape[1]
     for y in range(0, h):
@@ -32,7 +33,9 @@ def im2simplex(im, feature_size=24, scale=10):
             im[x,y] += value / scale
     return im
 
-class RandomSimplexNoise(Augmenter):
+
+
+class RandomSimplexNoise():
 
     def __init__(self, shape=(76, 76), n=10, *args, **kwargs):
         super().__init__()
@@ -43,14 +46,18 @@ class RandomSimplexNoise(Augmenter):
         for _ in tqdm(range(self.n)):
             features_size = np.random.randint(1, 50)
             im = im2simplex(image.copy(), features_size, 1)
-            im = np.expand_dims(im, -1)
+            # im = np.expand_dims(im, -1)
             self.images.append(im)
 
-    def augment_image(self, img,   *args, **kwargs):
-        idx = np.random.randint(0, self.n)
-        scale = np.random.randint(6, 10)
+    def __call__(self, img,  is_traversable):
 
-        return img + (self.images[idx] / scale)
+        idx = np.random.randint(0, self.n)
+
+        if is_traversable: scale = np.random.randint(12, 20)
+        else: scale = np.random.randint(5, 10)
+
+        tmp = self.images[idx] / scale
+        return img + tmp
 
         # features_size = np.random.randint(15, 80)
         # scale = np.random.randint(5, 10)
@@ -82,8 +89,7 @@ def get_aug():
                         [
                             iaa.Dropout(p=(0.05, 0.1)),
                             iaa.CoarseDropout((0.02, 0.1),
-                                              size_percent=(0.6, 0.8)),
-                            RandomSimplexNoise(n=500)
+                                              size_percent=(0.6, 0.8))
 
                         ], random_order=False),
 

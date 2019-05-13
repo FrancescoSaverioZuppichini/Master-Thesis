@@ -1,10 +1,63 @@
 import glob
+import torch
 
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from estimators.data import *
 from torch.utils.data import DataLoader, random_split, RandomSampler, ConcatDataset, WeightedRandomSampler
+import torchvision
+from .transformations import RandomSimplexNoise
+
+class ImbalancedDatasetSampler(torch.utils.data.sampler.Sampler):
+    """Samples elements randomly from a given list of indices for imbalanced dataset
+    Arguments:
+        indices (list, optional): a list of indices
+        num_samples (int, optional): number of samples to draw
+    """
+
+    def __init__(self, dataset, indices=None, num_samples=None):
+        super().__init__(dataset)
+
+        # if indices is not provided,
+        # all elements in the dataset will be considered
+        self.indices = list(range(len(dataset))) \
+            if indices is None else indices
+
+        # if num_samples is not provided,
+        # draw `len(indices)` samples in each iteration
+        self.num_samples = len(self.indices) \
+            if num_samples is None else num_samples
+
+        # distribution of classes in the dataset
+        label_to_count = {}
+        for idx in self.indices:
+            label = self._get_label(dataset, idx)
+            if label in label_to_count:
+                label_to_count[label] += 1
+            else:
+                label_to_count[label] = 1
+
+        # weight for each sample
+        weights = [1.0 / label_to_count[self._get_label(dataset, idx)]
+                   for idx in self.indices]
+        self.weights = torch.DoubleTensor(weights)
+
+    def _get_label(self, dataset, idx):
+        dataset_type = type(dataset)
+        if dataset_type is torchvision.datasets.MNIST:
+            return dataset.train_labels[idx].item()
+        elif dataset_type is torchvision.datasets.ImageFolder:
+            return dataset.imgs[idx][1]
+        elif dataset_type is TraversabilityDataset:
+            return dataset.df['labels'][idx]
+
+    def __iter__(self):
+        return (self.indices[i] for i in torch.multinomial(
+            self.weights, self.num_samples, replacement=True))
+
+    def __len__(self):
+        return self.num_samples
 
 def visualise(dl, n=10):
     fig, axes = plt.subplots(nrows=1, ncols=5, figsize=(20, 4))
@@ -47,6 +100,7 @@ def get_dataloaders(train_root,
     :return: train, val and test dataloaders
     """
 
+    random_simplex_noise = RandomSimplexNoise(n=2000)
 
     # if generate:
     train_meta = pd.read_csv(train_root + '/bags/meta.csv')
@@ -75,7 +129,8 @@ def get_dataloaders(train_root,
                                            tr=tr,
                                            patch_size=patch_size,
                                            more_than=more_than,
-                                           down_sampling=down_sampling
+                                           down_sampling=down_sampling,
+                                           simplex_noise=random_simplex_noise
                                            )
 
     val_root = train_root if val_root is None else val_root
@@ -94,16 +149,16 @@ def get_dataloaders(train_root,
     if num_samples is not None:
         print('[INFO] Sampling')
         train_dl = DataLoader(train_ds,
-                              sampler=RandomSampler(train_ds, num_samples=num_samples, replacement=True),
+                              sampler=ImbalancedDatasetSampler(train_ds),
                               *args, **kwargs)
     else:
         train_dl = DataLoader(train_ds,
                               shuffle=True,
                               *args, **kwargs)
     val_dl = DataLoader(val_ds, shuffle=False, *args, **kwargs)
-    visualise(val_dl)
-    visualise(train_dl)
-    visualise(train_dl)
+    # visualise(val_dl)
+    # visualise(train_dl)
+    # visualise(train_dl)
 
     # test_dl = val_dl
     #
@@ -144,6 +199,7 @@ if __name__ == '__main__':
                                                 down_sampling=2,
                                                 time_window=100,
                                                 patch_size=0.66,
+                                                tr=0.2,
                                                 transform=get_transform(True,
                                                                         debug=True))
 

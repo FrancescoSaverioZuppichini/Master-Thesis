@@ -6,6 +6,7 @@ from mpl_toolkits.mplot3d import \
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
+from functools import partialmethod, partial
 
 from collections.abc import Iterable
 
@@ -133,8 +134,8 @@ class Patch():
         return [p.plot2d() for p in patches]
 
     @staticmethod
-    def plot_all_3d(patches):
-        return [p.plot3d() for p in patches]
+    def plot_all_3d(patches, *args, **kwargs):
+        return [p.plot3d(*args, **kwargs) for p in patches]
 
     def __repr__(self):
         return "Shape = {}".format(self.shape)
@@ -190,7 +191,7 @@ class WallPatch(Patch):
 
     @property
     def title(self):
-        return 'height = {}'.format(self.strength)
+        return 'height = {}, offset = {}'.format(self.strength, (self.offset * 2) / 100)
 
 class BumpsPatch(Patch):
     def __init__(self, shape, resolution=(4, 4), size=(1, 1), strength=1):
@@ -229,6 +230,14 @@ class RampPatch(Patch):
         self.hm = self.hm + factors
         return self.hm
 
+    
+class HeatMapShowable():
+    def heatmap(self, size=(16, 16)):
+        #         TODO -> should return a Patch instead
+        hm = cv2.resize(self.hm, size)
+        p = Patch.from_hm(hm)
+        p._plot2d_ax = partial(p._plot2d_ax, annot=True, fmt=".2f")
+        return p
 #
 # p = WallPatch((513, 513), back=False, offset=513//2 + 2)
 # p.hm[220:224] = 0.1

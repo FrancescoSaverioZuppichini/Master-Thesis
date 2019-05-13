@@ -20,6 +20,7 @@ from utilities.postprocessing.utils import hmpatch
 random.seed(0)
 np.random.seed(0)
 
+
 class TraversabilityDataset(Dataset):
     def __init__(self, df, hm,
                  patches_dir,
@@ -29,6 +30,7 @@ class TraversabilityDataset(Dataset):
                  transform=None,
                  more_than=None,
                  down_sampling=None,
+                 simplex_noise=None,
                  ):
         self.hm = hm
         self.patches_dir = patches_dir
@@ -36,7 +38,7 @@ class TraversabilityDataset(Dataset):
         self.tr = tr
         self.transform = transform
         self.df = df
-
+        self.simplex_noise = simplex_noise
         self.should_generate_paths = not 'images' in df
 
         self.preprocess_df = Compose([AddAdvancement(time_window)])
@@ -77,7 +79,14 @@ class TraversabilityDataset(Dataset):
 
         y = torch.tensor(y)
 
-        return self.transform(patch), y
+        if 'label' in self.df and  self.simplex_noise is not None:
+            if np.random.random() > 0.2:
+                patch = self.simplex_noise(patch, row['label'])
+
+        patch =  self.transform(patch)
+
+
+        return patch, y
 
     def __len__(self):
         return len(self.df)
@@ -92,7 +101,8 @@ class TraversabilityDataset(Dataset):
 
         if n is not None: datasets = datasets[:n]
         concat_ds = ConcatDataset(datasets)
-
+        concat_ds.c = 2
+        concat_ds.classes = 'False', 'True'
         return concat_ds
 
     @classmethod
@@ -123,6 +133,8 @@ class TraversabilityDataset(Dataset):
                 datasets.append(cls(df, root, *args, **kwargs))
 
         concat_ds = ConcatDataset(datasets)
+        concat_ds.c = 2
+        concat_ds.classes = 'False', 'True'
         return concat_ds
 
 

@@ -27,6 +27,7 @@ torch.backends.cudnn.benchmark = True
 # np.random.seed(0)
 # if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
 import matplotlib.pyplot as plt
+from fastai.vision import ClassificationInterpretation
 
 def train_and_evaluate(params, train=True, load_model=None):
     # model = OmarCNN()
@@ -47,7 +48,7 @@ def train_and_evaluate(params, train=True, load_model=None):
         test_hm_root='/home/francesco/Documents/Master-Thesis/core/maps/test/',
         val_root=params['validation'],
         # val_root='/media/francesco/saetta/krock-dataset/val/',
-        # val_hm_root='/home/francesco/Documents/Master-Thesis/core/maps/val/',
+        val_hm_root='/home/francesco/Documents/Master-Thesis/core/maps/val/',
         generate=False,
         val_size = params['val_size'],
         train_transform=get_transform(should_aug=params['data-aug']),
@@ -95,15 +96,18 @@ def train_and_evaluate(params, train=True, load_model=None):
                       path=model_dir,
                       model_dir=model_dir,
                       loss_func=criterion,
-                      opt_func=partial(torch.optim.SGD, momentum=0.95, weight_decay=1e-4),
+                      # opt_func=partial(torch.optim.SGD, momentum=0.95, weight_decay=1e-4),
+                      opt_func=torch.optim.Adam,
+
                       metrics=[*metrics, Timer()])
 
     model_name_roc_auc = 'roc_auc'
     model_name_acc = 'accuracy'
     model_name_loss = 'loss'
 
-    callbacks = [ReduceLROnPlateauCallback(learn=learner, patience=3, factor=0.2),
-                 EarlyStoppingCallback(learn=learner, patience=8),
+    callbacks = [
+                # ReduceLROnPlateauCallback(learn=learner, patience=10, factor=0.2),
+                 # EarlyStoppingCallback(learn=learner, patience=25),
                  CSVLogger(learn=learner),
                  SaveModelCallback(learn=learner, name=model_name_loss)]
 
@@ -114,16 +118,27 @@ def train_and_evaluate(params, train=True, load_model=None):
 
     if train:
         with experiment.train():
-            # learner.lr_find()
-            # learner.recorder.plot()
-            # plt.show() # 1e-01
+            learner.lr_find()
+            learner.recorder.plot()
+            plt.show() # 1e-02
             # lr = 1e-3
-            # learner.fit_one_cycle(params['epochs'], slice(lr), pct_start=0.8, callbacks=callbacks)
+            learner.fit_one_cycle(5, slice(params['lr']))
+
+            learner.lr_find()
+            learner.recorder.plot()
+            plt.show() # 1e-02
+
+
+            learner.fit_one_cycle(10, max_lr=(1e-4, 1e-6), callbacks=callbacks)
+
+            interp = ClassificationInterpretation.from_learner(learner)
+            interp.plot_confusion_matrix()
+            plt.show()
             # lr =  1e-4,
             # learner.fit_one_cycle(10, slice(lr), pct_start=0.8, callbacks=callbacks)
-
-            learner.fit(epochs=params['epochs'], lr=params['lr'],
-                        callbacks=callbacks)  # SaveModelCallback load the best model after training!
+            #
+            # learner.fit(epochs=params['epochs'], lr=params['lr'],
+            #             callbacks=callbacks)  # SaveModelCallback load the best model after training!
     if params['tr'] is not None:
         with experiment.test():
             learner.load(model_name_loss)
@@ -159,24 +174,24 @@ def train_and_evaluate(params, train=True, load_model=None):
 
 if __name__ == '__main__':
     params = {'epochs': 30,
-              'lr': 1e-3,
+              'lr': 1e-2,
               'batch_size': 128,
               # 'model': 'omar',
               'val_size' : 10,
               'validation': None,
               'model': 'microresnet#4-gate=3x3-n=2-se=False',
               'dataset': '',
-              'sampler': '',
-              'num_samples': None,
+              'sampler': 'imbalance',
+              'num_samples': True,
               'sampler_type': 'random',
               'data-aug': True,
               'data-aug-type': 'coarse-dropout[0.6,0.8]',
-              'optim': 'sdg',
+              'optim': 'adam-fit_one_cycle-1e-2-1e-4',
               'info': '',
               'tr': 0.2,
               'problem' : 'classification',
               'more_than': 0,
-              'down_sampling': None,
+              'down_sampling': 2,
               'time_window': 50 * 2,
               'only_forward': False,
               'patch_size': 0.66 }
@@ -192,13 +207,13 @@ if __name__ == '__main__':
     #     train_and_evaluate(params)
 
     params['data-aug'] = True
-    params['data-aug-type'] = 'Dropout(p=(0.05, 0.1))-CoarseDropout((0.02, 0.1),(0.6, 0.8))-RandomSimplexNoise(1, 50)(6,10)',
+    params['data-aug-type'] = 'Dropout(p=(0.05, 0.1))-CoarseDropout((0.02, 0.1),(0.6, 0.8))-RandomSimplexNoise(2000)(1, 50)-0.8-imbalance',
     # -RandomSimplexNoise(1, 50)(4, 8)
 
     # for _ in range(5):
     #     train_and_evaluate(params)
 
-    # params['validation'] = '/media/francesco/saetta/krock-dataset/val/'
+    params['validation'] = '/media/francesco/saetta/krock-dataset/val/'
     # for _ in range(5):
     #     train_and_evaluate(params)
     #
@@ -206,10 +221,17 @@ if __name__ == '__main__':
     # for _ in range(5):
     #     train_and_evaluate(params)
 
-    params['model'] = 'microresnet#4-gate=3x3-n=1-se=False'
+
+    params['model'] = 'microresnet#4-gate=3x3-n=1-se=True'
+    params['lr'] =  1e-2
     for _ in range(5):
         train_and_evaluate(params)
+
     #
+    # params['model'] = 'microresnet#4-gate=3x3-n=2-se=False'
+    # for _ in range(5):
+    #     train_and_evaluate(params)
+
     # params['model'] = 'microresnet#2-gate=3x3-n=2-se=False'
     # for _ in range(5):
     #     train_and_evaluate(params)

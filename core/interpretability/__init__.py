@@ -146,13 +146,6 @@ class GrandCamAnswarable():
         x = x[1]['cam']
         return Patch.from_hm(x / 255)
 
-class HeatMapShowable():
-    def heatmap(self, size=(16, 16)):
-        #         TODO -> should return a Patch instead
-        hm = cv2.resize(self.hm, size)
-        p = Patch.from_hm(hm)
-        p._plot2d_ax = partial(p._plot2d_ax, annot=True, fmt=".2f")
-        return p
 
 class PatchAnswer(WebotsRunnablePatch, GrandCamAnswarable, HeatMapShowable):
     def __init__(self, patch_size, info, *args, **kwargs):
