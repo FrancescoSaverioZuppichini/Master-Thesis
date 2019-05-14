@@ -83,6 +83,7 @@ class TraversabilityDataset(Dataset):
             if np.random.random() > 0.2:
                 patch = self.simplex_noise(patch, row['label'])
 
+
         patch =  self.transform(patch)
 
 

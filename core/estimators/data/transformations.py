@@ -44,7 +44,7 @@ class RandomSimplexNoise():
         image = np.zeros((shape))
 
         for _ in tqdm(range(self.n)):
-            features_size = np.random.randint(1, 50)
+            features_size = np.random.randint(3, 50)
             im = im2simplex(image.copy(), features_size, 1)
             # im = np.expand_dims(im, -1)
             self.images.append(im)

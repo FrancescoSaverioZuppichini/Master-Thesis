@@ -7,7 +7,7 @@ import seaborn as sns
 from estimators.data import *
 from torch.utils.data import DataLoader, random_split, RandomSampler, ConcatDataset, WeightedRandomSampler
 import torchvision
-from .transformations import RandomSimplexNoise
+from estimators.data.transformations import RandomSimplexNoise
 
 class ImbalancedDatasetSampler(torch.utils.data.sampler.Sampler):
     """Samples elements randomly from a given list of indices for imbalanced dataset
@@ -100,7 +100,7 @@ def get_dataloaders(train_root,
     :return: train, val and test dataloaders
     """
 
-    random_simplex_noise = RandomSimplexNoise(n=2000)
+    random_simplex_noise = RandomSimplexNoise(n=500)
 
     # if generate:
     train_meta = pd.read_csv(train_root + '/bags/meta.csv')
@@ -143,7 +143,9 @@ def get_dataloaders(train_root,
                                            time_window=time_window,
                                            transform=val_transform,
                                            tr=tr,
-                                           patch_size=patch_size)
+                                           patch_size=patch_size
+                                           # simplex_noise=random_simplex_noise
+                                         )
 
 
     if num_samples is not None:
@@ -183,6 +185,9 @@ def get_dataloaders(train_root,
 
 if __name__ == '__main__':
     from estimators.data.TraversabilityDataset import TraversabilityDataset
+    from estimators.data.transformations import RandomSimplexNoise
+
+    simplex_noise = RandomSimplexNoise(n=10)
     import time
 
     start = time.time()
@@ -200,6 +205,7 @@ if __name__ == '__main__':
                                                 time_window=100,
                                                 patch_size=0.66,
                                                 tr=0.2,
+                                                simplex_noise=simplex_noise,
                                                 transform=get_transform(True,
                                                                         debug=True))
 

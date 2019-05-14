@@ -1,10 +1,11 @@
 import pprint
 import pandas as pd
 from utilities.postprocessing.postprocessing import *
+from utilities.visualisation import DataFrameVisualization
 
 import os
 
-MODE = 'val'
+MODE = 'train'
 
 PARSE_DATAFRAMES = False
 ADVANCEMENT = 0.66
@@ -70,4 +71,6 @@ extract_patches = MultiThreadWrapper(N_WORKERS, Compose([
 
 ]))
 
-extract_patches(meta.iterrows())
+# extract_patches(meta.iterrows())
+
+DataFrameVisualization.from_root(meta_df_out_dir)(0.2)

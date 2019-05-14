@@ -27,7 +27,6 @@ torch.backends.cudnn.benchmark = True
 # np.random.seed(0)
 # if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
 import matplotlib.pyplot as plt
-from fastai.vision import ClassificationInterpretation
 
 def train_and_evaluate(params, train=True, load_model=None):
     # model = OmarCNN()
@@ -81,7 +80,7 @@ def train_and_evaluate(params, train=True, load_model=None):
 
     data = DataBunch(train_dl=train_dl, valid_dl=val_dl, test_dl=test_dl)
 
-    experiment = Experiment(api_key="8THqoAxomFyzBgzkStlY95MOf",
+    experiment = Experiment(api_key="<HIDDEN>",
                             project_name="krock", workspace="francescosaveriozuppichini")
 
     experiment.log_parameters(params)
@@ -96,18 +95,15 @@ def train_and_evaluate(params, train=True, load_model=None):
                       path=model_dir,
                       model_dir=model_dir,
                       loss_func=criterion,
-                      # opt_func=partial(torch.optim.SGD, momentum=0.95, weight_decay=1e-4),
-                      opt_func=torch.optim.Adam,
-
+                      opt_func=partial(torch.optim.Adam),
                       metrics=[*metrics, Timer()])
 
     model_name_roc_auc = 'roc_auc'
     model_name_acc = 'accuracy'
     model_name_loss = 'loss'
 
-    callbacks = [
-                # ReduceLROnPlateauCallback(learn=learner, patience=10, factor=0.2),
-                 # EarlyStoppingCallback(learn=learner, patience=25),
+    callbacks = [ReduceLROnPlateauCallback(learn=learner, patience=3, factor=0.2),
+                 EarlyStoppingCallback(learn=learner, patience=8),
                  CSVLogger(learn=learner),
                  SaveModelCallback(learn=learner, name=model_name_loss)]
 
@@ -118,22 +114,11 @@ def train_and_evaluate(params, train=True, load_model=None):
 
     if train:
         with experiment.train():
-            learner.lr_find()
-            learner.recorder.plot()
-            plt.show() # 1e-02
-            # lr = 1e-3
-            learner.fit_one_cycle(5, slice(params['lr']))
-
-            learner.lr_find()
-            learner.recorder.plot()
-            plt.show() # 1e-02
-
-
-            learner.fit_one_cycle(10, max_lr=(1e-4, 1e-6), callbacks=callbacks)
-
-            interp = ClassificationInterpretation.from_learner(learner)
-            interp.plot_confusion_matrix()
-            plt.show()
+            # learner.lr_find()
+            # learner.recorder.plot()
+            # plt.show() # 1e-01
+            lr = 1e-3
+            learner.fit_one_cycle(params['epochs'], slice(lr), pct_start=0.8, callbacks=callbacks)
             # lr =  1e-4,
             # learner.fit_one_cycle(10, slice(lr), pct_start=0.8, callbacks=callbacks)
             #
@@ -174,7 +159,7 @@ def train_and_evaluate(params, train=True, load_model=None):
 
 if __name__ == '__main__':
     params = {'epochs': 30,
-              'lr': 1e-2,
+              'lr': 1e-3,
               'batch_size': 128,
               # 'model': 'omar',
               'val_size' : 10,
@@ -186,7 +171,7 @@ if __name__ == '__main__':
               'sampler_type': 'random',
               'data-aug': True,
               'data-aug-type': 'coarse-dropout[0.6,0.8]',
-              'optim': 'adam-fit_one_cycle-1e-2-1e-4',
+              'optim': 'adam',
               'info': '',
               'tr': 0.2,
               'problem' : 'classification',
@@ -223,7 +208,7 @@ if __name__ == '__main__':
 
 
     params['model'] = 'microresnet#4-gate=3x3-n=1-se=True'
-    params['lr'] =  1e-2
+    params['lr'] =  1e-4
     for _ in range(5):
         train_and_evaluate(params)
 
@@ -269,6 +254,3 @@ if __name__ == '__main__':
     # params['time_window'] = 50 * 3
     # for _ in range(5):
     #     train_and_evaluate(params)
-
-
-
