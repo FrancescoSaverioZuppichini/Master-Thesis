@@ -17,7 +17,7 @@ from os import path
 from Config import Config
 from utilities.patches import *
 
-from utilities.postprocessing.postprocessing import Handler, Compose
+from utilities.postprocessing.handlers import Handler, Compose
 from utilities.pipeline import *
 
 class StoreModelPredictionsOnDataframe(Handler):

@@ -9,7 +9,7 @@ import seaborn as sns
 
 from utilities.postprocessing.utils import *
 from matplotlib import gridspec
-from utilities.postprocessing.postprocessing import AddAdvancement
+from utilities.postprocessing.handlers import AddAdvancement
 from utilities.postprocessing.utils import PatchExtractStrategy
 
 class DataFrameVisualization():

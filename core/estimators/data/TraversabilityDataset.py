@@ -13,7 +13,7 @@ from torch.utils.data import DataLoader, random_split, RandomSampler, ConcatData
 from torch.utils.data import Dataset
 from torch.nn import Dropout
 from torchvision.transforms import Compose
-from utilities.postprocessing.postprocessing import AddAdvancement, CleanDataframe, AddHMcoordinates, \
+from utilities.postprocessing.handlers import AddAdvancement, CleanDataframe, AddHMcoordinates, \
     open_df_and_hm_from_meta_row
 from utilities.postprocessing.utils import hmpatch
 

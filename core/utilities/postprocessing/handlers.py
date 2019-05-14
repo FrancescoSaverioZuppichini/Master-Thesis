@@ -1,23 +1,23 @@
 import dateutil
 import rosbag_pandas
 import cv2
-import skimage
-import skimage.io
-import skimage.feature
-import skimage.novice
-import skimage.transform
 
 import pandas as pd
 import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
 
-from tqdm import tqdm
-from pypeln import thread as th
 from utilities.pipeline import Compose, Handler, Combine, MultiThreadWrapper
 from tf.transformations import euler_from_quaternion
-from utilities.postprocessing.utils import read_image
 from utilities.postprocessing.utils import KrockPatchExtractStrategy, PatchExtractStrategy
+
+def read_image(heightmap_png):
+    """
+    Read a given image and convert it to gray scale, then scale to [0,1]
+    :param heightmap_png:
+    :return:
+    """
+    hm = cv2.imread(heightmap_png)
+    hm = cv2.cvtColor(hm, cv2.COLOR_BGR2GRAY)
+    return hm
 
 class StoreDataframeKeepingSameName():
     def __init__(self, out_dir):
@@ -25,7 +25,7 @@ class StoreDataframeKeepingSameName():
 
     def __call__(self, data):
         df, hm, filename = data
-        df.to_csv(self.out_dir + filename + '.csv')
+        df.to_csv(self.out_dir + '/' + filename + '.csv')
         return  df, hm, filename
 
 
@@ -39,7 +39,7 @@ class Bags2Dataframe(Handler):
         self.base_dir = base_dir
 
     def __call__(self, filename):
-        df = rosbag_pandas.bag_to_dataframe(self.base_dir + filename + '.bag')
+        df = rosbag_pandas.bag_to_dataframe(self.base_dir + '/' + filename + '.bag')
         return df, None, filename
 
 class ReadDataframeFilenameAndHm():
@@ -252,7 +252,7 @@ class ReadDataframeAndStoreName():
         self.base_dir = base_dir
 
     def __call__(self, path):
-        df = pd.read_csv(self.base_dir + path + '.csv')
+        df = pd.read_csv(self.base_dir + '/' + path + '.csv')
         return df
 
 class ExtractPatches():

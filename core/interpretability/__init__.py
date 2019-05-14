@@ -15,7 +15,7 @@ from utilities.postprocessing.utils import KrockPatchExtractStrategy
 from estimators.data.TraversabilityDataset import TraversabilityDataset
 from estimators.data.transformations import get_transform
 from estimators.utils import get_learner, get_probs_and_labels_from_preds
-from utilities.postprocessing.postprocessing import Bags2Dataframe, ParseDataframe, AddAdvancement
+from utilities.postprocessing.handlers import Bags2Dataframe, ParseDataframe, AddAdvancement
 from utilities.pipeline import *
 from torch.utils.data import ConcatDataset
 from simulation.env.webots.krock import KrockWebotsEnv
