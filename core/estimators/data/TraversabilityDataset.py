@@ -30,8 +30,7 @@ class TraversabilityDataset(Dataset):
                  transform=None,
                  more_than=None,
                  down_sampling=None,
-                 simplex_noise=None,
-                 ):
+                 simplex_noise=None):
         self.hm = hm
         self.patches_dir = patches_dir
         self.patch_size = patch_size
@@ -137,7 +136,6 @@ class TraversabilityDataset(Dataset):
         concat_ds.c = 2
         concat_ds.classes = 'False', 'True'
         return concat_ds
-
 
 class PatchesDataset(Dataset):
     def __init__(self, patches, transform=None):

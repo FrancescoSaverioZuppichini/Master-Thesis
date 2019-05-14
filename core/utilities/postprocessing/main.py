@@ -15,7 +15,6 @@ DATASET_DIR = '/media/francesco/saetta/krock-dataset/{}/'.format(MODE)
 N_WORKERS = 16
 
 base_bags_dir = DATASET_DIR + '/bags/'
-# DATASET_DIR = '/media/francesco/saetta/krock-dataset/test_with_obstacles/'
 
 out_csvs_dir = DATASET_DIR + '/csvs/'
 out_parsed_csvs_dir = DATASET_DIR + '/csvs_parsed/'
@@ -24,9 +23,6 @@ meta = pd.read_csv(base_bags_dir + 'meta.csv')
 
 base_bags_dir = DATASET_DIR + '/bags/'
 # meta = pd.DataFrame(data={'filename' : ['1'], 'map' : ['wall'], 'height': [1]})
-# filename = meta['filename']
-#
-print(meta)
 
 os.makedirs(out_csvs_dir, exist_ok=True)
 os.makedirs(out_parsed_csvs_dir, exist_ok=True)
@@ -46,14 +42,8 @@ read_and_parse_dfs = MultiThreadWrapper(N_WORKERS, Compose([
 ]))
 
 if PARSE_DATAFRAMES:
-    dfs_from_bags = convert_bags2dfs_and_store( meta['filename'])
+    dfs_from_bags = convert_bags2dfs_and_store(meta['filename'])
     parsed_dfs = read_and_parse_dfs(meta.iterrows())
-#
-
-# #
-ADVANCEMENT = 0.66
-# PATCH_SIZE = 50 * 2 + 2 * 7
-window = 50 * 2
 
 print('[INFO] window={}'.format(window))
 patches_out_dir = DATASET_DIR + '/patches/{}/'.format(ADVANCEMENT)
@@ -71,6 +61,6 @@ extract_patches = MultiThreadWrapper(N_WORKERS, Compose([
 
 ]))
 
-# extract_patches(meta.iterrows())
+extract_patches(meta.iterrows())
 
 DataFrameVisualization.from_root(meta_df_out_dir)(0.2)
