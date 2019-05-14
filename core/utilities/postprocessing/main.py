@@ -46,7 +46,7 @@ read_and_parse_dfs = MultiThreadWrapper(N_WORKERS, Compose([
 ]))
 
 if PARSE_DATAFRAMES:
-    dfs_from_bags = convert_bags2dfs_and_store( meta['filename'])
+    dfs_from_bags = convert_bags2dfs_and_store(meta['filename'])
     parsed_dfs = read_and_parse_dfs(meta.iterrows())
 #
 
@@ -73,4 +73,42 @@ extract_patches = MultiThreadWrapper(N_WORKERS, Compose([
 
 # extract_patches(meta.iterrows())
 
-DataFrameVisualization.from_root(meta_df_out_dir)(0.2)
+# DataFrameVisualization.from_root(meta_df_out_dir)(0.2)
+
+from os import path
+import os
+import pandas as pd
+
+class TraversabilityDir():
+    def __init__(self, root, maps_dir):
+        self.root, self.maps_dir = root, maps_dir
+
+    @property
+    def meta(self):
+        return pd.read_csv(self.bags)
+
+    @property
+    def bags(self):
+        return path.normpath(self.root + '/bags')
+
+    @property
+    def csvs(self):
+        return path.normpath(self.root + '/csvs')
+
+    @property
+    def csvs_parsed(self):
+        return path.normpath(self.root + '/csvs_parsed')
+
+    @property
+    def csvs_patches(self):
+        return path.normpath(self.root + '/csvs_patches')
+
+    @property
+    def patches(self):
+        return path.normpath(self.root + '/patches')
+
+    def should_convert2bag(self, filename):
+        return path.exists(self.csvs + '/' + filename + '.csv')
+
+    def should_parse_df(self, filename):
+        return path.exists(self.csvs_parsed + '/' + filename + '.csv')

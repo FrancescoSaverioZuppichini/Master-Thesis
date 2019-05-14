@@ -32,6 +32,7 @@ class TraversabilityDataset(Dataset):
                  down_sampling=None,
                  simplex_noise=None,
                  ):
+
         self.hm = hm
         self.patches_dir = patches_dir
         self.patch_size = patch_size
@@ -47,9 +48,15 @@ class TraversabilityDataset(Dataset):
         if down_sampling is not None:
             self.df = self.df[::down_sampling]
 
-
         if more_than is not None: self.df = self.df[self.df['advancement'] >= more_than]
         if tr is not None: self.df["label"] = (self.df["advancement"] > tr)
+
+    def read_patch(self, img_name):
+        patch = cv2.imread(self.patches_dir + '/' + img_name)
+        patch = cv2.cvtColor(patch, cv2.COLOR_BGR2GRAY)
+        patch = patch.astype(np.float32)
+        patch /= 255
+        return patch
 
     def generate_patch(self, row):
         patch = hmpatch(self.hm, row["hm_x"], row["hm_y"], np.rad2deg(row['pose__pose_e_orientation_z']),
@@ -64,10 +71,7 @@ class TraversabilityDataset(Dataset):
         if self.should_generate_paths:
             patch = self.generate_patch(row)
         else:
-            patch = cv2.imread(self.patches_dir + '/' + row['images'])
-            patch = cv2.cvtColor(patch, cv2.COLOR_BGR2GRAY)
-            patch = patch.astype(np.float32)
-            patch /= 255
+            patch = self.read_patch(row['images'])
 
         y = row['advancement']
 
@@ -79,13 +83,11 @@ class TraversabilityDataset(Dataset):
 
         y = torch.tensor(y)
 
-        if 'label' in self.df and  self.simplex_noise is not None:
+        if 'label' in self.df and self.simplex_noise is not None:
             if np.random.random() > 0.2:
                 patch = self.simplex_noise(patch, row['label'])
 
-
-        patch =  self.transform(patch)
-
+        patch = self.transform(patch)
 
         return patch, y
 
@@ -93,7 +95,7 @@ class TraversabilityDataset(Dataset):
         return len(self.df)
 
     @classmethod
-    def from_meta(cls, meta, base_dir, hm_dir,  n=None, *args, **kwargs):
+    def from_meta(cls, meta, base_dir, hm_dir, n=None, *args, **kwargs):
         datasets = []
 
         for (idx, row) in meta.iterrows():
@@ -104,6 +106,7 @@ class TraversabilityDataset(Dataset):
         concat_ds = ConcatDataset(datasets)
         concat_ds.c = 2
         concat_ds.classes = 'False', 'True'
+
         return concat_ds
 
     @classmethod
@@ -120,9 +123,9 @@ class TraversabilityDataset(Dataset):
         if n is not None: datasets = datasets[:n]
 
         concat_ds = ConcatDataset(datasets)
-
         concat_ds.c = 2
         concat_ds.classes = 'False', 'True'
+
         return concat_ds
 
     @classmethod
@@ -153,8 +156,5 @@ class PatchesDataset(Dataset):
 
     def __len__(self):
         return len(self.patches)
-
-
-
 
 #

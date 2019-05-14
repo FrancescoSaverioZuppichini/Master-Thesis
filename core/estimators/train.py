@@ -21,12 +21,8 @@ from estimators.data import get_dataloaders, get_transform, TraversabilityDatase
 from estimators.models import zoo
 from estimators.callbacks import ROC_AUC, Timer
 
-# torch.manual_seed(0)
 torch.backends.cudnn.benchmark = True
-# torch.backends.cudnn.deterministic = True
-# np.random.seed(0)
-# if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
-import matplotlib.pyplot as plt
+
 
 def train_and_evaluate(params, train=True, load_model=None):
     # model = OmarCNN()
@@ -212,45 +208,3 @@ if __name__ == '__main__':
     for _ in range(5):
         train_and_evaluate(params)
 
-    #
-    # params['model'] = 'microresnet#4-gate=3x3-n=2-se=False'
-    # for _ in range(5):
-    #     train_and_evaluate(params)
-
-    # params['model'] = 'microresnet#2-gate=3x3-n=2-se=False'
-    # for _ in range(5):
-    #     train_and_evaluate(params)
-
-    # params['model'] = 'microresnet#4-gate=3x3-n=1-se=True'
-    # for _ in range(5):
-    #     train_and_evaluate(params)
-    # params['data-aug'] = False
-    #
-    # for _ in range(5):
-    #     train_and_evaluate(params)
-    #
-    # params['more_than'] = None
-    #
-    # for _ in range(5):
-    #     train_and_evaluate(params)
-
-
-
-
-    # params['down_sampling'] = None
-    #
-    # for _ in range(5):
-    #     train_and_evaluate(params)
-    #
-    # params['down_sampling'] = 2
-    # params['time_window'] = 50 * 3
-    # params['patch_size'] = 1
-    #
-    # for _ in range(5):
-    #     train_and_evaluate(params)
-
-
-    # params['patch_size'] = 1.0
-    # params['time_window'] = 50 * 3
-    # for _ in range(5):
-    #     train_and_evaluate(params)
