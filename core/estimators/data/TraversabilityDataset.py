@@ -24,26 +24,32 @@ np.random.seed(0)
 class TraversabilityDataset(Dataset):
     def __init__(self, df, hm,
                  patches_dir,
-                 time_window,
-                 patch_size,
+                 patch_size=None,
                  tr=None,
+                 time_window=None,
                  transform=None,
                  more_than=None,
                  down_sampling=None,
+                 transform_with_label=None,
                  simplex_noise=None,
                  ):
 
+
+        self.df = df
         self.hm = hm
         self.patches_dir = patches_dir
         self.patch_size = patch_size
         self.tr = tr
+        self.time_window = time_window
+
         self.transform = transform
-        self.df = df
+        self.transform_with_label = transform_with_label
         self.simplex_noise = simplex_noise
         self.should_generate_paths = not 'images' in df
 
-        self.preprocess_df = Compose([AddAdvancement(time_window)])
-        self.df = self.preprocess_df((self.df, None, None))[0]
+        if self.time_window is not None:
+            self.preprocess_df = Compose([AddAdvancement(time_window)])
+            self.df = self.preprocess_df((self.df, None, None))[0]
 
         if down_sampling is not None:
             self.df = self.df[::down_sampling]
@@ -83,13 +89,10 @@ class TraversabilityDataset(Dataset):
 
         y = torch.tensor(y)
 
-        if 'label' in self.df and self.simplex_noise is not None:
-            if np.random.random() > 0.2:
-                patch = self.simplex_noise(patch, row['label'])
+        if 'label' in self.df and self.transform_with_label is not None:
+                patch = self.transform_with_label(patch, row['label'])
 
-        patch = self.transform(patch)
-
-        return patch, y
+        return self.transform(patch), y
 
     def __len__(self):
         return len(self.df)

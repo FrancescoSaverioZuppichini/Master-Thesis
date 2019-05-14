@@ -11,89 +11,93 @@ from torchvision.transforms import Resize, ToPILImage, ToTensor, Grayscale, Comp
 from opensimplex import OpenSimplex
 from tqdm import tqdm
 
-class ImgaugWrapper():
+
+class DropoutAgumentation():
     """
     Wrapper for imgaug
     """
 
-    def __init__(self, aug):
-        self.aug = aug
+    def __init__(self):
+        self.aug_prob = 0.8
+        self.p = (0.05, 0.1)
+        self.aug = iaa.Sometimes(self.aug_prob,
+                            iaa.Sequential(
+                                [
+                                    iaa.Dropout(p=self.p),
+                                    iaa.CoarseDropout(self.p,
+                                                      size_percent=(0.6, 0.8))
+
+                                ], random_order=False),
+
+                            )
 
     def __call__(self, x):
         x = self.aug.augment_image(x)
+        min, max = x.min() + 1e-5, x.max()
+
+        x = (x - min) / (max - min)  # norm to 0,1 -> imgaug does not accept neg values
+        x = self.aug.augment_image(x)
+        x = x * (max - min) + min  # go back
         return x
 
+    def __str__(self):
+        return 'DropoutAgumentation={}p={}-({},size_percent=(0.6, 0.8))'.format(self.aug_prob, self.p, self.p)
+
+
 simplex = OpenSimplex()
+
 
 def im2simplex(im, feature_size=24, scale=10):
     h, w = im.shape[0], im.shape[1]
     for y in range(0, h):
         for x in range(0, w):
             value = simplex.noise2d(x / feature_size, y / feature_size)
-            im[x,y] += value / scale
+            im[x, y] += value / scale
     return im
-
 
 
 class RandomSimplexNoise():
 
-    def __init__(self, shape=(76, 76), n=10, *args, **kwargs):
+    def __init__(self, shape=(76, 76), n=10, p=0.8, *args, **kwargs):
         super().__init__()
         self.images = []
         self.n = n
+        self.p = p
+        self.features_dims = (1, 50)
+        self.traversable_scale_dims = (12, 50)
+        self.no_traversable_scale_dims = (5, 12)
+
+        self._make_images(shape)
+
+    def _make_images(self, shape):
         image = np.zeros((shape))
 
         for _ in tqdm(range(self.n)):
-            features_size = np.random.randint(3, 50)
+            features_size = np.random.randint(*self.features_dims)
             im = im2simplex(image.copy(), features_size, 1)
-            # im = np.expand_dims(im, -1)
             self.images.append(im)
 
-    def __call__(self, img,  is_traversable):
+    def __call__(self, img, is_traversable):
+        if np.random.random() > (1 - self.p):
 
-        idx = np.random.randint(0, self.n)
+            idx = np.random.randint(0, self.n)
 
-        if is_traversable: scale = np.random.randint(12, 20)
-        else: scale = np.random.randint(5, 10)
+            if is_traversable:
+                scale = np.random.randint(*self.traversable_scale_dims)
+            else:
+                scale = np.random.randint(*self.no_traversable_scale_dims)
 
-        tmp = self.images[idx] / scale
-        return img + tmp
+            tmp = self.images[idx] / scale
+            img = img + tmp
 
-        # features_size = np.random.randint(15, 80)
-        # scale = np.random.randint(5, 10)
-        # return im2simplex(img, features_size, scale)
+        return img
 
-    def _augment_images(self, images, *args, **kwargs):
-        for i in range(len(images)):
-            images[i] = self.augment_image(images[i], *args, **kwargs)
-
-        return images
+    def __str__(self):
+        return 'RandomSimplexNoise={}{}-{}-{}'.format(self.p, self.features_dims,
+                                 self.traversable_scale_dims,
+                                 self.no_traversable_scale_dims)
 
 
-    def _augment_heatmaps(self, *args, **kwargs):
-        return None
-
-    def _augment_polygons(self, *args, **kwargs):
-        return None
-
-    def get_parameters(self):
-        return None
-
-    def _augment_keypoints(self, *args, **kwargs):
-        return None
-# TODO this must be in a zoo and be passed as param to CenterAndScalePatch
-
-def get_aug():
-    return  iaa.Sometimes(0.8,
-                    iaa.Sequential(
-                        [
-                            iaa.Dropout(p=(0.05, 0.1)),
-                            iaa.CoarseDropout((0.02, 0.1),
-                                              size_percent=(0.6, 0.8))
-
-                        ], random_order=False),
-
-                    )
 
 class CenterAndScalePatch():
     """
@@ -103,13 +107,10 @@ class CenterAndScalePatch():
     depending on the map, we need to multiply the patch by a scaling factor.
     """
 
-    def __init__(self, scale=1.0, debug=False, should_aug=False, resize=None, aug=None):
+    def __init__(self, scale=1.0, debug=False, resize=None, ):
         self.scale = scale
         self.debug = debug
-        self.should_aug = should_aug
         self.resize = resize
-        self.aug = None
-        if self.should_aug: self.aug = get_aug() if aug is None else aug
 
     def show_heatmap(self, x, title, ax):
         ax.set_title(title)
@@ -124,6 +125,7 @@ class CenterAndScalePatch():
         if self.debug:
             ax = plt.subplot(2, 2, 1)
             self.show_heatmap(x, 'original', ax)
+
         x *= self.scale
         if self.debug:
             ax = plt.subplot(2, 2, 2)
@@ -132,17 +134,9 @@ class CenterAndScalePatch():
         center = x[x.shape[0] // 2, x.shape[1] // 2]
         x -= center
 
-        min, max = x.min() + 1e-5, x.max()
-
         if self.debug:
             ax = plt.subplot(2, 2, 3)
             self.show_heatmap(x, 'centered {}'.format(center), ax)
-
-        if self.should_aug:
-            x = (x - min) / (max - min)  # norm to 0,1 -> imgaug does not accept neg values
-            x = self.aug.augment_image(x)
-            x = x * (max - min) + min  # go back
-
         if self.resize is not None:
             x = cv2.resize(x, self.resize)
         if self.debug:
@@ -153,20 +147,17 @@ class CenterAndScalePatch():
         return x.astype(np.float32)
 
 
-def get_transform(should_aug=False, scale=1, debug=False, resize=None):
+def get_transform(aug=None, scale=1, debug=False, resize=None):
     """
-    Return a `Compose` transformation to be applied to the input of the model
-    :param resize: size in pixel of the wanted final patch size
-    :param should_aug: if True, dropout will be applied on the input
+     Return a `Compose` transformation to be applied to the input of the model
     :param scale: integer that is multiplied to the input
+    :param aug: data augmentation
+    :param resize: size in pixel of the wanted final patch size
     :return:
     """
     transformations = []
-    # if resize is not None: transformations.append(Resize((resize, resize)))
-    # transformations.append(ToTensor())
-    transformations.append(CenterAndScalePatch(scale=scale, debug=debug, should_aug=should_aug, resize=resize))
-    # if should_aug: transformations.append(ImgaugWrapper(aug, debug))
+    transformations.append(CenterAndScalePatch(scale=scale, debug=debug, resize=resize))
+    if aug is not None: transformations.append(aug)
     transformations.append(ToTensor())
-    # if should_aug: transformations.append(Dropout(0.1))
 
     return Compose(transformations)

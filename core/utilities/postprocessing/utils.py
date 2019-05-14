@@ -26,13 +26,13 @@ class TraversabilityDir():
 
     @property
     def csvs_parsed_dir(self):
-        dir = path.normpath(self.root + '/csvs_parsed')
+        dir = path.normpath(self.root + '/csvs')
         os.makedirs(dir, exist_ok=True)
         return dir
 
     @property
     def csvs_patches_dir(self):
-        dir = path.normpath(self.root + '/csvs_patches')
+        dir = path.normpath(self.root + '/csvs')
         os.makedirs(dir, exist_ok=True)
         return dir
 
