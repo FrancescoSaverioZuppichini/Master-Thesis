@@ -9,6 +9,7 @@ from utilities.pipeline import Compose, Handler, Combine, MultiThreadWrapper
 from tf.transformations import euler_from_quaternion
 from utilities.postprocessing.utils import KrockPatchExtractStrategy, PatchExtractStrategy
 
+
 def read_image(heightmap_png):
     """
     Read a given image and convert it to gray scale, then scale to [0,1]
@@ -19,6 +20,7 @@ def read_image(heightmap_png):
     hm = cv2.cvtColor(hm, cv2.COLOR_BGR2GRAY)
     return hm
 
+
 class StoreDataframeKeepingSameName():
     def __init__(self, out_dir):
         self.out_dir = out_dir
@@ -26,7 +28,7 @@ class StoreDataframeKeepingSameName():
     def __call__(self, data):
         df, hm, filename = data
         df.to_csv(self.out_dir + '/' + filename + '.csv')
-        return  df, hm, filename
+        return df, hm, filename
 
 
 class Bags2Dataframe(Handler):
@@ -42,6 +44,7 @@ class Bags2Dataframe(Handler):
         df = rosbag_pandas.bag_to_dataframe(self.base_dir + '/' + filename + '.bag')
         return df, None, filename
 
+
 class ReadDataframeFilenameAndHm():
     def __init__(self, base_dir, hm_dir):
         self.base_dir = base_dir
@@ -52,6 +55,7 @@ class ReadDataframeFilenameAndHm():
         df, hm = open_df_and_hm_from_meta_row(row, self.base_dir, self.hm_dir)
         df['height'] = row['height']
         return df, hm, row['filename']
+
 
 class ParseDataframe(Handler):
     def convert_date2timestamp(self, df):
@@ -134,14 +138,11 @@ class AddAdvancement(Handler):
         df, hm, filename = data
 
         if len(df) > 0:
-
             # look dt in the future and compute the distance for booth axis
             df["S_dX"] = df.rolling(window=(self.dt + 1))['pose__pose_position_x'].apply(lambda x: x[-1] - x[0],
-                                                                                         raw=True).shift(
-                -self.dt)
+                                                                                         raw=True).shift(-self.dt)
             df["S_dY"] = df.rolling(window=(self.dt + 1))['pose__pose_position_y'].apply(lambda x: x[-1] - x[0],
-                                                                                         raw=True).shift(
-                -self.dt)
+                                                                                         raw=True).shift(-self.dt)
             # project x and y in the current line and compute the advancement
             df["advancement"] = np.einsum('ij,ij->i', df[["S_dX", "S_dY"]], df[["S_oX", "S_oY"]])  # row-wise dot product
 
@@ -218,6 +219,7 @@ class AddHMcoordinates(Handler):
             axis=1)
         return df, hm, filename
 
+
 def drop_uselesss_columns(data):
     df, hm, filename = data
 
@@ -229,6 +231,7 @@ def drop_uselesss_columns(data):
                   'ros_time'], axis=1)
 
     return df, hm, filename
+
 
 class ReadHm(Handler):
     def __init__(self, base_dir):
@@ -247,6 +250,7 @@ def open_df_and_hm_from_meta_row(row, base_dir, hm_dir):
 
     return df, hm
 
+
 class ReadDataframeAndStoreName():
     def __init__(self, base_dir):
         self.base_dir = base_dir
@@ -254,6 +258,7 @@ class ReadDataframeAndStoreName():
     def __call__(self, path):
         df = pd.read_csv(self.base_dir + '/' + path + '.csv')
         return df
+
 
 class ExtractPatches():
     def __init__(self, patch_extract_stategy):
@@ -265,10 +270,12 @@ class ExtractPatches():
         patches = []
 
         for (idx, row) in df.iterrows():
-            patch = self.patch_extract_stategy(hm, row["hm_x"], row["hm_y"], np.rad2deg(row['pose__pose_e_orientation_z']))[0]
+            patch = \
+            self.patch_extract_stategy(hm, row["hm_x"], row["hm_y"], np.rad2deg(row['pose__pose_e_orientation_z']))[0]
             patches.append(patch)
 
         return df, patches, filename
+
 
 class StorePatches():
     def __init__(self, out_dir, meta_df_out_dir):
@@ -290,8 +297,6 @@ class StorePatches():
         df['images'] = paths
 
         df.to_csv('{}/{}.csv'.format(self.meta_df_out_dir, filename))
-        del patches # free up memory
+        del patches  # free up memory
 
         return df, filename
-
-

@@ -70,7 +70,7 @@ def visualise(dl, n=10):
     for (x, y) in dl:
         for i, img, l in zip(range(3), x, y):
             axes[i].set_title("{}".format(l))
-            sns.heatmap(img.numpy().squeeze(), ax=axes[i], vmax=1)
+            sns.heatmap(img.numpy().squeeze(), ax=axes[i])
 
         plt.show()
         break
@@ -96,6 +96,7 @@ def get_dataloaders(train_root,
                     time_window=None,
                     val_size=0.2, tr=0.45,
                     sampler=None,
+                    num_samples=None,
                     train_transform=None,
                     train_transform_with_label=None,
                     val_transform=None,
@@ -117,14 +118,15 @@ def get_dataloaders(train_root,
     print('[INFO] {} simulations for training.'.format(len(train_meta)))
     if val_root is None:
         train_meta = train_meta.sample(frac=1, random_state=0)
-        # val_size = int((len(train_meta) // 100) * val_size)
+        val_size = int((len(train_meta) // 100) * val_size)
         train_meta = train_meta[val_size:]
         val_meta = train_meta[:val_size]
         # print('[INFO] val_meta')
         # print(val_meta)
     else:
         val_meta = pd.read_csv(val_root + '/bags/meta.csv')
-
+    print(train_transform)
+    print(train_transform_with_label)
     train_ds = FastAIImageFolder.from_meta(train_meta,
                                            train_root + '/csvs/',
                                            hm_root,
@@ -153,9 +155,9 @@ def get_dataloaders(train_root,
                                          transform=val_transform)
 
     if sampler is not None:
-        print('[INFO] Sampling using {}'.format(sampler))
+        print('[INFO] Sampling using {} with num_samples {}'.format(sampler, num_samples))
         train_dl = DataLoader(train_ds,
-                              sampler=sampler(train_ds),
+                              sampler=sampler(train_ds, num_samples=num_samples),
                               *args, **kwargs)
     else:
         train_dl = DataLoader(train_ds,
@@ -186,26 +188,26 @@ if __name__ == '__main__':
     from estimators.data.TraversabilityDataset import TraversabilityDataset
     from estimators.data.transformations import RandomSimplexNoise, DropoutAgumentation
 
-    simplex_noise = RandomSimplexNoise(n=50)
+    # simplex_noise = RandomSimplexNoise(n=50)
     import time
 
     start = time.time()
-    meta = pd.read_csv('/media/francesco/saetta/krock-dataset/train/bags/meta.csv')
-    meta = meta[meta['map'] == 'bars1']
+    meta = pd.read_csv('/media/francesco/saetta/krock-dataset/new-train/bags/meta.csv')
+    meta = meta[meta['map'] == 'bumps0-rocks1']
     # print('[INFO] {} simulations for training.'.format(len(meta)))
     # meta = meta[meta['map'] == 'bars1']
     print(meta)
     concat_ds = TraversabilityDataset.from_meta(meta,
-                                                '/media/francesco/saetta/krock-dataset/train/csvs/',
-                                                '/home/francesco/Documents/Master-Thesis/core/maps/train/',
-                                                patches_dir='/media/francesco/saetta/krock-dataset/train/patches/0.66',
+                                                '/media/francesco/saetta/krock-dataset/new-train/csvs/',
+                                                '/home/francesco/Documents/Master-Thesis/core/maps/new-train/',
+                                                patches_dir='/media/francesco/saetta/krock-dataset/new-train/patches/0.66',
                                                 n=1,
                                                 down_sampling=2,
                                                 time_window=100,
                                                 patch_size=0.66,
                                                 tr=0.2,
-                                                transform_with_label=simplex_noise,
-                                                transform=get_transform(DropoutAgumentation(),
+                                                # transform_with_label=simplex_noise,
+                                                transform=get_transform(None,
                                                                         debug=False))
 
     for i in range(1):
@@ -216,6 +218,6 @@ if __name__ == '__main__':
 
     visualise(dl)
     visualise(dl)
-    visualise(dl)
-    visualise(dl)
-    visualise(dl)
+    # visualise(dl)
+    # visualise(dl)
+    # visualise(dl)

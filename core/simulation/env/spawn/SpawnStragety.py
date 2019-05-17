@@ -5,6 +5,18 @@ import matplotlib.pyplot as plt
 
 from skimage.util.shape import view_as_windows
 from sklearn.cluster import KMeans
+import random
+
+class RandomSpawnStrategy():
+    def __init__(self, map):
+        self.map = map
+
+    def __call__(self, offset=22, k=50):
+        spawn_points= [(random.randint(offset, self.map.shape[0] - offset),
+                random.randint(offset, self.map.shape[1] - offset)) for _ in range(k)]
+
+
+        return spawn_points
 
 class FlatGroundSpawnStrategy():
     """
@@ -72,7 +84,7 @@ class FlatGroundSpawnStrategy():
 
         return new_positions
 
-    def __call__(self, k=100, size=40, *args, **kwargs):
+    def __call__(self, k=50, size=40, *args, **kwargs):
         positions = self.find_spawn_points(size=size)
         if self.debug: print('[INFO] Found {} spawn points'.format(len(positions)))
         if self.debug: self.show_spawn_pos(positions, label='point in the clusters')

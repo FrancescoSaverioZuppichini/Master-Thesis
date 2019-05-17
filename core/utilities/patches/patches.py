@@ -37,11 +37,11 @@ class Patch():
 
 
     def _plot2d_ax(self, *args, **kwargs):
-        return sns.heatmap(self.hm, cmap=plt.cm.viridis, vmax=1, *args, **kwargs)
+        return sns.heatmap(self.hm, cmap=plt.cm.viridis, *args, **kwargs)
 
-    def plot2d(self, title='', *args, **kwargs):
+    def plot2d(self, title='', vmax=1, *args, **kwargs):
         fig = plt.figure()
-        self._plot2d_ax(*args, **kwargs)
+        self._plot2d_ax(vmax=vmax, *args, **kwargs)
         plt.title(self.title)
 
         return fig

@@ -63,9 +63,9 @@ class RandomSimplexNoise():
         self.images = []
         self.n = n
         self.p = p
-        self.features_dims = (1, 50)
-        self.traversable_scale_dims = (12, 50)
-        self.no_traversable_scale_dims = (5, 12)
+        self.features_dims = (3, 50)
+        self.traversable_scale_dims = (15, 25)
+        self.no_traversable_scale_dims = (3, 15)
 
         self._make_images(shape)
 
@@ -78,7 +78,7 @@ class RandomSimplexNoise():
             self.images.append(im)
 
     def __call__(self, img, is_traversable):
-        if np.random.random() > (1 - self.p):
+        if np.random.random() > (1.0 - self.p):
 
             idx = np.random.randint(0, self.n)
 
@@ -153,7 +153,7 @@ def get_transform(aug=None, scale=1, debug=False, resize=None):
     :param scale: integer that is multiplied to the input
     :param aug: data augmentation
     :param resize: size in pixel of the wanted final patch size
-    :return:
+    :return:ImbalancedDatasetSampler
     """
     transformations = []
     transformations.append(CenterAndScalePatch(scale=scale, debug=debug, resize=resize))
