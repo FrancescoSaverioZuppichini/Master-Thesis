@@ -29,6 +29,7 @@ class TraversabilityDataset(Dataset):
                  time_window=None,
                  transform=None,
                  more_than=None,
+                 less_than=None,
                  down_sampling=None,
                  transform_with_label=None,
                  simplex_noise=None,
@@ -44,17 +45,17 @@ class TraversabilityDataset(Dataset):
 
         self.transform = transform
         self.transform_with_label = transform_with_label
-        self.simplex_noise = simplex_noise
         self.should_generate_paths = not 'images' in df
 
         if self.time_window is not None:
             self.preprocess_df = Compose([AddAdvancement(time_window)])
             self.df = self.preprocess_df((self.df, None, None))[0]
-
+            self.df = df.dropna()
         if down_sampling is not None:
             self.df = self.df[::down_sampling]
 
         if more_than is not None: self.df = self.df[self.df['advancement'] >= more_than]
+        if less_than is not None: self.df = self.df[self.df['advancement'] <= less_than]
         if tr is not None: self.df["label"] = (self.df["advancement"] > tr)
 
     def read_patch(self, img_name):
@@ -104,7 +105,6 @@ class TraversabilityDataset(Dataset):
         for (idx, row) in meta.iterrows():
             df, hm = open_df_and_hm_from_meta_row(row, base_dir, hm_dir)
             if len(df) > 0: datasets.append(cls(df, hm, *args, **kwargs))
-
         if n is not None: datasets = datasets[:n]
         concat_ds = ConcatDataset(datasets)
         concat_ds.c = 2
@@ -112,17 +112,25 @@ class TraversabilityDataset(Dataset):
 
         return concat_ds
 
+    @staticmethod
+    def concat_dfs(concat_ds):
+        df = None
+        for ds in concat_ds.datasets:
+            if df is None: df = ds.df
+            else: df = pd.concat([df, ds.df])
+
+        concat_ds.df = df
+        return concat_ds
+
     @classmethod
     def from_root(cls, root, n=None, *args, **kwargs):
         dfs_paths = glob.glob(root + '/*.csv')
         if len(dfs_paths) == 0: dfs_paths = glob.glob(root + '/**/*.csv')
-
         datasets = []
         for df_path in dfs_paths:
             df = pd.read_csv(df_path)
             if len(df) > 0:
                 datasets.append(cls(df, root, *args, **kwargs))
-
         if n is not None: datasets = datasets[:n]
 
         concat_ds = ConcatDataset(datasets)

@@ -50,8 +50,10 @@ class ImbalancedDatasetSampler(torch.utils.data.sampler.Sampler):
             return dataset.train_labels[idx].item()
         elif dataset_type is torchvision.datasets.ImageFolder:
             return dataset.imgs[idx][1]
-        elif dataset_type is TraversabilityDataset:
-            return dataset.df['labels'][idx]
+        elif dataset_type is ConcatDataset:
+            if type(dataset.datasets[0]) is TraversabilityDataset:
+                return dataset.df['labels'][idx]
+
 
     def __iter__(self):
         return (self.indices[i] for i in torch.multinomial(
@@ -94,7 +96,8 @@ def get_dataloaders(train_root,
                     test_hm_root=None,
                     val_hm_root=None,
                     time_window=None,
-                    val_size=0.2, tr=0.45,
+                    val_size=0.2,
+                    tr=None,
                     sampler=None,
                     num_samples=None,
                     train_transform=None,
@@ -102,6 +105,7 @@ def get_dataloaders(train_root,
                     val_transform=None,
                     test_transform=None,
                     more_than=None,
+                    less_than=None,
                     down_sampling=None,
                     patch_size=None,
                     *args,
@@ -111,7 +115,7 @@ def get_dataloaders(train_root,
     :return: train, val and test dataloaders
     """
 
-    train_meta = pd.read_csv(train_root + '/bags/meta.csv')
+    train_meta = pd.read_csv(train_root + '/meta.csv')
 
     # train_meta = train_meta.drop(train_meta[(train_meta['map'] == 'slope_rocks1') & (train_meta['height'] == 1)].index)
 
@@ -124,9 +128,10 @@ def get_dataloaders(train_root,
         # print('[INFO] val_meta')
         # print(val_meta)
     else:
-        val_meta = pd.read_csv(val_root + '/bags/meta.csv')
+        val_meta = pd.read_csv(val_root + '/meta.csv')
     print(train_transform)
     print(train_transform_with_label)
+    print(less_than)
     train_ds = FastAIImageFolder.from_meta(train_meta,
                                            train_root + '/csvs/',
                                            hm_root,
@@ -135,6 +140,7 @@ def get_dataloaders(train_root,
                                            time_window=time_window,
                                            patch_size=patch_size,
                                            more_than=more_than,
+                                           less_than=less_than,
                                            transform=train_transform,
                                            transform_with_label=train_transform_with_label,
                                            down_sampling=down_sampling
@@ -156,6 +162,7 @@ def get_dataloaders(train_root,
 
     if sampler is not None:
         print('[INFO] Sampling using {} with num_samples {}'.format(sampler, num_samples))
+        train_ds = TraversabilityDataset.concat_dfs(train_ds)
         train_dl = DataLoader(train_ds,
                               sampler=sampler(train_ds, num_samples=num_samples),
                               *args, **kwargs)
@@ -192,16 +199,16 @@ if __name__ == '__main__':
     import time
 
     start = time.time()
-    meta = pd.read_csv('/media/francesco/saetta/krock-dataset/new-train/bags/meta.csv')
+    meta = pd.read_csv('/media/francesco/saetta/krock-dataset/train/meta.csv')
     meta = meta[meta['map'] == 'bumps0-rocks1']
     # print('[INFO] {} simulations for training.'.format(len(meta)))
     # meta = meta[meta['map'] == 'bars1']
     print(meta)
     concat_ds = TraversabilityDataset.from_meta(meta,
-                                                '/media/francesco/saetta/krock-dataset/new-train/csvs/',
+                                                '/media/francesco/saetta/krock-dataset/train/csvs/',
                                                 '/home/francesco/Documents/Master-Thesis/core/maps/new-train/',
-                                                patches_dir='/media/francesco/saetta/krock-dataset/new-train/patches/0.66',
-                                                n=1,
+                                                patches_dir='/media/francesco/saetta/krock-dataset/train/patches/0.66/',
+                                                n=2,
                                                 down_sampling=2,
                                                 time_window=100,
                                                 patch_size=0.66,
@@ -210,11 +217,8 @@ if __name__ == '__main__':
                                                 transform=get_transform(None,
                                                                         debug=False))
 
-    for i in range(1):
-        p, y = concat_ds[i]
-        print(y)
-
-    dl = DataLoader(concat_ds, batch_size=5, pin_memory=True, num_workers=1, shuffle=True)
+    TraversabilityDataset.concat_dfs(concat_ds)
+    dl = DataLoader(concat_ds, sampler=ImbalancedDatasetSampler(concat_ds), batch_size=5, pin_memory=True, num_workers=1)
 
     visualise(dl)
     visualise(dl)
