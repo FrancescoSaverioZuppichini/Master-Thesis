@@ -152,7 +152,6 @@ class TraversabilityDataset(Dataset):
         concat_ds.classes = 'False', 'True'
         return concat_ds
 
-
 class PatchesDataset(Dataset):
     def __init__(self, patches, transform=None):
         self.patches = patches
