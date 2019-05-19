@@ -24,15 +24,15 @@ import random
 #     # agent_callbacks=[RosBagSaver('~/Desktop/querry-high/bags', topics=['pose'])],
 #     output_path='/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock2_ros/worlds/tmp.wbt')
 #
-env = KrockWebotsEnv.from_image(
-    MAP,
-    '/home/francesco/Documents/Master-Thesis/core/simulation/env/webots/krock/krock.wbt',
-    {'height': 1,
-     'resolution': 0.02 },
-    # agent_callbacks=[RosBagSaver('/media/francesco/saetta/krock-dataset/test_with_obstacle_in_center/bags',
-    #                              topics=['pose'])],
-    output_dir='/home/francesco/Documents/Master-Thesis/core/simulation/env/webots/krock/krock2_ros/worlds/')
-#
+# env = KrockWebotsEnv.from_image(
+#     MAP,
+#     '/home/francesco/Documents/Master-Thesis/core/simulation/env/webots/krock/krock.wbt',
+#     {'height': 1,
+#      'resolution': 0.02 },
+#     # agent_callbacks=[RosBagSaver('/media/francesco/saetta/krock-dataset/test_with_obstacle_in_center/bags',
+#     #                              topics=['pose'])],
+#     output_dir='/home/francesco/Documents/Master-Thesis/core/simulation/env/webots/krock/krock2_ros/worlds/')
+# #
 # env = KrockWebotsEnv(WORLD_PATH, load_world=True)
 
 # spawn_strategy = FlatGroundSpawnStrategy(MAP, scale = 1, debug=True)
@@ -49,10 +49,10 @@ def spawn_points2webots_pose(spawn_point, env):
 
     return pose
 #
-# env = KrockWebotsEnv(None,
-#                      agent_callbacks=[RosBagSaver('/media/francesco/saetta/krock-dataset/test_with_obstacles/bags',
-#                                                   topics=['pose'])],
-#                      )
+env = KrockWebotsEnv(None,
+                     agent_callbacks=[RosBagSaver('/media/francesco/saetta/krock-dataset/tr/bags',
+                                                  topics=['pose'])],
+                     )
 
 # env.reset(spawn=False)
 # import rospy
@@ -69,14 +69,20 @@ def spawn_points2webots_pose(spawn_point, env):
 # #
 # #
 
+file_name = 'test'
+
 env.agent()
 env.reset(spawn=False)
-#
-#
+
+meta = pd.DataFrame(data={'filename': [file_name],
+                          'map': ['bumps3-rocks1'],
+                          'height': [1]})
+
+meta.to_csv('/media/francesco/saetta/krock-dataset/tr/meta.csv')
 elapsed = 0
 start = time.time()
 # #
-while True:
+while elapsed <= 10:
 # #     # print(time.time())
     elapsed = time.time() - start
 #
@@ -84,6 +90,6 @@ while True:
     # pass
 #
 # #
-# env.step(env.STOP)
+env.step(env.STOP)
 # #
-env.agent.die(env, '1')
+env.agent.die(env, file_name)

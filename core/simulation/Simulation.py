@@ -7,10 +7,19 @@ sys.path.append("../")
 
 from simulation.agent.callbacks import *
 from simulation.env.webots.krock import KrockWebotsEnv
-from simulation.env.spawn import FlatGroundSpawnStrategy, spawn_points2webots_pose
+from simulation.env.spawn import FlatGroundSpawnStrategy, spawn_points2webots_pose, RandomSpawnStrategy
 from utilities import run_for
 import tqdm
 import random
+import cv2
+import numpy as np
+from utilities.patches.texture import get_rocks
+
+def hmread(hm_path):
+    hm = cv2.imread(hm_path)
+    print(hm_path)
+    hm = cv2.cvtColor(hm, cv2.COLOR_BGR2GRAY)
+    return hm
 
 def make_env(map, args):
     agent = None
@@ -36,78 +45,93 @@ def make_env(map, args):
     return env, map_name, bags_map_dir, height
 
 class Simulation():
-    def __init__(self):
+    def __init__(self, map_path, n, height, bags_dirs,
+                 spawn_strategy=RandomSpawnStrategy,
+                 max_time=20,
+                 texture=None,
+                 name='sim'):
+
+        self.map_path = map_path
+        self.map = hmread(map_path)
+        self.map_name = path.splitext(path.basename(self.map_path))[0]
+
+        self.n, self.height, self.bags_dir, self.name = n, height, bags_dirs, name
+        self.texture = texture
+        self.max_time = max_time
         self.meta = None
-    #TODO # better add a constructor .from_args
-    def __call__(self, args, **kwargs):
+        self.spawn_strategy = spawn_strategy
+
+    def __call__(self):
         rospy.init_node("traversability_simulation")
+        self.spawn_strategy = self.spawn_strategy(self.map)
 
-        if args.maps is None:  args.maps = [args.world]
+        temp = self.map.copy().astype(np.float32) * self.height
+        if self.texture is not None:
+            temp += self.texture * 255
 
-        start = time.time()
+        env = KrockWebotsEnv.from_numpy(
+            temp,
+            path.abspath('/home/francesco/Documents/Master-Thesis/core/simulation/env/webots/krock/krock_no_tail.wbt'),
+            {'height': 1,
+             'resolution': 0.02},
+            output_path=path.abspath('/home/francesco/Documents/Master-Thesis/core/simulation/env/webots/krock/krock2_ros/worlds/{}.wbt'.format(self.map_name)),
+            agent_callbacks=[RosBagSaver(self.bags_dir, topics=['pose'])]
+        )
 
-        maps_bar = tqdm.tqdm(args.maps)
-        for map in maps_bar:
+        spawn_points = self.spawn_strategy(self.n)
 
-            maps_bar.set_description('Running {}'.format(map))
-            spawn_strategy = FlatGroundSpawnStrategy(map, scale=args.height)
-            random_spawn = False
-            # todo add a flag for the random spawn
-            try:
-                spawn_points = spawn_strategy(k=args.n_sim, tol=1e-2, size=45)
-            except ValueError:
-                print('No flat points!.')
-            #     there are no flat spawn points, fall back to random spawn
-                random_spawn = True
-            # random_spawn = True
-            print('[INFO] random_spawn = {}'.format(random_spawn))
-            env, _, bags_map_dir, height = make_env(map, args)
+        n_sim_bar = tqdm.tqdm(range(self.n), leave=False)
 
-            n_sim_bar = tqdm.tqdm(range(args.n_sim), leave=False)
-            for i in n_sim_bar:
-                if not random_spawn:
-                    spawn_point = random.choice(spawn_points)
-                    if i < len(spawn_points): spawn_point = spawn_points[i]
-                else:
-                    spawn_point = [random.randint(22, 513 - 22), random.randint(22, 513 - 22)]
-                env.reset(pose=spawn_points2webots_pose(spawn_point, env))
+        for i in n_sim_bar:
+            spawn_point = spawn_points[i]
+            if i > len(spawn_points): spawn_point = random.choice(spawn_points)
 
+            env.reset(pose=spawn_points2webots_pose(spawn_point, env))
 
-                if i % 5 == 0:
-                    n_sim_bar.set_description('Reanimate robot')
-                    env.reanimate()
+            if i % 20 == 0:
+                n_sim_bar.set_description('Reanimate robot')
+                env.reanimate()
 
+            elapsed = 0
+            start = time.time()
 
-                elapsed = 0
-                start = time.time()
+            while elapsed <= (int(self.max_time)):
+                obs, r, done, _ = env.step(env.GO_FORWARD)
+                elapsed = time.time() - start
 
-                while elapsed <= (int(args.time)):
-                    obs, r, done, _ = env.step(env.GO_FORWARD)
-                    elapsed = time.time() - start
+                if done: break
 
-                    if done: break
+            # we want to store after each each spawn
+            # map_name = self.name
+            file_name = '{}-{}-{}'.format(self.map_name, self.height, time.time())
+            env.agent.die(env, file_name)
 
-                # we want to store after each each spawn
-                map_name = path.splitext(path.basename(map))[0]
-                file_name = '{}-{}-{}'.format(map_name, height, i)
-                env.agent.die(env, file_name)
+            temp = pd.DataFrame(data={'filename': [file_name],
+                                      'map': [self.map_name],
+                                      'height': [self.height]})
 
-                temp = pd.DataFrame(data={'filename': [file_name], 'map': [map_name], 'height': [height]})
-
-                if self.meta is None:
-                    try:
-                        self.meta = pd.read_csv('{}/meta.csv'.format(args.save_dir), index_col=[0])
-                        self.meta = pd.concat([self.meta, temp])
-                        self.meta = self.meta.reset_index(drop=True)
-                    except FileNotFoundError:
-                        self.meta = temp
-                else:
+            if self.meta is None:
+                try:
+                    self.meta = pd.read_csv('{}/meta.csv'.format(self.bags_dir), index_col=[0])
                     self.meta = pd.concat([self.meta, temp])
                     self.meta = self.meta.reset_index(drop=True)
-                self.meta.to_csv('{}/meta.csv'.format(args.save_dir))
-                # rospy.loginfo('Done after {:.2f} seconds, callback was called {} times.'.format(elapsed, env.agent.called))
+                except FileNotFoundError:
+                    self.meta = temp
+            else:
+                self.meta = pd.concat([self.meta, temp])
+                self.meta = self.meta.reset_index(drop=True)
+            self.meta.to_csv('{}/meta.csv'.format(self.bags_dir))
 
 
-        # rospy.loginfo('Iter={}'.format(str(i)))
-        # return all the bags stored
-        return glob.glob('{}/**/*.bags'.format(args.save_dir))
+        # @classmethod
+        # def from_config(cls, config, maps_dir, *args, **kwargs):
+        #     simulations = []
+        #
+        #     for map_name, config in config.items():
+        #         cls(maps_dir + map_name + '.png',
+        #             config.n,
+        #             config.height)
+        #     return cls()
+#
+# rocks1, rocks2, rocks3 = get_rocks((513, 513))
+# #

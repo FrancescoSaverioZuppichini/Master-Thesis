@@ -20,49 +20,59 @@ from fastai.layers import CrossEntropyFlat, MSELossFlat
 from estimators.data import get_dataloaders, get_transform, TraversabilityDataset
 from estimators.models import zoo
 from estimators.callbacks import ROC_AUC, Timer
-
-# torch.manual_seed(0)
+from estimators.data.transformations import RandomSimplexNoise, DropoutAgumentation
+from estimators.data.dataloaders import ImbalancedDatasetSampler
+from utilities.postprocessing.utils import KrockPatchExtractStrategy
 torch.backends.cudnn.benchmark = True
-# torch.backends.cudnn.deterministic = True
-# np.random.seed(0)
-# if torch.cuda.is_available(): torch.cuda.manual_seed_all(0)
 import matplotlib.pyplot as plt
+
 
 def train_and_evaluate(params, train=True, load_model=None):
     # model = OmarCNN()
-    model = zoo[params['model']]
-    # print(model)
-    summary(model.cuda(), (1, 76,76))
+    model = zoo[params['model']]()
 
+    # print(model)
+
+    patch_size = KrockPatchExtractStrategy.patch_shape(params['patch_size'], 0.02)
+    summary(model.cuda(), (1, patch_size[0], patch_size[1]))
+    # print(model)
     pprint.pprint(params)
+    timestamp = time.time()
 
     criterion = CrossEntropyFlat() if params['tr'] is not None else MSELossFlat()
 
+    experiment = Experiment(api_key="8THqoAxomFyzBgzkStlY95MOf",
+                            project_name="krock-new-train", workspace="francescosaveriozuppichini")
+
+    experiment.log_parameters(params)
+    experiment.log_metric("timestamp", timestamp)
+
     train_dl, val_dl, test_dl = get_dataloaders(
         train_root = '/media/francesco/saetta/krock-dataset/train/',
-        hm_root= '/home/francesco/Documents/Master-Thesis/core/maps/train/',
-        time_window=params['time_window'],
+        hm_root= '/home/francesco/Documents/Master-Thesis/core/maps/new-train/',
         patch_size=params['patch_size'],
         test_root='/media/francesco/saetta/krock-dataset/test/',
         test_hm_root='/home/francesco/Documents/Master-Thesis/core/maps/test/',
         val_root=params['validation'],
         # val_root='/media/francesco/saetta/krock-dataset/val/',
-        val_hm_root='/home/francesco/Documents/Master-Thesis/core/maps/val/',
-        generate=False,
-        val_size = params['val_size'],
-        train_transform=get_transform(should_aug=params['data-aug']),
-        val_transform=get_transform(scale=1, should_aug=False),
-        test_transform=get_transform(scale=1, should_aug=False),
-        num_samples=params['num_samples'],
-        batch_size=params['batch_size'],
-        num_workers=16,
+        val_hm_root='/home/francesco/Documents/Master-Thesis/core/maps/val/' if params['validation'] is not None else None,
         tr=params['tr'],
+        time_window=params['time_window'],
+        train_transform=get_transform(aug=params['data-aug'][0]),
+        train_transform_with_label=params['data-aug'][1],
+        val_transform=get_transform(),
+        test_transform=get_transform (),
+        val_size=params['val_size'],
+        batch_size=params['batch_size'],
         more_than=params['more_than'],
+        less_than=params['less_than'],
         down_sampling=params['down_sampling'],
-        only_forward=params['only_forward'],
+        sampler=params['sampler'],
+        num_samples=params['num_samples'],
+        generate=False,
+        num_workers=16,
         pin_memory=True)
 
-    timestamp = time.time()
     model_name = '{}-{}-{}-{}-{}'.format(params['model'], params['dataset'].split('/')[0], params['lr'],
                                          params['patch_size'], timestamp)
 
@@ -80,12 +90,6 @@ def train_and_evaluate(params, train=True, load_model=None):
 
     data = DataBunch(train_dl=train_dl, valid_dl=val_dl, test_dl=test_dl)
 
-    experiment = Experiment(api_key="<HIDDEN>",
-                            project_name="krock", workspace="francescosaveriozuppichini")
-
-    experiment.log_parameters(params)
-    experiment.log_metric("timestamp", timestamp)
-
     metrics = []
 
     if params['tr'] is not None: metrics = [accuracy, ROC_AUC()]
@@ -95,21 +99,25 @@ def train_and_evaluate(params, train=True, load_model=None):
                       path=model_dir,
                       model_dir=model_dir,
                       loss_func=criterion,
-                      opt_func=partial(torch.optim.Adam),
+                      opt_func=params['optim'],
+                      # opt_func=partial(torch.optim.SGD, momentum=0.95, weight_decay=1e-4),
+                      # opt_func=partial(torch.optim.Adam),
                       metrics=[*metrics, Timer()])
 
     model_name_roc_auc = 'roc_auc'
     model_name_acc = 'accuracy'
     model_name_loss = 'loss'
 
-    callbacks = [ReduceLROnPlateauCallback(learn=learner, patience=3, factor=0.2),
-                 EarlyStoppingCallback(learn=learner, patience=8),
+    callbacks = [
+                 ReduceLROnPlateauCallback(learn=learner, patience=5, factor=0.2, monitor='roc_auc'),
+                 EarlyStoppingCallback(learn=learner, patience=8, monitor='roc_auc'),
                  CSVLogger(learn=learner),
-                 SaveModelCallback(learn=learner, name=model_name_loss)]
+                 # SaveModelCallback(learn=learner, name=model_name_loss)
+    ]
 
     if params['tr'] is not None:
         callbacks.append(SaveModelCallback(learn=learner, name=model_name_roc_auc, monitor='roc_auc'))
-        callbacks.append(SaveModelCallback(learn=learner, name=model_name_acc, monitor='accuracy'))
+        # callbacks.append(SaveModelCallback(learn=learner, name=model_name_acc, monitor='accuracy'))
         # callbacks.append(SaveModelCallback(learn=learner, name=model_name_loss))
 
     if train:
@@ -117,34 +125,36 @@ def train_and_evaluate(params, train=True, load_model=None):
             # learner.lr_find()
             # learner.recorder.plot()
             # plt.show() # 1e-01
-            lr = 1e-3
-            learner.fit_one_cycle(params['epochs'], slice(lr), pct_start=0.8, callbacks=callbacks)
-            # lr =  1e-4,
-            # learner.fit_one_cycle(10, slice(lr), pct_start=0.8, callbacks=callbacks)
+            # # lr = 1e-3
+            # learner.fit_one_cycle(params['epochs'], slice(params['lr']), pct_start=0.8, callbacks=callbacks)
+            # # lr =  1e-4,
+            # learner.fit_one_cycle(5, slice(params['lr']), pct_start=0.8, callbacks=callbacks)
+            # loss, acc, roc = learner.validate(data.test_dl, metrics=[accuracy, ROC_AUC()])
+            # print(loss, acc, roc)
             #
-            # learner.fit(epochs=params['epochs'], lr=params['lr'],
-            #             callbacks=callbacks)  # SaveModelCallback load the best model after training!
+            # # learner.lr_find()
+            # # learner.recorder.plot()
+            # # plt.show() # 1e
+            # learner.fit_one_cycle(5, slice(1e-5), callbacks=callbacks)
+            # loss, acc, roc = learner.validate(data.test_dl, metrics=[accuracy, ROC_AUC()])
+            # print(loss, acc, roc)
+            # # #
+            # learner.fit_one_cycle(5, slice(1e-6), pct_start=0.8, callbacks=callbacks)
+
+            #
+            learner.fit(epochs=params['epochs'], lr=params['lr'],
+                        callbacks=callbacks)  # SaveModelCallback load the best model after training!
+
     if params['tr'] is not None:
         with experiment.test():
-            learner.load(model_name_loss)
-            loss, acc, roc = learner.validate(data.test_dl, metrics=[accuracy, ROC_AUC()])
-            print(loss, acc, roc)
-            experiment.log_metric("roc_auc_from_loss", roc.item())
-            experiment.log_metric("test_loss_from_loss", loss)
-
-        with experiment.test():
-            learner.load(model_name_acc)
-            loss, acc, roc = learner.validate(data.test_dl, metrics=[accuracy, ROC_AUC()])
-            print(loss, acc, roc)
-            experiment.log_metric("roc_auc_from_acc", roc.item())
-            experiment.log_metric("test_loss_from_acc", loss)
-
-        with experiment.test():
             learner.load(model_name_roc_auc)
+            learner.model.eval()
+            loss, acc, roc = learner.validate(data.valid_dl, metrics=[accuracy, ROC_AUC()])
+            print(loss, acc, roc, 'validation')
             loss, acc, roc = learner.validate(data.test_dl, metrics=[accuracy, ROC_AUC()])
             print(loss, acc, roc)
-            experiment.log_metric("roc_auc-from-best", roc.item())
-            experiment.log_metric("test_loss_from_roc_auc", loss)
+            experiment.log_metric("roc_auc", roc.item())
+            experiment.log_metric("acc", acc.item())
 
     else:
         with experiment.test():
@@ -156,101 +166,44 @@ def train_and_evaluate(params, train=True, load_model=None):
     print(model_name)
     del learner.model
     del learner
+    del model
 
 if __name__ == '__main__':
-    params = {'epochs': 30,
-              'lr': 1e-3,
-              'batch_size': 128,
-              # 'model': 'omar',
-              'val_size' : 10,
-              'validation': None,
-              'model': 'microresnet#4-gate=3x3-n=2-se=False',
-              'dataset': '',
-              'sampler': 'imbalance',
-              'num_samples': True,
-              'sampler_type': 'random',
-              'data-aug': True,
-              'data-aug-type': 'coarse-dropout[0.6,0.8]',
-              'optim': 'adam',
-              'info': '',
-              'tr': 0.2,
-              'problem' : 'classification',
-              'more_than': 0,
-              'down_sampling': 2,
-              'time_window': 50 * 2,
-              'only_forward': False,
-              'patch_size': 0.66 }
+    def get_params():
+        return {'epochs': 30 ,
+                      'lr': 1e-3,
+                      'batch_size': 128,
+                      'val_size' : 10,
+                      'validation': None,
+                      'model': 'microresnet#4-gate=3x3-n=1-se=False',
+                      'dataset': '',
+                      'sampler': None,
+                      'num_samples': None,
+                      'data-aug': (None,None),
+                      # 'data-aug': None,
+                      'optim': partial(torch.optim.SGD, momentum=0.95, weight_decay=1e-4),
+                      # 'optim':  torch.optim.Adam,
+                      'info': '',
+                      'tr': 0.2,
+                      'problem' : 'classification',
+                      'more_than': None,
+                      'less_than': None,
+                      'down_sampling': 2,
+                      'time_window': 50 * 2,
+                      'patch_size': 0.71
+                      }
 
-    # params['data-aug'] = False
-    #
-    # for _ in range(5):
-    #     train_and_evaluate(params)
-    #
-    # params['more_than'] = 0
-    #
-    # for _ in range(5):
-    #     train_and_evaluate(params)
+    params = get_params()
 
-    params['data-aug'] = True
-    params['data-aug-type'] = 'Dropout(p=(0.05, 0.1))-CoarseDropout((0.02, 0.1),(0.6, 0.8))-RandomSimplexNoise(2000)(1, 50)-0.8-imbalance',
-    # -RandomSimplexNoise(1, 50)(4, 8)
-
-    # for _ in range(5):
-    #     train_and_evaluate(params)
-
-    params['validation'] = '/media/francesco/saetta/krock-dataset/val/'
-    # for _ in range(5):
-    #     train_and_evaluate(params)
-    #
-    # params['model'] = 'microresnet#4-gate=3x3-n=2-se=True'
-    # for _ in range(5):
-    #     train_and_evaluate(params)
-
-
+    params = get_params()
+    params['epochs'] = 30
+    # params['validation'] = '/media/francesco/saetta/krock-dataset/val/'
+    # opt_func=partial(torch.optim.Adam),
     params['model'] = 'microresnet#4-gate=3x3-n=1-se=True'
-    params['lr'] =  1e-4
-    for _ in range(5):
+    # params['sampler'] = ImbalancedDatasetSampler
+    # params['num_samples'] = 1000
+    # params['data-aug'] = (DropoutAgumentation(), RandomSimplexNoise(n=1000, p=0.8))
+    for _ in range(2):
         train_and_evaluate(params)
 
-    #
-    # params['model'] = 'microresnet#4-gate=3x3-n=2-se=False'
-    # for _ in range(5):
-    #     train_and_evaluate(params)
 
-    # params['model'] = 'microresnet#2-gate=3x3-n=2-se=False'
-    # for _ in range(5):
-    #     train_and_evaluate(params)
-
-    # params['model'] = 'microresnet#4-gate=3x3-n=1-se=True'
-    # for _ in range(5):
-    #     train_and_evaluate(params)
-    # params['data-aug'] = False
-    #
-    # for _ in range(5):
-    #     train_and_evaluate(params)
-    #
-    # params['more_than'] = None
-    #
-    # for _ in range(5):
-    #     train_and_evaluate(params)
-
-
-
-
-    # params['down_sampling'] = None
-    #
-    # for _ in range(5):
-    #     train_and_evaluate(params)
-    #
-    # params['down_sampling'] = 2
-    # params['time_window'] = 50 * 3
-    # params['patch_size'] = 1
-    #
-    # for _ in range(5):
-    #     train_and_evaluate(params)
-
-
-    # params['patch_size'] = 1.0
-    # params['time_window'] = 50 * 3
-    # for _ in range(5):
-    #     train_and_evaluate(params)
