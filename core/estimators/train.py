@@ -22,16 +22,20 @@ from estimators.models import zoo
 from estimators.callbacks import ROC_AUC, Timer
 from estimators.data.transformations import RandomSimplexNoise, DropoutAgumentation
 from estimators.data.dataloaders import ImbalancedDatasetSampler
-
+from utilities.postprocessing.utils import KrockPatchExtractStrategy
 torch.backends.cudnn.benchmark = True
+import matplotlib.pyplot as plt
 
 
 def train_and_evaluate(params, train=True, load_model=None):
     # model = OmarCNN()
-    model = zoo[params['model']]
-    # print(model)
-    summary(model.cuda(), (1, 76,76))
+    model = zoo[params['model']]()
 
+    # print(model)
+
+    patch_size = KrockPatchExtractStrategy.patch_shape(params['patch_size'], 0.02)
+    summary(model.cuda(), (1, patch_size[0], patch_size[1]))
+    # print(model)
     pprint.pprint(params)
     timestamp = time.time()
 
@@ -44,23 +48,24 @@ def train_and_evaluate(params, train=True, load_model=None):
     experiment.log_metric("timestamp", timestamp)
 
     train_dl, val_dl, test_dl = get_dataloaders(
-        train_root = '/media/francesco/saetta/krock-dataset/new-train/',
+        train_root = '/media/francesco/saetta/krock-dataset/train/',
         hm_root= '/home/francesco/Documents/Master-Thesis/core/maps/new-train/',
         patch_size=params['patch_size'],
         test_root='/media/francesco/saetta/krock-dataset/test/',
         test_hm_root='/home/francesco/Documents/Master-Thesis/core/maps/test/',
         val_root=params['validation'],
         # val_root='/media/francesco/saetta/krock-dataset/val/',
-        # val_hm_root='/home/francesco/Documents/Master-Thesis/core/maps/val/' if params['validation'] is not None else None,
+        val_hm_root='/home/francesco/Documents/Master-Thesis/core/maps/val/' if params['validation'] is not None else None,
         tr=params['tr'],
         time_window=params['time_window'],
         train_transform=get_transform(aug=params['data-aug'][0]),
         train_transform_with_label=params['data-aug'][1],
         val_transform=get_transform(),
-        test_transform=get_transform(),
+        test_transform=get_transform (),
         val_size=params['val_size'],
         batch_size=params['batch_size'],
         more_than=params['more_than'],
+        less_than=params['less_than'],
         down_sampling=params['down_sampling'],
         sampler=params['sampler'],
         num_samples=params['num_samples'],
@@ -103,10 +108,12 @@ def train_and_evaluate(params, train=True, load_model=None):
     model_name_acc = 'accuracy'
     model_name_loss = 'loss'
 
-    callbacks = [ReduceLROnPlateauCallback(learn=learner, patience=3, factor=0.2),
-                 EarlyStoppingCallback(learn=learner, patience=6),
+    callbacks = [
+                 ReduceLROnPlateauCallback(learn=learner, patience=5, factor=0.2, monitor='roc_auc'),
+                 EarlyStoppingCallback(learn=learner, patience=8, monitor='roc_auc'),
                  CSVLogger(learn=learner),
-                 SaveModelCallback(learn=learner, name=model_name_loss)]
+                 # SaveModelCallback(learn=learner, name=model_name_loss)
+    ]
 
     if params['tr'] is not None:
         callbacks.append(SaveModelCallback(learn=learner, name=model_name_roc_auc, monitor='roc_auc'))
@@ -118,10 +125,22 @@ def train_and_evaluate(params, train=True, load_model=None):
             # learner.lr_find()
             # learner.recorder.plot()
             # plt.show() # 1e-01
-            # lr = 1e-3
+            # # lr = 1e-3
             # learner.fit_one_cycle(params['epochs'], slice(params['lr']), pct_start=0.8, callbacks=callbacks)
-            # lr =  1e-4,
-            # learner.fit_one_cycle(10, slice(lr), pct_start=0.8, callbacks=callbacks)
+            # # lr =  1e-4,
+            # learner.fit_one_cycle(5, slice(params['lr']), pct_start=0.8, callbacks=callbacks)
+            # loss, acc, roc = learner.validate(data.test_dl, metrics=[accuracy, ROC_AUC()])
+            # print(loss, acc, roc)
+            #
+            # # learner.lr_find()
+            # # learner.recorder.plot()
+            # # plt.show() # 1e
+            # learner.fit_one_cycle(5, slice(1e-5), callbacks=callbacks)
+            # loss, acc, roc = learner.validate(data.test_dl, metrics=[accuracy, ROC_AUC()])
+            # print(loss, acc, roc)
+            # # #
+            # learner.fit_one_cycle(5, slice(1e-6), pct_start=0.8, callbacks=callbacks)
+
             #
             learner.fit(epochs=params['epochs'], lr=params['lr'],
                         callbacks=callbacks)  # SaveModelCallback load the best model after training!
@@ -130,6 +149,8 @@ def train_and_evaluate(params, train=True, load_model=None):
         with experiment.test():
             learner.load(model_name_roc_auc)
             learner.model.eval()
+            loss, acc, roc = learner.validate(data.valid_dl, metrics=[accuracy, ROC_AUC()])
+            print(loss, acc, roc, 'validation')
             loss, acc, roc = learner.validate(data.test_dl, metrics=[accuracy, ROC_AUC()])
             print(loss, acc, roc)
             experiment.log_metric("roc_auc", roc.item())
@@ -145,6 +166,7 @@ def train_and_evaluate(params, train=True, load_model=None):
     print(model_name)
     del learner.model
     del learner
+    del model
 
 if __name__ == '__main__':
     def get_params():
@@ -164,65 +186,24 @@ if __name__ == '__main__':
                       'info': '',
                       'tr': 0.2,
                       'problem' : 'classification',
-                      'more_than': 0,
+                      'more_than': None,
+                      'less_than': None,
                       'down_sampling': 2,
                       'time_window': 50 * 2,
-                      'patch_size': 0.66
+                      'patch_size': 0.71
                       }
 
     params = get_params()
 
-    # params['data-aug-type'] = str(params['data-aug'][0]) + '-' + str(params['data-aug'][1])
-    # # params['validation'] = '/media/francesco/saetta/krock-dataset/val/'
-    #
-    # # params['sampler'] = ImbalancedDatasetSampler(num_samples=100000)
-    # # for _ in range(5):
-    # #     train_and_evaluate(params)
-    #
-    # # params['validation'] = None
-    # params['data-aug'] = (DropoutAgumentation(), None)sa
-    # params['data-aug-type'] = str(params['data-aug'][0]) + '-' + str(params['data-aug'][1])
-    # params['validation'] = None
-    # # params['more_than'] = -0.2
-    # for _ in range(5):
-    #     train_and_evaluate(params)
-
-
-
     params = get_params()
-    params['data-aug'] = (DropoutAgumentation(), RandomSimplexNoise(n=2000))
-    params['data-aug-type'] = str(params['data-aug'][0]) + '-' + str(params['data-aug'][1])
-    for _ in range(5):
-        train_and_evaluate(params)
-    #
-    params['sampler'] = ImbalancedDatasetSampler
-    # params['num_samples'] = 150000
-    for _ in range(5):
-        train_and_evaluate(params)
-    #
-    params = get_params()
-    params['optim'] = torch.optim.Adam
-    for _ in range(5):
-        train_and_evaluate(params)
-    #
-    params = get_params()
+    params['epochs'] = 30
+    params['validation'] = '/media/francesco/saetta/krock-dataset/val/'
+    # opt_func=partial(torch.optim.Adam),
     params['model'] = 'microresnet#4-gate=3x3-n=1-se=True'
-    params['data-aug'] = (DropoutAgumentation(), None)
-    params['data-aug-type'] = str(params['data-aug'][0]) + '-' + str(params['data-aug'][1])
-    for _ in range(5):
+    # params['sampler'] = ImbalancedDatasetSampler
+    # params['num_samples'] = 1000
+    # params['data-aug'] = (DropoutAgumentation(), RandomSimplexNoise(n=1000, p=0.8))
+    for _ in range(2):
         train_and_evaluate(params)
-    #
-    # # params = get_params()
-    # params['data-aug'] = (DropoutAgumentation(), RandomSimplexNoise(2000))
-    # params['data-aug-type'] = str(params['data-aug'][0]) + '-' + str(params['data-aug'][1])
-    # for _ in range(5):
-    #     train_and_evaluate(params)
 
 
-
-
-    # params['model'] =  'microresnet#4-gate=3x3-n=1-se=True'
-    # params['more_than'] = 0
-    # params['down_sampling'] = 2
-    # for _ in range(5):
-    #     train_and_evaluate(params)

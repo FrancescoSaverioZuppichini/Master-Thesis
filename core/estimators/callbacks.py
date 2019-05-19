@@ -36,6 +36,10 @@ class ROC_AUC(Callback):
             self.targs = np.append(self.targs, targs)
 
     def on_epoch_end(self, last_metrics, last_target, last_output, **kwargs):
+
+        self.preds = self.preds.reshape((-1))
+        self.targs = self.targs.reshape((-1))
+
         roc = roc_auc_score(self.preds, self.targs)
         self.metric = roc
         self.preds = np.array([])

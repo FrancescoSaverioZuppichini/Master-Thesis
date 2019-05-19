@@ -21,15 +21,15 @@ class DropoutAgumentation():
         self.aug_prob = 0.8
         self.p = (0.05, 0.1)
         self.aug = iaa.Sometimes(self.aug_prob,
-                            iaa.Sequential(
-                                [
-                                    iaa.Dropout(p=self.p),
-                                    iaa.CoarseDropout(self.p,
-                                                      size_percent=(0.6, 0.8))
+                                 iaa.Sequential(
+                                     [
+                                         iaa.Dropout(p=self.p),
+                                         iaa.CoarseDropout(self.p,
+                                                           size_percent=(0.6, 0.8))
 
-                                ], random_order=False),
+                                     ], random_order=False),
 
-                            )
+                                 )
 
     def __call__(self, x):
         x = self.aug.augment_image(x)
@@ -57,8 +57,13 @@ def im2simplex(im, feature_size=24, scale=10):
 
 
 class RandomSimplexNoise():
+    """
+    Apply random simplex noise on input based on p. This class is
+    specific to our problem with hard-coded features dimension for each
+    class.
+    """
 
-    def __init__(self, shape=(76, 76), n=10, p=0.8, *args, **kwargs):
+    def __init__(self, shape=(78, 78), n=10, p=0.8, *args, **kwargs):
         super().__init__()
         self.images = []
         self.n = n
@@ -94,9 +99,8 @@ class RandomSimplexNoise():
 
     def __str__(self):
         return 'RandomSimplexNoise={}{}-{}-{}'.format(self.p, self.features_dims,
-                                 self.traversable_scale_dims,
-                                 self.no_traversable_scale_dims)
-
+                                                      self.traversable_scale_dims,
+                                                      self.no_traversable_scale_dims)
 
 
 class CenterAndScalePatch():

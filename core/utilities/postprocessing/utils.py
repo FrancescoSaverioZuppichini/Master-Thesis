@@ -12,7 +12,7 @@ class TraversabilityDir():
 
     @property
     def meta(self):
-        return pd.read_csv(self.bags_dir + '/meta.csv')
+        return pd.read_csv(self.root + '/meta.csv')
 
     @property
     def bags_dir(self):

@@ -1,5 +1,6 @@
 from utilities.postprocessing.handlers import *
 from utilities.postprocessing.utils import TraversabilityDir
+from utilities.postprocessing.utils import KrockPatchExtractStrategy, PatchExtractStrategy
 
 
 class PostProcessing():
@@ -17,14 +18,13 @@ class PostProcessing():
             ParseDataframe(),
             AddHMcoordinates(),
             CleanDataframe(lower_bound=1, offset=22),
-            drop_uselesss_columns,
             StoreDataframeKeepingSameName(self.dir.csvs_parsed_dir)
         ]))
 
         self.extract_patches = MultiThreadWrapper(16, Compose([
             ReadDataframeFilenameAndHm(self.dir.csvs_parsed_dir,
                                        self.dir.maps_dir),
-            AddAdvancement(time_window),
+            # AddAdvancement(time_window),
             ExtractPatches(patch_extract_stategy=KrockPatchExtractStrategy(max_advancement=self.advancement)),
             StorePatches(self.dir.patches_dir, self.dir.csvs_patches_dir)
 

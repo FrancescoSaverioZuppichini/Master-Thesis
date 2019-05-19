@@ -38,7 +38,7 @@ class ImbalancedDatasetSampler(torch.utils.data.sampler.Sampler):
                 label_to_count[label] += 1
             else:
                 label_to_count[label] = 1
-
+        print(label_to_count)
         # weight for each sample
         weights = [1.0 / label_to_count[self._get_label(dataset, idx)]
                    for idx in self.indices]
@@ -51,14 +51,13 @@ class ImbalancedDatasetSampler(torch.utils.data.sampler.Sampler):
         elif dataset_type is torchvision.datasets.ImageFolder:
             return dataset.imgs[idx][1]
         elif dataset_type is ConcatDataset:
-            if type(dataset.datasets[0]) is TraversabilityDataset:
-                return dataset.df['labels'][idx]
+            return int(dataset.df['label'][idx])
 
 
     def __iter__(self):
-        return (self.indices[i] for i in torch.multinomial(
+        iter = (self.indices[i] for i in torch.multinomial(
             self.weights, self.num_samples, replacement=True))
-
+        return iter
     def __len__(self):
         return self.num_samples
 
@@ -208,7 +207,7 @@ if __name__ == '__main__':
                                                 '/media/francesco/saetta/krock-dataset/train/csvs/',
                                                 '/home/francesco/Documents/Master-Thesis/core/maps/new-train/',
                                                 patches_dir='/media/francesco/saetta/krock-dataset/train/patches/0.66/',
-                                                n=2,
+                                                n=10,
                                                 down_sampling=2,
                                                 time_window=100,
                                                 patch_size=0.66,

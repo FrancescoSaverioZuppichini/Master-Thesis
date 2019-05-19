@@ -9,8 +9,9 @@ import seaborn as sns
 
 from utilities.postprocessing.utils import *
 from matplotlib import gridspec
-from utilities.postprocessing.handlers import AddAdvancement
+from utilities.postprocessing.handlers import add_advancement
 from utilities.postprocessing.utils import PatchExtractStrategy
+from utilities.visualisation.utils import *
 
 class DataFrameVisualization():
     """
@@ -19,10 +20,8 @@ class DataFrameVisualization():
     def __init__(self, df, time_window=None,*args, **kwargs):
 
         self.df = df
-        if time_window is not None: self.df = AddAdvancement(time_window)((self.df, None, None))[0]
 
     def __call__(self, tr, time_window=None):
-        if time_window is not None: self.df = AddAdvancement(time_window)((self.df, None, None))[0]
         self.plot_advancement().show()
         self.plot_advancement_box().show()
         self.plot_rotation().show()
@@ -76,8 +75,8 @@ class DataFrameVisualization():
         return cls.from_dfs(dfs, *args, **kwargs)
 
     @classmethod
-    def from_dfs(cls, dfs, *args, **kwargs):
-
+    def from_dfs(cls, dfs, time_window=None, *args, **kwargs):
+        if time_window is not None: dfs = [add_advancement(df, time_window) for df in dfs]
         df_total = pd.concat(dfs, sort=False)
         df_total = df_total.dropna()
         df_total = df_total.reset_index(drop=True)

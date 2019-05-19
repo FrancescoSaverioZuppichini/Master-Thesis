@@ -118,7 +118,7 @@ class TraversabilityDataset(Dataset):
         for ds in concat_ds.datasets:
             if df is None: df = ds.df
             else: df = pd.concat([df, ds.df])
-
+        df = df.reset_index(drop=True)
         concat_ds.df = df
         return concat_ds
 
