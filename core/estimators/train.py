@@ -197,7 +197,7 @@ if __name__ == '__main__':
 
     params = get_params()
     params['epochs'] = 30
-    params['validation'] = '/media/francesco/saetta/krock-dataset/val/'
+    # params['validation'] = '/media/francesco/saetta/krock-dataset/val/'
     # opt_func=partial(torch.optim.Adam),
     params['model'] = 'microresnet#4-gate=3x3-n=1-se=True'
     # params['sampler'] = ImbalancedDatasetSampler
