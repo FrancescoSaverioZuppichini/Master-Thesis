@@ -55,7 +55,7 @@ def train_and_evaluate(params, train=True, load_model=None):
         test_hm_root='/home/francesco/Documents/Master-Thesis/core/maps/test/',
         val_root=params['validation'],
         # val_root='/media/francesco/saetta/krock-dataset/val/',
-        val_hm_root='/home/francesco/Documents/Master-Thesis/core/maps/val/' if params['validation'] is not None else None,
+        val_hm_root='/home/francesco/Documents/Master-Thesis/core/maps/test/' if params['validation'] is not None else None,
         tr=params['tr'],
         time_window=params['time_window'],
         train_transform=get_transform(aug=params['data-aug'][0]),
@@ -197,12 +197,12 @@ if __name__ == '__main__':
 
     params = get_params()
     params['epochs'] = 30
-    # params['validation'] = '/media/francesco/saetta/krock-dataset/val/'
+    params['validation'] = '/media/francesco/saetta/krock-dataset/test/'
     # opt_func=partial(torch.optim.Adam),
     params['model'] = 'microresnet#4-gate=3x3-n=1-se=True'
     # params['sampler'] = ImbalancedDatasetSampler
     # params['num_samples'] = 1000
-    # params['data-aug'] = (DropoutAgumentation(), RandomSimplexNoise(n=1000, p=0.8))
+    params['data-aug'] = (DropoutAgumentation(), None)
     for _ in range(2):
         train_and_evaluate(params)
 

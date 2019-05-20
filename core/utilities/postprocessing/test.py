@@ -2,8 +2,8 @@ from utilities.visualisation import DataFrameVisualization
 from utilities.postprocessing.PostProcessing import PostProcessing
 
 
-post = PostProcessing(root='/media/francesco/saetta/krock-dataset/tr/',
-                      maps_dir='/home/francesco/Documents/Master-Thesis/core/maps/new-train/',
+post = PostProcessing(root='/media/francesco/saetta/krock-dataset/new-test-random/',
+                      maps_dir='/home/francesco/Documents/Master-Thesis/core/maps/test/',
                       advancement=0.71,
                       time_window=100)
 

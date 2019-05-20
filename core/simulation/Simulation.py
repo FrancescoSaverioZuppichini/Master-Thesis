@@ -13,7 +13,6 @@ import tqdm
 import random
 import cv2
 import numpy as np
-from utilities.patches.texture import get_rocks
 
 def hmread(hm_path):
     hm = cv2.imread(hm_path)

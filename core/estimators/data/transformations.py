@@ -11,6 +11,7 @@ from torchvision.transforms import Resize, ToPILImage, ToTensor, Grayscale, Comp
 from opensimplex import OpenSimplex
 from tqdm import tqdm
 
+from PIL import Image
 
 class DropoutAgumentation():
     """
@@ -43,6 +44,19 @@ class DropoutAgumentation():
     def __str__(self):
         return 'DropoutAgumentation={}p={}-({},size_percent=(0.6, 0.8))'.format(self.aug_prob, self.p, self.p)
 
+class RandomCoarsening():
+    def __init__(self, p):
+        self.factors = 8 * np.linspace(2, 12, 11, dtype=np.int)
+        # array([16., 24., 32., 40., 48., 56., 64., 72., 80., 88., 96.])
+        self.p = p
+
+    def __call__(self, x):
+        original_shape = x.shape
+        if np.random.random() > (1.0 - self.p):
+            shape = np.random.choice(self.factors)
+            x = cv2.resize(x, (shape, shape))
+            x = cv2.resize(x, original_shape)
+        return x
 
 simplex = OpenSimplex()
 
@@ -68,9 +82,9 @@ class RandomSimplexNoise():
         self.images = []
         self.n = n
         self.p = p
-        self.features_dims = (3, 50)
+        self.features_dims = (1, 50)
         self.traversable_scale_dims = (15, 25)
-        self.no_traversable_scale_dims = (3, 15)
+        self.no_traversable_scale_dims = (5, 15)
 
         self._make_images(shape)
 
@@ -111,10 +125,9 @@ class CenterAndScalePatch():
     depending on the map, we need to multiply the patch by a scaling factor.
     """
 
-    def __init__(self, scale=1.0, debug=False, resize=None, ):
+    def __init__(self, scale=1.0, debug=False, ):
         self.scale = scale
         self.debug = debug
-        self.resize = resize
 
     def show_heatmap(self, x, title, ax):
         ax.set_title(title)
@@ -141,8 +154,7 @@ class CenterAndScalePatch():
         if self.debug:
             ax = plt.subplot(2, 2, 3)
             self.show_heatmap(x, 'centered {}'.format(center), ax)
-        if self.resize is not None:
-            x = cv2.resize(x, self.resize)
+
         if self.debug:
             ax = plt.subplot(2, 2, 4)
             self.show_heatmap(x, 'final', ax)
@@ -160,8 +172,10 @@ def get_transform(aug=None, scale=1, debug=False, resize=None):
     :return:ImbalancedDatasetSampler
     """
     transformations = []
-    transformations.append(CenterAndScalePatch(scale=scale, debug=debug, resize=resize))
-    if aug is not None: transformations.append(aug)
+    transformations.append(CenterAndScalePatch(scale=scale, debug=debug))
+    # transformations.append(RandomCoarsening(0.8))
+    if aug is not None:
+        transformations.append(DropoutAgumentation())
     transformations.append(ToTensor())
 
     return Compose(transformations)

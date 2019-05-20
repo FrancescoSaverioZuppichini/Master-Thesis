@@ -1,7 +1,7 @@
 from utilities.postprocessing.handlers import *
 from utilities.postprocessing.utils import TraversabilityDir
 from utilities.postprocessing.utils import KrockPatchExtractStrategy, PatchExtractStrategy
-
+from utilities.pipeline import Compose, MultiThreadWrapper
 
 class PostProcessing():
     def __init__(self, root, maps_dir, advancement, time_window):

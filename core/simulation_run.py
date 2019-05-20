@@ -1,4 +1,3 @@
-from utilities.patches.texture import get_rocks
 from simulation.Simulation import Simulation
 from simulation.env.spawn.SpawnStragety import FlatGroundSpawnStrategy, RandomSpawnStrategy
 from os import path
@@ -55,3 +54,11 @@ sims = [
 print('[INFO] TOT sims = {}  N maps = {}'.format(N_SIM * len(sims), len(sims)))
 for sim in sims:
     sim()
+
+
+# test
+BAGS_DIR = '/media/francesco/saetta/krock-dataset/new-test-random/bags/'
+Simulation('/home/francesco/Documents/Master-Thesis/core/maps/test/querry-big-10.png', 50, 10, BAGS_DIR, RandomSpawnStrategy, max_time=20)()
+# test
+BAGS_DIR = '/media/francesco/saetta/krock-dataset/new-test/bags/'
+Simulation('/home/francesco/Documents/Master-Thesis/core/maps/test/querry-big-10.png', 50, 10, BAGS_DIR, FlatGroundSpawnStrategy, max_time=20)()
