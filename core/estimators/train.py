@@ -198,8 +198,8 @@ if __name__ == '__main__':
     params = get_params()
     params['epochs'] = 30
     params['validation'] = '/media/francesco/saetta/krock-dataset/test/'
-    # opt_func=partial(torch.optim.Adam),
-    params['model'] = 'microresnet#4-gate=3x3-n=1-se=True'
+    opt_func=partial(torch.optim.Adam),
+    params['model'] = 'microresnet#4-gate=3x3-n=1-se=False'
     # params['sampler'] = ImbalancedDatasetSampler
     # params['num_samples'] = 1000
     params['data-aug'] = (DropoutAgumentation(), None)

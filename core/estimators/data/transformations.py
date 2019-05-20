@@ -46,7 +46,9 @@ class DropoutAgumentation():
 
 class RandomCoarsening():
     def __init__(self, p):
-        self.factors = 8 * np.linspace(2, 12, 11, dtype=np.int)
+        self.factors = [16,24,32,56,64]
+
+        # self.factors = 8 * np.linspace(2, 12, 11, dtype=np.int)
         # array([16., 24., 32., 40., 48., 56., 64., 72., 80., 88., 96.])
         self.p = p
 
@@ -173,7 +175,7 @@ def get_transform(aug=None, scale=1, debug=False, resize=None):
     """
     transformations = []
     transformations.append(CenterAndScalePatch(scale=scale, debug=debug))
-    # transformations.append(RandomCoarsening(0.8))
+    # transformations.append(RandomCoarsening(p=0.8))
     if aug is not None:
         transformations.append(DropoutAgumentation())
     transformations.append(ToTensor())

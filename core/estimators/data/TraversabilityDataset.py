@@ -56,7 +56,8 @@ class TraversabilityDataset(Dataset):
 
         if more_than is not None: self.df = self.df[self.df['advancement'] >= more_than]
         if less_than is not None: self.df = self.df[self.df['advancement'] <= less_than]
-        if tr is not None: self.df["label"] = (self.df["advancement"] > tr)
+        if tr is not None and len(self.df) > 0:
+            self.df["label"] = self.df["advancement"] > tr
 
     def read_patch(self, img_name):
         patch = cv2.imread(self.patches_dir + '/' + img_name)
@@ -117,7 +118,7 @@ class TraversabilityDataset(Dataset):
         df = None
         for ds in concat_ds.datasets:
             if df is None: df = ds.df
-            else: df = pd.concat([df, ds.df])
+            else: df = pd.concat([df, ds.df], sort=True)
         df = df.reset_index(drop=True)
         concat_ds.df = df
         return concat_ds
