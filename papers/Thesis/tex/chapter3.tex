@@ -175,7 +175,8 @@ We also implement one additional library called \href{https://github.com/Frances
 To collect \emph{Krock}'s interaction with the environment, we spawn the robot on the ground and let it move forward for $t$ seconds. We repeat this process $n$ times per each map.
     Unfortunately, spawning the robot is not a trivial task. In certain maps, for instance, \emph{bars1}, we must avoid spawning on an obstacle otherwise the run will be ruined by \emph{Krock} getting stuck at the beginning. To solve the problem, we define a random spawn strategy used in most of the maps without big obstacles such as \emph{slope\_rocks}, and a flat ground spawn strategy for the others. The random spawn just selects a random position and rotation for the robot. On the other hand, the flat ground strategy first selects suitable spawn positions by using a sliding window on the heightmap of size equal \emph{Krock}'s footprint and check if the mean pixel value is lower than a small threshold. If so, we store the center coordinates of the patch. Intuitively, if a patch is flat the mean value will be close to zero.
     
-We clustered those points with K-Means in $k$ clusters where $k$ is the number of spawning points we need, in our case fifty. By clustering, we guarantee to cover all region of the map. The following picture shows this strategy on \emph{bars1}. 
+Since there may be more flat spawing positions than simulations we need to run we have to reduce the size of the candidate points. To maintaings the correct distribution on the map to avoiding 
+spawing the robot always in the same cloud of points, we used K-Means with $k$ clusters where $k$ is of simulations we wish to run. By clustering, we guarantee to cover all region of the map avoiding adding bias. The following picture shows this strategy on \emph{bars1}. 
 \begin{figure}[H]
     \begin{subfigure}[b]{0.5\textwidth}
         \includegraphics[width=\textwidth]{../img/3/spawn/flat-spawn-10.png}
@@ -367,20 +368,21 @@ Our network differs is composed by $n$ ResNet blocks, a depth of $d$ and a chann
 \subsubsection{Normalization}
 Before feeding the data to the models, we need to make the patches height invariant. This must be done to correctly normalize different patches taken from different maps with different height scaling factor. We subtract the height of the map corresponding \emph{Krock}'s position from the patch to correctly center it. The following figure shows the normalization process on the patch with the square in the middle.
 \begin{figure}[H]
-    \begin{subfigure}[b]{0.5\textwidth}
+    \centering
+    \begin{subfigure}[b]{0.32\textwidth}
         \includegraphics[width=\textwidth]{../img/data-aug/2d/square-middle.png}
         \caption{Input}
     \end{subfigure}
-    \begin{subfigure}[b]{0.5\textwidth}
+    \begin{subfigure}[b]{0.32\textwidth}
         \includegraphics[width=\textwidth]{../img/data-aug/2d/square-middle-center.png}
         \caption{Height centered}
     \end{subfigure}  
-    
-          \begin{subfigure}[b]{0.5\textwidth}
+    \\
+          \begin{subfigure}[b]{0.32\textwidth}
         \includegraphics[width=\textwidth]{../img/data-aug/3d/square-middle.png}
         \caption{Input}
     \end{subfigure}
-    \begin{subfigure}[b]{0.5\textwidth}
+    \begin{subfigure}[b]{0.32\textwidth}
         \includegraphics[width=\textwidth]{../img/data-aug/3d/square-middle-center.png}
         \caption{Height centered}
     \end{subfigure}  
@@ -392,10 +394,11 @@ Before feeding the data to the models, we need to make the patches height invari
 \label{sec: data-aug}
 Data augmentation is used to change the input of a model using different techniques to change it in order to produce more training examples. Since our inputs are heightmaps we cannot utilize the classic image manipulations such as shifts, flips, and zooms. Imagine that we have a patch with a wall in front of it, if we random rotate the image the wall may go in a position where the patch it is now traversable but its label is still not traversable, we have to be more creative. We decided to apply dropout, coarse dropout, and random simplex noise since they are traversability invariant. To illustrate those techniques we are going to use the following example patch of size $100x100$.
 \begin{figure}[H]
-    \begin{subfigure}[b]{0.5\textwidth}
+    \centering
+    \begin{subfigure}[b]{0.32\textwidth}
         \includegraphics[width=\textwidth]{../img/data-aug/2d/square-middle.png}
     \end{subfigure}
-    \begin{subfigure}[b]{0.5\textwidth}
+    \begin{subfigure}[b]{0.32\textwidth}
         \includegraphics[width=\textwidth]{../img/data-aug/square-middle.png}
     \end{subfigure}    
 \label{fig: square-patch}
@@ -407,19 +410,19 @@ Data augmentation is used to change the input of a model using different techniq
 \begin{figure}[H]
     \centering
 
-        \begin{subfigure}[b]{0.45\textwidth}
+        \begin{subfigure}[b]{0.32\textwidth}
             \includegraphics[width=\textwidth]{../img/data-aug/3d/simplex1.png}
             \caption{Features size = 10}
         \end{subfigure}
-        \begin{subfigure}[b]{0.45\linewidth}
+        \begin{subfigure}[b]{0.32\linewidth}
             \includegraphics[width=\textwidth]{../img/data-aug/3d/simplex2.png}
-            \caption{Data-aug}
+            \caption{Features size = 20}
             \end{subfigure}    
-          \begin{subfigure}[b]{0.45\textwidth}
+          \begin{subfigure}[b]{0.32\textwidth}
             \includegraphics[width=\textwidth]{../img/data-aug/3d/simplex3.png}
             \caption{Features size = 30}
         \end{subfigure}    
-        \begin{subfigure}[b]{0.45\textwidth}
+        \begin{subfigure}[b]{0.32\textwidth}
             \includegraphics[width=\textwidth]{../img/data-aug/3d/simplex4.png}
             \caption{Features size = 40}
         \end{subfigure}    
@@ -430,21 +433,21 @@ Data augmentation is used to change the input of a model using different techniq
 The following images show the tree data augmentation techniques used applied the input image.
 \begin{figure}[H]
     \centering
-        \begin{subfigure}[b]{0.45\textwidth}
+        \begin{subfigure}[b]{0.32\textwidth}
             \includegraphics[width=\textwidth]{../img/data-aug/2d/center-dropout.png}
             \caption{Dropout}
         \end{subfigure}
-        \begin{subfigure}[b]{0.45\linewidth}
+        \begin{subfigure}[b]{0.32\linewidth}
             \includegraphics[width=\textwidth]{../img/data-aug/2d/center-coarse-dropout.png}
             \caption{Coarse Dropout}
             \end{subfigure}    
 
-          \begin{subfigure}[b]{0.45\textwidth}
+          \begin{subfigure}[b]{0.32\textwidth}
             \includegraphics[width=\textwidth]{../img/data-aug/2d/center-simplex.png}
             \caption{Simplex Noise}
 
         \end{subfigure}    
-        \begin{subfigure}[b]{0.45\textwidth}
+        \begin{subfigure}[b]{0.32\textwidth}
             \includegraphics[width=\textwidth]{../img/data-aug/2d/center-aug.png}
             \caption{Final result}
         \end{subfigure}    
