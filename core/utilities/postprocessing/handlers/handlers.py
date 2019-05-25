@@ -47,9 +47,9 @@ class AddAdvancement(Handler):
         self.dt = dt
 
     def __call__(self, data):
-        df, hm, filename = data
+        df, filename = data
         if len(df) > 0: df = add_advancement(df, self.dt)
-        return df, hm, filename
+        return df, filename
 
 
 class CleanDataframe(Handler):
@@ -103,12 +103,22 @@ class ExtractPatches():
 
 
 class StorePatches():
-    def __init__(self, out_dir, meta_df_out_dir):
+    def __init__(self, out_dir):
         self.out_dir = out_dir
-        self.meta_df_out_dir = meta_df_out_dir
 
     def __call__(self, data):
         df, patches, filename = data
-        df, filename = store_patches(df, filename, patches, self.meta_df_out_dir, self.out_dir)
+        df, filename = store_patches(df, filename, patches, self.out_dir)
+
+        return df, filename
+
+class StoreDataframePatches():
+    def __init__(self, out_dir):
+        self.out_dir = out_dir
+
+    def __call__(self, data):
+        df, filename = data
+        if len(df) > 0:
+            df = store_meta_patches(df, filename, self.out_dir)
 
         return df, filename

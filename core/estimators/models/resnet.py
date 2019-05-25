@@ -2,30 +2,35 @@ import torch
 import torch.nn as nn
 
 from torchvision import models
+import torch.nn.functional as F
+
+
+class DoNothing(nn.Module):
+    def forward(self, x):
+        return x
 
 
 def conv_block3x3(in_planes, out_planes, conv_layer=nn.Conv2d,
-                  kernel_size=3, padding=None, preactivate=False, stride=1, activation='relu'):
-    activation_funcs = nn.ModuleDict({'relu': nn.ReLU(),
-                                      'leaky_relu': nn.LeakyReLU(),
-                                      'selu': nn.SELU()})
-
+                  kernel_size=3, padding=None, stride=1):
     padding = kernel_size // 2 if not padding else padding
 
-    if preactivate:
-        conv_block = nn.Sequential(
-            nn.BatchNorm2d(in_planes),
-            activation_funcs[activation],
-            conv_layer(in_planes, out_planes, kernel_size=kernel_size, padding=padding, bias=False, stride=stride)
-        )
-    else:
-        conv_block = nn.Sequential(
-            conv_layer(in_planes, out_planes, kernel_size=kernel_size, padding=padding, bias=False, stride=stride),
-            nn.BatchNorm2d(out_planes),
-            activation_funcs[activation],
-        )
+    return conv_layer(in_planes, out_planes, kernel_size=kernel_size, padding=padding, bias=False, stride=stride)
 
-    return conv_block
+    #
+    # if prectivate:
+    #     conv_block = nn.Sequential(
+    #         nn.BatchNorm2d(in_planes),
+    #         activation_funcs[activation],
+    #         conv_layer(in_planes, out_planes, kernel_size=kernel_size, padding=padding, bias=False, stride=stride)
+    #     )
+    # else:
+    #     conv_block = nn.Sequential(
+    #         conv_layer(in_planes, out_planes, kernel_size=kernel_size, padding=padding, bias=False, stride=stride),
+    #         nn.BatchNorm2d(out_planes),
+    #         activation_funcs[activation],
+    #     )
+    #
+    # return conv_block
 
 
 class SEModule(nn.Module):
@@ -33,7 +38,7 @@ class SEModule(nn.Module):
     Squeeze and Excitation module https://arxiv.org/abs/1709.01507
     """
 
-    def __init__(self, n_features, ratio=16, *args, **kwargs):
+    def __init__(self, n_features, ratio=8, *args, **kwargs):
         super().__init__()
 
         self.avg_pool = nn.AdaptiveAvgPool2d(1)
@@ -53,6 +58,14 @@ class SEModule(nn.Module):
         return x * out
 
 
+def get_activation_funcs():
+    return  nn.ModuleDict([
+        ['relu', nn.ReLU(inplace=True)],
+        ['leaky_relu', nn.LeakyReLU(negative_slope=0.1, inplace=True)],
+        ['selu', nn.SELU(inplace=True)]
+    ])
+
+
 class BasicBlock(nn.Module):
     """
     Basic block of ResNet, it is composed by two 3x3 conv - relu and batchnorm.
@@ -60,14 +73,40 @@ class BasicBlock(nn.Module):
     """
     expansion = 1
 
-    def __init__(self, in_planes, out_planes, stride=1, conv_block=conv_block3x3, *args, **kwargs):
-        super().__init__()
 
+    def __init__(self, in_planes, out_planes, stride=1, conv_block=conv_block3x3, activation='relu', preactivate=False,
+                 *args, **kwargs):
+        super().__init__()
         self.in_planes, self.out_planes, self.conv_block, self.stride = in_planes, out_planes, conv_block, stride
 
-        self.convs = self.get_convs(in_planes, out_planes, conv_block, stride=stride, *args, **kwargs)
-
         self.shortcut = self.get_shortcut() if self.in_planes != self.expanded else None
+
+
+        if preactivate:
+            self.convs = nn.Sequential(
+                nn.BatchNorm2d(in_planes),
+                self.activations_funcs[activation],
+                conv_block(in_planes, out_planes, stride=stride),
+                nn.BatchNorm2d(out_planes),
+                self.activations_funcs[activation],
+                conv_block(out_planes, out_planes),
+            )
+
+        else:
+            self.convs = nn.Sequential(conv_block(in_planes, out_planes, stride=stride),
+                                       nn.BatchNorm2d(out_planes),
+                                       self.activations_funcs[activation],
+                                       conv_block(out_planes, out_planes),
+                                       nn.BatchNorm2d(out_planes))
+
+        self.preactivate, self.activation = preactivate, activation
+    @property
+    def activations_funcs(self):
+        return nn.ModuleDict([
+            ['relu', nn.ReLU(inplace=True)],
+            ['leaky_relu', nn.LeakyReLU(negative_slope=0.1, inplace=True)],
+            ['selu', nn.SELU(inplace=True)]
+        ])
 
     @property
     def expanded(self):
@@ -80,20 +119,13 @@ class BasicBlock(nn.Module):
             nn.BatchNorm2d(self.out_planes),
         )
 
-    def get_convs(self, in_planes, out_planes, conv_block, stride, *args, **kwargs):
-        return nn.Sequential(
-            conv_block(self.in_planes, out_planes, stride=stride, *args, **kwargs),
-            conv_block(out_planes, out_planes, *args, **kwargs),
-        )
-
     def forward(self, x):
         residual = x
-
         if self.shortcut is not None: residual = self.shortcut(residual)
-
         out = self.convs(x)
-
-        out = out + residual
+        out += residual
+        if not self.preactivate:
+            out = self.activations_funcs[self.activation](out)
 
         return out
 
@@ -110,38 +142,36 @@ class Bottleneck(BasicBlock):
 
 
 class BasicBlockSE(BasicBlock):
-    def __init__(self, in_planes, out_planes, *args, **kwargs):
+    def __init__(self, in_planes, out_planes, ratio=16, *args, **kwargs):
         super().__init__(in_planes, out_planes, *args, **kwargs)
-        self.se = SEModule(out_planes)
+        self.se = SEModule(out_planes, ratio)
 
     def forward(self, x):
         residual = x
-
-        if self.shortcut is not None:
-            residual = self.shortcut(residual)
-
+        if self.shortcut is not None: residual = self.shortcut(residual)
         out = self.convs(x)
         out = self.se(out)
         out += residual
+        if not self.preactivate:
+            out = self.activations_funcs[self.activation](out)
 
         return out
 
 
 class BottleneckSE(Bottleneck):
-    def __init__(self, in_planes, out_planes, *args, **kwargs):
+    def __init__(self, in_planes, out_planes, ratio=16, *args, **kwargs):
         super().__init__(in_planes, out_planes, *args, **kwargs)
-        self.se = SEModule(out_planes * self.expansion)
+        self.se = SEModule(out_planes * self.expansion, ratio)
 
     def forward(self, x):
+
         residual = x
-
-        if self.shortcut is not None:
-            residual = self.shortcut(residual)
-
+        if self.shortcut is not None: residual = self.shortcut(residual)
         out = self.convs(x)
         out = self.se(out)
-
-        out.add_(residual)
+        out += residual
+        if not self.preactivate:
+            out = self.activations_funcs[self.activation](out)
 
         return out
 
@@ -179,7 +209,8 @@ class ResNetEncoder(nn.Module):
     .gate layer first and feed the output to one layer after the other.
     """
 
-    def __init__(self, in_channel, depths, blocks=BasicBlock, blocks_sizes=None, conv_block=conv_block3x3, *args,
+    def __init__(self, in_channel, depths, blocks=BasicBlock, blocks_sizes=None, conv_block=conv_block3x3,
+                 activation='relu', *args,
                  **kwargs):
         super().__init__()
         self.in_channel, self.depths, self.blocks = in_channel, depths, blocks
@@ -189,7 +220,7 @@ class ResNetEncoder(nn.Module):
         self.gate = nn.Sequential(
             nn.Conv2d(in_channel, self.blocks_sizes[0][0], kernel_size=7, stride=2, padding=3, bias=False),
             nn.BatchNorm2d(self.blocks_sizes[0][0]),
-            nn.LeakyReLU(inplace=True),
+            get_activation_funcs()[activation],
             nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         )
         # if the user passed a single instance of block, use it for each layer
@@ -197,17 +228,17 @@ class ResNetEncoder(nn.Module):
             self.blocks = [blocks] * len(self.blocks_sizes)
         # stack a number of layers together equal to the len of depth
         self.layers = nn.ModuleList([
-            ResNetLayer(in_c, out_c, depth=depths[i], block=self.blocks[i], *args, **kwargs)
+            ResNetLayer(in_c, out_c, depth=depths[i], block=self.blocks[i], activation=activation, *args, **kwargs)
             for i, (in_c, out_c) in enumerate(self.blocks_sizes)
         ])
 
-        self.initialise(self.modules())
+        self.initialise(self.modules(), activation)
 
     @staticmethod
-    def initialise(modules):
+    def initialise(modules, activation='relu'):
         for m in modules:
             if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='leaky_relu')
+                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity=activation)
             elif isinstance(m, nn.BatchNorm2d):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)

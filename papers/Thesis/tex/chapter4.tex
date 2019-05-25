@@ -2,12 +2,16 @@
 \begin{document}
 \section{Results}
 In the section we show and evaluate the models results. We will start by presenting to the reader the networks score on each metric, then we will use the best models to predict the traversability of real world terrain. Finally, we will use handcrafted patches, for example a wall of a certain height in a specific position, to test the robustness of the network by trying to highlighting its behaviour.
-\subsubsection{Experiment Setup}
+\subsection{Experiment Setup}
+\subsubsection{Hardware}
 We run all the experiment on a work station with Ubuntu 18.10 operating system. The machine is equipped with a Ryzen 2700x, a powerful CPU with 8 cores and 16 threads, and a NVIDIA 1080 GPU with 8GB of dedicated RAM.
-For the classification task, we select a threshold of $0.2m$ on a time window of two seconds to label the patches, meaning that a patch with an advancement less than $20$ centimeters is labeled as \emph{no traversable} and viceversa. We minimise the binary Cross Entropy.
+\subsubsection{Dataset}
+For the classification task, we select a threshold of $0.2m$ on a time window of two seconds to label the patches, meaning that a patch with an advancement less than $20$ centimeters is labeled as \emph{no traversable} and viceversa. We minimise the binary Cross Entropy. 
 On the other hand, for regression, we did not label the patch and directly regress on the advancement for a given time window while minimising the Mean Square Error (MSE). 
 To train the network we follow the best practice on residual network \cite{he2015deep} using Standard Gradient Descent with momentum set to $0.95$ and weight decay to $1e-4$ with an initial learning rate of $1e-3$.
-We fix the maximum number of train epochs to $30$ and reduce the learning rage on platuoe \todo{fix this typo} by a factor of $0.1$ with a patience of $4$. We used early stopping to stop the training if the validation accuracy does not increase in $6$ epochs.
+We fix the maximum number of train epochs to $30$ and reduce the learning rage on platuoe \todo{fix this typo} by a factor of $0.2$ with a patience of $4$. We used early stopping to stop the training if the validation accuracy does not increase in $6$ epochs.
+\todo[inline]{I actually use now acycling learning or something like it}
+
 \subsubsection{Experimental validation}
 We select as \emph{validation} ten percent of the training data. We remain to the reader that we store each run of \emph{Krock} as a \emph{.csv} file. So, to avoid any biases, we used completely different dataframes, meaning that train and validation sets are composed by non overlapping data from the simulations.
 \todo[inline]{add more maps if we add them to the test set}

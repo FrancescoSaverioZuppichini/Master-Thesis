@@ -3,29 +3,29 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-
+import torch
 from os import path
 from imgaug import augmenters as iaa
 from imgaug.augmenters import Augmenter
 from torchvision.transforms import Resize, ToPILImage, ToTensor, Grayscale, Compose
 from opensimplex import OpenSimplex
 from tqdm import tqdm
-
+from torch.nn import Dropout
 from PIL import Image
-
+import torch.nn.functional as F
 class DropoutAgumentation():
     """
     Wrapper for imgaug
     """
 
     def __init__(self):
-        self.aug_prob = 0.8
-        self.p = (0.05, 0.1)
-        self.aug = iaa.Sometimes(self.aug_prob,
+        self.p = 0.8
+        self.drop_prob = (0.05, 0.15)
+        self.aug = iaa.Sometimes(self.p,
                                  iaa.Sequential(
                                      [
-                                         iaa.Dropout(p=self.p),
-                                         iaa.CoarseDropout(self.p,
+                                         iaa.Dropout(p=self.drop_prob),
+                                         iaa.CoarseDropout(self.drop_prob,
                                                            size_percent=(0.6, 0.8))
 
                                      ], random_order=False),
@@ -33,20 +33,25 @@ class DropoutAgumentation():
                                  )
 
     def __call__(self, x):
-        x = self.aug.augment_image(x)
-        min, max = x.min() + 1e-5, x.max()
+        roll = np.random.random()
 
-        x = (x - min) / (max - min)  # norm to 0,1 -> imgaug does not accept neg values
-        x = self.aug.augment_image(x)
-        x = x * (max - min) + min  # go back
+        if roll > (1.0 - self.p):
+            x = F.dropout(x, p=np.random.uniform(*self.drop_prob))
+        #
+
+        # min, max = x.min() + 1e-5, x.max()
+        #
+        # x = (x - min) / (max - min)  # norm to 0,1 -> imgaug does not accept neg values
+        # x = self.aug.augment_image(x)
+        # x = x * (max - min) + min  # go back
         return x
 
     def __str__(self):
-        return 'DropoutAgumentation={}p={}-({},size_percent=(0.6, 0.8))'.format(self.aug_prob, self.p, self.p)
+        return 'DropoutAgumentation={}p={}-'.format(self.p, self.drop_prob)
 
 class RandomCoarsening():
     def __init__(self, p):
-        self.factors = [16,24,32,56,64]
+        self.factors = [32, 48, 64, 128]
 
         # self.factors = 8 * np.linspace(2, 12, 11, dtype=np.int)
         # array([16., 24., 32., 40., 48., 56., 64., 72., 80., 88., 96.])
@@ -62,6 +67,23 @@ class RandomCoarsening():
 
 simplex = OpenSimplex()
 
+class RandomScale():
+    def __init__(self, p):
+        self.p = p
+        self.traversable_scale_dims = (0.5, 1)
+        self.no_traversable_scale_dims = (1, 2)
+
+    def __call__(self, img, is_traversable):
+        if np.random.random() > (1.0 - self.p):
+            scale = 1
+            if is_traversable:
+                scale = np.random.randint(*self.traversable_scale_dims)
+            else:
+                scale = np.random.randint(*self.no_traversable_scale_dims)
+
+            img *= scale
+
+        return img
 
 def im2simplex(im, feature_size=24, scale=10):
     h, w = im.shape[0], im.shape[1]
@@ -96,7 +118,7 @@ class RandomSimplexNoise():
         for _ in tqdm(range(self.n)):
             features_size = np.random.randint(*self.features_dims)
             im = im2simplex(image.copy(), features_size, 1)
-            self.images.append(im)
+            self.images.append(im.astype(np.float32))
 
     def __call__(self, img, is_traversable):
         if np.random.random() > (1.0 - self.p):
@@ -149,7 +171,6 @@ class CenterAndScalePatch():
         if self.debug:
             ax = plt.subplot(2, 2, 2)
             self.show_heatmap(x, 'scale', ax)
-
         center = x[x.shape[0] // 2, x.shape[1] // 2]
         x -= center
 
@@ -162,7 +183,7 @@ class CenterAndScalePatch():
             self.show_heatmap(x, 'final', ax)
 
         if self.debug: plt.show()
-        return x.astype(np.float32)
+        return x
 
 
 def get_transform(aug=None, scale=1, debug=False, resize=None):
@@ -175,9 +196,9 @@ def get_transform(aug=None, scale=1, debug=False, resize=None):
     """
     transformations = []
     transformations.append(CenterAndScalePatch(scale=scale, debug=debug))
-    # transformations.append(RandomCoarsening(p=0.8))
-    if aug is not None:
-        transformations.append(DropoutAgumentation())
+    # transformations.append(RandomCoarsening(p=0.7))
     transformations.append(ToTensor())
+    if aug is not None:
+        transformations.append(aug)
 
     return Compose(transformations)

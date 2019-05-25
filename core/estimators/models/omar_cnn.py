@@ -24,7 +24,7 @@ class OmarCNN(nn.Module):
                                      nn.MaxPool2d(kernel_size=2),
                                      conv_block(5, 5))
 
-        self.decoder = nn.Sequential(nn.Linear(19220, 128),
+        self.decoder = nn.Sequential(nn.Linear(7605, 128),
                                      nn.ReLU(),
                                      nn.Dropout(),
                                      nn.Linear(128, 2),

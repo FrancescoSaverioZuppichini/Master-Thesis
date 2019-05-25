@@ -90,7 +90,6 @@ We genered four different maps with increasing bumps using simplex noise with fe
             \includegraphics[width=\textwidth]{../img/hm3d/bumps3.png}
             \caption{\emph{bumps3}}
         \end{subfigure}    
-    \label{fig: heightmaps}
     \caption{Bumps maps ($10\times10$m).}
 \end{figure}
 \paragraph{Bars:} In these maps there are wall with different shapes and heights. In 
@@ -104,7 +103,6 @@ We genered four different maps with increasing bumps using simplex noise with fe
             \includegraphics[width=\textwidth]{../img/hm3d/bars3.png}
             \caption{\emph{bars3}}
             \end{subfigure}     
-    \label{fig: heightmaps}
     \caption{Bars maps ($10\times10$m).}
 \end{figure}
 \paragraph{Rails:} Flat grounds with slots.
@@ -122,7 +120,6 @@ We genered four different maps with increasing bumps using simplex noise with fe
             \includegraphics[width=\textwidth]{../img/hm3d/rails3.png}
             \caption{\emph{rails3}}
         \end{subfigure}    
-    \label{fig: heightmaps}
     \caption{Rails maps ($10\times10$m).}
 \end{figure}
 \paragraph{Steps:} These are maps have huge wall and holes
@@ -140,9 +137,9 @@ We genered four different maps with increasing bumps using simplex noise with fe
             \includegraphics[width=\textwidth]{../img/hm3d/steps3.png}
             \caption{\emph{steps3}}
         \end{subfigure}    
-    \label{fig: heightmaps}
     \caption{Steps maps ($10\times10$m).}
 \end{figure}
+
 \paragraph{Slopes/Ramps:} Maps composed by uneven terrain scaled by different height factors from $3$ to $5$ used to include samples where \emph{Krock} has to climb.
 \begin{figure}[H]
     \centering
@@ -158,11 +155,17 @@ We genered four different maps with increasing bumps using simplex noise with fe
             \includegraphics[width=\textwidth]{../img/hm3d/slope_rocks1.png}
             \caption{\emph{slope\_rocks1}}
         \end{subfigure}    
-    \label{fig: heightmaps}
     \caption{Slopes maps ($10\times10$m).}
 \end{figure}
-
-\todo[inline]{blender maps are better but I need to write a proper code to generate them}
+\paragraph{Holes} We also included a map with holes
+\begin{figure}[H]
+    \centering
+        \begin{subfigure}[b]{0.32\textwidth}
+            \includegraphics[width=\textwidth]{../img/hm3d/holes1.png}
+            \caption{\emph{holes1}}
+        \end{subfigure}
+\caption{Holes map ($10\times10$m).}
+\end{figure}
 \subsubsection{Simulator}
 We used Webots to move \emph{Krock} on the genereted terrain. The robot controlled was implemented by EPFL \todo{cite them?} and handed to IDSIA \todo{cite?}. The controller implements a ROS' node to publish \emph{Krock} status including its pose at a rate of $250hz$. We decide to reduce it $50hz$ by using ROS build it \texttt{throttle} command. 
 To load the map into the simulator we had to convert it to Webots's \emph{.wbt} file. Unfortunately, the simulator lacks support for heightmap so we had to use a script to read the image and perform the conversion.
@@ -242,6 +245,11 @@ The following table shows the maps configuration used in the simulator.
       &\multirow{3}{*}{\emph{slope\_rocks1}} & 3 & \multirow{3}{*}{random} & \multirow{3}{*}{-} & \multirow{3}{*}{50} & \multirow{3}{*}{10} \\
       && 4 &&&& \\
       && 5 &&&& \\
+      \hline
+      &\emph{holes1} & 1 &random & - & 50 & 10 \\
+      \hline
+      &\emph{quarry} & 10 &random & - & 50 & 10 \\
+      &&& Total: 1600 \\ 
       \bottomrule   
   
     \end{tabular}
@@ -252,7 +260,7 @@ The following table shows the maps configuration used in the simulator.
 
 
 \subsection{Postprocessing}
-We now need to extract the patches for each pose $p_t$ of \emph{Krock} and compute the advancement for a given time window. To create the post-processing pipeline, we create an easy to use API called \href{https://github.com/FrancescoSaverioZuppichini/Master-Thesis/tree/master/core/utilities/pipeline}{\texttt{pipeline}} to define a cascade stream of function that is applied one after the other using a multi-thread queue to speed-up the process
+We now need to extract the patches for each pose $p_t$ of \emph{Krock} and compute the advancement for a given time window. All the handles are available as a python \href{https://github.com/FrancescoSaverioZuppichini/Master-Thesis/tree/master/core/utilities/postprocessing/handlers}{package}. We create an easy to use API called \href{https://github.com/FrancescoSaverioZuppichini/Master-Thesis/tree/master/core/utilities/pipeline}{\texttt{pipeline}} to define a cascade stream of function that is applied one after the other using a multi-thread queue to speed-up the process
 \subsubsection{Parse simulation data}
 First, we turn each \emph{.bag} file into a pandas dataframe and cache them into \emph{.csv} files. We used \href{https://github.com/aktaylor08/RosbagPandas}{\texttt{rosbag\_pandas}}, an open source library we ported to python3, to perform the conversion.
 Then, we load the dataframes with the respective heightmaps and start the data cleaning process. We remove the rows corresponding tp the first second of the simulation time to account for the robot spawning time. Then we eliminate all the entries where the \emph{Krock} pose was near the edges of a map, we used a threshold of $22$ pixels since we notice  \emph{Krock} getting stuck in the borders of the terrain during a simulation. 
@@ -274,8 +282,16 @@ Once we extract the patches, we can always re-compute the advancement without re
 \label{fig: postprocessing-pipeline}
 \end{figure}
 \todo[inline]{add arrows!}
+The following figure shows the mean advancement across all the maps used to train the model in a range of $\pm 0.71$cm, the maximum advancment on this time window.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{../img/datasets/box_for_each_map.png}
+    \caption{Advancement on each map with a time window of $2$s in ascendent order.}
+\end{figure}
+
+
 \subsection{Estimator}
-In this section we shows the adopted models' architecture.
+In this section we described the choices behind the adopted network architecture.
 \subsubsection{Vanilla Model}
 \subsubsection{ResNet}
 We decide to use a Residual Network, ResNet \cite{he2015deep}, variant. Residual networks are deep convolutional
@@ -285,7 +301,7 @@ networks consisting of many stacked \" Residual Units \". Intuitively, the resid
     \label{eq : resnet}
 \end{equation}
 Where, $x$ and $y$ are the input and output vector of the layers considered. The function $\mathcal{F}\left(\mathbf{x},\left\{W_{i}\right\}\right)$ is the residual mapping to be learn and $h$ is the identity mapping. The next figure visualises the equation.
-
+\todo[inline]{add resnet image or table}
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.3]{../img/implementation/estimator/resnet_block.png}
@@ -293,7 +309,7 @@ Where, $x$ and $y$ are the input and output vector of the layers considered. The
 \end{figure}
 When the input and output shapes mistmatch, the \emph{identity map} is applyed to the input as a $3x3$ Convolution with a stride of 2 to mimic the polling operator. A single block is composed by a $3x3$ \emph{Convolution}, \emph{Batchnorm} and a \emph{Relu} activation function. 
 \subsubsection{Preactivation}
-Following the recent work of He et al. \cite{he2015identity} we adopt \emph{pre-activation} in each block.\emph{Pre-activation} works by just reverse the order of the operations in a block.
+Following the recent work of He et al. \cite{he2015identity} we adopt \emph{pre-activation} in each block.\emph{Pre-activation} works by just reversing the order of the operations in a block.
 
 \begin{figure}[H]
     \centering
@@ -309,7 +325,15 @@ The next figure visualises the SE module.
     \caption{\emph{Squeeze and Excitation} \cite{hu2017squeeze}}
 \end{figure}
 \subsubsection{Micro resnet}
-Our network differs is composed by $n$ ResNet blocks, a depth of $d$ and a channel incrementing factor of $2$. We evaluate $n=[1,2], d=3$ with and without SE module all with a starting channel size of $16$ and finally select $n=1$ and $d=3$ with a starting channel size of $16$, we called this model architecture \emph{micro-resnet}. 
+Our network is composed by $n$ ResNet blocks, a depth of $d$ and a channel incrementing factor of $2$. Since ResNet assumed an input size of $224\times224$ and perform an aggressive features extraction in the first layer as show in \todo{ref to Resnet Table} we decided to adopt a less aggressive convolution. We tested two kernel sized of $7\times7$ and $3\times3$ with stride of $2$ and $1$ respectively. Lastly, we used LeakyReLU with a negative slope of $0.1$ instead of ReLU, defined as following
+
+\begin{equation}
+% \text {LeakyRELU}(x)=\left\{
+%     \begin{array}{ll}{x,} & {\text { if } x \geq 0} \\ {\text { negative_ slope } \times x,} & {\text { otherwise }}\end{array}
+%         \right
+\end{equation}
+
+We evaluated $n=[1,2], d=3$ with and without SE module all with a starting channel size of $16$ and finally select $n=1$ and $d=3$, we called this model architecture \emph{micro-resnet}. 
 
 \begin{table}[H]
     \centering
@@ -358,11 +382,12 @@ Our network differs is composed by $n$ ResNet blocks, a depth of $d$ and a chann
        & & \multicolumn{4}{c}{average pool, $1$-d fc, softmax} \\ 
        \hline
 
-       Parameters & & TODO & 302,610  & TODO & TODO \\
+       Parameters & & 314 & 302,610  & TODO & TODO \\
        \hline
     \end{tabular}
     \caption{\emph{micro-resnet} architectures evaluated}
 \end{table}
+\todo[inline]{missing the two head}
 \todo[inline]{ask omar help to add margin in the rows}
 \todo[inline]{add model picture}
 \subsubsection{Normalization}
@@ -392,18 +417,8 @@ Before feeding the data to the models, we need to make the patches height invari
 
 \subsubsection{Data Augmentation}
 \label{sec: data-aug}
-Data augmentation is used to change the input of a model using different techniques to change it in order to produce more training examples. Since our inputs are heightmaps we cannot utilize the classic image manipulations such as shifts, flips, and zooms. Imagine that we have a patch with a wall in front of it, if we random rotate the image the wall may go in a position where the patch it is now traversable but its label is still not traversable, we have to be more creative. We decided to apply dropout, coarse dropout, and random simplex noise since they are traversability invariant. To illustrate those techniques we are going to use the following example patch of size $100x100$.
-\begin{figure}[H]
-    \centering
-    \begin{subfigure}[b]{0.32\textwidth}
-        \includegraphics[width=\textwidth]{../img/data-aug/2d/square-middle.png}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.32\textwidth}
-        \includegraphics[width=\textwidth]{../img/data-aug/square-middle.png}
-    \end{subfigure}    
-\label{fig: square-patch}
-\caption{A patch with a square in the middle}    
-\end{figure}
+Data augmentation is used to change the input of a model using different techniques to change it in order to produce more training examples. Since our inputs are heightmaps we cannot utilize the classic image manipulations such as shifts, flips, and zooms. Imagine that we have a patch with a wall in front of it, if we random rotate the image the wall may go in a position where the wall is not facing the robot anymore, making the image now traversable with a wrong target. We decided to apply dropout, coarse dropout, and random simplex noise since they are traversability invariant. To illustrate those techniques we are going to use the same square patch showed before \ref{fig: center}.
+
 \paragraph{Dropout} is a technique to randomly set some pixels to zero, in our case we flat some random pixel in the patch. 
 \paragraph{Coarse Dropout} similar to dropout, it sets to zero random regions of pixels.
 \paragraph{Simplex Noise} is a form of Perlin noise that is mostly used in ground generation. Our idea is to add some noise to make the network generalize better since lots of training maps have only obstacles in flat ground. Since it is computationally expensive, we randomly fist apply the noise to five hundred images with only zeros. Then, we randomly scaled them and add to the input image.

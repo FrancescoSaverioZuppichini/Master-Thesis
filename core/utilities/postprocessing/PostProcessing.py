@@ -24,10 +24,10 @@ class PostProcessing():
         self.extract_patches = MultiThreadWrapper(16, Compose([
             ReadDataframeFilenameAndHm(self.dir.csvs_parsed_dir,
                                        self.dir.maps_dir),
-            # AddAdvancement(time_window),
             ExtractPatches(patch_extract_stategy=KrockPatchExtractStrategy(max_advancement=self.advancement)),
-            StorePatches(self.dir.patches_dir, self.dir.csvs_patches_dir)
-
+            StorePatches(self.dir.patches_dir),
+            AddAdvancement(time_window),
+            StoreDataframePatches( self.dir.csvs_patches_dir)
         ]))
 
     def __call__(self):

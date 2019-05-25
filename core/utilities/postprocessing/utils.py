@@ -32,7 +32,7 @@ class TraversabilityDir():
 
     @property
     def csvs_patches_dir(self):
-        dir = path.normpath(self.root + '/csvs')
+        dir = path.normpath(self.root + '/csvs_patches')
         os.makedirs(dir, exist_ok=True)
         return dir
 

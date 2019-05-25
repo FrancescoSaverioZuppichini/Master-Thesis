@@ -46,12 +46,12 @@ def convert_date2timestamp(df):
     """
     df.index = df[df.columns[0]]
     df['ros_time'] = df.index
-    try:
-        df['timestamp'] = df['ros_time'].apply(lambda x: dateutil.parser.parse(str(x)).timestamp())
-        df['timestamp'] -= df['timestamp'].iloc[0]
-        df = df.set_index(df['timestamp'])
-    except Exception:
-        print('[INFO] something exploded while converting the ros time.')
+    # try:
+    df['timestamp'] = df['ros_time'].apply(lambda x: dateutil.parser.parse(str(x)).timestamp())
+    df['timestamp'] -= df['timestamp'].iloc[0]
+    df = df.set_index(df['timestamp'])
+    # except Exception:
+    #     print('[INFO] something exploded while converting the ros time.')
     return df
 
 
@@ -187,8 +187,7 @@ def extract_patches(df, hm, patch_extract_stategy):
     return patches
 
 
-def store_patches(df, filename, patches, meta_out_dir, patches_out_dir):
-    meta_dir = meta_out_dir
+def store_patches(df, filename, patches, patches_out_dir):
     images_dir = patches_out_dir
 
     paths = []
@@ -202,7 +201,13 @@ def store_patches(df, filename, patches, meta_out_dir, patches_out_dir):
 
     df['images'] = paths
 
-    df.to_csv('{}/{}.csv'.format(meta_dir, filename))
     del patches  # free up memory
 
     return df, filename
+
+
+def store_meta_patches(df, filename, meta_dir):
+    df = df[['advancement', 'images', 'height', 'hm_x', 'hm_y']]
+    df.to_csv('{}/{}.csv'.format(meta_dir, filename))
+
+    return df

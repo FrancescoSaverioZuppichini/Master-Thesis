@@ -15,6 +15,7 @@ from torch.nn import Dropout
 from torchvision.transforms import Compose
 from utilities.postprocessing.handlers import AddAdvancement, CleanDataframe, AddHMcoordinates, \
     open_df_and_hm_from_meta_row
+from utilities.postprocessing.handlers.functional import add_advancement
 from utilities.postprocessing.utils import hmpatch
 
 random.seed(0)
@@ -47,10 +48,9 @@ class TraversabilityDataset(Dataset):
         self.transform_with_label = transform_with_label
         self.should_generate_paths = not 'images' in df
 
-        if self.time_window is not None:
-            self.preprocess_df = Compose([AddAdvancement(time_window)])
-            self.df = self.preprocess_df((self.df, None, None))[0]
-            self.df = df.dropna()
+        if 'advancement' not in self.df:
+            self.df = add_advancement(self.df, time_window)
+
         if down_sampling is not None:
             self.df = self.df[::down_sampling]
 
@@ -104,7 +104,10 @@ class TraversabilityDataset(Dataset):
         datasets = []
 
         for (idx, row) in meta.iterrows():
-            df, hm = open_df_and_hm_from_meta_row(row, base_dir, hm_dir)
+            try:
+                df, hm = open_df_and_hm_from_meta_row(row, base_dir, hm_dir)
+            except FileNotFoundError:
+                continue
             if len(df) > 0: datasets.append(cls(df, hm, *args, **kwargs))
         if n is not None: datasets = datasets[:n]
         concat_ds = ConcatDataset(datasets)
@@ -163,7 +166,7 @@ class PatchesDataset(Dataset):
         patch = self.patches[item].hm
         if self.transform is not None: patch = self.transform(patch)
 
-        return patch, 0
+        return patch.float(), 0
 
     def __len__(self):
         return len(self.patches)

@@ -20,8 +20,12 @@ class DataFrameVisualization():
     def __init__(self, df, time_window=None,*args, **kwargs):
 
         self.df = df
-
+        self._df = df.copy()
+        self.add_advancement(time_window)
+    def add_advancement(self, time_window=None):
+        if time_window is not None: self.df = add_advancement(self._df, time_window)
     def __call__(self, tr, time_window=None):
+
         self.plot_advancement().show()
         self.plot_advancement_box().show()
         self.plot_rotation().show()
@@ -124,7 +128,7 @@ class PatchesAndDataframeVisualization(DataFrameVisualization):
 
 
         if compress:
-            df = df.loc[list(range(0, len(df), len(df) // n_show)), :]
+            df = df.iloc[list(range(0, len(df), len(df) // n_show)), :]
 
         hm_patches = []
         for i, row in df.iterrows():
