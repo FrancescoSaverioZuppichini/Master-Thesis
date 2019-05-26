@@ -9,6 +9,7 @@ import numpy as np
 from functools import partialmethod, partial
 
 from collections.abc import Iterable
+import mayavi.mlab as mlab
 
 
 class Patch():
@@ -238,21 +239,39 @@ class HeatMapShowable():
         p = Patch.from_hm(hm)
         p._plot2d_ax = partial(p._plot2d_ax, annot=True, fmt=".2f")
         return p
-#
-# p = WallPatch((513, 513), back=False, offset=513//2 + 2)
-# p.hm[220:224] = 0.1
-# p()
-#
-# p.plot2d()
-# p.save('/media/francesco/saetta/krock-dataset/test_with_obstacles/wall.png')
 
+class Mayavi3dPlottable():
 
-# hm = cv2.imread(
-#     '/home/francesco/Documents/Master-Thesis/core/maps/train/slope_rocks3.png')
-# hm = cv2.cvtColor(hm, cv2.COLOR_BGR2GRAY)
+    def setup_scene(self, s):
+        s.actor.property.interpolation = 'phong'
+        s.actor.property.specular = 0.0
+        s.actor.property.specular_power = 10
+        s.actor.property.ambient_color = (1, 1, 1)
+        s.actor.property.diffuse_color = (0.7, 0.7, 0.7)
+        s.actor.property.color = (0.7, 0.7, 0.7)
+        s.actor.property.ambient = 0.02
 
-# p = Patch.from_path(
-#     '/home/francesco/Documents/Master-Thesis/core/maps/train/slope_rocks3.png')
-# p.plot3d()
+    def plot3d_mayavi(self, pixelsize, save_path=None, size=(1000, 1000), azimuth=45, elevation=45, distance=25,
+                      mesh=False, colormap=None, color=(1.0, 1.0, 1.0), *args, **kwargs):
+        fig = mlab.figure(size=size)
+        fig.scene.background = (1, 1, 1)
 
-# w = WallPatch((88, 88))()
+        y, x = np.meshgrid(np.arange(self.hm.shape[0]) * pixelsize, np.arange(self.hm.shape[1]) * pixelsize)
+
+        if mesh:
+            if colormap is None:
+                s = mlab.mesh(x, y, self.hm, color=color,*args, **kwargs )
+            else: s = mlab.mesh(x, y, self.hm, colormap=colormap, *args, **kwargs)
+
+        else:
+            s = mlab.surf(x, y, self.hm, color=(1.0, 1.0, 1.0))
+
+        self.setup_scene(s)
+
+        mlab.view(azimuth=azimuth, elevation=elevation, distance=distance)
+
+        if save_path:
+            mlab.savefig(save_path)
+
+        mlab.close(fig)
+        return fig

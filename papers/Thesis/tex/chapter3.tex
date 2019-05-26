@@ -282,13 +282,102 @@ Once we extract the patches, we can always re-compute the advancement without re
 \label{fig: postprocessing-pipeline}
 \end{figure}
 \todo[inline]{add arrows!}
+\todo[inline]{Here on in interpretability???}
 The following figure shows the mean advancement across all the maps used to train the model in a range of $\pm 0.71$cm, the maximum advancment on this time window.
 \begin{figure}[H]
     \centering
     \includegraphics[width=\linewidth]{../img/datasets/box_for_each_map.png}
     \caption{Advancement on each map with a time window of $2$s in ascendent order.}
 \end{figure}
-
+The following picture shows some traversable an not traversable patches in 3d sorted by advancement taken directly from the \emph{Quarry} dataset to help the reader visualize better the generated dataset.
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/all/best/35-patch-3d-majavi-colormap-0.png}
+    \caption{$35$cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/all/best/38-patch-3d-majavi-colormap-1.png}
+    \caption{$38$cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/all/best/44-patch-3d-majavi-colormap-2.png}
+    \caption{$44$cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/all/best/45-patch-3d-majavi-colormap-3.png}
+    \caption{$45$cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/all/best/49-patch-3d-majavi-colormap-4.png}
+    \caption{$49$cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/all/best/51-patch-3d-majavi-colormap-5.png}
+    \caption{$51$cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/all/best/65-patch-3d-majavi-colormap-6.png}
+    \caption{$65$cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/all/best/67-patch-3d-majavi-colormap-7.png}
+    \caption{$67$cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/all/best/67-patch-3d-majavi-colormap-8.png}
+    \caption{$67$cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/all/best/72-patch-3d-majavi-colormap-9.png}
+    \caption{$72$cm}
+    \end{subfigure}
+    \caption{Traversable patches from \emph{Quarry}}
+\end{figure}
+    \begin{figure}[H]
+        \centering
+        \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/all/worst/-8-patch-3d-majavi-colormap-0.png}
+        \caption{$-8$cm}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/all/worst/00-patch-3d-majavi-colormap-1.png}
+        \caption{$00$cm}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/all/worst/01-patch-3d-majavi-colormap-2.png}
+        \caption{$01$cm}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/all/worst/01-patch-3d-majavi-colormap-3.png}
+        \caption{$01$cm}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/all/worst/02-patch-3d-majavi-colormap-4.png}
+        \caption{$02$cm}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/all/worst/03-patch-3d-majavi-colormap-5.png}
+        \caption{$03$cm}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/all/worst/06-patch-3d-majavi-colormap-6.png}
+        \caption{$06$cm}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/all/worst/06-patch-3d-majavi-colormap-7.png}
+        \caption{$06$cm}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/all/worst/10-patch-3d-majavi-colormap-8.png}
+        \caption{$10$cm}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.19\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/all/worst/18-patch-3d-majavi-colormap-9.png}
+        \caption{$18$cm}
+        \end{subfigure}
+        \caption{Non traversable patches from \emph{Quarry}}
+    \end{figure}
 
 \subsection{Estimator}
 In this section we described the choices behind the adopted network architecture.

@@ -88,7 +88,20 @@ zoo = {
                                                                       blocks=[BasicBlock, BasicBlock, BasicBlock,
                                                                               BasicBlockSE],
                                                                       preactivate=True,
-                                                                      activation='leaky_relu')
+                                                                      activation='leaky_relu'),
+    'microresnet#3-gate=7x7-n=1-se=True':  lambda: ResNet(
+        in_channel=1,
+        encoder=Encoder7x7,
+        # decoder=MyDecoder,
+        depths=[1, 1, 1],
+        blocks=[BasicBlockSE, BasicBlockSE, BasicBlockSE],
+        blocks_sizes=[(16, 32), (32, 64), (64, 128)],
+        n_classes=2,
+        activation='leaky_relu',
+        preactivate=True,
+        ratio=4,
+    )
+
 
 
 }

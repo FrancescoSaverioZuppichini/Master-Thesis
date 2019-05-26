@@ -8,15 +8,12 @@ import matplotlib
 import pandas as pd
 import cv2
 import seaborn as sns
+import utilities.postprocessing.handlers.functional as F
 
 from utilities.patches import *
-from utilities.postprocessing.utils import KrockPatchExtractStrategy
 
 from estimators.data.TraversabilityDataset import TraversabilityDataset
-from estimators.data.transformations import get_transform
 from estimators.utils import get_learner, get_probs_and_labels_from_preds
-from utilities.postprocessing.handlers import Bags2Dataframe, ParseDataframe, AddAdvancement
-from utilities.pipeline import *
 from torch.utils.data import ConcatDataset
 from simulation.env.webots.krock import KrockWebotsEnv
 from simulation.env.spawn import spawn_points2webots_pose
@@ -54,9 +51,9 @@ class ExplainModel():
         self.df = df
         self.learner = learner
 
-    def by_looking_at(self, filters=None, how_many=10):
+    def by_looking_at(self, filters=None, how_many=10, every=1):
         if filters is None: return self
-        return {f.name: ExplainModel(*self.zip_df_ds(f(self.df).head(how_many)), self.learner) for f in filters}
+        return {f.name: ExplainModel(*self.zip_df_ds(f(self.df)[::every].head(how_many)), self.learner) for f in filters}
 
     def tell(self, answer):
         return answer(self)
@@ -128,14 +125,13 @@ class WebotsRunnablePatch(Patch):
         return self
 
     def get_advancement(self, time_window):
-        return Compose([
-            Bags2Dataframe(self.env.bags_out_dir + '/'),
-            ParseDataframe(),
-            AddAdvancement(time_window),
-            lambda x: x[0],
-            lambda df: df.reset_index(drop=True),
-            lambda df: df['advancement'][0]
-        ])(self.bag_name)
+        df = F.bags2df(self.env.bags_out_dir + '/' + self.env.bag_name + '.bag')
+        df = F.parse_dataframe(df)
+        df = F.add_advancement(df, time_window)
+        df: df.reset_index(drop=True)
+        self.df = df
+        return  self.df
+
 
 
 class GrandCamAnswarable():
@@ -147,7 +143,7 @@ class GrandCamAnswarable():
         return Patch.from_hm(x / 255)
 
 
-class PatchAnswer(WebotsRunnablePatch, GrandCamAnswarable, HeatMapShowable):
+class PatchAnswer(WebotsRunnablePatch, GrandCamAnswarable, HeatMapShowable, Mayavi3dPlottable):
     def __init__(self, patch_size, info, *args, **kwargs):
         super().__init__(patch_size, *args, **kwargs)
         self.info = info

@@ -4,8 +4,11 @@ import cv2
 import dateutil
 
 from tf.transformations import euler_from_quaternion
+import rosbag_pandas
 
-
+def bags2df(path):
+        df = rosbag_pandas.bag_to_dataframe(path)
+        return df
 def add_advancement(df, dt):
     """
     Project the distance x and y computed using a rolling window
@@ -44,10 +47,15 @@ def convert_date2timestamp(df):
     :param df:
     :return:
     """
-    df.index = df[df.columns[0]]
-    df['ros_time'] = df.index
-    # try:
-    df['timestamp'] = df['ros_time'].apply(lambda x: dateutil.parser.parse(str(x)).timestamp())
+    try:
+        df.index = df[df.columns[0]]
+        df['ros_time'] = df.index
+        # try:
+        df['timestamp'] = df['ros_time'].apply(lambda x: dateutil.parser.parse(str(x)).timestamp())
+    except ValueError:
+        df['ros_time'] = df.index
+        # try:
+        df['timestamp'] = df['ros_time'].apply(lambda x: dateutil.parser.parse(str(x)).timestamp())
     df['timestamp'] -= df['timestamp'].iloc[0]
     df = df.set_index(df['timestamp'])
     # except Exception:

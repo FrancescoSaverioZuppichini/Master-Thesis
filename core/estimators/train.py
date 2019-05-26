@@ -132,24 +132,12 @@ class TrainAndEvaluate():
             # learner.recorder.plot()
             # plt.show() # 1e-01
             # lr = 1e-3
-            learner.fit_one_cycle(5, slice(params['lr']), pct_start=0.8, callbacks=callbacks)
-            # # lr =  1e-4,
-            # learner.fit_one_cycle(5, slice(params['lr']), pct_start=0.8, callbacks=callbacks)
-            # loss, acc, roc = learner.validate(data.test_dl, metrics=[accuracy, ROC_AUC()])
-            # print(loss, acc, roc)
-            #
-            # # learner.lr_find()
-            # # learner.recorder.plot()
-            # # plt.show() # 1e
-            learner.fit_one_cycle(5, slice(1e-5), callbacks=callbacks)
-            # loss, acc, roc = learner.validate(data.test_dl, metrics=[accuracy, ROC_AUC()])
-            # print(loss, acc, roc)
-            # # #
-            # learner.fit_one_cycle(5, slice(1e-6), pct_start=0.8, callbacks=callbacks)
-
-            #
-            # learner.fit(epochs=params['epochs'], lr=params['lr'],
-            #             callbacks=callbacks)  # SaveModelCallback load the best model after training!
+            if params['fit_one_cycle']:
+                learner.fit_one_cycle(5, slice(params['lr']), pct_start=0.8, callbacks=callbacks)
+                learner.fit_one_cycle(5, slice(1e-5), callbacks=callbacks)
+            else:
+                learner.fit(epochs=params['epochs'], lr=params['lr'],
+                            callbacks=callbacks)  # SaveModelCallback load the best model after training!
 
         if params['tr'] is not None:
             with experiment.test():
@@ -193,7 +181,7 @@ def get_params():
             # 'data-aug': None,
             # 'optim': partial(torch.optim.SGD, momentum=0.95, weight_decay=1e-4),
             'optim':  torch.optim.Adam,
-            'info': 'diobestia',
+            'info': '',
             'tr': 0.2,
             'problem': 'classification',
             'name': '',
@@ -201,7 +189,8 @@ def get_params():
             'less_than': None,
             'down_sampling': None,
             'time_window': 50 * 2,
-            'patch_size': 0.71
+            'patch_size': 0.71,
+            'fit_one_cycle': True
             }
 
 
@@ -283,10 +272,7 @@ if __name__ == '__main__':
     patch_size = KrockPatchExtractStrategy.patch_shape(params['patch_size'], 0.02)
 
     params['test'] = '/media/francesco/saetta/krock-dataset/new-test-random/'
-    # params['validation'] = '/media/francesco/saetta/krock-dataset/new-new-val/'
-    # params['validation'] = '/media/francesco/saetta/krock-dataset/new-test-random/'
-    # params['sampler'] = RandomSampler
-    # params['num_samples'] = 50000
+    train_and_evaluate = TrainAndEvaluate(params)
 
     model = lambda: ResNet(
         in_channel=1,
@@ -301,9 +287,70 @@ if __name__ == '__main__':
         ratio=4,
     )
 
-    # model()
     params['model'] = model
+    params['name'] = '[(16, 32), (32, 64), (64, 128)]-Encoder7x7-se'
 
-    train_and_evaluate = TrainAndEvaluate(params)
-    for _ in range(5):
+    for _ in range(10):
         train_and_evaluate( params['model'])
+
+    model = lambda: ResNet(
+        in_channel=1,
+        encoder=Encoder7x7,
+        # decoder=MyDecoder,
+        depths=[1, 1, 1, 1],
+        blocks=[BasicBlockSE, BasicBlockSE, BasicBlockSE, BasicBlockSE],
+        blocks_sizes=[(32, 32), (32, 64), (64, 128),  (128, 256)],
+        n_classes=2,
+        activation='leaky_relu',
+        preactivate=True,
+        ratio=8,
+    )
+
+    params['model'] = model
+    params['name'] = '[(32, 32), (32, 64), (64, 128),  (128, 256)]-Encoder7x7-se'
+
+    model = lambda: ResNet(
+        in_channel=1,
+        encoder=Encoder3x3,
+        # decoder=MyDecoder,
+        depths=[1, 1, 1],
+        blocks=[BasicBlockSE, BasicBlockSE, BasicBlockSE],
+        blocks_sizes=[(16, 32), (32, 64), (64, 128)],
+        n_classes=2,
+        activation='leaky_relu',
+        preactivate=True,
+        ratio=4,
+    )
+
+    params['model'] = model
+    params['name'] = '[(16, 32), (32, 64), (64, 128)]-Encoder3x3-se'
+
+    for _ in range(10):
+        train_and_evaluate( params['model'])
+
+    params['model'] = 'omar'
+    params['name'] = 'omar'
+    for _ in range(10):
+        train_and_evaluate( params['model'])
+
+    model = lambda: ResNet(
+        in_channel=1,
+        encoder=Encoder7x7,
+        # decoder=MyDecoder,
+        depths=[1, 1, 1],
+        blocks=[BasicBlockSE, BasicBlockSE, BasicBlockSE],
+        blocks_sizes=[(16, 32), (32, 64), (64, 128)],
+        n_classes=2,
+        activation='leaky_relu',
+        preactivate=True,
+        ratio=4,
+    )
+
+    params['model'] = model
+    params['name'] = '[(16, 32), (32, 64), (64, 128)]-Encoder7x'
+    params['fit_one_cycle'] = False
+    params['optim'] = partial(torch.optim.SGD, momentum=0.95, weight_decay=1e-4)
+
+    for _ in range(10):
+        train_and_evaluate( params['model'])
+
