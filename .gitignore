@@ -422,3 +422,10 @@ TSWLatexianTemp*
 # papers/Thesis/*.pdf
 # papers/Thesis/tex/*.pdf
 
+papers/Thesis/tex/chapter1.bcf
+papers/Thesis/tex/chapter1.run.xml
+*.fls
+*.fdb_latexmk
+*.bcf
+*.gz
+*.xml
