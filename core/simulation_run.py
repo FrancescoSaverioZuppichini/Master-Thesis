@@ -71,9 +71,13 @@ map_path = lambda x: path.abspath(MAPS_DIR + "/{}.png".format(x))
 #
 
 # val
-BAGS_DIR = '/media/francesco/saetta/krock-dataset/train/bags/'
-Simulation(map_path('holes1'), 50, 1, BAGS_DIR, RandomSpawnStrategy, max_time=10)()
-Simulation(map_path('holes2'), 50, 1, BAGS_DIR, RandomSpawnStrategy, max_time=10)()
-#
+# BAGS_DIR = '/media/francesco/saetta/krock-dataset/train/bags/'
+# Simulation(map_path('holes1'), 50, 1, BAGS_DIR, RandomSpawnStrategy, max_time=10)()
+# Simulation(map_path('holes2'), 50, 1, BAGS_DIR, RandomSpawnStrategy, max_time=10)()
+# #
 
 # /media/francesco/saetta/krock-dataset/train/bags
+BAGS_DIR = '/tmp'
+
+Simulation(map_path('bumps3-rocks0'), 2, 1, BAGS_DIR, RandomSpawnStrategy, max_time=10)(),
+Simulation(map_path('bars1'), 2, 1, BAGS_DIR, FlatGroundSpawnStrategy, max_time=10)(),

@@ -7,7 +7,7 @@ from estimators.callbacks import ROC_AUC, Timer
 from utilities.visualisation import DataFrameVisualization
 
 import matplotlib.pyplot as plt
-test_root = '/media/francesco/saetta/krock-dataset/new-test-random/csvs_patches/'
+test_root = '/media/francesco/saetta/krock-dataset/new-new-val/csvs_patches/'
 
 model_name = 'microresnet#3-gate=7x7-n=1-se=True'
 model_dir = '/media/francesco/Carino/vaevictis/data/1558825182.753924'
@@ -16,7 +16,7 @@ model_dir = '/media/francesco/Carino/vaevictis/data/1558825182.753924'
 # vis(tr=0.45)
 
 learner, dl = get_learner(model_name, model_dir, callbacks=[], root=test_root, tr=0.2,
-                         patches_dir='/media/francesco/saetta/krock-dataset/new-test-random/patches/0.71/',
+                         patches_dir='/media/francesco/saetta/krock-dataset/new-new-val/patches/0.71/',
                          transform=get_transform(),
                          time_window=50 * 2,
                          patch_size=0.71)

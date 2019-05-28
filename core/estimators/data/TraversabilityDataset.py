@@ -33,9 +33,7 @@ class TraversabilityDataset(Dataset):
                  less_than=None,
                  down_sampling=None,
                  transform_with_label=None,
-                 simplex_noise=None,
                  ):
-
 
         self.df = df
         self.hm = hm
@@ -92,7 +90,7 @@ class TraversabilityDataset(Dataset):
         y = torch.tensor(y)
 
         if 'label' in self.df and self.transform_with_label is not None:
-                patch = self.transform_with_label(patch, row['label'])
+            patch = self.transform_with_label(patch, row['label'])
 
         return self.transform(patch), y
 
@@ -120,8 +118,10 @@ class TraversabilityDataset(Dataset):
     def concat_dfs(concat_ds):
         df = None
         for ds in concat_ds.datasets:
-            if df is None: df = ds.df
-            else: df = pd.concat([df, ds.df], sort=True)
+            if df is None:
+                df = ds.df
+            else:
+                df = pd.concat([df, ds.df], sort=True)
         df = df.reset_index(drop=True)
         concat_ds.df = df
         return concat_ds
@@ -155,6 +155,7 @@ class TraversabilityDataset(Dataset):
         concat_ds.c = 2
         concat_ds.classes = 'False', 'True'
         return concat_ds
+
 
 class PatchesDataset(Dataset):
     def __init__(self, patches, transform=None):

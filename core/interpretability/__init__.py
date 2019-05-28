@@ -23,6 +23,7 @@ from functools import partialmethod, partial
 from .filters import *
 from fastai.vision import ClassificationInterpretation
 
+
 # Utils
 def dataset2dataframe(ds):
     df = pd.DataFrame(data={'out_0': [], 'out_1': [], 'prediction': []})
@@ -45,6 +46,7 @@ def outs2dafaframe(df, probs, labels):
     df['prediction'] = labels.cpu().tolist()
     return df
 
+
 class ExplainModel():
     def __init__(self, ds, df, learner):
         self.ds = ds
@@ -53,7 +55,8 @@ class ExplainModel():
 
     def by_looking_at(self, filters=None, how_many=10, every=1):
         if filters is None: return self
-        return {f.name: ExplainModel(*self.zip_df_ds(f(self.df)[::every].head(how_many)), self.learner) for f in filters}
+        return {f.name: ExplainModel(*self.zip_df_ds(f(self.df)[::every].head(how_many)), self.learner) for f in
+                filters}
 
     def tell(self, answer):
         return answer(self)
@@ -130,8 +133,7 @@ class WebotsRunnablePatch(Patch):
         df = F.add_advancement(df, time_window)
         df: df.reset_index(drop=True)
         self.df = df
-        return  self.df
-
+        return self.df
 
 
 class GrandCamAnswarable():
@@ -167,7 +169,6 @@ class PatchAnswer(WebotsRunnablePatch, GrandCamAnswarable, HeatMapShowable, Maya
     @classmethod
     def from_explain(cls, explain):
         return [cls.from_tensor(el[0], row) for el, (dx, row) in zip(explain.ds, explain.df.iterrows())]
-
 
 
 class ClassificationAnswer(ClassificationInterpretation):

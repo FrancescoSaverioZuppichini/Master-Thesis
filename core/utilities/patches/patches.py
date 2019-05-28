@@ -20,6 +20,7 @@ class Patch():
     The patch is built when the Patch.__call__() method is called,
     internally it calls the .make method that MUST be implemented.
     """
+
     def __init__(self, shape, *args, **kwargs):
         self.hm = np.zeros(shape)
         self.shape = shape
@@ -35,7 +36,6 @@ class Patch():
     @property
     def title(self):
         return ''
-
 
     def _plot2d_ax(self, *args, **kwargs):
         return sns.heatmap(self.hm, cmap=plt.cm.viridis, *args, **kwargs)
@@ -59,7 +59,6 @@ class Patch():
 
         ax.set_zlim3d(min(np.min(self.hm), -1), max(np.max(self.hm), 1))
         # ax.set_zlim3d = (-1, 2)
-
 
         surf = ax.plot_surface(X, Y, self.hm.T,
                                rstride=rstride,
@@ -87,7 +86,7 @@ class Patch():
     def from_range(cls, shape, **kwargs):
         patches = []
 
-        static_fields = {k: v for k,  v in kwargs.items() if not isinstance(v, Iterable)}
+        static_fields = {k: v for k, v in kwargs.items() if not isinstance(v, Iterable)}
 
         for key, range in kwargs.items():
             if isinstance(range, Iterable):
@@ -180,7 +179,6 @@ class WallPatch(Patch):
         self.offset = offset
         self.size = size
 
-
     def make(self):
         if self.back:
             self.hm[:, self.offset: self.offset + self.size] = self.strength
@@ -193,6 +191,7 @@ class WallPatch(Patch):
     @property
     def title(self):
         return 'height = {}, offset = {}'.format(self.strength, (self.offset * 2) / 100)
+
 
 class BumpsPatch(Patch):
     def __init__(self, shape, resolution=(4, 4), size=(1, 1), strength=1):
@@ -231,14 +230,14 @@ class RampPatch(Patch):
         self.hm = self.hm + factors
         return self.hm
 
-    
+
 class HeatMapShowable():
     def heatmap(self, size=(16, 16)):
-        #         TODO -> should return a Patch instead
         hm = cv2.resize(self.hm, size)
         p = Patch.from_hm(hm)
-        p._plot2d_ax = partial(p._plot2d_ax, annot=True, fmt=".2f")
+        p._plot2d_ax = partial(p._plot2d_ax, annot=True, fmt=".2f") # old school never dies ;)
         return p
+
 
 class Mayavi3dPlottable():
 
@@ -260,8 +259,9 @@ class Mayavi3dPlottable():
 
         if mesh:
             if colormap is None:
-                s = mlab.mesh(x, y, self.hm, color=color,*args, **kwargs )
-            else: s = mlab.mesh(x, y, self.hm, colormap=colormap, *args, **kwargs)
+                s = mlab.mesh(x, y, self.hm, color=color, *args, **kwargs)
+            else:
+                s = mlab.mesh(x, y, self.hm, colormap=colormap, *args, **kwargs)
 
         else:
             s = mlab.surf(x, y, self.hm, color=(1.0, 1.0, 1.0))

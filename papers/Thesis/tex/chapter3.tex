@@ -414,71 +414,64 @@ The next figure visualises the SE module.
     \caption{\emph{Squeeze and Excitation} \cite{hu2017squeeze}}
 \end{figure}
 \subsubsection{Micro resnet}
-Our network is composed by $n$ ResNet blocks, a depth of $d$ and a channel incrementing factor of $2$. Since ResNet assumed an input size of $224\times224$ and perform an aggressive features extraction in the first layer as show in \todo{ref to Resnet Table} we decided to adopt a less aggressive convolution. We tested two kernel sized of $7\times7$ and $3\times3$ with stride of $2$ and $1$ respectively. Lastly, we used LeakyReLU with a negative slope of $0.1$ instead of ReLU, defined as following
+Our network is composed by $n$ ResNet blocks, a depth of $d$ and a channel incrementing factor of $2$. Since ResNet assumed an input size of $224\times224$ and perform an aggressive features extraction in the first layer, we called it \emph{head}, as showed in \todo{ref to Resnet Table} we decided to adopt a less aggressive convolution. We tested two kernel sized of $7\times7$ and $3\times3$ with stride of $2$ and $1$ respectively. Lastly, we used LeakyReLU with a negative slope of $0.1$ instead of ReLU, defined as following. We called this model architecture \emph{micro-resnet}. 
 
-\begin{equation}
-% \text {LeakyRELU}(x)=\left\{
-%     \begin{array}{ll}{x,} & {\text { if } x \geq 0} \\ {\text { negative_ slope } \times x,} & {\text { otherwise }}\end{array}
-%         \right
-\end{equation}
 
-We evaluated $n=[1,2], d=3$ with and without SE module all with a starting channel size of $16$ and finally select $n=1$ and $d=3$, we called this model architecture \emph{micro-resnet}. 
+% \begin{equation}
+% % \text {LeakyRELU}(x)=\left\{
+% %     \begin{array}{ll}{x,} & {\text { if } x \geq 0} \\ {\text { negative_ slope } \times x,} & {\text { otherwise }}\end{array}
+% %         \right
+% \end{equation}
 
-\begin{table}[H]
+We evaluated $n=[1,2], d=3$ with and without squeeze and excitation and with the two differents \emph{head}'s convolution. All the networks have a starting channel size of $16$.
+
+ \begin{table}[H]
     \centering
     \ra{1.2}
-        \begin{tabular}{@{}lc|cccc@{}}
+        \begin{tabular}{@{}l|ccccc@{}}
         \hline
-        & depth   &  \multicolumn{4}{c}{3}  \\ 
-        \hline 
-        & n   & \multicolumn{2}{c}{1} & \multicolumn{2}{c}{2}\\
-        \hline
-    \multirow{12}{*}{Layers}
-     & &\multicolumn{4}{c}{$3 \ x\ 3,\ 16 \ stride\ 1$} \\ 
-     \cline{3-6}
-     & &\multicolumn{4}{c}{$2 \ x\ 2$ max-pool} \\ 
-     \cline{3-6}
-     & & \multicolumn{2}{c}{$\begin{bmatrix}
-      3\ x\ 3, & 16 \\
-      3\ x \ 3, & 16 \\  
-     \end{bmatrix}$ x 1} & \multicolumn{2}{c}{$\begin{bmatrix}
-        3\ x\ 3, & 16 \\
-        3\ x \ 3, & 16 \\  
-       \end{bmatrix}$ x 2}\\ 
-       \cline{3-6}
-     & & SE & - & SE & -\\ 
-     \cline{3-6}
-     & & \multicolumn{2}{c}{$\begin{bmatrix}
-        3\ x \ 3, & 32 \\
-        3\ x\ 3, & 32 \\  
-       \end{bmatrix}$ x 1} & \multicolumn{2}{c}{$\begin{bmatrix}
-        3\ x\ 3, & 32 \\
-        3\ x \ 3, & 32 \\  
-       \end{bmatrix}$ x 2} \\
-       \cline{3-6}
-       & & SE & - & SE & -\\ 
-       \cline{3-6}
-       & & \multicolumn{2}{c}{$\begin{bmatrix}
-        3\ x \ 3, & 64 \\
-        3 \ x \ 3, & 64 \\  
-       \end{bmatrix}$ x 1} & \multicolumn{2}{c}{$\begin{bmatrix}
-        3\ x\ 3, & 64 \\
-        3\ x \ 3, & 64 \\  
-       \end{bmatrix}$ x 2}\\  
-       \cline{3-6}
-       & & SE & - & SE & -\\ 
-       \cline{3-6}
-       & & \multicolumn{4}{c}{average pool, $1$-d fc, softmax} \\ 
-       \hline
+             Input   &  \multicolumn{4}{c}{$(1,79,79)$}  \\ 
+            \hline 
+            \multirow{12}{*}{Layers} & \multicolumn{2}{c}{$3 \times 3$, $16$ stride $1$} & \multicolumn{2}{c}{$7 \times 7$ $16$ stride $2$} \\
+            \cline{2-5}
+            &\multicolumn{4}{c}{$2 \times \ 2$ max-pool} \\ 
+            \cline{2-5}
+            &  \multicolumn{4}{c}{$\begin{bmatrix}
+                3  \times 3, & 16 \\
+                3  \times  3, & 32 \\  
+               \end{bmatrix}$ x 1} \\ 
+               \cline{2-5}
+               &  SE & - & SE & -\\ 
+               \cline{2-5}
+               &  \multicolumn{4}{c}{$\begin{bmatrix}
+                3  \times 3, & 32 \\
+                3  \times  3, & 64 \\  
+               \end{bmatrix}$ x 1} \\ 
+               \cline{2-5}
+               &  SE & - & SE & -\\ 
+               \cline{2-5}
 
-       Parameters & & 314 & 302,610  & TODO & TODO \\
-       \hline
-    \end{tabular}
-    \caption{\emph{micro-resnet} architectures evaluated}
-\end{table}
-\todo[inline]{missing the two head}
+               &  \multicolumn{4}{c}{$\begin{bmatrix}
+                3  \times 3, & 64 \\
+                3  \times  3, & 128 \\  
+               \end{bmatrix}$ x 1} \\
+               \hline
+               &  SE & - & SE & -\\ 
+               \cline{2-5}
+               &  \multicolumn{4}{c}{average pool, $1$-d fc, softmax} \\ 
+               \hline
+        
+               Parameters &  313,642 & 302,610  &  \textbf{314,282} & 303,250 \\
+            \hline
+               Size (MB) & 5.93 & 5.71 &  \textbf{2.41} & 2.32 \\ 
+               \hline 
+        \end{tabular}
+        \caption{Micro-resnet architecture}
+    \end{table}
+To simplicity we use the following notation to describe each architecture variant: \texttt{micro-resnet-{/se}-{3x3/7x7}}
 \todo[inline]{ask omar help to add margin in the rows}
 \todo[inline]{add model picture}
+
 \subsubsection{Normalization}
 Before feeding the data to the models, we need to make the patches height invariant. This must be done to correctly normalize different patches taken from different maps with different height scaling factor. We subtract the height of the map corresponding \emph{Krock}'s position from the patch to correctly center it. The following figure shows the normalization process on the patch with the square in the middle.
 \begin{figure}[H]
