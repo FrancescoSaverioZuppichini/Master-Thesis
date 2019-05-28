@@ -97,7 +97,10 @@ def extract_cos_sin(df):
 
 
 def parse_dataframe(df):
-    df = convert_date2timestamp(df)
+    try:
+        df = convert_date2timestamp(df)
+    except:
+        pass
     df = convert_quaterion2euler(df)
     df = extract_cos_sin(df)
 

@@ -10,9 +10,44 @@ from functools import partialmethod, partial
 
 from collections.abc import Iterable
 import mayavi.mlab as mlab
+class Mayavi3dPlottable():
 
+    def setup_scene(self, s):
+        s.actor.property.interpolation = 'phong'
+        s.actor.property.specular = 0.0
+        s.actor.property.specular_power = 10
+        s.actor.property.ambient_color = (1, 1, 1)
+        s.actor.property.diffuse_color = (0.7, 0.7, 0.7)
+        s.actor.property.color = (0.7, 0.7, 0.7)
+        s.actor.property.ambient = 0.02
 
-class Patch():
+    def plot3d_mayavi(self, pixelsize, save_path=None, size=(1000, 1000), azimuth=45, elevation=45, distance=25,
+                      mesh=False, colormap=None, color=(1.0, 1.0, 1.0), *args, **kwargs):
+        fig = mlab.figure(size=size)
+        fig.scene.background = (1, 1, 1)
+
+        y, x = np.meshgrid(np.arange(self.hm.shape[0]) * pixelsize, np.arange(self.hm.shape[1]) * pixelsize)
+
+        if mesh:
+            if colormap is None:
+                s = mlab.mesh(x, y, self.hm, color=color, *args, **kwargs)
+            else:
+                s = mlab.mesh(x, y, self.hm, colormap=colormap, *args, **kwargs)
+
+        else:
+            s = mlab.surf(x, y, self.hm, color=(1.0, 1.0, 1.0))
+
+        self.setup_scene(s)
+
+        mlab.view(azimuth=azimuth, elevation=elevation, distance=distance)
+
+        if save_path:
+            mlab.savefig(save_path)
+
+        mlab.close(fig)
+        return fig
+
+class Patch(Mayavi3dPlottable):
     """
     Based class for defining a custom patch.
     When the class is instantiated, it creates a 'tabula rasa'
@@ -239,39 +274,3 @@ class HeatMapShowable():
         return p
 
 
-class Mayavi3dPlottable():
-
-    def setup_scene(self, s):
-        s.actor.property.interpolation = 'phong'
-        s.actor.property.specular = 0.0
-        s.actor.property.specular_power = 10
-        s.actor.property.ambient_color = (1, 1, 1)
-        s.actor.property.diffuse_color = (0.7, 0.7, 0.7)
-        s.actor.property.color = (0.7, 0.7, 0.7)
-        s.actor.property.ambient = 0.02
-
-    def plot3d_mayavi(self, pixelsize, save_path=None, size=(1000, 1000), azimuth=45, elevation=45, distance=25,
-                      mesh=False, colormap=None, color=(1.0, 1.0, 1.0), *args, **kwargs):
-        fig = mlab.figure(size=size)
-        fig.scene.background = (1, 1, 1)
-
-        y, x = np.meshgrid(np.arange(self.hm.shape[0]) * pixelsize, np.arange(self.hm.shape[1]) * pixelsize)
-
-        if mesh:
-            if colormap is None:
-                s = mlab.mesh(x, y, self.hm, color=color, *args, **kwargs)
-            else:
-                s = mlab.mesh(x, y, self.hm, colormap=colormap, *args, **kwargs)
-
-        else:
-            s = mlab.surf(x, y, self.hm, color=(1.0, 1.0, 1.0))
-
-        self.setup_scene(s)
-
-        mlab.view(azimuth=azimuth, elevation=elevation, distance=distance)
-
-        if save_path:
-            mlab.savefig(save_path)
-
-        mlab.close(fig)
-        return fig

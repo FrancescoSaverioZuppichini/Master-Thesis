@@ -146,6 +146,7 @@ class GrandCamAnswarable():
 
 
 class PatchAnswer(WebotsRunnablePatch, GrandCamAnswarable, HeatMapShowable, Mayavi3dPlottable):
+    idx2label = {0: 'Not Traversable', 1 : 'Traversable'}
     def __init__(self, patch_size, info, *args, **kwargs):
         super().__init__(patch_size, *args, **kwargs)
         self.info = info
@@ -163,12 +164,21 @@ class PatchAnswer(WebotsRunnablePatch, GrandCamAnswarable, HeatMapShowable, Maya
     def add_advancement_using_simulator(self, for_seconds, time_window):
         self.run_on_simulator(for_seconds)
         adv = self.get_advancement(time_window)
-        self.info['advancement'] = adv
+        self.info['advancement'] = adv['advancement']
         return self
 
     @classmethod
     def from_explain(cls, explain):
         return [cls.from_tensor(el[0], row) for el, (dx, row) in zip(explain.ds, explain.df.iterrows())]
+
+class CustomPatchAnswer(PatchAnswer):
+    @property
+    def title(self):
+        pred = self.idx2label[self.info['prediction']]
+        title = pred
+        if 'advancement' in self.info:
+            title += '\nAdvancement = {:3.1f}cm'.format(self.info['advancement'].values[25] * 100)
+        return title
 
 
 class ClassificationAnswer(ClassificationInterpretation):
