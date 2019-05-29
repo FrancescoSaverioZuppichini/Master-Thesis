@@ -151,6 +151,9 @@ class PatchAnswer(WebotsRunnablePatch, GrandCamAnswarable, HeatMapShowable, Maya
         super().__init__(patch_size, *args, **kwargs)
         self.info = info
 
+
+
+
     @property
     def title(self):
         pred = self.info['prediction']
@@ -172,6 +175,12 @@ class PatchAnswer(WebotsRunnablePatch, GrandCamAnswarable, HeatMapShowable, Maya
         return [cls.from_tensor(el[0], row) for el, (dx, row) in zip(explain.ds, explain.df.iterrows())]
 
 class CustomPatchAnswer(PatchAnswer):
+
+    def plot2d(self, title='', *args, **kwargs):
+        vmax = max(1, np.max(self.hm))
+
+        return super().plot2d(title, vmax=vmax, *args, **kwargs)
+
     @property
     def title(self):
         pred = self.idx2label[self.info['prediction']]
