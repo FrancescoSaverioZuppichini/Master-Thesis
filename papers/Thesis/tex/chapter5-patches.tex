@@ -5,9 +5,8 @@ To test is robustness we will create custom patches with different features, wal
 \subsubsection{Wall in front of Krock}
 The easiest test we can perform is to place a wall in front of \emph{Krock}. If we place the wall at different distance from the Krock's head we should reach a point where, moving the wall towards the end of the patch, the model should yield traversable even if the wall itself is tall. Why? Because the robot will be able to traverse more than the threshold before beeing stopped by the wall.
 
-
-We create different patches by first placing the wall exactly in front of the robot and then move it $1$cm at the time towards the end. The following image shows some of the input patches.
-\begin{figure}
+We create fifty-five different patches by first placing the wall exactly in front of the robot and then move it $1$cm at the time towards the end. It follows some of the input patches ordered by distance from the robot.
+\begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.160\textwidth}
     \includegraphics[width=\linewidth]{../img/5/custom_patches/walls_front/all/55-3d.png}
@@ -90,6 +89,8 @@ Furthermore, we can increase the wall size of the first traversable patch, $(b)$
     \end{subfigure}   
 \caption{Traversable patches with a very tall wall.}    
 \end{figure}
-Correctly, the model was not confused by the enourmous height of the wall.
+Correctly, the model classifies the patches as traversable and was not confused by the enourmous height of the wall.
 
+\subsubsection{Increasing taller Walls}
+We will test our model's robustness by placing different wall of increasing heights in from of it and check wather the prediciton matches the output from the simulator. 
 \end{document}

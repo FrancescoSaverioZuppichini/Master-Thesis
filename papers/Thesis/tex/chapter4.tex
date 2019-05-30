@@ -14,9 +14,9 @@ We fix the maximum number of train epochs to $30$ and reduce the learning rage o
 \todo[inline]{I am actually using acycling learning or something like it I don't rememeber the paper's name}
 
 To train the models we first use Standard Gradient Descent with momentum set to $0.95$ and weight decay to $1e-4$ with an initial learning rate of $1e-3$ as was originally proposed to train residual network \cite{he2015deep}. However, we later utilize Leslie Smith's 1cycle policy \cite{1cycle} that allows us to trian the network faster and with an higher accuracy.
-\subsubsection{Experimental validˀation}
+\subsubsection{Experimental validation}
 We select as \emph{validation} ten percent of the training data. We remain to the reader that we store each run of \emph{Krock} as a \emph{.csv} file. So, to avoid any biases, we used completely different dataframes, meaning that train and validation sets are composed by non overlapping data from the simulations.
-\todo[inline]{add more maps if we add them to the test set}ˀ
+\todo[inline]{add more maps if we add them to the test set}
 \subsubsection{Metrics}
 
 \paragraph{Classification:} To evaluate the model's classification performance we used two metrics: \emph{accuracy} and \emph{AUC-ROC Curve}. Accuracy scores the number of correct predictions made by the network while AUC-ROC Curve represents degree or measure of separability, informally it tells how much model is capable of distinguishing between classes. For each experiment, we select the model with the higher AUC-ROC Curve during training to be evaluated on the test set.
