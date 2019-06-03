@@ -6,68 +6,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from estimators.data import *
 from torch.utils.data import DataLoader, random_split, RandomSampler, ConcatDataset, WeightedRandomSampler
-import torchvision
-from estimators.data.transformations import RandomSimplexNoise
-from torch.nn.functional import softmax
-
-
-class ImbalancedDatasetSampler(torch.utils.data.sampler.Sampler):
-    """Samples elements randomly from a given list of indices for imbalanced dataset
-    Arguments:
-        indices (list, optional): a list of indices
-        num_samples (int, optional): number of samples to draw
-    """
-
-    def __init__(self, dataset, indices=None, num_samples=None, *args, **kwargs):
-        super().__init__(dataset)
-
-        # if indices is not provided,
-        # all elements in the dataset will be considered
-        self.indices = list(range(len(dataset))) \
-            if indices is None else indices
-
-        # if num_samples is not provided,
-        # draw `len(indices)` samples in each iteration
-        self.num_samples = len(self.indices) \
-            if num_samples is None else num_samples
-
-        # distribution of classes in the dataset
-        label_to_count = {}
-        for idx in self.indices:
-            label = self._get_label(dataset, idx)
-            if label in label_to_count:
-                label_to_count[label] += 1
-            else:
-                label_to_count[label] = 1
-        print(label_to_count)
-        # weight for each sample
-        weights = [1.0 / label_to_count[self._get_label(dataset, idx)]
-                   for idx in self.indices]
-        self.weights = torch.DoubleTensor(weights)
-        # self.weights = softmax(self.weights, dim=-1)
-
-        # self.weights = torch.tensor([0.5, 0.5])
-
-    def _get_label(self, dataset, idx):
-        dataset_type = type(dataset)
-        if dataset_type is torchvision.datasets.MNIST:
-            return dataset.train_labels[idx].item()
-        elif dataset_type is torchvision.datasets.ImageFolder:
-            return dataset.imgs[idx][1]
-        elif dataset_type is ConcatDataset:
-            return int(dataset.df['label'][idx])
-        else: return int(dataset[idx][0])
-
-
-    def __iter__(self):
-        iter = (self.indices[i] for i in torch.multinomial(
-            self.weights, self.num_samples, replacement=True))
-        return iter
-    def __len__(self):
-        return self.num_samples
-
-    def __repr__(self):
-        return 'ImbalancedDatasetSampler'
 
 
 def visualise(dl, n=10):
@@ -137,9 +75,9 @@ def get_dataloaders(train_root,
     print(train_transform_with_label)
 
     train_ds = FastAIImageFolder.from_meta(train_meta,
-                                           train_root + '/csvs_patches/',
+                                           train_root + '/{}/csvs/'.format(time_window),
                                            hm_root,
-                                           patches_dir='{}/patches/{}/'.format(train_root, patch_size),
+                                           patches_dir='{}/{}/patches/'.format(train_root, time_window),
                                            tr=tr,
                                            time_window=time_window,
                                            patch_size=patch_size,
@@ -156,9 +94,9 @@ def get_dataloaders(train_root,
     print('[INFO] val root = {}'.format(val_root))
 
     val_ds = FastAIImageFolder.from_meta(val_meta,
-                                         val_root + '/csvs_patches/',
+                                         val_root + '/{}/csvs/'.format(time_window),
                                          val_hm_root,
-                                         patches_dir='{}/patches/{}/'.format(val_root, patch_size),
+                                         patches_dir='{}/{}/patches/'.format(val_root, time_window),
                                          tr=tr,
                                          patch_size=patch_size,
                                          more_than=more_than,
@@ -180,13 +118,13 @@ def get_dataloaders(train_root,
 
     if test_root is not None:
         print('[INFO] Using test root = {}'.format(test_root))
-        test_ds = FastAIImageFolder.from_root(test_root + '/csvs_patches/',
-                                             patches_dir='{}/patches/{}/'.format(test_root, patch_size),
-                                             tr=tr,
-                                             time_window=time_window,
-                                             more_than=more_than,
-                                             transform=test_transform,
-                                             patch_size=patch_size)
+        test_ds = FastAIImageFolder.from_root(test_root + '/{}/csvs/'.format(time_window),
+                                              patches_dir='{}/{}/patches/'.format(test_root, time_window),
+                                              tr=tr,
+                                              time_window=time_window,
+                                              more_than=more_than,
+                                              transform=test_transform,
+                                              patch_size=patch_size)
 
         test_dl = DataLoader(test_ds, shuffle=False, *args, **kwargs)
     else:
@@ -210,8 +148,8 @@ if __name__ == '__main__':
     # print('[INFO] {} simulations for training.'.format(len(meta)))
     # meta = meta[meta['map'] == 'bars1']
     print(meta)
-    concat_ds = TraversabilityDataset.from_root('/media/francesco/saetta/krock-dataset/new-test-random/csvs_patches/',
-                                                patches_dir='/media/francesco/saetta/krock-dataset/new-test-random/patches/0.71/',
+    concat_ds = TraversabilityDataset.from_root('/media/francesco/saetta/krock-dataset/new-test-random/100/csvs/',
+                                                patches_dir='/media/francesco/saetta/krock-dataset/new-test-random/100/patches/',
                                                 down_sampling=2,
                                                 time_window=100,
                                                 patch_size=0.71,
@@ -220,12 +158,12 @@ if __name__ == '__main__':
                                                 transform=Compose([
                                                     # RandomCoarsening(p=1),
                                                     CenterAndScalePatch(),
-                                                                    DropoutAgumentation(),
-                                                                    ToTensor(),
-                                                                    # DropoutAgumentation()
-                                                                    ]))
+                                                    # DropoutAgumentation(),
+                                                    ToTensor(),
+                                                    # DropoutAgumentation()
+                                                ]))
 
     TraversabilityDataset.concat_dfs(concat_ds)
-    dl = DataLoader(concat_ds,  batch_size=5, pin_memory=True, num_workers=1, shuffle=False)
+    dl = DataLoader(concat_ds, batch_size=5, pin_memory=True, num_workers=1, shuffle=False)
 
     visualise(dl)

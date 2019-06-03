@@ -5,7 +5,7 @@ from utilities.pipeline import Compose, MultiThreadWrapper
 
 class PostProcessing():
     def __init__(self, root, maps_dir, advancement, time_window):
-        self.dir = TraversabilityDir(root, maps_dir, advancement)
+        self.dir = TraversabilityDir(root, maps_dir, time_window)
         self.advancement, self.time_window = advancement, time_window
 
         self.convert_bags2dfs_and_store = MultiThreadWrapper(16, Compose([
@@ -27,7 +27,7 @@ class PostProcessing():
             ExtractPatches(patch_extract_stategy=KrockPatchExtractStrategy(max_advancement=self.advancement)),
             StorePatches(self.dir.patches_dir),
             AddAdvancement(time_window),
-            StoreDataframePatches( self.dir.csvs_patches_dir)
+            StoreDataframePatches(self.dir.csvs_patches_dir)
         ]))
 
     def __call__(self):

@@ -7,8 +7,8 @@ from utilities.postprocessing.extractions import *
 
 
 class TraversabilityDir():
-    def __init__(self, root, maps_dir, advancement):
-        self.root, self.maps_dir, self.advancement = root, maps_dir, advancement
+    def __init__(self, root, maps_dir, time_window):
+        self.root, self.maps_dir, self.time_window = root, maps_dir, time_window
 
     @property
     def meta(self):
@@ -32,13 +32,13 @@ class TraversabilityDir():
 
     @property
     def csvs_patches_dir(self):
-        dir = path.normpath(self.root + '/csvs_patches')
+        dir = path.normpath(self.root + '/{}/csvs'.format(self.time_window))
         os.makedirs(dir, exist_ok=True)
         return dir
 
     @property
     def patches_dir(self):
-        dir = path.normpath(self.root + '/patches/{}'.format(self.advancement))
+        dir = path.normpath(self.root + '/{}/patches/'.format(self.time_window))
         os.makedirs(dir, exist_ok=True)
         return dir
 

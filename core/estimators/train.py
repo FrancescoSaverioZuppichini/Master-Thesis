@@ -21,7 +21,7 @@ from estimators.data import get_dataloaders, get_transform, TraversabilityDatase
 from estimators.models import zoo
 from estimators.callbacks import ROC_AUC, Timer
 from estimators.data.transformations import RandomSimplexNoise, DropoutAgumentation, RandomScale
-from estimators.data.dataloaders import ImbalancedDatasetSampler
+from estimators.data.samplers import ImbalancedDatasetSampler
 
 from torch.utils.data.sampler import RandomSampler
 
@@ -269,7 +269,7 @@ if __name__ == '__main__':
     #     return x
 
 
-    # params = get_params()
+    params = get_params()
     # params['train_transform'] = train_transformation
     # params['train_transform_with_label'] = RandomSimplexNoise(p=0.7, n=500)
     # params['data-aug'] = str(train_transformation)
@@ -292,13 +292,13 @@ if __name__ == '__main__':
 
     summary(model().cuda(), (1, 79, 79))
 
-    # train_and_evaluate = TrainAndEvaluate(params)
+    train_and_evaluate = TrainAndEvaluate(params)
 
     # params['model'] = model
     # params['name'] = '[(16, 32), (32, 64), (64, 128)]-Encoder7x7-se'
     #
-    # for _ in range(10):
-    #     train_and_evaluate( params['model'])
+    for _ in range(10):
+        train_and_evaluate( params['model'])
     #
     # model = lambda: ResNet(
     #     in_channel=1,
