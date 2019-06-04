@@ -467,15 +467,12 @@ Our network is composed by $n$ ResNet blocks, a depth of $d$ and a channel incre
 LeakyRelu(x)=\left\{\begin{array}{ll}{x} & {\text { if } x>0} \\ {0.1 x} & {\text { otherwise }}\end{array}\right.
 \end{equation}
 
-We called this model architecture \emph{MicroResNet}. 
+We called this model architecture \emph{MicroResNet}. We evaluated $n=[1,2], d=3$ with and without squeeze and excitation and with the two differents \emph{head}'s convolution. All the networks have a starting channel size of $16$. The following table shows the architecture from top to bottom.
 
-
-We evaluated $n=[1,2], d=3$ with and without squeeze and excitation and with the two differents \emph{head}'s convolution. All the networks have a starting channel size of $16$.
-
- \begin{table}[H]
+\begin{table}[H]
     \centering
     \ra{1.2}
-        \begin{tabular}{@{}l|ccccc@{}}
+        \begin{tabular}{@{}l|c|c|c|cc@{}}
         \hline
              Input   &  \multicolumn{4}{c}{$(1,78,78)$}  \\ 
             \hline 
@@ -513,10 +510,10 @@ We evaluated $n=[1,2], d=3$ with and without squeeze and excitation and with the
                Size (MB) & 5.93 & 5.71 &  \textbf{2.41} & 2.32 \\ 
                \hline 
         \end{tabular}
-        \caption{MicroResNet architecture from top to bottom. First row is the first layer of the network.}
+        \caption{MicroResNet architecture from top to bottom. Some part of the architecture are equal across models, this is shows by sharing columns in the table.}
     \end{table}
 \todo[inline]{this table sucks}
-Our models have approximately $35$ times less parameters than the smalles ResNet model, ResNet18, that has $11M$ parameters. To simplicity we will use the following notation to describe each architecture variant: \texttt{MicroResNet-{3x3/7x7}-{/SE}}.
+Our models have approximately $35$ times less parameters than the smalles ResNet model, ResNet18, that has $11$M parameters. To simplicity we will use the following notation to describe each architecture variant: \texttt{MicroResNet-{3x3/7x7}-{/SE}}.
 \todo[inline]{ask omar help to add margin in the rows}
 \todo[inline]{add model picture}
 

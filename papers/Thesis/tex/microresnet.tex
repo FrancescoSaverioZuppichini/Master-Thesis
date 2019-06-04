@@ -15,59 +15,54 @@
 \usepackage{multirow, multicol, makecell, booktabs}
 \usepackage{array,multirow}
 \usepackage{bm}
+\usepackage{booktabs}
+
 \newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
 \newcommand{\cs}[1]{\renewcommand{\tabcolsep}{#1pt}}
+
+
 \begin{document}
 \begin{table}[H]
     \centering
     \ra{1.2}
-        \begin{tabular}{@{}lc|cccc@{}}
+        \begin{tabular}{@{}l|c|c|c|cc@{}}
         \hline
-        & depth   &  \multicolumn{4}{c}{3}  \\ 
-        \hline 
-        & n   & \multicolumn{2}{c}{1} & \multicolumn{2}{c}{2}\\
-        \hline
-    \multirow{12}{*}{Layers}
-     & &\multicolumn{4}{c}{$3 \ x\ 3,\ 16 \ stride\ 1$} \\ 
-     \cline{3-6}
-     & &\multicolumn{4}{c}{$2 \ x\ 2$ max-pool} \\ 
-     \cline{3-6}
-     & & \multicolumn{2}{c}{$\begin{bmatrix}
-      3\ x\ 3, & 16 \\
-      3\ x \ 3, & 16 \\  
-     \end{bmatrix}$ x 1} & \multicolumn{2}{c}{$\begin{bmatrix}
-        3\ x\ 3, & 16 \\
-        3\ x \ 3, & 16 \\  
-       \end{bmatrix}$ x 2}\\ 
-       \cline{3-6}
-     & & SE & - & SE & -\\ 
-     \cline{3-6}
-     & & \multicolumn{2}{c}{$\begin{bmatrix}
-        3\ x \ 3, & 32 \\
-        3\ x\ 3, & 32 \\  
-       \end{bmatrix}$ x 1} & \multicolumn{2}{c}{$\begin{bmatrix}
-        3\ x\ 3, & 32 \\
-        3\ x \ 3, & 32 \\  
-       \end{bmatrix}$ x 2} \\
-       \cline{3-6}
-       & & SE & - & SE & -\\ 
-       \cline{3-6}
-       & & \multicolumn{2}{c}{$\begin{bmatrix}
-        3\ x \ 3, & 64 \\
-        3 \ x \ 3, & 64 \\  
-       \end{bmatrix}$ x 1} & \multicolumn{2}{c}{$\begin{bmatrix}
-        3\ x\ 3, & 64 \\
-        3\ x \ 3, & 64 \\  
-       \end{bmatrix}$ x 2}\\  
-       \cline{3-6}
-       & & SE & - & SE & -\\ 
-       \cline{3-6}
-       & & \multicolumn{4}{c}{average pool, $1$-d fc, softmax} \\ 
-       \hline
+             Input   &  \multicolumn{4}{c}{$(1,78,78)$}  \\ 
+            \hline 
+            \multirow{12}{*}{Layers} & \multicolumn{2}{c}{$3 \times 3$, $16$ stride $1$} & \multicolumn{2}{c}{$7 \times 7$ $16$ stride $2$} \\
+            \cline{2-5}
+            &\multicolumn{4}{c}{$2 \times \ 2$ max-pool} \\ 
+            \cline{2-5}
+            &  \multicolumn{4}{c}{$\begin{bmatrix}
+                3  \times 3, & 16 \\
+                3  \times  3, & 32 \\  
+               \end{bmatrix}$ x 1} \\ 
+               \cline{2-5}
+               &  SE & - & SE & -\\ 
+               \cline{2-5}
+               &  \multicolumn{4}{c}{$\begin{bmatrix}
+                3  \times 3, & 32 \\
+                3  \times  3, & 64 \\  
+               \end{bmatrix}$ x 1} \\ 
+               \cline{2-5}
+               &  SE & - & SE & -\\ 
+               \cline{2-5}
 
-       Parameters & & TODO & 302,610  & TODO & TODO \\
-       \hline
-    \end{tabular}
-    \caption{\emph{micro-resnet} architecture}
-\end{table}
+               &  \multicolumn{4}{c}{$\begin{bmatrix}
+                3  \times 3, & 64 \\
+                3  \times  3, & 128 \\  
+               \end{bmatrix}$ x 1} \\
+               \hline
+               &  SE & - & SE & -\\ 
+               \cline{2-5}
+               &  \multicolumn{4}{c}{average pool, $1$-d fc, softmax} \\ 
+               \hline
+        
+               Parameters &  313,642 & 302,610  &  \textbf{314,282} & 303,250 \\
+            \hline
+               Size (MB) & 5.93 & 5.71 &  \textbf{2.41} & 2.32 \\ 
+               \hline 
+        \end{tabular}
+        \caption{MicroResNet architecture from top to bottom. First row is the first layer of the network.}
+    \end{table}
 \end{document}
