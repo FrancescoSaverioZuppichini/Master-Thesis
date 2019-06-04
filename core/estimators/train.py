@@ -169,7 +169,7 @@ def get_params():
             'val_size': 10,
             'test': None,
             'validation': None,
-            'model': 'microresnet#4-gate=3x3-n=1-se=False',
+            'model': 'microresnet#3-gate=7x7-n=1-se=True',
             'dataset': '',
             'sampler': None,
             'num_samples': None,
@@ -183,13 +183,13 @@ def get_params():
             'optim':  torch.optim.Adam,
             'info': '',
             'tr': 0.2,
-            'problem': 'classification',
+            'problem': 'remove',
             'name': '',
             'more_than': None,
             'less_than': None,
             'down_sampling': None,
             'time_window': 50 * 2,
-            'patch_size': 0.71,
+            'patch_size': 0.7,
             'fit_one_cycle': True
             }
 
@@ -199,57 +199,8 @@ if __name__ == '__main__':
     from torchvision.transforms import ToTensor, Compose
     from estimators.data.transformations import RandomCoarsening, RandomSimplexNoise, CenterAndScalePatch, \
         DropoutAgumentation
-    from torch.nn import Dropout
 
     from torchsummary import summary
-
-    # summary(zoo['microresnet#3-gate=7x7-n=1-se=True']().cuda(), (1, 79, 79))
-
-    class MyDecoder(ResnetDecoder):
-        def __init__(self, in_features, n_classes):
-            super().__init__(in_features, n_classes)
-            #         self.avg = nn.AdaptiveAvgPool2d((1, 1))
-            self.decoder = nn.Sequential(
-                nn.Linear(in_features, 64),
-                nn.Dropout(),
-                nn.Linear(64, n_classes),
-            )
-
-
-    class Encoder3x3(ResNetEncoder):
-        def __init__(self, in_channel, depths, *args, **kwargs):
-            super().__init__(in_channel, depths, *args, **kwargs)
-
-            self.gate = nn.Sequential(
-                nn.Conv2d(in_channel, self.blocks_sizes[0][0], kernel_size=3, stride=1, bias=False, padding=1),
-                nn.BatchNorm2d(self.blocks_sizes[0][0]),
-                nn.LeakyReLU(inplace=True),
-                nn.MaxPool2d(kernel_size=2)
-            )
-
-
-    class Encoder7x7(ResNetEncoder):
-        def __init__(self, in_channel, depths, *args, **kwargs):
-            super().__init__(in_channel, depths, *args, **kwargs)
-
-            self.gate = nn.Sequential(
-                nn.Conv2d(in_channel, self.blocks_sizes[0][0], kernel_size=7, stride=2, bias=False, padding=2),
-                nn.BatchNorm2d(self.blocks_sizes[0][0]),
-                nn.LeakyReLU(inplace=True),
-                nn.MaxPool2d(kernel_size=2)
-            )
-
-
-    class Encoder5x5(ResNetEncoder):
-        def __init__(self, in_channel, depths, *args, **kwargs):
-            super().__init__(in_channel, depths, *args, **kwargs)
-
-            self.gate = nn.Sequential(
-                nn.Conv2d(in_channel, self.blocks_sizes[0][0], kernel_size=5, stride=1, bias=False, padding=1),
-                nn.BatchNorm2d(self.blocks_sizes[0][0]),
-                nn.LeakyReLU(inplace=True),
-                nn.MaxPool2d(kernel_size=2)
-            )
 
 
     validate_transformation = Compose([CenterAndScalePatch(), ToTensor])
@@ -262,102 +213,22 @@ if __name__ == '__main__':
     ])
 
     # r_scale = RandomScale(p=0.3)
-    # r_noise = RandomSimplexNoise(p=0.7, n=500)
     # def train_transform_with_label(img, is_traversable):
     #     x = r_scale(img, is_traversable)
     #     x = r_noise(x, is_traversable)
     #     return x
 
-
     params = get_params()
-    # params['train_transform'] = train_transformation
-    # params['train_transform_with_label'] = RandomSimplexNoise(p=0.7, n=500)
-    # params['data-aug'] = str(train_transformation)
-    # patch_size = KrockPatchExtractStrategy.patch_shape(params['patch_size'], 0.02)
-    #
-    # params['test'] = '/media/francesco/saetta/krock-dataset/new-test-random/'
+    print(zoo[params['model']]())
 
-    model = lambda: ResNet(
-        in_channel=1,
-        encoder=Encoder7x7,
-        # decoder=MyDecoder,
-        depths=[1, 1, 1],
-        blocks=[BasicBlockSE, BasicBlockSE, BasicBlockSE],
-        blocks_sizes=[(16, 32), (32, 64), (64, 128)],
-        n_classes=2,
-        activation='leaky_relu',
-        preactivate=True,
-        ratio=4,
-    )
-
-    summary(model().cuda(), (1, 79, 79))
-
+    params['test'] = '/media/francesco/saetta/krock-dataset/new-test-random/'
+    params['train_transformation'] = train_transformation
+    shape = KrockPatchExtractStrategy.patch_shape(params['patch_size'])
+    print(shape)
+    r_noise = RandomSimplexNoise(shape, p=0.7, n=500)
+    params['train_transform_with_label'] = r_noise
     train_and_evaluate = TrainAndEvaluate(params)
 
-    # params['model'] = model
-    # params['name'] = '[(16, 32), (32, 64), (64, 128)]-Encoder7x7-se'
-    #
-    for _ in range(10):
+    print(params['model']())
+    for _ in range(1):
         train_and_evaluate( params['model'])
-    #
-    # model = lambda: ResNet(
-    #     in_channel=1,
-    #     encoder=Encoder7x7,
-    #     # decoder=MyDecoder,
-    #     depths=[1, 1, 1, 1],
-    #     blocks=[BasicBlockSE, BasicBlockSE, BasicBlockSE, BasicBlockSE],
-    #     blocks_sizes=[(32, 32), (32, 64), (64, 128),  (128, 256)],
-    #     n_classes=2,
-    #     activation='leaky_relu',
-    #     preactivate=True,
-    #     ratio=8,
-    # )
-    #
-    # params['model'] = model
-    # params['name'] = '[(32, 32), (32, 64), (64, 128),  (128, 256)]-Encoder7x7-se'
-    #
-    # model = lambda: ResNet(
-    #     in_channel=1,
-    #     encoder=Encoder3x3,
-    #     # decoder=MyDecoder,
-    #     depths=[1, 1, 1],
-    #     blocks=[BasicBlockSE, BasicBlockSE, BasicBlockSE],
-    #     blocks_sizes=[(16, 32), (32, 64), (64, 128)],
-    #     n_classes=2,
-    #     activation='leaky_relu',
-    #     preactivate=True,
-    #     ratio=4,
-    # )
-    #
-    # params['model'] = model
-    # params['name'] = '[(16, 32), (32, 64), (64, 128)]-Encoder3x3-se'
-    #
-    # for _ in range(10):
-    #     train_and_evaluate( params['model'])
-    #
-    # params['model'] = 'omar'
-    # params['name'] = 'omar'
-    # for _ in range(10):
-    #     train_and_evaluate( params['model'])
-    #
-    # model = lambda: ResNet(
-    #     in_channel=1,
-    #     encoder=Encoder7x7,
-    #     # decoder=MyDecoder,
-    #     depths=[1, 1, 1],
-    #     blocks=[BasicBlockSE, BasicBlockSE, BasicBlockSE],
-    #     blocks_sizes=[(16, 32), (32, 64), (64, 128)],
-    #     n_classes=2,
-    #     activation='leaky_relu',
-    #     preactivate=True,
-    #     ratio=4,
-    # )
-    #
-    # params['model'] = model
-    # params['name'] = '[(16, 32), (32, 64), (64, 128)]-Encoder7x'
-    # params['fit_one_cycle'] = False
-    # params['optim'] = partial(torch.optim.SGD, momentum=0.95, weight_decay=1e-4)
-    #
-    # for _ in range(10):
-    #     train_and_evaluate( params['model'])
-    #

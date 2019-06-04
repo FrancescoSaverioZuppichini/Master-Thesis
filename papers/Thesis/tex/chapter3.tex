@@ -70,7 +70,7 @@ using heightmaps. A heightmap is a 2D array, an image, where each pixel's value 
     \end{figure}
 We used thirty maps of $513\times513$ pixel with a resolution of $0.02cm/pixel$ in order to represent a $10\times10m$ region. We generated them by 2D simplex noise \cite{simplex}, a variant of Perlin noise \cite{perlin}, a widely used technique in terrain generation litterature. We created four main categories of terrains: $bumps$, $rails$, $steps$ and $slopes$/$ramps$. For each map we add three different rocky texture to create even more different situations.
 
-\paragraph{Bumps:}
+\paragraph{Bumps:} 
 We genered four different maps with increasing bumps using simplex noise with features size $\in[200,100,50,25 ]$. 
 \begin{figure}[H]
     \centering
@@ -269,10 +269,11 @@ Before caching again the resulting dataframes into \emph{.csv} files, we convert
 
 Finally, we load again the last stage and compute the advancement by projecting the pose's position, $x$ and $y$, in the current line. Then, we select a time window according to the store rate, for if we select two seconds we need to multiply the rate by two, so $50*2=100$ since \emph{Krock} published with a $50hz$ frequency. Once the time window is defined, we project $x$ and $y$ on the current line The Robot Operating System (ROS) \cite{ROS} is a flexible framework for writing robot software. It is \emph{de facto} the industry and research standard framework for robotics due to its simple yet effective interface that facilitates the task of creating a robust and complex robot behavior regardless of the platforms. ROS works by establishing a peer-to-peer connection where each \emph{node} is to communicate between the others by exposing sockets endpoints, called \emph{topics}, to stream data or send \emph{messages}. used the $\sin$ and $\cos$ values calculated before to get the advancement.
 \subsubsection{Extract patches}
-To create the patches, we first discover the maximum advancement for one second by running some simulations of \emph{Krock} on flat ground and averaging the advancement. For our robot, the maximum speed is $33cm/s$ Then, we multiply the maximum displacement by the number of seconds we are interested in. We can now crop the corresponding region in the heightmap by including the whole \emph{Krock}'s footprint and the maximum advancement. The following figure visualizes the patch extraction process. 
-\todo[inline]{figure that shows Krock somewhere with the patch bounding boxed}. Lastly, we create a final dataframe containing the map coordinates, the advancement, and the patches paths for each simulation and store them to disk as \emph{.csv} files. 
+To create the patches, we first compute the maximum advancement for a given time window, $\Delta t$, by running some simulations of \emph{Krock} on flat ground and averaging the advancement. For our robot, the maximum speed is $33cm/s$. Then, we multiply the maximum displacement by the number of seconds we are interested in. We can now crop the corresponding region in the heightmap by including the whole \emph{Krock}'s footprint and the maximum advancement for a specific $\Delta t$. The following figure visualizes the patch extraction process. We decided to use
+\todo[inline]{figure that shows Krock somewhere with the patch bounding boxed}. 
+We decided to use $\Delta t = 2$ and $\Delta t = 3$ since they are big enough to include two and tree full legs motition. Lastly, we create a final dataframe containing the map coordinates, the advancement, and the patches paths for each simulation and store them to disk as \emph{.csv} files. 
 
-The whole pipeline takes less than one hour to run the first time with 16 threads, and, once it is cached, less than fifteen minutes to extract the patches. 
+The whole pipeline takes less than one hour to run the first time with 16 threads, and, once it is cached, less than fifteen minutes to extract all the patches. 
 
 Once we extract the patches, we can always re-compute the advancement without re-running the whole pipeline. The next figure show proposed pipeline.
 \begin{figure}[H] 
@@ -283,13 +284,13 @@ Once we extract the patches, we can always re-compute the advancement without re
 \end{figure}
 \todo[inline]{add arrows!}
 \todo[inline]{Here on in interpretability???}
-The following figure shows the mean advancement across all the maps used to train the model in a range of $\pm 0.71$cm, the maximum advancment on this time window.
+The following figure shows the mean advancement across all the maps used to train the model in a range of $\pm 0.71$cm, the maximum advancment on this time window. The robot traverse from left to right.
 \begin{figure}[H]
     \centering
     \includegraphics[width=\linewidth]{../img/datasets/box_for_each_map.png}
     \caption{Advancement on each map with a time window of $2$s in ascendent order.}
 \end{figure}
-The following picture shows some traversable an not traversable patches in 3d sorted by advancement taken directly from the \emph{Quarry} dataset to help the reader visualize better the generated dataset.
+The following pictures show some of the extracted ground patches from \emph{Quarry}.
 \begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.19\textwidth}
@@ -332,7 +333,7 @@ The following picture shows some traversable an not traversable patches in 3d so
     \includegraphics[width=\linewidth]{../img/5/quarry/all/best/72-patch-3d-majavi-colormap-9.png}
     \caption{$72$cm}
     \end{subfigure}
-    \caption{Traversable patches from \emph{Quarry}}
+    \caption{Patches with high advancement \emph{Quarry} using a time window of $2$seconds.}
 \end{figure}
     \begin{figure}[H]
         \centering
@@ -376,10 +377,58 @@ The following picture shows some traversable an not traversable patches in 3d so
         \includegraphics[width=\linewidth]{../img/5/quarry/all/worst/18-patch-3d-majavi-colormap-9.png}
         \caption{$18$cm}
         \end{subfigure}
-        \caption{Non traversable patches from \emph{Quarry}}
+        \caption{Patches with low advancament \emph{Quarry} using a time window of $2$seconds.}
     \end{figure}
+Corretly, we can notice that the patches with a lower advancament values have some ostacle in front of the robot, while the other set of inputs are almost flat.
+
+\subsubsection{Label the Patches}
+To decide wather a patch is traversable or not traversable we need to decide a \emph{treshold}, $tr$, such as if a patches has an advancement major than $tr$ it is label as traversable and viceversa. Ideally, the trashold should small enough to include as less as possible false positive and big enough to cover all the cases where Krock gets stuck. We empirically compute the treshold's value by spawing Krock in front of a bumps and a ramp and let it walk.
+\paragraph{Bumps} We spawned the robot on the \emph{bumps3} map close to the end and let it go for 20 seconds. The following figure shows Krock in the simulated environment.
+
+\begin{figure}[H]
+\centering
+    \begin{subfigure}[b]{0.45\textwidth}
+    \includegraphics[width=\linewidth]{../img/3/find_tr/krock-bumps.jpg}
+    \end{subfigure}
+\caption{Krock tries to overcome an obstacle in the \emph{bumps3} map.}
+\end{figure}
+
+Due to its characteristic locomotion, Krock tries to first overcome the obstacle using the legs to move itself to the top and then it fell backs producing a spicky advancament where first it is positive and then negative. The following picture shows the advancemnet on this map with different time windows, $\Delta t$, the greater the smoother.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+        \includegraphics[width=\linewidth]{../img/3/find_tr/100-bumps3}
+        \caption{$\Delta t = 2$s.}
+    \end{subfigure}
+        \begin{subfigure}[b]{0.45\textwidth}
+        \includegraphics[width=\linewidth]{../img/3/find_tr/150-bumps3}
+        \caption{$\Delta t = 3$s.}
+    \end{subfigure}
+\caption{Advancement over time with different $\Delta t$ on \emph{bumps3}.}
+\end{figure}
+A wheel robot, on the other hand, will not produce such graph since it cannot free itself easily from an obstacle.
+
+\paragraph{Ramps}
+To correctly decide the treshold we must be sure it will not create false negative. For this reason, we check the advancement on the $slope_rocks1$ map with a height scaling factor set to $5$.
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+        \includegraphics[width=\linewidth]{../img/3/find_tr/100-slope_rocks1}
+        \caption{$\Delta t = 2$s.}
+    \end{subfigure}
+        \begin{subfigure}[b]{0.45\textwidth}
+        \includegraphics[width=\linewidth]{../img/3/find_tr/150-slope_rocks1}
+        \caption{$\Delta t = 3$s.}
+    \end{subfigure}
+    \caption{Advancement over time with different $\Delta t$ on \emph{slope\_rocks3}.}
+\end{figure}
+We know that those patches are traversable even if sometimes the robot may find it hard to climb them. So, we want to choose a treshold that is beetween the upper bound of \emph{bumps} and beetween the lower bound of \emph{slope\_rocks1}. Thus, good tresholds values are $tr_{\Delta t = 2s} = 20cm$ and $tr_{\Delta t = 3s} = 30cm$. 
+
+Thus a patch $p_i$ is label as \emph{not traversable} if the advancement in a given time window $\Delta t = n$ is less than the treshold $tr_{\Delta t = n}$
 
 \subsection{Estimator}
+\label{sec: estimator}
 In this section we described the choices behind the adopted network architecture.
 \subsubsection{Vanilla Model}
 \subsubsection{ResNet}

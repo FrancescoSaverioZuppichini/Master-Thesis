@@ -20,16 +20,55 @@ We select as \emph{validation} ten percent of the training data. We remain to th
 \subsubsection{Metrics}
 
 \paragraph{Classification:} To evaluate the model's classification performance we used two metrics: \emph{accuracy} and \emph{AUC-ROC Curve}. Accuracy scores the number of correct predictions made by the network while AUC-ROC Curve represents degree or measure of separability, informally it tells how much model is capable of distinguishing between classes. For each experiment, we select the model with the higher AUC-ROC Curve during training to be evaluated on the test set.
+
+
+
 \paragraph{Regression:} We used the Mean Square Error to evaluate the model's performance.
 \subsection{Quantitative Results}
-The following table shows the final results on various test dataset made by using real-world heightmaps. We select \emph{micro-resnet}
-with squeeze and excitation and a starting convolution's kernel size of $7\times7$ with stride of $2$.
-\todo[inline]{maybe add model comparison}
+\subsubsection{Model selection}
+We compared two different \emph{micro-resnet} and the \emph{vanilla} cnn from the previous Chapter. We evaluate those models using a time window of two second, a threshold of $20$cm and the data augmentation techniques described before. We run five experiments per architecture and we select the best performing network, the results are showed in the following table. 
 
+\begin{table*}[h]
+  \centering
+  \ra{1.2}
+  \begin{tabular}{@{}lcccc@{}}
+  \toprule
+   && Vanilla & \multicolumn{2}{c}{MicroResnetSE} \\
+  \cline{3-5}
+  && & $3\times 3$ stride $1$ & $7\times7$ stride $2$\\ 
+  \cline{3-5}
+  \multirow{2}{*}{AUC} & Top & 0.892 & 0.888 & \textbf{0.896}\\
+   & Mean & \textbf{0.890} & 0.883 & 0.888\\
+  \cline{1-5}
+  Params & & 974,351 & 313,642 & 314,282  \\
+  \bottomrule   
+\end{tabular}
+\caption{Model comparison on the test set.}
+\end{table*}
+\todo[inline]{Luca told me is better to split the models like Model1 and Model2 etc}
+
+Based on this data We select \emph{micro-resnet} with squeeze and excitation and a starting convolution's kernel size of $7\times7$ with stride of $2$. This model has one third of the parameter of the origal model proposed by Chavez-Garcia et all \cite{omar2018traversability}. 
+
+As proof of work, we also train the best network architecture, MicroResnetSE with a first convolution's kernel size of $7 \times 7$ and stride$=2$, with and without the Squeeze and Excitation operator.
+\begin{table*}[h]
+  \centering
+  \ra{1.2}
+  \begin{tabular}{@{}lccc@{}}
+  \toprule
+  &  MicroResnet$7\times7$ & MicroResnet$7\times7$-SE  & Improvement \\
+  \cline{1-4}
+   Top & 0.875 & \textbf{0.896} & $+0.021$ \\
+   Mean & 0.867 & \textbf{0.888} & $+0.021$ \\
+  \bottomrule   
+\end{tabular}
+\caption{AUC top value and mean value for MicroResnet with a fist convolution of $7\times7$ and stride $=2$ with and without the SE module. The improvement is the same.}
+\end{table*}
+
+\subsection{Final results}
+The following table shows in deep the score of the best network for each dataset.
 \begin{table*}[h]
     \centering
     \ra{1.2}
-  
     \begin{tabular}{@{}llccccc@{}}
     \toprule
     % \multicolumn{8}{c}{Quantitative evaluation in simulation} \\
@@ -46,11 +85,9 @@ with squeeze and excitation and a starting convolution's kernel size of $7\times
     & baaa & TODO & & & & \\
     \bottomrule   
 \end{tabular}
-\caption{Todo}
+\end{table*}
 \todo[inline]{I have actually never talk about surf rocks}
 
-
-\end{table*}
 Moreover, we would like to also show the different steps we made to reach this result. The following table shows the metric's score without any data-augmentation.
 \todo[inline]{add result with and without data agu}
 Adding dropout increases the results.

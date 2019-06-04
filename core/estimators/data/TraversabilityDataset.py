@@ -57,6 +57,10 @@ class TraversabilityDataset(Dataset):
         if tr is not None and len(self.df) > 0:
             self.df["label"] = self.df["advancement"] > tr
 
+        if tr is None:
+            self.df["advancement"][self.df["advancement"] < 0] = 0
+
+
     def read_patch(self, img_name):
         patch = cv2.imread(self.patches_dir + '/' + img_name)
         patch = cv2.cvtColor(patch, cv2.COLOR_BGR2GRAY)

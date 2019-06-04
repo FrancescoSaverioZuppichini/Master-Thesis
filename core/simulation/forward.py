@@ -4,7 +4,7 @@ from tf import transformations
 from simulation.env.spawn import FlatGroundSpawnStrategy, spawn_points2webots_pose
 
 WORLD_PATH = '/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock2_ros/worlds/bars1.wbt'
-MAP = '/home/francesco/Documents/Master-Thesis/core/maps/test/flat.png'
+MAP = '/home/francesco/Documents/Master-Thesis/core/maps/new-train/slope_rocks1.png'
 # MAP = '/media/francesco/saetta/krock-dataset/test_with_obstacles/wall.png'
 
 # MAP = '/home/francesco/Desktop/center.png'
@@ -23,11 +23,11 @@ import random
 #      'resolution': 0.02},
 #     # agent_callbacks=[RosBagSaver('~/Desktop/querry-high/bags', topics=['pose'])],
 #     output_path='/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock2_ros/worlds/tmp.wbt')
-#
+# #
 # env = KrockWebotsEnv.from_image(
 #     MAP,
-#     '/home/francesco/Documents/Master-Thesis/core/simulation/env/webots/krock/krock.wbt',
-#     {'height': 1,
+#     '/home/francesco/Documents/Master-Thesis/core/simulation/env/webots/krock/krock_no_tail.wbt',
+#     {'height': 5,
 #      'resolution': 0.02 },
 #     # agent_callbacks=[RosBagSaver('/media/francesco/saetta/krock-dataset/test_with_obstacle_in_center/bags',
 #     #                              topics=['pose'])],
@@ -50,7 +50,7 @@ def spawn_points2webots_pose(spawn_point, env):
     return pose
 #
 env = KrockWebotsEnv(None,
-                     agent_callbacks=[RosBagSaver('/media/francesco/saetta/krock-dataset/tr/bags',
+                     agent_callbacks=[RosBagSaver('/media/francesco/saetta/krock-dataset/tr/bumps/bags',
                                                   topics=['pose'])],
                      )
 
@@ -75,14 +75,14 @@ env.agent()
 env.reset(spawn=False)
 
 meta = pd.DataFrame(data={'filename': [file_name],
-                          'map': ['bumps3-rocks1'],
-                          'height': [1]})
+                          'map': ['slope_rocks1'],
+                          'height': [5]})
 
-meta.to_csv('/media/francesco/saetta/krock-dataset/tr/meta.csv')
+meta.to_csv('/media/francesco/saetta/krock-dataset/tr/slope_rocks1/meta.csv')
 elapsed = 0
 start = time.time()
 # #
-while elapsed <= 10:
+while elapsed <= 20:
 # #     # print(time.time())
     elapsed = time.time() - start
 #
