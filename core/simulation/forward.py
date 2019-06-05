@@ -50,7 +50,7 @@ def spawn_points2webots_pose(spawn_point, env):
     return pose
 #
 env = KrockWebotsEnv(None,
-                     agent_callbacks=[RosBagSaver('/media/francesco/saetta/krock-dataset/tr/bumps/bags',
+                     agent_callbacks=[RosBagSaver('/media/francesco/saetta/krock-dataset/crop/bags',
                                                   topics=['pose'])],
                      )
 
@@ -75,21 +75,21 @@ env.agent()
 env.reset(spawn=False)
 
 meta = pd.DataFrame(data={'filename': [file_name],
-                          'map': ['slope_rocks1'],
-                          'height': [5]})
+                          'map': ['bars1'],
+                          'height': [1]})
 
-meta.to_csv('/media/francesco/saetta/krock-dataset/tr/slope_rocks1/meta.csv')
+meta.to_csv('/media/francesco/saetta/krock-dataset/crop/meta.csv')
 elapsed = 0
 start = time.time()
 # #
-while elapsed <= 20:
+while elapsed <= 5:
 # #     # print(time.time())
     elapsed = time.time() - start
 #
-    obs, r, done, _ = env.step(env.GO_FORWARD)
+    # obs, r, done, _ = env.step(env.STOP)
     # pass
 #
 # #
-env.step(env.STOP)
+# env.step(env.STOP)
 # #
 env.agent.die(env, file_name)

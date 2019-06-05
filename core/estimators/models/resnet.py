@@ -61,7 +61,7 @@ class SEModule(nn.Module):
 def get_activation_funcs():
     return  nn.ModuleDict([
         ['relu', nn.ReLU(inplace=True)],
-        ['leaky_relu', nn.LeakyReLU(negative_slope=0.1, inplace=True)],
+        ['leaky_relu', nn.LeakyReLU(negative_slope=0.01, inplace=True)],
         ['selu', nn.SELU(inplace=True)]
     ])
 

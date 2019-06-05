@@ -163,8 +163,8 @@ class TrainAndEvaluate():
 
 
 def get_params():
-    return {'epochs': 30,
-            'lr': 1e-3,
+    return {'epochs': 20,
+            'lr': 1e-4,
             'batch_size': 128,
             'val_size': 10,
             'test': None,
@@ -183,14 +183,14 @@ def get_params():
             'optim':  torch.optim.Adam,
             'info': '',
             'tr': 0.2,
-            'problem': 'classification',
-            'name': 'omar-vanilla',
+            'problem': 'new test 2',
+            'name': 'microresnet#3-gate=7x7-n=1-se=True',
             'more_than': None,
             'less_than': None,
-            'down_sampling': 2,
+            'down_sampling': None,
             'time_window': 50 * 2,
             'patch_size': 0.7,
-            'fit_one_cycle': True
+            'fit_one_cycle': False
             }
 
 
@@ -234,6 +234,7 @@ if __name__ == '__main__':
         DropoutAgumentation(),
     ])
 
+
     # r_scale = RandomScale(p=0.3)
     # def train_transform_with_label(img, is_traversable):
     #     x = r_scale(img, is_traversable)
@@ -248,160 +249,7 @@ if __name__ == '__main__':
     params['train_transform_with_label'] = RandomSimplexNoise(shape, p=0.7, n=500)
     train_and_evaluate = TrainAndEvaluate(params)
 
-
-    params['model'] = lambda: ResNet(
-        in_channel=1,
-        encoder=Encoder7x7,
-        # decoder=MyDecoder,
-        depths=[1, 1, 1],
-        blocks=[BasicBlockSE, BasicBlockSE, BasicBlockSE],
-        blocks_sizes=[(16, 32), (32, 64), (64, 128)],
-        n_classes=2,
-        activation='leaky_relu',
-        preactivate=True,
-        ratio=4,
-    )
-
-    params['name'] = 'microresnet#3-gate=7x7-n=1-se=True-preactivate=True'
     for _ in range(5):
         train_and_evaluate( params['model'])
 
 
-    params['model'] = lambda: ResNet(
-        in_channel=1,
-        encoder=Encoder7x7,
-        # decoder=MyDecoder,
-        depths=[1, 1, 1],
-        blocks=[BasicBlockSE, BasicBlockSE, BasicBlockSE],
-        blocks_sizes=[(16, 32), (32, 64), (64, 128)],
-        n_classes=2,
-        activation='leaky_relu',
-        preactivate=False,
-        ratio=4,
-    )
-    params['name'] = 'microresnet#3-gate=7x7-n=1-se=True-preactivate=False'
-    for _ in range(5):
-        train_and_evaluate( params['model'])
-
-
-
-    params['model'] = lambda: ResNet(
-        in_channel=1,
-        encoder=Encoder7x7,
-        # decoder=MyDecoder,
-        depths=[1, 1, 1],
-        blocks=[BasicBlock, BasicBlock, BasicBlock],
-        blocks_sizes=[(16, 32), (32, 64), (64, 128)],
-        n_classes=2,
-        activation='leaky_relu',
-        preactivate=True,
-        ratio=4,
-    )
-
-
-    params['name'] = 'microresnet#3-gate=7x7-n=1-se=False-preactivate=True'
-    for _ in range(5):
-        train_and_evaluate( params['model'])
-
-
-    params['name'] = 'omar'
-    params['model'] = 'omar'
-    for _ in range(5):
-        train_and_evaluate( params['model'])
-
-    params['model'] = lambda: ResNet(
-        in_channel=1,
-        encoder=Encoder3x3,
-        # decoder=MyDecoder,
-        depths=[1, 1, 1],
-        blocks=[BasicBlock, BasicBlock, BasicBlock],
-        blocks_sizes=[(16, 32), (32, 64), (64, 128)],
-        n_classes=2,
-        activation='leaky_relu',
-        preactivate=True,
-        ratio=4,
-    )
-
-    params['name'] = 'microresnet#3-gate=3x3-n=1-se=False'
-    for _ in range(5):
-        train_and_evaluate(params['model'])
-
-
-    params['model'] = lambda: ResNet(
-        in_channel=1,
-        encoder=Encoder3x3,
-        # decoder=MyDecoder,
-        depths=[1, 1, 1],
-        blocks=[BasicBlockSE, BasicBlockSE, BasicBlockSE],
-        blocks_sizes=[(16, 32), (32, 64), (64, 128)],
-        n_classes=2,
-        activation='leaky_relu',
-        preactivate=True,
-        ratio=4,
-    )
-
-    params['name'] = 'microresnet#3-gate=3x3-n=1-se=True'
-    for _ in range(5):
-        train_and_evaluate(params['model'])
-
-
-
-    params['model'] = lambda: ResNet(
-        in_channel=1,
-        encoder=Encoder7x7,
-        # decoder=MyDecoder,
-        depths=[2, 2, 2],
-        blocks=[BasicBlockSE, BasicBlockSE, BasicBlockSE],
-        blocks_sizes=[(16, 32), (32, 64), (64, 128)],
-        n_classes=2,
-        activation='leaky_relu',
-        preactivate=True,
-        ratio=4,
-    )
-
-    params['name'] = 'microresnet#3-gate=7x7-n=2-se=True-preactivate=True'
-    for _ in range(5):
-        train_and_evaluate( params['model'])
-
-
-    params['model'] = lambda: ResNet(
-        in_channel=1,
-        encoder=Encoder7x7,
-        # decoder=MyDecoder,
-        depths=[1, 1, 1, 1],
-        blocks=[BasicBlockSE, BasicBlockSE, BasicBlockSE, BasicBlockSE],
-        blocks_sizes=[(16, 32), (32, 64), (64, 128), (128, 256)],
-        n_classes=2,
-        activation='leaky_relu',
-        preactivate=True,
-        ratio=4,
-    )
-
-    params['name'] = '[(16, 32), (32, 64), (64, 128), (128, 256)]-gate=7x7-n=1-se=True-preactivate=True'
-    for _ in range(5):
-        train_and_evaluate( params['model'])
-    
-    class MyDecoder(ResnetDecoder):
-        def __init__(self, in_features, n_classes):
-            super().__init__(in_features, n_classes)
-            self.decoder = nn.Sequential(
-                nn.Linear(in_features, 64),
-                nn.Linear(64, n_classes),
-            )
-
-    params['model'] = lambda: ResNet(
-        in_channel=1,
-        encoder=Encoder7x7,
-        decoder=MyDecoder,
-        depths=[1, 1, 1],
-        blocks=[BasicBlockSE, BasicBlockSE, BasicBlockSE],
-        blocks_sizes=[(16, 32), (32, 64), (64, 128)],
-        n_classes=2,
-        activation='leaky_relu',
-        preactivate=True,
-        ratio=4,
-    )
-
-    params['name'] = 'microresnet#3-gate=7x7-n=1-se=True-preactivate=True-decoder=64'
-    for _ in range(5):
-        train_and_evaluate(params['model'])
