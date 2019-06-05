@@ -5,6 +5,7 @@ from fastai.vision import ClassificationInterpretation
 from fastai.metrics import accuracy, dice
 from estimators.callbacks import ROC_AUC, Timer
 from utilities.visualisation import DataFrameVisualization
+from torchsummary import summary
 
 import matplotlib.pyplot as plt
 time_window = 100
@@ -21,14 +22,18 @@ learner, dl = get_learner(model_name, model_dir, callbacks=[], root=test_root, t
                          patches_dir=patches_dir,
                          transform=get_transform(),
                          time_window=50 * 2,
-                         patch_size=0.71)
+                         patch_size=0.7)
+
+
 # learner.model.eval()
 print(len(dl))
 learner.model.eval()
+summary(learner.model.cuda(), (1, 78,78))
+
 loss, acc, roc_auc = learner.validate(metrics=[accuracy, ROC_AUC()])
 
 interp = ClassificationInterpretation.from_learner(learner)
 interp.plot_confusion_matrix()
 plt.show()
-print('[INFO] roc auc = {:.4f} acc = {}'.format(roc_auc, acc))
+print('[INFO] roc auc = {:.5f} acc = {}'.format(roc_auc, acc))
 # print('acc = {}'.format(acc))

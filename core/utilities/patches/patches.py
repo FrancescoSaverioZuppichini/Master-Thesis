@@ -253,16 +253,17 @@ class HolesPatch(BumpsPatch):
 
 
 class RampPatch(Patch):
-    def __init__(self, shape, strenght=1, direction='up'):
+    def __init__(self, shape, strenght=1, direction='up', factors_func = lambda x: x):
         super().__init__(shape)
         self.strenght = strenght
         self.direction = direction
+        self.factors = factors_func(np.linspace(0, self.strenght, self.hm.shape[0]))
 
-    def make(self):
-        factors = np.linspace(0, self.strenght, self.hm.shape[0])
-        if self.direction == 'down': factors *= -1
 
-        self.hm = self.hm + factors
+    def make(self, factors_func = lambda x: x):
+        if self.direction == 'down': self.factors *= -1
+
+        self.hm = self.hm + self.factors
         return self.hm
 
 
