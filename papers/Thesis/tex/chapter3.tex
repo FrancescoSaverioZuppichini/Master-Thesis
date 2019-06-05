@@ -1,7 +1,7 @@
 \documentclass[../document.tex]{subfiles}
 \begin{document}
 \section{Implementation}
-In this section we reveal the details about the implementation. We will start from the employed software, then we will describe each step in the dataset generation and finishing by illustrate the utilized estimators.
+In this section we reveal the details about the implementation tools and choices. We will start from the employed software, then we will describe each step in the dataset generation and finishing by illustrate the utilized estimators.
 \subsection{Tools}
 We quickly list the most important tools and libraries adopted in this project:
 \begin{itemize}
@@ -271,9 +271,16 @@ The correct value of $\Delta t$ is crucial. We want a time window small enough t
 \subsubsection{Extract patches}
 Each patch must contain booth Krock's footprint, to include the situations where the obstacle is under the robot, and certain amount of ground region in front of it. Intuitively, we want to include in each patch the correct amount of future informations according to the selected time window. Thus, we should add the maximum possible ground that Krock could traverse. 
 
-To find out the correct value, we must compute the maximum advancement on a flat ground for the $\Delta t$ and use it to calculate the final size of the patch. We compute it by running some simulations of \emph{Krock} on flat ground and averaging the advancement. For our robot with a $\Delta t = 2$ the maximum displacement is $70cm$, this is the amount of ground we have to add in front of the robot. The following figure visualizes the patch extraction process. 
-\todo[inline]{figure that shows Krock somewhere with the patch bounding boxed}. 
+To find out the correct value, we must compute the maximum advancement on a flat ground for the $\Delta t$ and use it to calculate the final size of the patch. We compute it by running some simulations of \emph{Krock} on flat ground and averaging the advancement getting a value of $71$cm in our $\Delta t = 2$s.
 
+Each patch must include Krock's footprint and the maximum possible distance it can travel is a $\Delta t$. So, since Krock's pose was stored from IMU located in the juncture between the head and the legs, we have to crop from behind its length, $85$cm minus the offset between the IMU and the head, $14$cm. Then, we have to take $71$cm, the maximum advancement with a $\Delta t = 2$s plus the removed offset. The following figure visualizes the patch extraction process. 
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.66\textwidth}
+        \includegraphics[width=\textwidth]{../img/3/crop/crop.png}
+    \end{subfigure}
+\caption{Patch extraction process for $\Delta t = 2$s.}   
+\end{figure}
 Lastly, we create a final dataframe containing the map coordinates, the advancement, and the patches paths for each simulation and store them to disk as \emph{.csv} files. 
 
 The whole pipeline takes less than one hour to run the first time with 16 threads, and, once it is cached, less than fifteen minutes to extract all the patches. In total, we created almost half a milion images.
@@ -285,9 +292,7 @@ Once we extract the patches, we can always re-compute the advancement without re
 \caption{Postprocessing Pipeline flow graph, starting from the top.}
 \label{fig: postprocessing-pipeline}
 \end{figure}
-\todo[inline]{add arrows!}
-\todo[inline]{Here on in interpretability???}
-The following figure shows the mean advancement across all the maps used to train the model in a range of $\pm 0.70$cm, the maximum advancment the used time window, $\Delta t = 2$s.
+The following figure shows the mean advancement across all the maps used to train the model in a range of $\pm 0.71$cm, the maximum advancment the used time window, $\Delta t = 2$s.
 \begin{figure}[H]
     \centering
     \includegraphics[width=\linewidth]{../img/datasets/box_for_each_map.png}
