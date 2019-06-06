@@ -271,7 +271,7 @@ class HeatMapShowable():
     def heatmap(self, size=(16, 16)):
         hm = cv2.resize(self.hm, size)
         p = Patch.from_hm(hm)
-        p._plot2d_ax = partial(p._plot2d_ax, annot=True, fmt=".2f") # old school never dies ;)
+        p._plot2d_ax = partial(p._plot2d_ax, annot=True, fmt=".2f")
         return p
 
 
