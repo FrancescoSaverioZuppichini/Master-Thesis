@@ -185,12 +185,12 @@ def get_params():
             'tr': 0.2,
             'problem': 'new test 2',
             'name': 'microresnet#3-gate=7x7-n=1-se=True',
-            'more_than': None,
+            'more_than': 0,
             'less_than': None,
             'down_sampling': None,
             'time_window': 50 * 2,
             'patch_size': 0.7,
-            'fit_one_cycle': False
+            'fit_one_cycle': True
             }
 
 
