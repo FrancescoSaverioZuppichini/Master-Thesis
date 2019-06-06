@@ -1,4 +1,5 @@
-\documentclass{article}
+\documentclass[mscthesis]{usiinfthesis}
+% \documentclass[12pt]{article}
 \usepackage{subfiles}
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
@@ -10,17 +11,45 @@
 \usepackage{float}
 \usepackage{amsmath}
 \usepackage{amsthm}
+\let\circledS\undefined 
 \usepackage{amssymb}
 \usepackage{hyperref}
 \usepackage{multirow, multicol, makecell, booktabs}
 \usepackage{bm}
 \newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
 \newcommand{\cs}[1]{\renewcommand{\tabcolsep}{#1pt}}
+\usepackage{lipsum}
+\usepackage{listings}
 
 \graphicspath{{img/}{../img/}}
 
+\title{My Dissertation - A very long title\\ which runs over two
+  lines} %compulsory
+\specialization{Dependable Distributed Systems}%optional
+\subtitle{Subtitle: Reinventing the World} %optional 
+\author{Master Student} %compulsory
+\begin{committee}
+\advisor{Prof.}{Student's}{Advisor} %compulsory
+\coadvisor{Prof.}{Student's}{Co-Advisor}{} %optional
+\end{committee}
+\Day{Yesterday} %compulsory
+\Month{September} %compulsory
+\Year{2010} %compulsory, put only the year
+\place{Lugano} %compulsory
 \addbibresource{bibliography.bib}
+
 \begin{document}
+
+\maketitle %generates the titlepage, this is FIXED
+\frontmatter %generates the frontmatter, this is FIXED
+\lipsum
+
+\begin{acknowledgements}
+\lipsum 
+\end{acknowledgements}
+
+\tableofcontents 
+
 \subfile{./tex/abstract.tex}
 \subfile{./tex/introduction.tex}
 
@@ -29,6 +58,8 @@
 \subfile{./tex/chapter3.tex}
 \subfile{./tex/chapter4.tex}
 \subfile{./tex/chapter5.tex}
+\subfile{./tex/chapter5-quarry.tex}
+\subfile{./tex/chapter5-patches.tex}
 
 %\input{Section_1}
 %\input{Section_2}
