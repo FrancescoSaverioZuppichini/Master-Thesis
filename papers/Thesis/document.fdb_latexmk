@@ -1,11 +1,11 @@
 # Fdb version 3
-["biber document"] 1559851651 "document.bcf" "document.bbl" "document" 1559851888
+["biber document"] 1559851651 "document.bcf" "document.bbl" "document" 1559852144
   "bibliography.bib" 1559756087 6755 9878c886fa9ec259fedecefd7558bbff ""
   "document.bcf" 1559851887 93547 78cf660acf4d7c2aca77dac2e39e167a "pdflatex"
   (generated)
   "document.bbl"
   "document.blg"
-["pdflatex"] 1559851855 "/Users/vaevictis/Documents/Project/Master-Thesis/papers/Thesis/document.tex" "/Users/vaevictis/Documents/Project/Master-Thesis/papers/Thesis/document.pdf" "document" 1559851888
+["pdflatex"] 1559852144 "/Users/vaevictis/Documents/Project/Master-Thesis/papers/Thesis/document.tex" "/Users/vaevictis/Documents/Project/Master-Thesis/papers/Thesis/document.pdf" "document" 1559852144
   "./tex/abstract.tex" 1559850382 699 7d954e17ac9a2ad463cd2f0c69bb42e8 ""
   "./tex/chapter1.tex" 1559650616 6411 5f948ae96057def38dfcde8228108326 ""
   "./tex/chapter3.tex" 1559741822 42301 f37ea72df1ea327376f29a4e74d7c720 ""
@@ -15,8 +15,8 @@
   "./tex/chapter5.tex" 1559760780 1825 a0524ccc19d636dc2b2eef7c33c6c841 ""
   "./tex/introduction.tex" 1559119271 3845 80956c6e6ed4fd693ed5081dac3e9249 ""
   "/Users/vaevictis/Documents/Project/Master-Thesis/papers/Thesis/document.aux" 1559851887 33036 1f560e7e496789c1441a546abc35cf6e ""
-  "/Users/vaevictis/Documents/Project/Master-Thesis/papers/Thesis/document.tex" 1559851822 1774 75e6bf28f13d2e0dcfe2734354364883 ""
-  "/dev/null" 1559851888 0 d41d8cd98f00b204e9800998ecf8427e ""
+  "/Users/vaevictis/Documents/Project/Master-Thesis/papers/Thesis/document.tex" 1559852144 1766 9a6717e22ca1d158675fd282e7abaec0 ""
+  "/dev/null" 1559852140 0 d41d8cd98f00b204e9800998ecf8427e ""
   "/usr/local/texlive/2019/texmf-dist/fonts/enc/dvips/base/8r.enc" 1165713224 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/local/texlive/2019/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc" 1136849721 2971 def0b6c1f0b107b3b936def894055589 ""
   "/usr/local/texlive/2019/texmf-dist/fonts/enc/dvips/ly1/texnansi.enc" 1276641224 6938 5135be6a8802f13a7faf296d1959a1ab ""
@@ -308,7 +308,7 @@
   "document.bbl" 1559851653 33989 c8b660a1b167a00e7723e9fc71ff4657 "biber document"
   "document.out" 1559851887 1837 ce7a5dfd7b620e27347f841cb1f5e123 "pdflatex"
   "document.run.xml" 1559851887 2335 bdec27e39430c873c76c2d69f1c407a7 "pdflatex"
-  "document.tex" 1559851822 1774 75e6bf28f13d2e0dcfe2734354364883 ""
+  "document.tex" 1559852144 1766 9a6717e22ca1d158675fd282e7abaec0 ""
   "document.toc" 1559851887 6596 fe72a4f1c83b67a30acb20bfa1b462c4 "pdflatex"
   "img/../img/3/crop/crop.png" 1559741310 3673281 1532400aa62c09a78651cb2ce1dd7461 ""
   "img/../img/3/find_tr/100-bumps3.png" 1559650616 79866 1a1970314cf6f37d6bf83c98d3598e42 ""
@@ -499,12 +499,12 @@
   "tex/introduction.tex" 1559119271 3845 80956c6e6ed4fd693ed5081dac3e9249 ""
   "usiinfthesis.cls" 1559851410 15054 f5ea696ba3392d24331db7bb28ca1326 ""
   (generated)
+  "document.aux"
+  "document.bcf"
+  "document.log"
   "/Users/vaevictis/Documents/Project/Master-Thesis/papers/Thesis/document.pdf"
   "document.out"
-  "document.bcf"
-  "document.toc"
-  "/Users/vaevictis/Documents/Project/Master-Thesis/papers/Thesis/document.log"
-  "document.aux"
-  "document.log"
   "document.pdf"
+  "/Users/vaevictis/Documents/Project/Master-Thesis/papers/Thesis/document.log"
   "document.run.xml"
+  "document.toc"
