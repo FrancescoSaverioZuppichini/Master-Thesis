@@ -186,7 +186,7 @@ class CustomPatchAnswer(PatchAnswer):
         pred = self.idx2label[self.info['prediction']]
         title = pred
         if 'advancement' in self.info:
-            title += '\nAdvancement = {:3.1f}cm'.format(self.info['advancement'].values[25] * 100)
+            title += '\nAdvancement = {:3.1f}cm'.format(max(self.info['advancement'].values[25], self.info['advancement'].values[50]) * 100)
         return title
 
 

@@ -278,6 +278,15 @@ Each patch must include Krock's footprint and the maximum possible distance it c
     \centering
     \begin{subfigure}[b]{0.66\textwidth}
         \includegraphics[width=\textwidth]{../img/3/crop/crop.png}
+        \caption{Robot in the simulator.}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.45\textwidth}
+        \includegraphics[width=\textwidth]{../img/3/crop/test-1-2d.png}
+        \caption{Cropped patch in 2d.}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.45\textwidth}
+        \includegraphics[width=\textwidth]{../img/3/crop/test-1-3d.png}
+        \caption{Cropped patch in 3d.}
     \end{subfigure}
 \caption{Patch extraction process for $\Delta t = 2$s.}   
 \end{figure}
@@ -405,7 +414,7 @@ Ideally, the threshold should small enough to include as less as possible false 
 \caption{Krock tries to overcome an obstacle in the \emph{bumps3} map.}
 \end{figure}
 
-Due to its characteristic locomotion, Krock tries to first overcome the obstacle using the legs to move itself to the top and then it fell backs producing a spicky advancement where first it is positive and then negative. The following picture shows the advancemnet on this map with different time windows, $\Delta t$, the greater the smoother.
+Due to its characteristic locomotion, Krock tries to overcome the obstacle using the legs to move itself to the top but it fell backs producing a spicky advancement where first it is positive and then negative. The following picture shows the advancemnet on this map with different time windows, $\Delta t$, the greater the smoother.
 
 \begin{figure}[H]
     \centering
@@ -461,6 +470,7 @@ Following the recent work of He et al. \cite{he2015identity} we adopt \emph{pre-
 \subsubsection{Sqeeze and Excitation}
 Finally, we also used the \emph{Squeeze and Excitation} (SE) module \cite{hu2017squeeze}. It is a form of attention that weights the channel of each convolutional operation by learnable scaling factors. Formally, for a given transformation, e.g. Convolution, defined as $\bm{F}_{tr}  : \bm{X} \mapsto \bm{U}$, $\bm{X} \in mathbb{R}^{H' \times W' \times C'}$, $\bm{U} \in \mathbb{R}^{H \times W \times C}$, the SE module first squeeze the information by using average pooling, $\bm{F}_{sq}$, the it excitates them using learnable weights, $\bm{F}_{ex}$ and finally, adaptive recalibration is performed, $\bm{F}_{scale}$.
 The next figure visualises the SE module.
+
 \begin{figure}[H]
     \centering
     \includegraphics[width=\linewidth]{../img/implementation/estimator/se.png}
