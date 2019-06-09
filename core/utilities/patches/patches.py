@@ -7,9 +7,11 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 from functools import partialmethod, partial
+from tvtk.api import tvtk
 
 from collections.abc import Iterable
 import mayavi.mlab as mlab
+
 class Mayavi3dPlottable():
 
     def setup_scene(self, s):
@@ -21,8 +23,18 @@ class Mayavi3dPlottable():
         s.actor.property.color = (0.7, 0.7, 0.7)
         s.actor.property.ambient = 0.02
 
+    def add_texture(self, s, filename):
+        img = tvtk.JPEGReader(file_name=filename)
+        texture = tvtk.Texture(input_connection=img.output_port, interpolate=1)
+
+        s.actor.actor.mapper.scalar_visibility = False
+        s.actor.enable_texture = True
+        s.actor.tcoord_generator_mode = 'plane'
+        s.actor.actor.texture = texture
+
+        return s
     def plot3d_mayavi(self, pixelsize, save_path=None, size=(1000, 1000), azimuth=45, elevation=45, distance=25,
-                      mesh=False, colormap=None, color=(1.0, 1.0, 1.0), *args, **kwargs):
+                      mesh=False, colormap=None, color=(1.0, 1.0, 1.0), texture_path=None, *args, **kwargs):
         fig = mlab.figure(size=size)
         fig.scene.background = (1, 1, 1)
 
@@ -38,6 +50,8 @@ class Mayavi3dPlottable():
             s = mlab.surf(x, y, self.hm, color=(1.0, 1.0, 1.0))
 
         self.setup_scene(s)
+        print(s, texture_path)
+        if texture_path is not None: self.add_texture(s, texture_path)
 
         mlab.view(azimuth=azimuth, elevation=elevation, distance=distance)
 
@@ -146,9 +160,6 @@ class Patch(Mayavi3dPlottable):
 
     def save(self, out_path):
         cv2.imwrite(out_path, self.to_gray())
-
-    def add_texture(self, tex):
-        self.texture = Patch.from_hm(tex)
 
     def shift(self, px):
         self.hm = np.roll(self.hm, px)

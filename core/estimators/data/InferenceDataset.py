@@ -11,6 +11,7 @@ import numpy as np
 from torch.utils.data import Dataset
 from torchvision.transforms.functional import rotate
 from skimage.util.shape import view_as_windows
+from utilities.postprocessing.handlers.functional import read_image
 from PIL import Image
 
 class InferenceDataset(Dataset):
@@ -19,8 +20,7 @@ class InferenceDataset(Dataset):
     to test the model.
     """
     def __init__(self, hm_path, patch_size=88, step=1, transform=None, rotate=None, debug=False):
-        self.hm = cv2.imread(hm_path)
-        self.hm = cv2.cvtColor(self.hm, cv2.COLOR_BGR2GRAY)
+        self.hm = read_image(hm_path).astype(np.float32) / 255
         # self.temp = imutils.rotate(self.hm, rotate)
 
         self.images = view_as_windows(self.hm, (patch_size, patch_size), step)
@@ -48,9 +48,9 @@ class InferenceDataset(Dataset):
 
         if self.rotate is not None:
             img = np.array(Image.fromarray(img).rotate(self.rotate))
-
-        img = img.astype(np.float32)
-        img /= 255
+        #
+        # img = img.astype(np.float32)
+        # img /= 255
 
         if self.transform is not None: img = self.transform(img)
 
@@ -162,12 +162,13 @@ class InferenceDataset(Dataset):
         sns.heatmap(texture)
         plt.show()
 
-        path = '{}/{}-{}.png'.format(out_dir, name, self.rotate)
-
+        path = '{}/{}-{}.jpg'.format(out_dir, name, self.rotate)
+        texture = np.array(Image.fromarray(texture).rotate(0))
         texture = (texture * 255).astype(np.uint8)
         cv2.imwrite(path, texture)
 
         return path
+
 
 
 if __name__ == '__main__':
