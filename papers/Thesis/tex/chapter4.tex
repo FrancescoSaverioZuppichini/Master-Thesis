@@ -10,7 +10,7 @@ For the classification task, we select a threshold of $0.2$m on a time window, $
 
 While, for regression, we did not label the patch and directly regress on the advancement  minimising the Mean Square Error (MSE). 
 
-Initially, to train the models in booth cases we first use Standard Gradient Descent with momentum set to $0.95$ and weight decay to $1e-4$ with an initial learning rate of $1e-3$ as was originally proposed to train residual network \cite{he2015deep}. However, we later utilize Leslie Smith's 1cycle policy \cite{1cycle} that allows us to trian the network faster and with an higher accuracy.
+Initially, to train the models in both cases we first use Standard Gradient Descent with momentum set to $0.95$ and weight decay to $1e-4$ with an initial learning rate of $1e-3$ as was originally proposed to train residual network \cite{he2015deep}. However, we later utilize Leslie Smith's 1cycle policy \cite{1cycle} that allows us to trian the network faster and with an higher accuracy.
 \subsubsection{Experimental validation}
 We select as \emph{validation} ten percent of the training data. We remain to the reader that we store each run of \emph{Krock} as a \emph{.csv} file. So, to avoid any biases, we used completely different dataframes, meaning that train and validation sets are composed by non overlapping data from the simulations.
 \todo[inline]{add more maps if we add them to the test set}

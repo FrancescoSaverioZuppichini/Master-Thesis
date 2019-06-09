@@ -267,9 +267,9 @@ Before caching again the resulting dataframes into \emph{.csv} files, we convert
 
 To compute the robot's advancement in a time window $\Delta t$ we look for each stored pose ,$p_t$, in the future, $p_{t + \Delta t}$, and see how far it went. This is describe by the following equation: 
 \todo[inline]{ask omar}
-The correct value of $\Delta t$ is crucial. We want a time window small enough to avoid smoothing to much the advancement and making obstacle traversale, and big enough to include the full legs motion. We empirically set $\Delta t = 2$ since it allows Krock to move booth its legs and does not flat the advancement too much. 
+The correct value of $\Delta t$ is crucial. We want a time window small enough to avoid smoothing to much the advancement and making obstacle traversale, and big enough to include the full legs motion. We empirically set $\Delta t = 2$ since it allows Krock to move both its legs and does not flat the advancement too much. 
 \subsubsection{Extract patches}
-Each patch must contain booth Krock's footprint, to include the situations where the obstacle is under the robot, and certain amount of ground region in front of it. Intuitively, we want to include in each patch the correct amount of future informations according to the selected time window. Thus, we should add the maximum possible ground that Krock could traverse. 
+Each patch must contain both Krock's footprint, to include the situations where the obstacle is under the robot, and certain amount of ground region in front of it. Intuitively, we want to include in each patch the correct amount of future informations according to the selected time window. Thus, we should add the maximum possible ground that Krock could traverse. 
 
 To find out the correct value, we must compute the maximum advancement on a flat ground for the $\Delta t$ and use it to calculate the final size of the patch. We compute it by running some simulations of \emph{Krock} on flat ground and averaging the advancement getting a value of $71$cm in our $\Delta t = 2$s.
 
