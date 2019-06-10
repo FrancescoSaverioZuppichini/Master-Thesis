@@ -45,31 +45,32 @@ Open Source Computer Vision Library, \href{https://opencv.org/}{OpenCV}, is an o
 \href{https://course.fast.ai/}{FastAI} is library based on PyTorch that simplifies fast and accurate neural nets training using modern best practices. It provides a high-level API to train, evaluate and test deep learning models on any type of dataset. We used it to train, test, and evaluate our models.
 
 \subsubsection{imgaug}
-\href{https://imgaug.readthedocs.io/en/latest/}{Image augmentation} (imgaug) is a python library to perform image augmenting operations on images. It provides a variety of methodologies, such as affine transformations, perspective transformations, contrast changes and Gaussian noise, to build sophisticated pipelines. It supports images,  heatmaps, segmentation maps, masks, key points/landmarks, bounding boxes, polygons, and line strings. We used it to augment the heightmap, details are in \hyperref[sec: data-aug]{section \ref*{sec: data-aug}}
+\href{https://imgaug.readthedocs.io/en/latest/}{Image augmentation} (imgaug) is a python library to perform image augmenting operations on images. It provides a variety of methodologies, such as affine transformations, perspective transformations, contrast changes and Gaussian noise, to build sophisticated pipelines. It supports images,  heatmaps, segmentation maps, masks, key points/landmarks, bounding boxes, polygons, and line strings. We used it to augment the heightmap, details are in \hyperref[sec: data-aug]{section \ref{sec: data-aug}}
 
 \subsubsection{Blender}
 \href{https://www.blender.org/}{Blender} is the free and open source 3D creation suite. It supports the entirety of the 3D pipeline modeling, rigging, animation, simulation, rendering, compositing and motion tracking, even video editing and game creation. We used Blender to render some of the 3D terrain utilized to evaluate the trained model.
 
+\todo[inline]{I switched to mayavi}
 \subsection{Data Gathering}
-In this section we describe how we generate the synthetic maps, how we the robot intereacts with them and all the postprocessing needed to generate the final dataset.
+In this section we describe how we generate the synthetic maps, how we the robot interacts with them and all the postprocessing needed to create the final dataset.
 \subsubsection{Heightmap generation}
 To collect the data throught simulation we first need to generate meaningful terrain to be explored by the robot. Each map are stored as heightmap, a 2D array, an image, where each pixel's value represents the terrain height. The following figure shows an heightmap representing a real world \emph{Quarry} and the relative terrain.
 \begin{figure}[H]
     \centering
         \begin{subfigure}[b]{0.45\textwidth}
             \includegraphics[width=\textwidth]{../img/hm/querry-big-10.png}
-            \caption{\emph{Quarry} heightmap}
+            \caption{An heightmap representing a \emph{Quarry}.}
         \end{subfigure}
         \begin{subfigure}[b]{0.45\linewidth}
             \includegraphics[width=\textwidth]{../img/hm3d/querry-big-10.png}
-            \caption{\emph{Quarry} map}
+            \caption{3D rendered}
             \end{subfigure}    
-    \caption{A heightmap}
+    \caption{This image shows an heightmap and the 3D render of a Quarry.}
     \end{figure}
-We generated thirty maps of $513\times513$ pixel with a resolution of $0.02cm/pixel$ in order to represent a $10\times10m$ region. We created them by 2D simplex noise \cite{simplex}, a variant of Perlin noise \cite{perlin}, a widely used technique in the terrain generation litterature. We created five main categories of terrains: $bumps$, $rails$, $steps$, $slopes$/$ramps$ and $holes$. For some map we add three different rocky texture to create more complicated situations.
+We created thirty maps of $513\times513$ pixel with a resolution of $0.02cm/pixel$ in order to represent a $10\times10m$ terrain. To generate them with 2D simplex noise \cite{simplex}, a variant of Perlin noise \cite{perlin}, a widely used technique in the terrain generation litterature. We divide the maps into five main categories of terrains: $bumps$, $rails$, $steps$, $slopes$/$ramps$ and $holes$. For some map we add three different rocky texture to create more complicated situations, all the maps configuration are shown in table \ref{table: maps}.
 
 \paragraph{Bumps:} 
-We genered four different maps with increasing bumps using simplex noise with features size $\in[200,100,50,25 ]$. 
+We genered four different maps with increasing bumps' height using simplex noise with features size $\in[200,100,50,25 ]$. 
 \begin{figure}[H]
     \centering
         \begin{subfigure}[b]{0.32\textwidth}
@@ -172,18 +173,32 @@ To communicate with the simulator, Webots exposes a wide number of ROS services,
 
 We also implement one additional library called \href{https://github.com/FrancescoSaverioZuppichini/Master-Thesis/tree/master/core/simulation/agent}{\texttt{Agent}} to create reusable robot's interfaces independent from the simulator. The package supports callbacks that can be attached to each agent adding additional features. Finally, we used \emph{Gym} \cite{gym}, a toolkit to develop and evaluate reinforcement learning algorithms, to define our environment. Due to the library's popularity, the code can easily be shared with other researches or we may directly experiment with already made RL algorithm in the future without changing the underlying infrastructure.
 
+\subsubsection{Real world maps}
+To later evaluate the model's performance, we decide to use real world terrain. We gather several heightmaps produced by ground mapping flying drones from \href{https://www.sensefly.com/education/datasets/}{sensefly}'s dataset. The following images shows them. 
+\begin{figure}[H]
+    \begin{subfigure}[b]{0.45\textwidth}
+        \includegraphics[width=\textwidth]{../img/hm3d/querry-big-10.png}
+        \caption{Quarry}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.45\textwidth}
+        \includegraphics[width=\textwidth]{../img/hm3d/querry-big-10.png}
+        \caption{Quarry}
+    \end{subfigure}  
+\caption{Real world maps obtained from \href{https://www.sensefly.com/education/datasets/}{sensefly}'s dataset..}  
+\end{figure}
+
+Quarry is used as test set to evaluate the model performance.
 \subsubsection{Simulation}
 To collect \emph{Krock}'s interaction with the environment, we spawn the robot on the ground and let it move forward for $t$ seconds. We repeat this process $n$ times per each map.
-    Unfortunately, spawning the robot is not a trivial task. In certain maps, for instance, \emph{bars1}, a map with tons of walls, we must avoid spawning Krock on an obstacle otherwise the run will be ruined by \emph{Krock} getting stuck at the beginning introducing noise in the dataset. To solve the problem, we defined two spawn strategies, a random spawn strategy used in most of the maps without big obstacles such as \emph{slope\_rocks}, and a flat ground spawn strategy for the others. The random spawn just spawn the robot on random position and rotation. While, the flat ground strategy first selects suitable spawn positions by using a sliding window on the heightmap of size equal Krock's footprint and check if the mean pixel value is lower than a small threshold. If so, we store the center coordinates of the patch. Intuitively, if a patch is flat then its mean value will be close to zero.
-    
-Since there may be more flat spawing positions than simulations needed, we have to reduce the size of the candidate points. To maintaing the correct distribution on the map to avoid
-spawing the robot always in the same cloud of points, we used K-Means with $k$ clusters where $k$ is equal to the number of simulations we wish to run. By clustering, we guarantee to cover all region of the map avoiding adding bias. The following picture shows this strategy on \emph{bars1}. 
+    Unfortunately, spawning the robot is not a trivial task. In certain maps, for instance, \emph{bars1}, a map with tons of walls, we must avoid spawning Krock on an obstacle otherwise the run will be ruined by \emph{Krock} getting stuck at the beginning introducing noise in the dataset. To solve the problem, we defined two spawn strategies, a random spawn and a flat ground spawn strategy. The first one is used in most of the maps without big obstacles such as \emph{slope\_rocks}. This stragety just spawn the robot on random position and rotation. 
+    While, the flat ground strategy isfirst selects suitable spawn positions by using a sliding window on the heightmap of size equal Krock's footprint and check if the mean pixel value is lower than a small threshold. If so, we store the center coordinates of the patch as a candidate spawing point. Intuitively, if a patch is flat then its mean value will be close to zero.
+Since there may be more flat spawing positions than simulations needed, we have to reduce the size of the candidate points. To maintaing the correct distribution on the map to avoid spawing the robot always in the same cloud of points, we used K-Means with $k$ clusters where $k$ is equal to the number of simulations we wish to run. By clustering, we guarantee to cover all region of the map removing any bias. The following picture shows this strategy on \emph{bars1}. 
 \begin{figure}[H]
-    \begin{subfigure}[b]{0.5\textwidth}
+    \begin{subfigure}[b]{0.45\textwidth}
         \includegraphics[width=\textwidth]{../img/3/spawn/flat-spawn-10.png}
         \caption{Flat regions}
     \end{subfigure}
-    \begin{subfigure}[b]{0.5\textwidth}
+    \begin{subfigure}[b]{0.45\textwidth}
         \includegraphics[width=\textwidth]{../img/3/spawn/spawn-10.png}
         \caption{K-Means with $k=20$}
     \end{subfigure}  
@@ -249,13 +264,10 @@ The following table shows the maps configuration used in the simulator.
       &\emph{quarry} & 10 &random & - & 50 & 10 \\
       &&& Total: 1600 \\ 
       \bottomrule   
-  
     \end{tabular}
+    \label{table: maps}
     \caption{Maps configuration used in the simulator.}
-  
   \end{table}
-  
-
 
 \subsection{Postprocessing}
 After the run Krock on each map, we need to extract the patches for each stored pose $p_i$ and compute the advancement for a given time window, $\Delta t$.
