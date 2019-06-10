@@ -1,7 +1,7 @@
 \documentclass[../document.tex]{subfiles}
 \begin{document}
 \section{Results}
-In the section we show and evaluate the models results. We will start by presenting to the reader the networks score on each metric, then we will use the best models to predict the traversability of real world terrain. Finally, we will use handcrafted patches, for example a wall of a certain height in a specific position, to test the robustness of the network by trying to highlighting its behaviour.
+In the section we show and evaluate the model's results. We will start by presenting to the reader the networks score on each metric, then we will use the best models to predict the traversability of real world terrain. Finally, we will use handcrafted patches, for example a wall of a certain height in a specific position, to test the robustness of the network by trying to highlighting its behaviour.
 \subsection{Experiment Setup}
 \subsubsection{Hardware}
 We run all the experiment on a Ubuntu 18.10  work station equipped with a Ryzen 2700x, a powerful CPU with 8 cores and 16 threads, and a NVIDIA 1080 GPU with 8GB of dedicated RAM.
@@ -85,7 +85,6 @@ The following table shows in deep the score of the best network for each dataset
 \caption{Final results on different datasets.}
 \end{table*}
 \todo[inline]{I have actually never talk about surf rocks}
-
 Moreover, we would like to also show the different steps we made to reach this result. The following table shows the metric's score without any data-augmentation.
 \todo[inline]{add result with and without data agu}
 Adding dropout increases the results.
@@ -93,17 +92,29 @@ Adding dropout increases the results.
 With dropout plus coarse dropout.
 \todo[inline]{table with results}
 \subsection{Qualitative results}
-\todo[inline]{\textbf{THIS PLOT IS OLD!}}
-We qualitative evaluate the models in real world scenarios by computing the traversability probability for each map with different rotation. Specifically, we used a sliding window to extract the patches from the heightmaps and colour by blue the relative region with the corresponding traversability probability. A brighter colour yields an higher probability. For each map we show the traversability from bottom to top, top to bottom, left to right and right to left since those are the most human understandable.
-We will start by showing the traversability probability on the \emph{Quarry} assuming \emph{Krock} is walking from bottom to top.
+We qualitative evaluate the model predictions by showing the traversability probability on different maps in 3D as a texture. Specifically, we used a sliding window to extract the patches from the heightmaps and create a texture based on the model's output for the traversable class. We then apply this texture on the image and colour using a colormap \todo{probably this will change.} For each map we show the traversability from bottom to top, top to bottom, left to right and right to left since those are the most human understandable.
+\subsubsection{Quarry}
 \todo[inline]{add quarry textures from bottom to top}
-Thanks its special locomotion, \emph{Krock} can traverse the big slopes in the top part of them map while obliously it is stock by big bumps near the bottom as show in the next figures.
+
+The first map we evaluate is the test set, Quarry. This maps has some interesting features, such as the three bis slopes and the rocky ground on top. We expect the trail on the slopes to be traversable at almost any rotation, expecially from left to right and viceversa. While, the top part should be not traversable in any case. The following figure shows the traversability probability on the map.
 \begin{figure}[H]
 \centering
-\includegraphics[width=\linewidth]{../img/4/traversability/quarry/querry-big-10-270.png}
-\end{figure}
-\todo[inline]{add figure of krock traversing the big slopes and getting stop near the bottom}
-To convince the reader that those slopes can be traverse, we run \emph{Krock} on them directly from the simulator.
-\todo[inline]{image of one extracted patch from quarry and one run on the simulator} 
+\begin{subfigure}[b]{0.45\textwidth}
+  \includegraphics[width=\linewidth]{../img/4/traversability/quarry/270.png}  
+\end{subfigure}
+\begin{subfigure}[b]{0.45\textwidth}
+    \includegraphics[width=\linewidth]{../img/4/traversability/quarry/0.png}  
+\end{subfigure}
+\begin{subfigure}[b]{0.45\textwidth}
+  \includegraphics[width=\linewidth]{../img/4/traversability/quarry/90.png}  
+\end{subfigure}
+\begin{subfigure}[b]{0.45\textwidth}
+    \includegraphics[width=\linewidth]{../img/4/traversability/quarry/180.png}  
+\end{subfigure}
 
+\caption{Traversability probability on the Quarry map for different Krock's rotation. The values are obstained by sliding a window on the map to create the patches to get the predictions from the model.
+\end{figure}
+\todo[inline]{need to add arrows}
+We can start our discussion by comment the first image, Krock moving from bottom to top. Correctly, all the flat regions were label with high confidence as traversable, expecially the lower part of the map. There are two interesting regions, the bumps on the bottom right corner and the slopes. The following images higlights this two details
+\todo[inline]{add images}
 \end{document}
