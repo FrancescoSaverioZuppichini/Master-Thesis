@@ -33,6 +33,7 @@ class Mayavi3dPlottable():
         s.actor.actor.texture = texture
 
         return s
+
     def plot3d_mayavi(self, pixelsize, save_path=None, size=(1000, 1000), azimuth=45, elevation=45, distance=25,
                       mesh=False, colormap=None, color=(1.0, 1.0, 1.0), texture_path=None, *args, **kwargs):
         fig = mlab.figure(size=size)
@@ -60,6 +61,7 @@ class Mayavi3dPlottable():
 
         mlab.close(fig)
         return fig
+
 
 class Patch(Mayavi3dPlottable):
     """
@@ -286,3 +288,55 @@ class HeatMapShowable():
         return p
 
 
+class TraversabilityPatch(Patch):
+    def plot3d_traversability(self, pixelsize, mask, save_path=None, size=(1000, 1000), azimuth=45, elevation=45, distance=25, *args, **kwargs):
+        """
+        Code taken from Omar/Giusti
+        :param pixelsize:
+        :param mask:
+        :param save_path:
+        :param size:
+        :param azimuth:
+        :param elevation:
+        :param distance:
+        :param mesh:
+        :param colormap:
+        :param color:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        fig = mlab.figure(size=size)
+        fig.scene.background = (1, 1, 1)
+
+        y, x = np.meshgrid(np.arange(self.hm.shape[0]) * pixelsize, np.arange(self.hm.shape[1]) * pixelsize)
+
+        s = mlab.mesh(x, y, self.hm, scalars=mask)
+
+        colormap = np.tile(np.array([180, 180, 180, 255]), [256, 1])  # all gray
+        colormap= np.linspace(180, 220, 256)
+        # colormap[:, 1] = np.linspace(180, 220, 256)  # scale green channel
+
+        s.module_manager.scalar_lut_manager.lut.table = colormap
+        s.module_manager.scalar_lut_manager.lut.range = np.array([0.0, 1.0])
+
+        self.setup_scene(s)
+
+        # square = np.array([[0, 0], [1, 0], [1, 1], [0, 1]])[[0, 1, 2, 3, 0], :]
+        # square = np.hstack((square * np.array([[np.max(x), np.max(y)]]), np.zeros((5, 1))))
+        # base = mlab.plot3d(square[:, 0], square[:, 1], square[:, 2], color=(0, 0, 0), line_width=2)
+        # for i in range(4):
+        #     p = np.mean(square[[i, i + 1], :], axis=0)
+        #     d = np.linalg.norm(square[i + 1, :] - square[i + 0, :])
+        #     mlab.text3d(p[0], p[1], p[2], "{:.1f}m".format(d), scale=0.4, color=(0, 0, 0))
+        # height = mlab.plot3d(np.array([0.0, 0.0]), np.array([0.0, 0.0]), np.array([0.0, np.nanmax(self.hm)]),
+        #                      color=(0, 0, 0), line_width=2)
+        # mlab.text3d(0.0, 0.0, np.nanmax(terrain) / 2, "{:.1f}m".format(np.nanmax(terrain)), scale=0.4, color=(0, 0, 0))
+        mlab.view(azimuth=azimuth, elevation=elevation, distance=distance)
+
+        if save_path:
+            mlab.savefig(save_path)
+
+        mlab.close(fig)
+
+        return fig

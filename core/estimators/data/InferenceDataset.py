@@ -161,8 +161,7 @@ class InferenceDataset(Dataset):
         fig = plt.figure()
         sns.heatmap(texture)
         plt.show()
-
-        path = '{}/{}-{}.jpg'.format(out_dir, name, self.rotate)
+        path = '{}/{}-{}.png'.format(out_dir, name, self.rotate)
         texture = np.array(Image.fromarray(texture).rotate(0))
         texture = (texture * 255).astype(np.uint8)
         cv2.imwrite(path, texture)
