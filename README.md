@@ -2,6 +2,9 @@
 # Masther Thesis
 Francesco Saverio Zuppichini
 
+*With this project, we estimate ground traversability for a legged crocodile-like robot. We generate different synthetic grounds and let the robot walk on them in a simulated environment to collect its interaction with the terrain. Then, we train a deep convolutional neural network using the data collected through simulation to predict wether a given ground patch can be traverse or not. Later, we highlight the strength and weakness of our method
+    by using interpretability techniques to visualise the network's behaviour in interesting scenarios.*
+
 [WARNING] In progress
 ![image](https://raw.githubusercontent.com/FrancescoSaverioZuppichini/Master-Thesis/master/resources/images/querry_krock_traversability.png)
 *Map traversability from bottom to top (up-hill) for the Krock robot. The brighter the blue the more traversable*
