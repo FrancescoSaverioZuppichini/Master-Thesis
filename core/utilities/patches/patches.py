@@ -310,15 +310,7 @@ class TraversabilityPatch(Patch):
         fig.scene.background = (1, 1, 1)
 
         y, x = np.meshgrid(np.arange(self.hm.shape[0]) * pixelsize, np.arange(self.hm.shape[1]) * pixelsize)
-
-        s = mlab.mesh(x, y, self.hm, scalars=mask)
-
-        colormap = np.tile(np.array([180, 180, 180, 255]), [256, 1])  # all gray
-        colormap= np.linspace(180, 220, 256)
-        # colormap[:, 1] = np.linspace(180, 220, 256)  # scale green channel
-
-        s.module_manager.scalar_lut_manager.lut.table = colormap
-        s.module_manager.scalar_lut_manager.lut.range = np.array([0.0, 1.0])
+        s = mlab.mesh(x, y, self.hm, scalars=mask, colormap='RdYlGn')
 
         self.setup_scene(s)
 
@@ -333,6 +325,7 @@ class TraversabilityPatch(Patch):
         #                      color=(0, 0, 0), line_width=2)
         # mlab.text3d(0.0, 0.0, np.nanmax(terrain) / 2, "{:.1f}m".format(np.nanmax(terrain)), scale=0.4, color=(0, 0, 0))
         mlab.view(azimuth=azimuth, elevation=elevation, distance=distance)
+        mlab.move(up=-3)
 
         if save_path:
             mlab.savefig(save_path)

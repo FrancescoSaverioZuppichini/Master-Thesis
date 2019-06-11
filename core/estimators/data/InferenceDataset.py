@@ -144,7 +144,6 @@ class InferenceDataset(Dataset):
                     # TODO understand why they are swapped
                     if is_traversable:
                         texture[y:y + self.patch_size, x: x + self.patch_size] += out[1]
-
                     i += 1
                     pbar.update(1)
                 except IndexError:
@@ -152,7 +151,7 @@ class InferenceDataset(Dataset):
             j += 1
 
         pbar.close()
-
+        # texture /= counter
         texture = cv2.normalize(texture, None, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
 
 
