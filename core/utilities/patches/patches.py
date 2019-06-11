@@ -170,10 +170,10 @@ class Patch(Mayavi3dPlottable):
         return (self.hm * 255).astype(np.uint8)
 
     @classmethod
-    def from_path(cls, path):
+    def from_path(cls, path, *args, **kwargs):
         hm = cv2.imread(path)
         hm = cv2.cvtColor(hm, cv2.COLOR_BGR2GRAY)
-        p = cls(hm.shape)
+        p = cls(hm.shape, *args, **kwargs)
         p.hm = hm / 255
         return p
 

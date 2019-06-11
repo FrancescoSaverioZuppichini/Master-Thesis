@@ -19,8 +19,8 @@ class InferenceDataset(Dataset):
     This class creates a dataset from an height map that can be used during inference
     to test the model.
     """
-    def __init__(self, hm_path, patch_size=88, step=1, transform=None, rotate=None, debug=False):
-        self.hm = read_image(hm_path).astype(np.float32) / 255
+    def __init__(self, hm, patch_size=88, step=1, transform=None, rotate=None, debug=False):
+        self.hm = hm
         # self.temp = imutils.rotate(self.hm, rotate)
 
         self.images = view_as_windows(self.hm, (patch_size, patch_size), step)
@@ -115,7 +115,7 @@ class InferenceDataset(Dataset):
 
         plt.show()
 
-    def make_texture(self, outputs, predictions, name, out_dir):
+    def make_texture(self, outputs, predictions, out_dir):
         texture = np.zeros(self.hm.shape)
 
         fig = plt.figure()
@@ -161,7 +161,7 @@ class InferenceDataset(Dataset):
         fig = plt.figure()
         sns.heatmap(texture)
         plt.show()
-        path = '{}/{}-{}.png'.format(out_dir, name, self.rotate)
+        path = '{}/texture-{}.png'.format(out_dir, self.rotate)
         texture = np.array(Image.fromarray(texture).rotate(0))
         texture = (texture * 255).astype(np.uint8)
         cv2.imwrite(path, texture)
