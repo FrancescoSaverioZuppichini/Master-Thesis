@@ -95,28 +95,37 @@ With dropout plus coarse dropout.
 \subsection{Qualitative results}
 We qualitative evaluate the model predictions by showing the traversability probability on different maps in 3D as a texture. Specifically, we used a sliding window to extract the patches from the heightmaps and create a texture based on the model's output for the traversable class. We then apply this texture on the image and colour using a colormap. For each map we show the traversability from bottom to top, top to bottom, left to right and right to left since those are the most human understandable.
 \subsubsection{Quarry}
-% \todo[inline]{add quarry textures from bottom to top}
-
-The first map we evaluate is Quarry. This maps has some interesting features, such as the three bis slopes and the rocky ground on top. We expect the trail on the slopes to be traversable at almost any rotation, expecially from left to right and viceversa. While, the top part should be not traversable in any case. The following figure shows the traversability probability on the map.
+The first map we evaluate is Quarry, this map is $32\times 32$m long and has a maximum height of $10$m. We can use some of the terrain interesting features, such as are three bis slopes and the rocky ground on top, to evaluate the model. For instance, w expect the trail on the slopes to be traversable at almost any rotation, expecially from left to right and viceversa. While, the top part should be hard to traverse in almost any case. The following figure shows the traversability probability directly on the map. 
+\todo[inline]{some where place the colormap bar}
 \begin{figure}[H]
 \centering
 \begin{subfigure}[b]{0.45\textwidth}
-  \includegraphics[width=\linewidth]{../img/4/traversability/quarry/-270.png}  
+  \includegraphics[width=\linewidth]{../img/4/traversability/quarry/-270.png} 
+  \caption{Robot moving from bottom to top} 
+  \label{fig: quarry-b2t}
 \end{subfigure}
 \begin{subfigure}[b]{0.45\textwidth}
-    \includegraphics[width=\linewidth]{../img/4/traversability/quarry/-0.png}  
+    \includegraphics[width=\linewidth]{../img/4/traversability/quarry/-90.png}
+    \caption{Robot moving from top to bottom} 
+    \label{fig: quarry-t2b}
 \end{subfigure}
 \begin{subfigure}[b]{0.45\textwidth}
-  \includegraphics[width=\linewidth]{../img/4/traversability/quarry/-90.png}  
+  \includegraphics[width=\linewidth]{../img/4/traversability/quarry/-0.png}
+  \caption{Robot moving from left to right}   
+  \label{fig: quarry-l2r}
 \end{subfigure}
 \begin{subfigure}[b]{0.45\textwidth}
     \includegraphics[width=\linewidth]{../img/4/traversability/quarry/-180.png}  
+    \caption{Robot moving from right to left} 
+    \label{fig: quarry-r2l}
 \end{subfigure}
-
-\caption{Traversability probability on the Quarry map for different Krock's rotation. The values are obstained by sliding a window on the map to create the patches to get the predictions from the model.}
+\caption{Traversability probability on the Quarry map for different Krock's rotation. The values are obtained by sliding a window on the map to create the patches to get the predictions from the model.}
 \end{figure}
-\todo[inline]{need to add arrows}
-We can start our discussion by commenting the first image, Krock moving from bottom to top. Correctly, all the flat regions were label with high confidence as traversable, expecially the lower part of the map. There are two interesting regions, the bumps on the bottom right corner and the slopes. The following images higlights this two details
+ Correctly, the lower part of the map, composed by flat regions, was label with high confidence as traversable in all rotations. On the other hand, the traversability of the  slopes and the bumps on the top region depends on the robot orientation.
+ 
+ One oblious example are the slopes on then zig-zag trail. When the robot is moving up-hill, figure \ref{fig: quarry-b2t}, the propability to traverse those steep patches is low. But, if we travel down hill, figure \ref{fig: quarry-t2b}, then the slopes are traversable. This is also true, when the robot is moving from left to right and right to left, figure \ref{fig: quarry-l2r} and \ref{fig: quarry-r2l} is able to travel the slopes since the inclination is not too big to make the robot fall. 
+ 
+ There are two interesting regions, the bumps on the bottom right corner and the slopes. The following images higlights this two details
 \todo[inline]{add images}
 The slopes traversability is depends on the orientation. When the robot is moving up-hill, the propability is low while when it is going down those patches are completely traversable. Also, we the robot is moving from left to right and right to left it is able to traverse the slopes since the inclination is not too big to make the robot fall. 
 
