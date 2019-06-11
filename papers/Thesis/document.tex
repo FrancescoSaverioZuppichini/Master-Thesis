@@ -19,6 +19,15 @@
 \newcommand{\cs}[1]{\renewcommand{\tabcolsep}{#1pt}}
 \usepackage{lipsum}
 \usepackage{listings}
+\usepackage{alphalph}
+\renewcommand*{\thesubfigure}{%
+\alphalph{\value{subfigure}}%
+}%
+
+\renewcommand{\thesection}{\alphalph{\value{section}}}
+\renewcommand{\thesubsubsection}{\alphalph{\value{section}}}
+
+% \renewcommand*{\thesection}{(\value{subfigure})}
 
 \graphicspath{{img/}{../img/}}
 
@@ -39,8 +48,7 @@
 \begin{document}
 
 \maketitle %generates the titlepage, this is FIXED
-
-\tableofcontents 
+% \tableofcontents 
 
 \subfile{./tex/abstract.tex}
 \subfile{./tex/introduction.tex}
@@ -48,11 +56,11 @@
 \subfile{./tex/chapter1.tex}
 
 % % \subfile{./tex/chapter2.tex}
-% \subfile{./tex/chapter3.tex}
-% \subfile{./tex/chapter4.tex}
-% \subfile{./tex/chapter5.tex}
-% \subfile{./tex/chapter5-quarry.tex}
-% \subfile{./tex/chapter5-patches.tex}
+\subfile{./tex/chapter3.tex}
+\subfile{./tex/chapter4.tex}
+\subfile{./tex/chapter5.tex}
+\subfile{./tex/chapter5-quarry.tex}
+\subfile{./tex/chapter5-patches.tex}
 
 % %\input{Section_1}
 % %\input{Section_2}
