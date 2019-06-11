@@ -93,7 +93,7 @@ Adding dropout increases the results.
 With dropout plus coarse dropout.
 \todo[inline]{table with results}
 \subsection{Qualitative results}
-We qualitative evaluate the model predictions by showing the traversability probability on different maps in 3D as a texture. Specifically, we used a sliding window to extract the patches from the heightmaps and create a texture based on the model's output for the traversable class. We then apply this texture on the image and colour using a colormap. For each map we show the traversability from bottom to top, top to bottom, left to right and right to left since those are the most human understandable.
+We qualitative evaluate the model predictions by showing the traversability probability on different maps in 3D as a texture. Specifically, we used a sliding window to extract the patches from the heightmaps and create a texture based on the model's output for the traversable class. Then, we apply this texture on the image and colour using a colormap. For each map we show the traversability from bottom to top, top to bottom, left to right and right to left since those are the most human understandable.
 \subsubsection{Quarry}
 The first map we evaluate is Quarry, this map is $32\times 32$m long and has a maximum height of $10$m. We can use some of the terrain interesting features, such as are three bis slopes and the rocky ground on top, to evaluate the model. For instance, w expect the trail on the slopes to be traversable at almost any rotation, expecially from left to right and viceversa. While, the top part should be hard to traverse in almost any case. The following figure shows the traversability probability directly on the map. 
 \todo[inline]{some where place the colormap bar}
@@ -119,17 +119,17 @@ The first map we evaluate is Quarry, this map is $32\times 32$m long and has a m
     \caption{Robot moving from right to left} 
     \label{fig: quarry-r2l}
 \end{subfigure}
-\caption{Traversability probability on the Quarry map for different Krock's rotation. The values are obtained by sliding a window on the map to create the patches to get the predictions from the model.}
+\caption{Traversability probability on the Quarry map, $32\times 32$m, for different Krock's rotation. The values are obtained by sliding a window on the map to create the patches and then predict the traversability for each one of them.}
 \end{figure}
  Correctly, the lower part of the map, composed by flat regions, was label with high confidence as traversable in all rotations. On the other hand, the traversability of the  slopes and the bumps on the top region depends on the robot orientation.
  
  One oblious example are the slopes on then zig-zag trail. When the robot is moving up-hill, figure \ref{fig: quarry-b2t}, the propability to traverse those steep patches is low. But, if we travel down hill, figure \ref{fig: quarry-t2b}, then the slopes are traversable. This is also true, when the robot is moving from left to right and right to left, figure \ref{fig: quarry-l2r} and \ref{fig: quarry-r2l} is able to travel the slopes since the inclination is not too big to make the robot fall. 
  
- There are two interesting regions, the bumps on the bottom right corner and the slopes. The following images higlights this two details
-\todo[inline]{add images}
-The slopes traversability is depends on the orientation. When the robot is moving up-hill, the propability is low while when it is going down those patches are completely traversable. Also, we the robot is moving from left to right and right to left it is able to traverse the slopes since the inclination is not too big to make the robot fall. 
-
+\subsubsection{Bars}
+Bars is a map composed by different heights wall, thus we expect similar probabilities with different orientation.
 For completeness, more images follow with their traversability probability.
 \todo[inline]{add images of bars, arcs rocks}
-
+\subsubsection{Sullen}
+The following map is a small village downloaded from sensefly online \href{https://www.sensefly.com/education/datasets/?dataset=1420}{datasets hub}. Since the map is huge, we crop a 
+\todo[inline]{TODO}
 \end{document}
