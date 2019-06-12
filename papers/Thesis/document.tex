@@ -49,7 +49,9 @@
 \begin{document}
 
 % \maketitle %generates the titlepage, this is FIXED
-% \tableofcontents 
+\tableofcontents 
+% \listoffigures
+% \listoftables
 
 % \input{./tex/abstract.tex}
 % \input{./tex/introduction.tex}
@@ -59,12 +61,19 @@
 % \input{./tex/chapter5.tex}
 
 \subfile{./tex/abstract.tex}
+\clearpage
 \subfile{./tex/introduction.tex}
+\clearpage
 \subfile{./tex/chapter1.tex}
+\clearpage
 \subfile{./tex/chapter3.tex}
+\clearpage
 \subfile{./tex/chapter4.tex}
+\clearpage
 \subfile{./tex/chapter5.tex}
-
+\clearpage
+\subfile{./tex/conclusion.tex}
+\clearpage
 
 \printbibliography
 

@@ -1,6 +1,6 @@
-\subsection{Robustness}
+\section{Robustness}
 To test the model's robustness we createed custom patches with different features, walls/bumps/ramps, and test the model prediction against the real robot advancement obtained from the simulator. According to the previous experiments, we used a threshold of $20$cm and a time window of two seconds. 
-\subsubsection{Wall in front of Krock}
+\subsection{Untraversable wall ahead}
 The most trivial test is to place a not traversable wall in front of \emph{Krock} at an increasing distance from the its head. We will expect to reach a point where the model predict traversable even if the wall itself is too tall. Why? Because the robot will be able to travel more than the threshold before being stopped by the obstacle.
 
 We created fifty-five different patches by first placing the wall exactly in front of the robot and then move it by $1$cm at the time towards the end. It follows some of the input patches ordered by distance from the robot. We remind to the reader that Krock traverse the patch from left to
@@ -99,7 +99,7 @@ Furthermore, we can increase the wall size of the first traversable patch, $(b)$
 \todo[inline]{remove title, second colormap is wrong}
 Correctly, the model classifies the patches as traversable and was not confused by the enourmous height of the wall.
 
-\subsubsection{Increasing height walls}
+\subsection{Increasing height walls ahead}
 We can also evaluate the model's robustness by placing different wall  of increasing heights in front of the robot to check whether the prediction matches the real data. We run forty patches in the simulator from a wall's height of $1$cm to $20$cm. The following figure shows some of the inputs.
 
 \begin{figure}[H]
@@ -172,7 +172,7 @@ We can compare the model's prediction with the advancement computed in the simul
 \end{figure}
 In the first case, the simulator outputs and advancement of $39.5$cm meaning that Krock was able to overcome the obstacle, while it fails in the second case. Correctly, the predictions match the real data.
 
-\subsubsection{Increasing height and distance walls}
+\subsection{Increasing height and distance walls ahead.}
 We can combine the previous experiments and test the model prediction against the ground truth for each height/distance combination. To reduce the number of samples and improve readability, we limit ourself to consider only patches with a wall tall between $5$cm and $20$cm, we know from previous sections patches with a value smaller and bigger obstacle are traversable and not traversable respectively. Similar, we set the wall's distance from Krock's head between $1$cm to $30$cm for the same reasons. The following image shows the traversability probability for each patch.
 \begin{figure}[H]
     \centering
@@ -185,7 +185,7 @@ We can combine the previous experiments and test the model prediction against th
 
 \todo[inline]{missing ground truth heatmap}
 \todo[inline]{FINISH}
-% \subsubsection{Wall under Krock}
+% \subsection{Wall under Krock}
 % By placing a wall taller than the Krock's distance from the ground the patch won't be traversable anymore since the robot will be lifted up or the back leg wil be stocked. So, as we did in the previous section we created forty patches with a wall from $1$cm to $20$cm in front of the rear legs.
 
 % \begin{figure}[H]
@@ -230,7 +230,7 @@ We can combine the previous experiments and test the model prediction against th
 %     \caption{Model prediction from the wall patches}
 % \end{table}
     
-\subsubsection{Tunnel}
+\subsection{Tunnel}
 \todo[inline]{do it}
 
 \begin{figure}[H]
@@ -262,7 +262,7 @@ We can combine the previous experiments and test the model prediction against th
     \caption{Some of the tested patches with tunnel at different distances.}
     \end{figure}
 
-\subsubsection{Ramps}
+\subsection{Ramps}
 \todo[inline]{explain we had to square the linear ramps to create a small flat region}
 We generate twenty ramps with a maximum height from $0.25$m to $4$m. Below we plot the traversability probabilities against the maximum height of each ramp.
 
@@ -342,5 +342,5 @@ Krock is able to traverse up to $1m$ height ramps, this is confirmed using the s
 We can add rocks to those patches to give Krock the ability to climb them better. 
 \todo[inline]{add rocks}
 
-\subsubsection{Holes}
+\subsection{Holes}
 \todo[inline]{do it}

@@ -1,8 +1,8 @@
 \documentclass[../document.tex]{subfiles}
 \begin{document}
-\section{Model}
+\chapter{Model}
 This section gives a high-level overview of the steps in our approach. We will first describe the data gathering,  then the post-processing pipeline used to generate the dataset. After, we will introduce the model used to fit the data and then show the results with different test environments.
-\subsection{Robot: Krock}
+\section{Robot: Krock}
 Our task was to apply the approach proposed in \cite{omar@traversability} with a legged robot developed at EPFL named 
 \emph{Krock}. Figure \ref{fig:krock} shows the robot in the simulated environment.
 \begin{figure}[H]
@@ -53,7 +53,7 @@ The robot is $85cm$ long and weights around $1.4kg$. The next figure \ref{fig:kr
 \ref{fig: krock-gait}
 \caption{\emph{Krock} differents gait configuration.}	
 \end{figure}
-\subsection{Simulation}
+\section{Simulation}
 Our approach relies on simulations to collect the data needed to train the estimator. We used Webots \cite{webots}, a professional mobile robot simulator, as the backbone for our framework. 
 
 We generate fifteen synthetic $10x10$ meters long heightmaps with different features, such as walls, bumps and slopes using the same techniques described in \cite{omar2018traversability}. A heightmap is a gray image, formally a 2D array, where each element, pixel, represents a height value. Since each image has a range from $[0,255]$, we also need to scale them when needed. For this reason, we associated a height scaling value for each height map that is used to increase or decrease the steepness. The next figure shows some of the maps used. 
@@ -135,7 +135,7 @@ The second issue was more challenging. If the robot spawns on an obstacle then i
 \caption{\emph{Krock}'s spawns on the \emph{bars1} map.}
 \end{figure}
 We run a total of \todo{add number of simulations} storing the results using ROS's \emph{.bag} files for a total of \todo{add size of all bags.}.
-\subsection{Postprocessing}
+\section{Postprocessing}
 %In order to create the training dataset, we need to post process the data stored during the simulation. To train our classifier we need to first compute the advancement for each pose at each time for a specific time window, $pose_{it}$. Then, we can use it to crop a patch from the heightmap that was used in the simulation of the correct size. Such patch must include the whole \emph{Krock} footprint and the maximum possible advancement in a given time window. 
 %By keeping this final goal in mind, we quickly describe each step taken to reach it. Figure \ref{fig: pipeline} shows each step applied in the pipeline. 
 %\begin{figure}[H]
@@ -159,7 +159,7 @@ Clearly, assuming \emph{Krock} is able to traverse $33$cm of flat ground per sec
 
 \todo[inline]{add figure with the patch computation}
 
-\subsection{Estimator}
+\section{Estimator}
 To classify the patches we need a class associated to each one of them, thus we must label each patch as \emph{traversable} or \emph{not traversable}. So, we selected a threshold, $tr$, and labeled each patch by $patch_{advancement} > tr$. 
 In other words, if \emph{Krock} was able to advance in a patch more than the threshold, then that patch is label as \emph{traversable} and vice-versa. The pair of patches and labels represent the final dataset.
 

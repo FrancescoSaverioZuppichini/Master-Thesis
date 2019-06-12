@@ -388,7 +388,7 @@ date of the approved research program.\\[18mm]
     \renewcommand{\headrulewidth}{0pt}}
     \pagestyle{fancy}
     \renewcommand{\chaptermark}[1]{\markboth{\ ##1}{}}
-    \renewcommand{\sectionmark}[1]{\markright{\thesection\ ##1}}
+    \renewcommand{\chaptermark}[1]{\markright{\thesection\ ##1}}
     \ifthenelse{\boolean{@printversion}}{%
       \fancyhead{}
       \fancyhead[LE, RO]{\sf \thepage}
