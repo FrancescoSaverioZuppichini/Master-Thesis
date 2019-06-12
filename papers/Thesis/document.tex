@@ -10,7 +10,8 @@
 \usepackage{todonotes}
 \usepackage{float}
 \usepackage{alphalph,etoolbox}
-\let\circledS\undefined 
+% \let\circledS\undefined 
+\usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{hyperref}
 \usepackage{multirow, multicol, makecell, booktabs}
@@ -20,20 +21,20 @@
 \usepackage{lipsum}
 \usepackage{listings}
 \usepackage{alphalph}
-\renewcommand*{\thesubfigure}{%
-\alphalph{\value{subfigure}}%
-}%
+% \renewcommand*{\thesubfigure}{%
+% \alphalph{\value{subfigure}}%
+% }%
 
-\renewcommand{\thesection}{\alphalph{\value{section}}}
-\renewcommand{\thesubsubsection}{\alphalph{\value{section}}}
+% \renewcommand{\thesection}{\alphalph{\value{section}}}
+% \renewcommand{\thesubsubsection}{\alphalph{\value{section}}}
 
 % \renewcommand*{\thesection}{(\value{subfigure})}
 
 \graphicspath{{img/}{../img/}}
 
 \title{Traversability Estimator for Legged robot.} %compulsory
-\specialization{Ask}%optional
-\subtitle{Subtitle: bho} %optional 
+\specialization{Artificial Intelligence}%optional
+% \subtitle{Subtitle: bho} %optional 
 \author{Francesco Saverio Zuppichini} %compulsory
 \begin{committee}
 \advisor{Prof.}{Student's}{Alessandro Giusti} %compulsory
@@ -47,25 +48,16 @@
 
 \begin{document}
 
-\maketitle %generates the titlepage, this is FIXED
+% \maketitle %generates the titlepage, this is FIXED
 % \tableofcontents 
 
-\subfile{./tex/abstract.tex}
-\subfile{./tex/introduction.tex}
+\input{./tex/abstract.tex}
+\input{./tex/introduction.tex}
+\input{./tex/chapter1.tex}
+\input{./tex/chapter3.tex}
+\input{./tex/chapter4.tex}
+\input{./tex/chapter5.tex}
 
-\subfile{./tex/chapter1.tex}
-
-% % \subfile{./tex/chapter2.tex}
-\subfile{./tex/chapter3.tex}
-\subfile{./tex/chapter4.tex}
-\subfile{./tex/chapter5.tex}
-\subfile{./tex/chapter5-quarry.tex}
-\subfile{./tex/chapter5-patches.tex}
-
-% %\input{Section_1}
-% %\input{Section_2}
-% %\input{Section_3}
-% %\input{Section_5}
-% \printbibliography
+\printbibliography
 
 \end{document}

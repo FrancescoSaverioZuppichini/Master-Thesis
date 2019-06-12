@@ -1,5 +1,3 @@
-\documentclass[../document.tex]{subfiles}
-\begin{document}
 \section{Interpretability}
 In this section, we will evaluate the model's prediction to better understand it. We will find if there are any features in the patches that can confuse it and if the model's output is robust.
 First, we will introduce on technique used to highlight the region of the input image that contribute the most to the model predictions. Then, we will use it on the data from the \emph{Quarry} test set to find out the patches were the model fails and analyze them.
@@ -19,6 +17,6 @@ Informally, Grad-CAM \cite{gradcam} is a technique to produce "visual explanatio
 
 In detail, the output with respect to a target class is backpropagate while storing the gradient and the output in the last convolution. Then global average is applyed the saved gradient keeping the channel dimension in order to get a 1-d tensor, this will represent the importance of each channel in the target convolutional layer. We  each element of the convolutional layer outputs is multiplyed with the averaged gradients to create the grad cam. This whole procedure is fast and it is architecture independent.
 
+\input{./tex/chapter5-patches.tex}
+\input{./tex/chapter5-quarry.tex}
 
-
-\end{document}
