@@ -1,3 +1,5 @@
+\documentclass[../document.tex]{subfiles}
+\begin{document}
 \section{Implementation}
 In this section we reveal the details about the implementation tools and choices. We will start from the employed software, then we will describe each step in the dataset generation and finishing by illustrate the utilized estimators.
 \subsection{Tools}
@@ -645,3 +647,4 @@ It follows an other set of figures that shows the data augmentation applyed on d
     \caption{Data augmentation applyed first on a patch with two walls, then on a ramp.}    
 \end{figure}
 In all the traning epochs, we data augment each input image $x$ with a probability of $0.8$. Dropout has a probability between $0.05$ and $0.1$. Coarse dropout with a probability of $0.02$ and $0.1$ with a size of the lower resolution image from which to sample the dropout between $0.6$ and $0.8$. Simplex noise with a feature size between $1$ and $50$ with a random scaling factor between $6$ and $10$. 
+\end{document}
