@@ -1,73 +1,82 @@
 \documentclass[../document.tex]{subfiles}
 \begin{document}
 \chapter{Implementation}
-In this section we reveal the details about the implementation tools and choices. We will start from the employed software, then we will describe each step in the dataset generation and finishing by illustrate the utilized estimators.
-\section{Tools}
-We quickly list the most important tools and libraries adopted in this project:
-\begin{itemize}
-    \item ROS Melodic
-    \item Numpy
-    \item Matplotlib
-    \item Pandas
-    \item OpenCV
-    \item PyTorch
-    \item FastAI
-    \item imgaug
-    \item Blender
-\end{itemize}
-The framework was entirely developed on Ubuntu 18.10 with Python 3.6.
+This sections talks in detail about the framework implementation, starting from the utilized robot, then we will describe each step in the dataset generation, illustrate the utilized estimators and finishing showing the employed software.
+\section{Robot}
+We tested our framewotk on a a legged crocodile robot called \emph{Krock} developed at \href{https://duckduckgo.com/?q=EPFL&atb=v154-1__&ia=web}{EPFL}. The next figure shows the robot in real life with a cloat and in a simulated enviroment.
 
-\subsection{ROS Melodic}
-The Robot Operating System (ROS) \cite{ROS} is a flexible framework for writing robot software. It is \emph{de facto} the industry and research standard framework for robotics due to its simple yet effective interface that facilitates the task of creating a robust and complex robot behavior regardless of the platforms. ROS works by establishing a peer-to-peer connection where each \emph{node} is to communicate between the others by exposing sockets endpoints, called \emph{topics}, to stream data or send \emph{messages}. 
+\begin{figure}[H]
+    \centering
+         \begin{subfigure}[b]{0.45\textwidth}
+        \includegraphics[width=\textwidth]{../img/krock-real.jpg}
+        \caption{Krock in real life.}
+    \end{subfigure}
+         \begin{subfigure}[b]{0.45\textwidth}
+          \includegraphics[width=\textwidth]{../img/krock-1.jpg}
+          \caption{Krock in the simulator.}
+        \end{subfigure}
+           \caption{\emph{Krock}}
+           \label{fig: krock}
 
-Each \emph{node} can subscribe to a \emph{topic} to receive or publish new messages. In our case, \emph{Krock} exposes different topics on which we can subscribe in order to get real-time information about the state of the robot.
-Unfortunately, ROS does not natively support Python3, so we had to compile it by hand. Because it was a difficult and time-consuming operation, we decided to share the ready-to-go binaries as a \href{https://hub.docker.com/r/zuppif/ros-melodic-python3/}{docker image}. 
-% \footnote{\href{https://hub.docker.com/r/zuppif/ros-melodic-python3/}} 
+    \end{figure}
+Krock has four legs, each one of them is equipped with three motors in order to rotate in each axis. The robot can raise itself in three different configurations, gaits, using the four motors on the body connected to the legs. In addition, there are another set of two motors in the inner body part to increase Krock's move set. 
+The tail is composed by another set of three motors and can be used to perform a wide array of tasks.
+The robot is $85cm$ long and weights around $1.4kg$. The next figure \ref{fig:krock-top} shows \emph{Krock} from the top helping the reader understanding its composition and the correct ratio between its parts. Also, each motor is highlighted with a red marker.
+\begin{figure}[H]
+\centering
+     \begin{subfigure}[b]{0.49\textwidth}
+    \includegraphics[width=\textwidth]{../img/krock-top.jpg}
+    \caption{Top view of \emph{Krock}}
+   	\end{subfigure}
+     \begin{subfigure}[b]{0.49\textwidth}
+      \includegraphics[width=\textwidth]{../img/krock-top-highlight.png}
+    \caption{Details highlighted in \emph{Krock}}
+   	\end{subfigure}
+   	    \label{fig:krock-top}
 
-
-\subsection{Numpy}
-\href{https://www.numpy.org/}{Numpy} is a fundamental package for any scientific use. It allows to express efficiently any matrix operation using its broadcasting functions. Numpy is used across the whole pipeline to manipulate matrices.
-
-\subsection{Matplotlib}
-Almost all the plots in this report were created by \href{https://matplotlib.org/}{Matplotlib}, is a Python 2D plotting library. It provides a similar functional interface to MATLAB and a deep ability to customize every region of the figure. All 
-It is worth citing \emph{seaborn} a data visualization library that we inglobate in our work-flow to create the heatmaps. It is based on Matplotlib and it provides an high-level interface.
-\subsection{Pandas}
-To process the data from the simulations we rely on \href{https://pandas.pydata.org/}{Pandas}, a Python library providing fast, flexible, and expressive data structures in a tabular form. Pandas is well suited for many different kinds of data such as handle tabular data with heterogeneously-typed columns, similar to SQL table or Excel spreadsheet, time series and matrices. We take advantages of the relationa data structure to perform custom manipulation on the rows by removing the outliears and computing the advancement.
-
-Generally, pandas does not scale well and it is mostly used to handle small dataset while relegating \"big data\" to other frameworks such as Spark or Hadoop. We used Pandas to store the results from the simulator and inside a Thread Queue to parse each \emph{.csv} file efficiently. 
-
-\subsection{OpenCV}
-Open Source Computer Vision Library, \href{https://opencv.org/}{OpenCV}, is an open source computer vision library with a rich collection of highly optimized algorithms. It includes classic and state-of-the-art computer vision and machine learning methods applied in a wide array of tasks, such as object detection and face recognition. We adopt this library to handle image data, mostly to pre and post-process the heightmaps and the patches.
-\subsection{PyTorch}
-\href{https://pytorch.org/}{PyTorch} is a Python open source deep learning framework. It allows Tensor computation (like NumPy) with strong GPU acceleration and Deep neural networks built on a tape-based auto grad system. Due to its Python-first philosophy, it is easy to use, expressive and predictable it is widely used amoung researches and enthusiast. Moreover, its main advantages over other mainstream frameworks such as TensorFlow \cite{tensorflow} are a cleaner API structure, better debugging, code shareability and an enormous number of high-quality third-party packages.
-
-\subsection{FastAI}
-\href{https://course.fast.ai/}{FastAI} is library based on PyTorch that simplifies fast and accurate neural nets training using modern best practices. It provides a high-level API to train, evaluate and test deep learning models on any type of dataset. We used it to train, test, and evaluate our models.
-
-\subsection{imgaug}
-\href{https://imgaug.readthedocs.io/en/latest/}{Image augmentation} (imgaug) is a python library to perform image augmenting operations on images. It provides a variety of methodologies, such as affine transformations, perspective transformations, contrast changes and Gaussian noise, to build sophisticated pipelines. It supports images,  heatmaps, segmentation maps, masks, key points/landmarks, bounding boxes, polygons, and line strings. We used it to augment the heightmap, details are in \hyperref[sec: data-aug]{section \ref{sec: data-aug}}
-
-\subsection{Blender}
-\href{https://www.blender.org/}{Blender} is the free and open source 3D creation suite. It supports the entirety of the 3D pipeline modeling, rigging, animation, simulation, rendering, compositing and motion tracking, even video editing and game creation. We used Blender to render some of the 3D terrain utilized to evaluate the trained model.
-
-\todo[inline]{I switched to mayavi}
+\end{figure}
+\emph{Krock}'s moves by lifting and moving forward one leg after the other. The following figure shows the robots going forward.
+	\begin{figure}[H]
+\centering
+    	\begin{subfigure}[b]{0.3\textwidth}
+			\includegraphics[width=\textwidth]{../img/krock-moving-1}
+			\caption{$t=1$}
+	    \end{subfigure}
+		\begin{subfigure}[b]{0.3\textwidth}
+			\includegraphics[width=\textwidth]{../img/krock-moving-2}
+			\caption{$t=2$}
+	    \end{subfigure}	
+	   \begin{subfigure}[b]{0.3\textwidth}
+			\includegraphics[width=\textwidth]{../img/krock-moving-3}
+			\caption{$t=3$}
+	    \end{subfigure}	
+    \caption{\emph{Krock} moving forward.}
+    \label{fig: krock-moving}
+	\end{figure}
+In our framework we fixed the gait configuration to normal, showed in figure \ref{ig: krock}, where the body is at the same legs' motors height.
+\todo[inline]{Add Krock gait picture}
+% \begin{figure}
+% \ref{fig: krock-gait}
+% \caption{Krock differents gait configuration.}	
+% \end{figure}
 \section{Data Gathering}
-In this section we describe how we generate the synthetic maps, how we the robot interacts with them and all the postprocessing needed to create the final dataset.
+To train a traversability estimator we need a dataset. This section describe in detail how to create, collect and process the data gather from a simulated enviroment to generate a dataset we can use to perform supervised learning.
 \subsection{Heightmap generation}
-To collect the data throught simulation we first need to generate meaningful terrain to be explored by the robot. Each map are stored as heightmap, a 2D array, an image, where each pixel's value represents the terrain height. The following figure shows an heightmap representing a real world \emph{Quarry} and the relative terrain.
+To collect the data throught simulation we first need to generate meaningful terrain to be explored by the robot. Each map is stored as heightmap, a 2D array, an image, where each pixel's value represents the terrain height. For example, the following image shows an heightmap representing a real world quarry and the relative terrain.
 \begin{figure}[H]
     \centering
         \begin{subfigure}[b]{0.45\textwidth}
             \includegraphics[width=\textwidth]{../img/hm/querry-big-10.png}
-            \caption{An heightmap representing a \emph{Quarry}.}
+            \caption{Heightmap.}
         \end{subfigure}
         \begin{subfigure}[b]{0.45\linewidth}
             \includegraphics[width=\textwidth]{../img/hm3d/querry-big-10.png}
             \caption{3D rendered}
             \end{subfigure}    
-    \caption{This image shows an heightmap and the 3D render of a Quarry.}
+    \caption{This image shows an heightmap and the 3D render of a quarry.}
     \end{figure}
-We created thirty maps of $513\times513$ pixel with a resolution of $0.02cm/pixel$ in order to represent a $10\times10m$ terrain. To generate them with 2D simplex noise \cite{simplex}, a variant of Perlin noise \cite{perlin}, a widely used technique in the terrain generation litterature. We divide the maps into five main categories of terrains: $bumps$, $rails$, $steps$, $slopes$/$ramps$ and $holes$. For some map we add three different rocky texture to create more complicated situations, all the maps configuration are shown in table \ref{table: maps}.
+We created thirty maps of $513\times513$ pixel with a resolution of $0.02cm/pixel$ in order to represent a $10\times10m$ terrain using 2D simplex noise \cite{simplex}. Simplex noise is a variant of Perlin noise \cite{perlin}, a widely used technique in the terrain generation litterature. 
+We divide the maps into five main categories of terrains to cluster differents ground features: $bumps$, $rails$, $steps$, $slopes$/$ramps$ and $holes$. For some map we add three different rocky texture to create more complicated situations, all the maps configuration are shown in detail in table \ref{table: maps}.
 
 \paragraph{Bumps:} 
 We genered four different maps with increasing bumps' height using simplex noise with features size $\in[200,100,50,25 ]$. 
@@ -171,7 +180,7 @@ To load the map into the simulator, we fist had to convert it to Webots's \emph{
 
 To communicate with the simulator, Webots exposes a wide number of ROS services, similar to HTTP endpoints, with which we can communicate. The client can use the services to get the value of a field of a Webots' Node, for example, if we want to get the terrain height, we have to ask for the field value \texttt{height} from \texttt{TERRAIN} node. In addition, to call one service, we first have to get the correct type of message we wish to send and then we can call it. We decided to implement a little library called \href{https://github.com/FrancescoSaverioZuppichini/Master-Thesis/tree/master/core/utilities/webots2ros}{\texttt{webots2ros}} to hide all the complexity needed to fetch a field value from a node.
 
-We also implement one additional library called \href{https://github.com/FrancescoSaverioZuppichini/Master-Thesis/tree/master/core/simulation/agent}{\texttt{Agent}} to create reusable robot's interfaces independent from the simulator. The package supports callbacks that can be attached to each agent adding additional features. Finally, we used \emph{Gym} \cite{gym}, a toolkit to develop and evaluate reinforcement learning algorithms, to define our environment. Due to the library's popularity, the code can easily be shared with other researches or we may directly experiment with already made RL algorithm in the future without changing the underlying infrastructure.
+We also implement one additional library called \href{https://github.com/FrancescoSaverioZuppichini/Master-Thesis/tree/master/core/simulation/agent}{\texttt{Agent}} to create reusable robot's interfaces independent from the simulator. The package supports callbacks that can be attached to each agent adding additional features such as storing its interaction. Finally, we used \emph{Gym} \cite{gym}, a toolkit to develop and evaluate reinforcement learning algorithms, to define our environment. Due to the library's popularity, the code can easily be shared with other researches or we may directly experiment with already made RL algorithm in the future without changing the underlying infrastructure.
 
 \subsection{Real world maps}
 To later evaluate the model's performance, we decide to use real world terrain. We gather several heightmaps produced by ground mapping flying drones from \href{https://www.sensefly.com/education/datasets/}{sensefly}'s dataset. 
@@ -314,7 +323,7 @@ Once we extract the patches, we can always re-compute the advancement without re
 \caption{Postprocessing Pipeline flow graph, starting from the top.}
 \label{fig: postprocessing-pipeline}
 \end{figure}
-The following figure shows the mean advancement across all the maps used to train the model in a range of $\pm 0.71$cm, the maximum advancment the used time window, $\Delta t = 2$s.
+The following figure shows the mean advancement across all the maps used to train the model in a range of $\pm 0.70$cm, the maximum advancment the used time window, $\Delta t = 2$s.
 \begin{figure}[H]
     \centering
     \includegraphics[width=\linewidth]{../img/datasets/box_for_each_map.png}
@@ -651,4 +660,54 @@ It follows an other set of figures that shows the data augmentation applyed on d
     \caption{Data augmentation applyed first on a patch with two walls, then on a ramp.}    
 \end{figure}
 In all the traning epochs, we data augment each input image $x$ with a probability of $0.8$. Dropout has a probability between $0.05$ and $0.1$. Coarse dropout with a probability of $0.02$ and $0.1$ with a size of the lower resolution image from which to sample the dropout between $0.6$ and $0.8$. Simplex noise with a feature size between $1$ and $50$ with a random scaling factor between $6$ and $10$. 
+
+\section{Tools}
+We quickly list the most important tools and libraries adopted in this project:
+\begin{itemize}
+    \item ROS Melodic
+    \item Numpy
+    \item Matplotlib
+    \item Pandas
+    \item OpenCV
+    \item PyTorch
+    \item FastAI
+    \item imgaug
+    \item Blender
+\end{itemize}
+The framework was entirely developed on Ubuntu 18.10 with Python 3.6.
+
+\subsection{ROS Melodic}
+The Robot Operating System (ROS) \cite{ROS} is a flexible framework for writing robot software. It is \emph{de facto} the industry and research standard framework for robotics due to its simple yet effective interface that facilitates the task of creating a robust and complex robot behavior regardless of the platforms. ROS works by establishing a peer-to-peer connection where each \emph{node} is to communicate between the others by exposing sockets endpoints, called \emph{topics}, to stream data or send \emph{messages}. 
+
+Each \emph{node} can subscribe to a \emph{topic} to receive or publish new messages. In our case, \emph{Krock} exposes different topics on which we can subscribe in order to get real-time information about the state of the robot.
+Unfortunately, ROS does not natively support Python3, so we had to compile it by hand. Because it was a difficult and time-consuming operation, we decided to share the ready-to-go binaries as a \href{https://hub.docker.com/r/zuppif/ros-melodic-python3/}{docker image}. 
+% \footnote{\href{https://hub.docker.com/r/zuppif/ros-melodic-python3/}} 
+
+
+\subsection{Numpy}
+\href{https://www.numpy.org/}{Numpy} is a fundamental package for any scientific use. It allows to express efficiently any matrix operation using its broadcasting functions. Numpy is used across the whole pipeline to manipulate matrices.
+
+\subsection{Matplotlib}
+Almost all the plots in this report were created by \href{https://matplotlib.org/}{Matplotlib}, is a Python 2D plotting library. It provides a similar functional interface to MATLAB and a deep ability to customize every region of the figure. All 
+It is worth citing \emph{seaborn} a data visualization library that we inglobate in our work-flow to create the heatmaps. It is based on Matplotlib and it provides an high-level interface.
+\subsection{Pandas}
+To process the data from the simulations we rely on \href{https://pandas.pydata.org/}{Pandas}, a Python library providing fast, flexible, and expressive data structures in a tabular form. Pandas is well suited for many different kinds of data such as handle tabular data with heterogeneously-typed columns, similar to SQL table or Excel spreadsheet, time series and matrices. We take advantages of the relationa data structure to perform custom manipulation on the rows by removing the outliears and computing the advancement.
+
+Generally, pandas does not scale well and it is mostly used to handle small dataset while relegating \"big data\" to other frameworks such as Spark or Hadoop. We used Pandas to store the results from the simulator and inside a Thread Queue to parse each \emph{.csv} file efficiently. 
+
+\subsection{OpenCV}
+Open Source Computer Vision Library, \href{https://opencv.org/}{OpenCV}, is an open source computer vision library with a rich collection of highly optimized algorithms. It includes classic and state-of-the-art computer vision and machine learning methods applied in a wide array of tasks, such as object detection and face recognition. We adopt this library to handle image data, mostly to pre and post-process the heightmaps and the patches.
+\subsection{PyTorch}
+\href{https://pytorch.org/}{PyTorch} is a Python open source deep learning framework. It allows Tensor computation (like NumPy) with strong GPU acceleration and Deep neural networks built on a tape-based auto grad system. Due to its Python-first philosophy, it is easy to use, expressive and predictable it is widely used amoung researches and enthusiast. Moreover, its main advantages over other mainstream frameworks such as TensorFlow \cite{tensorflow} are a cleaner API structure, better debugging, code shareability and an enormous number of high-quality third-party packages.
+
+\subsection{FastAI}
+\href{https://course.fast.ai/}{FastAI} is library based on PyTorch that simplifies fast and accurate neural nets training using modern best practices. It provides a high-level API to train, evaluate and test deep learning models on any type of dataset. We used it to train, test, and evaluate our models.
+
+\subsection{imgaug}
+\href{https://imgaug.readthedocs.io/en/latest/}{Image augmentation} (imgaug) is a python library to perform image augmenting operations on images. It provides a variety of methodologies, such as affine transformations, perspective transformations, contrast changes and Gaussian noise, to build sophisticated pipelines. It supports images,  heatmaps, segmentation maps, masks, key points/landmarks, bounding boxes, polygons, and line strings. We used it to augment the heightmap, details are in \hyperref[sec: data-aug]{section \ref{sec: data-aug}}
+
+\subsection{Blender}
+\href{https://www.blender.org/}{Blender} is the free and open source 3D creation suite. It supports the entirety of the 3D pipeline modeling, rigging, animation, simulation, rendering, compositing and motion tracking, even video editing and game creation. We used Blender to render some of the 3D terrain utilized to evaluate the trained model.
+
+\todo[inline]{I switched to mayavi}
 \end{document}
