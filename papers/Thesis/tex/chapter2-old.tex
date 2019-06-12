@@ -3,25 +3,25 @@
 \chapter{Model}
 This section gives a high-level overview of the steps in our approach. We will first describe the data gathering,  then the post-processing pipeline used to generate the dataset. After, we will introduce the model used to fit the data and then show the results with different test environments.
 \section{Robot: Krock}
-Our task was to apply the approach proposed in \cite{omar@traversability} with a legged robot developed at EPFL named 
+Our task is to estimate traversability for a legged crocodile robot called \emph{Krock} developed at \href{https://duckduckgo.com/?q=EPFL&atb=v154-1__&ia=web}{EPFL}.
 \emph{Krock}. Figure \ref{fig:krock} shows the robot in the simulated environment.
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\linewidth]{img/krock-1.jpg}
+    \includegraphics[width=0.5\linewidth]{../img/krock-1.jpg}
     \label{fig:krock}
     \caption{\emph{Krock}}
 \end{figure}
-\emph{Krock} has four legs, each one of them is equipped with three motors in order to rotate in each axis. The robot is also able to raise itself in three different configurations, gaits, using the four motors on the body connected to the legs. In addition, there are another set of two motors in the inner body part to increase \emph{Krock}'s move set. 
+Krock has four legs, each one of them is equipped with three motors in order to rotate in each axis. The robot is also able to raise itself in three different configurations, gaits, using the four motors on the body connected to the legs. In addition, there are another set of two motors in the inner body part to increase \emph{Krock}'s move set. 
 The tail is composed by another set of three motors and can be used to perform a wide array of tasks.
 The robot is $85cm$ long and weights around $1.4kg$. The next figure \ref{fig:krock-top} shows \emph{Krock} from the top helping the reader understanding its composition and the correct ratio between its parts. Also, each motor is highlighted with a red marker.
 \begin{figure}[H]
 \centering
      \begin{subfigure}[b]{0.49\textwidth}
-    \includegraphics[width=\textwidth]{img/krock-top.jpg}
+    \includegraphics[width=\textwidth]{../img/krock-top.jpg}
     \caption{Top view of \emph{Krock}}
    	\end{subfigure}
      \begin{subfigure}[b]{0.49\textwidth}
-      \includegraphics[width=\textwidth]{img/krock-top-highlight.png}
+      \includegraphics[width=\textwidth]{../img/krock-top-highlight.png}
     \caption{Details highlighted in \emph{Krock}}
    	\end{subfigure}
    	    \label{fig:krock-top}
@@ -31,15 +31,15 @@ The robot is $85cm$ long and weights around $1.4kg$. The next figure \ref{fig:kr
 	\begin{figure}[H]
 \centering
     	\begin{subfigure}[b]{0.3\textwidth}
-			\includegraphics[width=\textwidth]{img/krock-moving-1}
+			\includegraphics[width=\textwidth]{../img/krock-moving-1}
 			\caption{$t=1$}
 	    \end{subfigure}
 		\begin{subfigure}[b]{0.3\textwidth}
-			\includegraphics[width=\textwidth]{img/krock-moving-2}
+			\includegraphics[width=\textwidth]{../img/krock-moving-2}
 			\caption{$t=2$}
 	    \end{subfigure}	
 	   \begin{subfigure}[b]{0.3\textwidth}
-			\includegraphics[width=\textwidth]{img/krock-moving-3}
+			\includegraphics[width=\textwidth]{../img/krock-moving-3}
 			\caption{$t=3$}
 	    \end{subfigure}	
 	\label{fig: krock-moving}
@@ -60,15 +60,15 @@ We generate fifteen synthetic $10x10$ meters long heightmaps with different feat
 
 \begin{figure}[H]
     	\begin{subfigure}[b]{0.3\textwidth}
-			\includegraphics[width=\textwidth]{img/hm/bars1.png}
+			\includegraphics[width=\textwidth]{../img/hm/bars1.png}
 			\caption{\emph{bars1}}
 	    \end{subfigure}
 		\begin{subfigure}[b]{0.3\textwidth}
-			\includegraphics[width=\textwidth]{img/hm/slope_rocks2.png}
+			\includegraphics[width=\textwidth]{../img/hm/slope_rocks2.png}
 			\caption{\emph{slope rocks 2}}
 	    \end{subfigure}	
 	   \begin{subfigure}[b]{0.3\textwidth}
-			\includegraphics[width=\textwidth]{img/hm/steps1.png}
+			\includegraphics[width=\textwidth]{../img/hm/steps1.png}
 			\caption{\emph{steps 1}}
 	    \end{subfigure}	
 	\label{fig: heightmaps}
@@ -76,7 +76,7 @@ We generate fifteen synthetic $10x10$ meters long heightmaps with different feat
 \end{figure}
 The following figure shows the 3d rendered version of the bars heightmap.
 \begin{figure}[H]
-    \includegraphics[width=\textwidth]{img/hm3d/bars1.png}
+    \includegraphics[width=\textwidth]{../img/hm3d/bars1.png}
 	\label{fig: bars1-3d}
 	\caption{\emph{Bars1} 3d map}
 \end{figure}
@@ -87,11 +87,11 @@ We fix the robot's gait in its standard configuration and run fifteen simulation
 
 \begin{figure}[H]
     	\begin{subfigure}[b]{0.5\textwidth}
-			\includegraphics[width=\textwidth]{img/hm3d/slope_rocks2.png}
+			\includegraphics[width=\textwidth]{../img/hm3d/slope_rocks2.png}
 			\caption{height $=1$}
 	    \end{subfigure}
 		\begin{subfigure}[b]{0.5\textwidth}
-			\includegraphics[width=\textwidth]{img/hm3d/3-slope_rocks2.png}
+			\includegraphics[width=\textwidth]{../img/hm3d/3-slope_rocks2.png}
 			\caption{height $=3$}
 	    \end{subfigure}	
 	   
@@ -106,7 +106,7 @@ We also generate the test set, by running the robot in real-world environment, s
 \todo[inline]{Update this image, maybe a blender render? }
 \begin{figure}[H]
 \centering
-\includegraphics[width=\linewidth]{img/querry-big-10.png}
+\includegraphics[width=\linewidth]{../img/querry-big-10.png}
 \caption{\emph{Quarry} map.}
 \label{req: quarry}
 \end{figure}
@@ -116,10 +116,10 @@ By observing the simulations we notice two problems. First, \emph{Krock}'s tail 
 To overcome the first problem, we decide to remove the tail after we ensure by asking the developers that this will not compromise the traversability. We immediately observe less noisy data. 
 \begin{figure}[H]
         \begin{subfigure}[b]{0.5\textwidth}
-            \includegraphics[width=\textwidth]{img/krock-tail.jpg}
+            \includegraphics[width=\textwidth]{../img/krock-tail.jpg}
         \end{subfigure}
         \begin{subfigure}[b]{0.5\textwidth}
-            \includegraphics[width=\textwidth]{img/krock-no-tail.jpg}
+            \includegraphics[width=\textwidth]{../img/krock-no-tail.jpg}
         \end{subfigure}    
        
     \label{fig: heightmaps-heights}
@@ -131,7 +131,7 @@ The second issue was more challenging. If the robot spawns on an obstacle then i
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\linewidth]{img/krock-spawn-20-bars1.png}
+\includegraphics[width=\linewidth]{../img/krock-spawn-20-bars1.png}
 \caption{\emph{Krock}'s spawns on the \emph{bars1} map.}
 \end{figure}
 We run a total of \todo{add number of simulations} storing the results using ROS's \emph{.bag} files for a total of \todo{add size of all bags.}.
@@ -140,7 +140,7 @@ We run a total of \todo{add number of simulations} storing the results using ROS
 %By keeping this final goal in mind, we quickly describe each step taken to reach it. Figure \ref{fig: pipeline} shows each step applied in the pipeline. 
 %\begin{figure}[H]
 %\centering
-%\includegraphics[width=0.6\textwidth]{img/pipeline}
+%\includegraphics[width=0.6\textwidth]{../img/pipeline}
 %\caption{Pipeline}
 %\label{fig: pipeline}
 %\end{figure}
