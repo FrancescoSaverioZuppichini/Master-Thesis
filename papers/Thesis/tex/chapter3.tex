@@ -121,7 +121,7 @@ We genered four different maps with increasing bumps' height using simplex noise
         \end{subfigure}    
     \caption{Rails maps ($10\times10$m).}
 \end{figure}
-\paragraph{Steps:} These are maps have huge wall and holes
+\paragraph{Steps:} These are maps with various steps at increasing distance and frequency.
 \begin{figure}[H]
     \centering
         \begin{subfigure}[b]{0.32\textwidth}
@@ -139,7 +139,7 @@ We genered four different maps with increasing bumps' height using simplex noise
     \caption{Steps maps ($10\times10$m).}
 \end{figure}
 
-\paragraph{Slopes/Ramps:} Maps composed by uneven terrain scaled by different height factors from $3$ to $5$ used to include samples where \emph{Krock} has to climb. Those maps were scaled up with different height factors.
+\paragraph{Slopes/Ramps:} Maps composed by uneven terrain scaled by different height factors from $3$ to $5$ used to include samples where \emph{Krock} has to climb.
 \begin{figure}[H]
     \centering
         \begin{subfigure}[b]{0.32\textwidth}
@@ -166,7 +166,7 @@ We genered four different maps with increasing bumps' height using simplex noise
 \caption{Holes map ($10\times10$m).}
 \end{figure}
 \subsection{Simulator}
-We used Webots to move \emph{Krock} on the genereted terrain. The robot controlled was implemented by EPFL \todo{cite them?} and handed to IDSIA \todo{cite?}. The controller implements a ROS' node to publish \emph{Krock} status including its pose at a rate of $250hz$. We decide to reduce it $50hz$ by using ROS build it \texttt{throttle} command. 
+We used Webots to move \emph{Krock} on the genereted terrain. The robot controlled was implemented by EPFL \todo{cite them?} and handed to IDSIA \todo{cite?}. The controller implements a ROS' node to publish \emph{Krock} status including its pose at a rate of $250hz$. We decide to reduce it to $50hz$ by using ROS build it \texttt{throttle} command. 
 To load the map into the simulator, we fist had to convert it to Webots's \emph{.wbt} file. Unfortunately, the simulator lacks support for heightmaps so we had to use a script to read the image and perform the conversion.
 
 To communicate with the simulator, Webots exposes a wide number of ROS services, similar to HTTP endpoints, with which we can communicate. The client can use the services to get the value of a field of a Webots' Node, for example, if we want to get the terrain height, we have to ask for the field value \texttt{height} from \texttt{TERRAIN} node. In addition, to call one service, we first have to get the correct type of message we wish to send and then we can call it. We decided to implement a little library called \href{https://github.com/FrancescoSaverioZuppichini/Master-Thesis/tree/master/core/utilities/webots2ros}{\texttt{webots2ros}} to hide all the complexity needed to fetch a field value from a node.
@@ -174,7 +174,8 @@ To communicate with the simulator, Webots exposes a wide number of ROS services,
 We also implement one additional library called \href{https://github.com/FrancescoSaverioZuppichini/Master-Thesis/tree/master/core/simulation/agent}{\texttt{Agent}} to create reusable robot's interfaces independent from the simulator. The package supports callbacks that can be attached to each agent adding additional features. Finally, we used \emph{Gym} \cite{gym}, a toolkit to develop and evaluate reinforcement learning algorithms, to define our environment. Due to the library's popularity, the code can easily be shared with other researches or we may directly experiment with already made RL algorithm in the future without changing the underlying infrastructure.
 
 \subsection{Real world maps}
-To later evaluate the model's performance, we decide to use real world terrain. We gather several heightmaps produced by ground mapping flying drones from \href{https://www.sensefly.com/education/datasets/}{sensefly}'s dataset. The following images shows them. 
+To later evaluate the model's performance, we decide to use real world terrain. We gather several heightmaps produced by ground mapping flying drones from \href{https://www.sensefly.com/education/datasets/}{sensefly}'s dataset. 
+\todo[inline]{include sullens}
 \begin{figure}[H]
     \begin{subfigure}[b]{0.45\textwidth}
         \includegraphics[width=\textwidth]{../img/hm3d/querry-big-10.png}
@@ -437,7 +438,7 @@ Due to its characteristic locomotion, Krock tries to overcome the obstacle using
 
 \caption{Advancement over time with different $\Delta t$ on \emph{bumps3}.}
 \end{figure}
-A wheel robot, on the other hand, will not produce such graph since it cannot free itself easily from an obstacle.
+A wheel robot, on the other hand, will not produce such graph since it cannot free itself easily from an obstacle. Image a wheel robot moving forward, once it hits an obstance it stops moving, if we plot its advancement in this situation it will look more like a step than a series of spikes.
 
 \paragraph{Ramps}
 To correctly decide the threshold we must be sure it will not create false negative. For this reason, we check the advancement on the $slope_rocks1$ map with a height scaling factor set to $5$.
@@ -537,14 +538,14 @@ We called this model architecture \emph{MicroResNet}. We evaluated $n=[1,2], d=3
                Size (MB) & 5.93 & 5.71 &  \textbf{2.41} & 2.32 \\ 
                \hline 
         \end{tabular}
-        \caption{MicroResNet architecture from top to bottom. Some part of the architecture are equal across models, this is shows by sharing columns in the table.}
+        \caption{MicroResNet architecture. First layer is on the top. Some architecture's blocks are equal across models, this is shows by sharing columns in the table.}
     \end{table}
 \todo[inline]{this table sucks}
 Our models have approximately $35$ times less parameters than the smalles ResNet model, ResNet18, that has $11$M parameters. To simplicity we will use the following notation to describe each architecture variant: \texttt{MicroResNet-{3x3/7x7}-{/SE}}.
 \todo[inline]{ask omar help to add margin in the rows}
 \todo[inline]{add model picture}
 
-\subsection{Normalization}
+\section{Normalization}
 Before feeding the data to the models, we need to make the patches height invariant to correctly normalize different patches taken from different maps with different height scaling factor. To do so, we subtract the height of the map corresponding \emph{Krock}'s position from the patch to correctly center it. The following figure shows the normalization process on the patch with the square in the middle.
 \begin{figure}[H]
     \centering
@@ -565,17 +566,20 @@ Before feeding the data to the models, we need to make the patches height invari
         \includegraphics[width=\textwidth]{../img/data-aug/3d/square-middle-center.png}
         \caption{Height centered}
     \end{subfigure}  
-\caption{Normalization process}
+\caption{Normalization process. Each patch is normalized by subtracting the height value corresponding to the robot position to center its height. }
 \label{fig: center}
 \end{figure}
 
-\subsection{Data Augmentation}
+\section{Data Augmentation}
 \label{sec: data-aug}
 Data augmentation is used to change the input of a model in order to produce more training examples. Since our inputs are heightmaps we cannot utilize the classic image manipulations such as shifts, flips, and zooms. Imagine that we have a patch with a wall in front of it, if we random rotate the image the wall may go in a position where the wall is not facing the robot anymore, making the image now traversable with a wrong target. We decided to apply dropout, coarse dropout, and random simplex noise since they are traversability invariant. To illustrate those techniques we are going to use the same square patch showed before \ref{fig: center}.
 
-\paragraph{Dropout} is a technique to randomly set some pixels to zero, in our case we flat some random pixel in the patch. 
-\paragraph{Coarse Dropout} similar to dropout, it sets to zero random regions of pixels.
-\paragraph{Simplex Noise} is a form of Perlin noise that is mostly used in ground generation. Our idea is to add some noise to make the network generalize better since lots of training maps have only obstacles in flat ground. Since it is computationally expensive, we randomly fist apply the noise to five hundred images with only zeros. Then, we randomly scaled them and add to the input image. 
+\subsection{Dropout}
+Dropout is a technique to randomly set some pixels to zero, in our case we flat some random pixel in the patch. 
+\subsection{Coarse Dropout}
+Similar to dropout, it sets to zero random regions of pixels.
+\subsection{Simplex Noise} 
+Simplex Noise is a form of Perlin noise that is mostly used in ground generation. Our idea is to add some noise to make the network generalize better since lots of training maps have only obstacles in flat ground. Since it is computationally expensive, we randomly fist apply the noise to five hundred images with only zeros. Then, we randomly scaled them and add to the input image. 
 \begin{figure}[H]
     \centering
 
