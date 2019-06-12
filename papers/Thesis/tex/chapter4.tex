@@ -149,31 +149,31 @@ Bars is a map composed by different heights wall, thus we expect similar probabi
   \caption{Traversability probability on the bars map, $10\times 10$m, for different Krock's rotation. The values are obtained by sliding a window on the map to create the patches and then predict the traversability for each one of them.}
   \end{figure}
 
-This is a hard map to traverse due to the high number of walls, almost any wall can not be overcome by krock. Interesting, we can identify a tunnel near the bottom center of the maps that shows how the model correctly label those patches depending on the orientation.
+This is a hard map for the robot due to the high number of not traversable walls. Interesting, we can identify a tunnel near the bottom center of the maps that shows how the model correctly label those patches depending on the orientation. The following figure highlight this detail.
 
 \begin{figure}[H]
   \centering
-  \begin{subfigure}[b]{0.45\textwidth}
-    \includegraphics[width=\linewidth]{../img/4/traversability/bars/-270.png} 
-    \subcaption{Robot moving from bottom to top} 
+  \begin{subfigure}[b]{0.23\textwidth}
+    \includegraphics[width=\linewidth]{../img/4/traversability/bars/tunnel/-270-crop.png} 
+    % \subcaption{Robot moving from bottom to top} 
     % \label{fig: bars-b2t}
   \end{subfigure}
-  \begin{subfigure}[b]{0.45\textwidth}
-      \includegraphics[width=\linewidth]{../img/4/traversability/bars/-90.png}
-      \subcaption{Robot moving from top to bottom} 
+  \begin{subfigure}[b]{0.23\textwidth}
+      \includegraphics[width=\linewidth]{../img/4/traversability/bars/tunnel/-90-crop.png}
+      % \subcaption{Robot moving from top to bottom} 
       % \label{fig: bars-t2b}
   \end{subfigure}
-  \begin{subfigure}[b]{0.45\textwidth}
-    \includegraphics[width=\linewidth]{../img/4/traversability/bars/-0.png}
-    \subcaption{Robot moving from left to right}   
+  \begin{subfigure}[b]{0.23\textwidth}
+    \includegraphics[width=\linewidth]{../img/4/traversability/bars/tunnel/-0-crop.png}
+    % \subcaption{Robot moving from left to right}   
     % \label{fig: bars-l2r}
   \end{subfigure}
-  \begin{subfigure}[b]{0.45\textwidth}
-      \includegraphics[width=\linewidth]{../img/4/traversability/bars/-180.png}  
-      \subcaption{Robot moving from right to left} 
+  \begin{subfigure}[b]{0.23\textwidth}
+      \includegraphics[width=\linewidth]{../img/4/traversability/bars/tunnel/-180-crop.png}  
+      % \subcaption{Robot moving from right to left} 
       % \label{fig: bars-r2l}
   \end{subfigure}
-  \caption{Detail of a region in the bars map where there are two walls forming a tunnel.}
+  \caption{Detail of a region in the bars map where there are two walls forming a tunnel. Correctly, when the robot is travel following the trail the region is label as traversable.}
   \end{figure}
 
 \subsubsection{Sullen}
