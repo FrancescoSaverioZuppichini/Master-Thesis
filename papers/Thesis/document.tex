@@ -4,6 +4,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 \usepackage{biblatex}
+% \usepackage{natbib}
 \usepackage{todonotes}
 \usepackage{float}
 \usepackage{subcaption}
@@ -20,7 +21,7 @@
 \newcommand{\cs}[1]{\renewcommand{\tabcolsep}{#1pt}}
 \usepackage{lipsum}
 \usepackage{listings}
-\usepackage{alphalph}
+%\usepackage{alphalph}
 % \renewcommand*{\thesubfigure}{%
 % \alphalph{\value{subfigure}}%
 % }%
@@ -48,10 +49,17 @@
 
 \begin{document}
 
-% \maketitle %generates the titlepage, this is FIXED
+\maketitle %generates the titlepage, this is FIXED
+
+\frontmatter %generates the frontmatter, this is FIXED
+
+\subfile{./tex/abstract.tex}
+
 \tableofcontents 
 % \listoffigures
 % \listoftables
+
+\mainmatter
 
 % \input{./tex/abstract.tex}
 % \input{./tex/introduction.tex}
@@ -60,21 +68,26 @@
 % \input{./tex/chapter4.tex}
 % \input{./tex/chapter5.tex}
 
-\subfile{./tex/abstract.tex}
-\clearpage
+%\clearpage
 \subfile{./tex/introduction.tex}
-\clearpage
+%\clearpage
 \subfile{./tex/chapter1.tex}
-\clearpage
+%\clearpage
+
+\chapter{./tex/chapter2.tex}
+% TODO
+
 \subfile{./tex/chapter3.tex}
-\clearpage
+%\clearpage
 \subfile{./tex/chapter4.tex}
-\clearpage
+%\clearpage
 \subfile{./tex/chapter5.tex}
-\clearpage
+%\clearpage
 \subfile{./tex/conclusion.tex}
-\clearpage
+%\clearpage
 
 \printbibliography
+% \bibliographystyle{plainnat}
+% \bibliography{bibliography}
 
 \end{document}
