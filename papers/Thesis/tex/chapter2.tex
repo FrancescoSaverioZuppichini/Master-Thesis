@@ -1,7 +1,7 @@
 \documentclass[../document.tex]{subfiles}
 \begin{document}
 \chapter{Methodology}
-We develop a framework to learn and predict traversability that learns directly on ground patches for any robot using purely simulated data. The core idea, originally proposed by Chavez-Garcia et al. \cite{omar2018traversability}, is simple, we let a robot travel into a simulator on different synthetic terrain, we store its interactions to later crop a region of ground, a patch, around the each traveled position and directly use them to train an traversability estimator. Figure \ref{fig : pipeline} shows the proposed framework.
+We develop a framework to learn traversability directly on ground patches for any robot using purely simulated data. The core idea, originally proposed by Chavez-Garcia et al. \cite{omar2018traversability}, is simple, we let a robot travel into a simulator on different synthetic terrain, we store its interactions to later crop a region of ground, a patch, around each traveled position and directly train a neural network on them to predict traversability. Figure \ref{fig : pipeline} shows the proposed framework.
 \begin{figure}[H]
     \centering
         \includegraphics[width=\textwidth]{../img/method.png}
