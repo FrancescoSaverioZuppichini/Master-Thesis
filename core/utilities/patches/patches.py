@@ -325,7 +325,7 @@ class TraversabilityPatch(Patch):
         #                      color=(0, 0, 0), line_width=2)
         # mlab.text3d(0.0, 0.0, np.nanmax(terrain) / 2, "{:.1f}m".format(np.nanmax(terrain)), scale=0.4, color=(0, 0, 0))
         mlab.view(azimuth=azimuth, elevation=elevation, distance=distance)
-        mlab.move(up=-2)
+        mlab.move(up=-3)
 
         if save_path:
             mlab.savefig(save_path)

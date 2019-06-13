@@ -53,17 +53,18 @@ class TraversabilityHeightmap(TraversabilityPatch):
         return super().plot3d_traversability(pixelsize, mask=self.mask,
                                              save_path=self.save_path, *args, **kwargs)
 
-hm_path = '../maps/new-train/holes1.png'
+hm_path = '/home/francesco/Documents/Master-Thesis/core/maps/test/sullens_cropped_resize.png'
 for rotation in [0, 90, 180, 270]:
 
     p = TraversabilityHeightmap.from_path(hm_path,
                                           model_dir='/media/francesco/Carino/vaevictis/data/1558825182.753924',
                                           model_name='microresnet#3-gate=7x7-n=1-se=True',
-                                          scale=1)(
-        '/home/francesco/Documents/Master-Thesis/papers/Thesis/img/4/traversability/holes1/',
-        texture_save_path= '/home/francesco/Documents/Master-Thesis/papers/Thesis/img/4/traversability/holes1/',
-        step=3,
+                                          scale=10)(
+        '/home/francesco/Documents/Master-Thesis/papers/Thesis/img/4/traversability/sullens-church/',
+        texture_save_path= '/home/francesco/Documents/Master-Thesis/papers/Thesis/img/4/traversability/sullens-church/',
+        step=4,
         patch_size=(78,78),
         rotation=rotation
     )
-    p.plot3d_traversability(0.02, size=(1000, 1000), azimuth=45, elevation=45, distance=27)
+    p.plot3d_traversability(0.02, size=(1000, 1000), azimuth=45, elevation=25, distance=42)
+    del p
