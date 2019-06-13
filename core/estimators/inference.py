@@ -52,23 +52,6 @@ class TraversabilityHeightmap(TraversabilityPatch):
         print('[INFO] saving render into {}'.format(self.save_path))
         return super().plot3d_traversability(pixelsize, mask=self.mask,
                                              save_path=self.save_path, *args, **kwargs)
-#
-# hm_path = '../maps/test/querry-big-10.png'
-# for rotation in [180]:
-#
-#     p = TraversabilityHeightmap.from_path(hm_path,
-#                                           model_dir='/media/francesco/Carino/vaevictis/data/1558825182.753924',
-#                                           model_name='microresnet#3-gate=7x7-n=1-se=True',
-#                                           scale=10)(
-#         '/home/francesco/Documents/Master-Thesis/papers/Thesis/img/4/traversability/quarry/',
-#         texture_save_path= '/home/francesco/Documents/Master-Thesis/papers/Thesis/img/4/traversability/quarry/',
-#         step=5,
-#         patch_size=(78,78),
-#         rotation=rotation
-#     )
-#     p.plot3d_traversability(0.02, size=(1000, 1000), azimuth=45, elevation=45, distance=85)
-#
-#
 
 hm_path = '../maps/new-train/holes1.png'
 for rotation in [0, 90, 180, 270]:

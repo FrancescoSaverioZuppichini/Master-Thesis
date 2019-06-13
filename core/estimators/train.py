@@ -246,10 +246,11 @@ if __name__ == '__main__':
 
     params['test'] = '/media/francesco/saetta/krock-dataset/new-test-random/'
     params['train_transform'] = train_transform
-    params['train_transform_with_label'] = RandomSimplexNoise(shape, p=0.7, n=500)
-    train_and_evaluate = TrainAndEvaluate(params)
+    # params['train_transform_with_label'] = RandomSimplexNoise(shape, p=0.7, n=500)
+    # train_and_evaluate = TrainAndEvaluate(params)
 
-    for _ in range(5):
-        train_and_evaluate( params['model'])
+    summary(zoo[params['model']]().cuda(), (1, 78, 78))
+    # for _ in range(5):
+    #     train_and_evaluate( params['model'])
 
 
