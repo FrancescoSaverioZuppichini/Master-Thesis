@@ -10,7 +10,7 @@ Francesco Saverio Zuppichini
 *The proposed traversability framework's main blocks in couter-clockwise order. First we generated meaningful synthetic ground, then we let the robot spawn and walk on them in simulated enviroment while storing its interactions. Later, we crop a region of ground, a patch, for each simulation trajectory around the robot according to its locomotion. We label those images using a defined treshold and fit a deep convolutional neural network to predict traversability.*
 
 ![image](https://raw.githubusercontent.com/FrancescoSaverioZuppichini/Master-Thesis/master/resources/images/querry_krock_traversability.png)
-*Map traversability from bottom to top (up-hill) for the Krock robot. The brighter the blue the more traversable*
+*Map traversability from bottom to top (up-hill) for the Krock robot. The greaner the traversable*
 ![image](https://raw.githubusercontent.com/FrancescoSaverioZuppichini/Master-Thesis/master/resources/images/krock.jpg)
 *Krock*
 
