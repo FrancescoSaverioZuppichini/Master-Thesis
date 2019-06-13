@@ -14,10 +14,9 @@ Francesco Saverio Zuppichini
 ![image](https://raw.githubusercontent.com/FrancescoSaverioZuppichini/Master-Thesis/master/resources/images/krock.jpg)
 *Krock*
 
-*Krock*
-
 
 ## Stucture
+**Deprecated**
 
 ```
 .
@@ -74,5 +73,6 @@ Francesco Saverio Zuppichini
 Each package as its own documentation and examples.
 
 ## Results
-
-TODO 
+Final results with a our MicroResNet
+![image](https://raw.githubusercontent.com/FrancescoSaverioZuppichini/Master-Thesis/master/resources/images/results.png)
+ 
