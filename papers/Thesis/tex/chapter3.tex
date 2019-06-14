@@ -599,80 +599,80 @@ Data augmentation is used to change the input of a model in order to produce mor
 \subsection{Dropout}
 Dropout is a technique to randomly set some pixels to zero, in our case we flat some random pixel in the patch. 
 \subsection{Coarse Dropout}
-Similar to dropout, it sets to zero random regions of pixels.
+Similar to dropout, it sets to zero random regions of pixels with defined boundaries. Figure 
 \subsection{Simplex Noise} 
 Simplex Noise is a form of Perlin noise that is mostly used in ground generation. Our idea is to add some noise to make the network generalize better since lots of training maps have only obstacles in flat ground. Since it is computationally expensive, we randomly fist apply the noise to five hundred images with only zeros. Then, we randomly scaled them and add to the input image. 
 \begin{figure}[H]
     \centering
 
-        \begin{subfigure}[b]{0.32\textwidth}
+        \begin{subfigure}[b]{0.45\textwidth}
             \includegraphics[width=\textwidth]{../img/data-aug/3d/simplex1.png}
             \caption{Features size = 10}
         \end{subfigure}
-        \begin{subfigure}[b]{0.32\linewidth}
+        \begin{subfigure}[b]{0.45\linewidth}
             \includegraphics[width=\textwidth]{../img/data-aug/3d/simplex2.png}
             \caption{Features size = 20}
             \end{subfigure}    
-          \begin{subfigure}[b]{0.32\textwidth}
+          \begin{subfigure}[b]{0.45\textwidth}
             \includegraphics[width=\textwidth]{../img/data-aug/3d/simplex3.png}
             \caption{Features size = 30}
         \end{subfigure}    
-        \begin{subfigure}[b]{0.32\textwidth}
+        \begin{subfigure}[b]{0.45\textwidth}
             \includegraphics[width=\textwidth]{../img/data-aug/3d/simplex4.png}
             \caption{Features size = 40}
         \end{subfigure}    
     \label{fig: simplex-noise}
-    \caption{Simplex Noise on flat ground}    
+    \caption{Simplex Noise on flat ground. The feature size corespond to the amount of noise we introduce in the surface. A lower value will produce rocky grounds, while a bigger one bumps.}    
 \end{figure}
 
 The following images show the tree data augmentation techniques used applied the input image.
 \begin{figure}[H]
     \centering
         \begin{subfigure}[b]{0.32\textwidth}
-            \includegraphics[width=\textwidth]{../img/data-aug/2d/center-dropout.png}
+            \includegraphics[width=\textwidth]{../img/data-aug/3d/center-dropout-mayavi.png}
             \caption{Dropout}
         \end{subfigure}
         \begin{subfigure}[b]{0.32\linewidth}
-            \includegraphics[width=\textwidth]{../img/data-aug/2d/center-coarse-dropout.png}
+            \includegraphics[width=\textwidth]{../img/data-aug/3d/center-coarse-dropout-mayavi.png}
             \caption{Coarse Dropout}
             \end{subfigure}    
 
           \begin{subfigure}[b]{0.32\textwidth}
-            \includegraphics[width=\textwidth]{../img/data-aug/2d/center-simplex.png}
+            \includegraphics[width=\textwidth]{../img/data-aug/3d/center-simplex-mayavi.png}
             \caption{Simplex Noise}
 
         \end{subfigure}    
-        \begin{subfigure}[b]{0.32\textwidth}
-            \includegraphics[width=\textwidth]{../img/data-aug/2d/center-aug.png}
+        \begin{subfigure}[b]{0.32\textwidth}f
+            \includegraphics[width=\textwidth]{../img/data-aug/3d/center-final-mayavi.png}
             \caption{Final result}
         \end{subfigure}    
-    \label{fig: square-patch-aug}
-    \caption{Data augmentation applied on a patch.}    
+    \label{fig: data-aug}
+    \caption{Data augmentation applied on a patch. First we randomly set to flat some small regions of the ground. Then, we slighty mutate the surface using simplex noise.}    
 \end{figure}
-It follows an other set of figures that shows the data augmentation applyed on different inputs.
+To ensure we do create untraversable patches from traversable patch we limited the coarse dropout region to only few centiments and we apply a smoother simplex noise on traversable patches. In detail,
 
-\begin{figure}[H]
-    \centering
-        \begin{subfigure}[b]{0.23\textwidth}
-            \includegraphics[width=\textwidth]{../img/data-aug/2d/wall.png}
-            \caption{Walls}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.23\linewidth}
-            \includegraphics[width=\textwidth]{../img/data-aug/2d/wall-aug.png}
-            \caption{Walls aug}
-        \end{subfigure}    
-        \begin{subfigure}[b]{0.23\textwidth}
-            \includegraphics[width=\textwidth]{../img/data-aug/2d/ramp.png}
-            \caption{Ramp}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.23\linewidth}
-            \includegraphics[width=\textwidth]{../img/data-aug/2d/ramp-aug.png}
-            \caption{Ramp aug}
-        \end{subfigure}    
-    \label{fig: others-aug}
-    \caption{Data augmentation applyed first on a patch with two walls, then on a ramp.}    
-\end{figure}
-In all the traning epochs, we data augment each input image $x$ with a probability of $0.8$. Dropout has a probability between $0.05$ and $0.1$. Coarse dropout with a probability of $0.02$ and $0.1$ with a size of the lower resolution image from which to sample the dropout between $0.6$ and $0.8$. Simplex noise with a feature size between $1$ and $50$ with a random scaling factor between $6$ and $10$. 
+% \begin{figure}[H]
+%     \centering
+%         \begin{subfigure}[b]{0.23\textwidth}
+%             \includegraphics[width=\textwidth]{../img/data-aug/2d/wall.png}
+%             \caption{Walls}
+%         \end{subfigure}
+%         \begin{subfigure}[b]{0.23\linewidth}
+%             \includegraphics[width=\textwidth]{../img/data-aug/2d/wall-aug.png}
+%             \caption{Walls aug}
+%         \end{subfigure}    
+%         \begin{subfigure}[b]{0.23\textwidth}
+%             \includegraphics[width=\textwidth]{../img/data-aug/2d/ramp.png}
+%             \caption{Ramp}
+%         \end{subfigure}
+%         \begin{subfigure}[b]{0.23\linewidth}
+%             \includegraphics[width=\textwidth]{../img/data-aug/2d/ramp-aug.png}
+%             \caption{Ramp aug}
+%         \end{subfigure}    
+%     \label{fig: others-aug}
+%     \caption{Data augmentation applyed first on a patch with two walls, then on a ramp.}    
+% \end{figure}
+un all the traning epochs, we augmented $80\%$ of the input images with dropout and coarse dropout. Dropout has a probability between $0.05$ and $0.1$ and coarse dropout has a probability of $0.02$ and $0.1$ with a size of the lower resolution image from which to sample the dropout between $0.6$ and $0.8$. Simplex noise was applied on the $70\%$ of the training data samples with a feature size between $1$ and $50$ with a random scaling factor between $15 - 25$ and $5 - 15$ from traversable and not traversable patches respectively. 
 
 \section{Tools}
 We quickly list the most important tools and libraries adopted in this project:
@@ -719,8 +719,6 @@ Open Source Computer Vision Library, \href{https://opencv.org/}{OpenCV}, is an o
 \subsection{imgaug}
 \href{https://imgaug.readthedocs.io/en/latest/}{Image augmentation} (imgaug) is a python library to perform image augmenting operations on images. It provides a variety of methodologies, such as affine transformations, perspective transformations, contrast changes and Gaussian noise, to build sophisticated pipelines. It supports images,  heatmaps, segmentation maps, masks, key points/landmarks, bounding boxes, polygons, and line strings. We used it to augment the heightmap, details are in \hyperref[sec: data-aug]{section \ref{sec: data-aug}}
 
-\subsection{Blender}
-\href{https://www.blender.org/}{Blender} is the free and open source 3D creation suite. It supports the entirety of the 3D pipeline modeling, rigging, animation, simulation, rendering, compositing and motion tracking, even video editing and game creation. We used Blender to render some of the 3D terrain utilized to evaluate the trained model.
-
-\todo[inline]{I switched to mayavi}
+\subsection{Mayavi}
+Mayavi is a scientific data visualization and plotting in python library. We adopt it to rendered in 3D all the surfaces used in our framework.
 \end{document}

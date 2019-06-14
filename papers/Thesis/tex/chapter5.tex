@@ -8,16 +8,14 @@ First, we will introduce on technique used to highlight the region of the input 
 Later, we will work with custom created patches with different features, walls, bumps, etc, to test the robustness of the model by comparing its predictions to the real data gathered from the simulator.
 
 \section{Grad-CAM}
-Informally, Grad-CAM \cite{gradcam} is a technique to produce "visual explanations" for convolutional neural networks. It uses the gradient flowing into the last convolution layer to highlight a regions of interested in the image that contribute the most to the final prediction. 
-
+Gradient-weighted Class Activation Mapping (Grad-CAM) \cite{gradcam} is a technique to produce \"visual explanations\" for convolutional neural networks. It highlights the regions of the input image that contribuite the most to the prediciton. 
 \begin{figure}[H]
     \centering
     \begin{subfigure}[b]{1\textwidth}
         \includegraphics[width=\linewidth]{../img/5/grad_cam1.png}
     \end{subfigure}
-\caption{Grad-CAM procedure on an input image \cite{gradcam}.}
+\caption{Grad-CAM procedure on an input image. Image from the original paper \cite{gradcam}.}
 \end{figure}
-
 In detail, the output with respect to a target class is backpropagate while storing the gradient and the output in the last convolution. Then global average is applyed the saved gradient keeping the channel dimension in order to get a 1-d tensor, this will represent the importance of each channel in the target convolutional layer. We  each element of the convolutional layer outputs is multiplyed with the averaged gradients to create the grad cam. This whole procedure is fast and it is architecture independent.
 
 \input{./tex/chapter5-patches.tex}
