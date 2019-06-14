@@ -2,10 +2,9 @@
 \label{sec: robustness}
 To test the model's robustness we created custom patches with different features, walls,bumps,ramps, and test the model's predictions against the real robot advancement obtained from the simulator. Hopefully, model's outputs should match the ground truth or show a degree of uncertainty in the edge cases. According to the previous experiments, we used a threshold of $20$cm and a time window of two seconds. 
 \subsection{Untraversable wall ahead at increasing distance}
-The most trivial test is to place a not traversable wall in front of \emph{Krock} at an increasing distance from the its head. We will expect to reach a point where the model predict traversable even if the wall itself is too tall. Why? Because the robot will be able to travel more than t
-he threshold before being stopped by the obstacle.
+The most trivial test is to place a not traversable wall in front of \emph{Krock} at an increasing distance from the its head. At a certain distance, we expect the model's predictions to be traversable even if the wall itself is too tall. Why? Because the robot will be able to travel more than the threshold before being stopped by the obstacle.
 
-We created fifty-five different patches by first placing wall $16$cm tall exactly in front of the robot and then move it by $1$cm at the time towards the end. It follows some of the input patches ordered by distance from the robot. We remind to the reader that Krock traverse the patch from left to
+We created fifty-five different patches by first placing wall $16$cm long exactly in front of the robot and then move it by $1$cm at the time towards the end. It follows some of the input patches ordered by distance from the robot. We remind to the reader that Krock traverse the patch from left to
  right.
 \begin{figure}[H]
     \centering
@@ -41,7 +40,7 @@ We created fifty-five different patches by first placing wall $16$cm tall exactl
     \end{subfigure}
     \caption{Some of the tested patches with a non traversable wall at increasing distance from the robot.}
     \end{figure}
-The model's predictions are shown by the following plot. We can see how the two classes invert their values around $20$cm.
+    The model's predictions are shown in the following plot. We can see how the two classes invert their values around $20$cm. Moreover, the predictions are uniform and do not change multiple times. Intuitively, if a wall is traversable from a certain distance, it will still be if we place even further.
 \begin{figure}[H]
     \centering
 \begin{subfigure}[b]{1\textwidth}
@@ -57,7 +56,7 @@ Summarized by the following table:
         Distance(cm) & Prediction \\ 
         \hline
         0 - 20  & Not traversable \\ 
-        20 - end & Traversable \\ 
+        22 - end & Traversable \\ 
         \hline
     \end{tabular}
     \caption{Model prediction from the wall patches.}
