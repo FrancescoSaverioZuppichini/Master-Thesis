@@ -33,7 +33,9 @@ To create a quality dataset, we must generate a series of various surfaces and e
     \end{subfigure}  
 \caption{Some artificially generated terrains, $10\times 10$m, with one specific feature each. }   
 \end{figure}
-To let the robot interacts with them, each map can be simply loaded into a simulator. To ensure a correct exploration of each terrain, it is better to randomly spawn the robot multiple times on the same map and let it walk for a fixed amount of time. The robot position is tracked and stored during simulation in order to extract a small portion of ground, patches, around each of its trajectory's position. In practice, the patches are cropped from the original image using a specific size based on the robot's footprint and its velocity. Each resulting image is labeled using a minimum advancement based on the robot's characteristic. We tested our framework on a legged crocodile-like robot called \emph{Krock}. Due to its four legs, the robot has very unique locomotion allowing it to overcome different obstacles making estimate traversability more challenging. Figure \ref{patch-extraction} helps to visualize the procedure.
+To let the robot interacts with them, each map can be simply loaded into a simulator. To ensure a correct exploration of each terrain, we randomly spawn the robot multiple times on the same map and let it walk for a fixed amount of time. Randomly spawn the robot on the surface reduce the possibility to repeatedly visiting the same spot and it maximizes the robot's exploration.
+
+The robot position is tracked and stored during simulation in order to extract a small portion of ground, patches, around each of its trajectory's position. In practice, the patches are cropped from the original image using a specific size based on the robot's footprint and its velocity. Each resulting image is labeled using a minimum advancement based on the robot's characteristic. We tested our framework on a legged crocodile-like robot called \emph{Krock}. Due to its four legs, the robot has very unique locomotion allowing it to overcome different obstacles making estimate traversability more challenging. Figure \ref{patch-extraction} helps to visualize the procedure. The dataset generation process in explain in detail in section \ref{sec: data-gathering}. while 
 \begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.66\textwidth}
@@ -41,37 +43,31 @@ To let the robot interacts with them, each map can be simply loaded into a simul
     \caption{Robot's trajectory.}
 \end{subfigure}
 \begin{subfigure}[b]{1\textwidth}
-    \begin{subfigure}[b]{0.19\textwidth}
-    \includegraphics[width=\linewidth]{../img/bars1-example-patches/2d/0.png}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.19\textwidth}
+    \begin{subfigure}[b]{0.24\textwidth}
     \includegraphics[width=\linewidth]{../img/bars1-example-patches/2d/2.png}    
     \end{subfigure}  
-    \begin{subfigure}[b]{0.19\textwidth}
+    \begin{subfigure}[b]{0.24\textwidth}
     \includegraphics[width=\linewidth]{../img/bars1-example-patches/2d/4.png} 
     \end{subfigure}
-    \begin{subfigure}[b]{0.19\textwidth}
+    \begin{subfigure}[b]{0.24\textwidth}
     \includegraphics[width=\linewidth]{../img/bars1-example-patches/2d/7.png}    
     \end{subfigure}  
-    \begin{subfigure}[b]{0.19\textwidth}
+    \begin{subfigure}[b]{0.24\textwidth}
     \includegraphics[width=\linewidth]{../img/bars1-example-patches/2d/14.png}    
     \end{subfigure}  
 \caption{Cropped patches in 2D.}
 \end{subfigure}  
 \begin{subfigure}[b]{1\textwidth}
-    \begin{subfigure}[b]{0.19\textwidth}
-    \includegraphics[width=\linewidth]{../img/bars1-example-patches/3d/0.png}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.19\textwidth}
+    \begin{subfigure}[b]{0.24\textwidth}
     \includegraphics[width=\linewidth]{../img/bars1-example-patches/3d/2.png}    
     \end{subfigure}  
-    \begin{subfigure}[b]{0.19\textwidth}
+    \begin{subfigure}[b]{0.24\textwidth}
     \includegraphics[width=\linewidth]{../img/bars1-example-patches/3d/4.png} 
     \end{subfigure}
-    \begin{subfigure}[b]{0.19\textwidth}
+    \begin{subfigure}[b]{0.24\textwidth}
     \includegraphics[width=\linewidth]{../img/bars1-example-patches/3d/7.png}    
     \end{subfigure}  
-    \begin{subfigure}[b]{0.19\textwidth}
+    \begin{subfigure}[b]{0.24\textwidth}
     \includegraphics[width=\linewidth]{../img/bars1-example-patches/3d/14.png}    
     \end{subfigure}  
 \caption{Cropped patches in 3D.}
@@ -80,9 +76,10 @@ To let the robot interacts with them, each map can be simply loaded into a simul
 \caption{Example of a robot trajectory (a) extracted during training on a map with different walls. Robot's initial position is shown by its white silhouette. Patches borders are labeled with greed if traversable and red if not and showed as 2D (b) and 3D(c) rendered images. The robot traverses the patches from left to right.}
 \end{figure}
 
-This dataset is fed to a deep convolutional neural network. The network directly learns to extract features from raw data, in our case images, without needing to preprocess the inputs. We utilized a model three times lighter than the original one with comparable performance. We evaluated all tested architecture using real-world terrains, mostly obtained with flying droned and ground mapping software. 
-We also investigate the model's learning by first visualizing the inputs that confuse the model. We adopted a technique that allows highlighting the regions in the input images that contribute the most to the prediction, in this way we can understand which part of the terrain was responsible for the wrong prediction. Lastly, we tested the model's robustness by creating different patches with different characteristics and compare the prediction to the ground truth from the simulator. We shown that the model was able to match the simulator's outputs in most scenarios but most important, we understandood the network's limitations.
+This dataset is fed to a deep convolutional neural network. The network directly learns to extract features from raw data, in our case images, without needing to preprocess the inputs. After tested different model's, we selected a convolutional neural network three times lighter than the original one with comparable performance. To properly evaluate the architectures, we used real-world terrains, mostly obtained with flying droned and ground mapping software.
+The results are quantively and qualitively shown in chapter \ref{chap: results}.
+Later, in chapter \ref{chap: interpretability}, we investigated the model's learning by first visualizing the inputs that confuse the model, section \ref{sec: quarry-dataset}. We adopted a technique that allows highlighting the regions in the input images that contribute the most to the prediction, in this way we can understand which part of the terrain was responsible for the wrong prediction. Lastly, in section \ref{sec: robustness}, we tested the model's robustness by creating different patches with different characteristics and compare the prediction to the ground truth from the simulator. We shown that the model was able to match the simulator's outputs in most scenarios but most important, we understandood the network's limitations.
 
-To summarize our contributions to literature are the implementation of a framework to learn traversability entirely through simulation data that can be employed with any mobile robot, a new small neural network architecture able to reach high accuracy, different real-world evaluations, and a model interpretability case study to understand the strengths and limitations of the trained model. 
+To summarize our contributions to literature are the implementation of a framework to learn traversability entirely through simulation that can be employed with any mobile robot, a new small neural network architecture able to reach high accuracy, different real-world evaluations, and a model interpretability case study to understand the strengths and limitations of the trained model. 
 
 \end{document}

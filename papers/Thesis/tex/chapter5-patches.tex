@@ -1,4 +1,5 @@
 \section{Robustness}
+\label{sec: robustness}
 To test the model's robustness we createed custom patches with different features, walls/bumps/ramps, and test the model prediction against the real robot advancement obtained from the simulator. According to the previous experiments, we used a threshold of $20$cm and a time window of two seconds. 
 \subsection{Untraversable wall ahead}
 The most trivial test is to place a not traversable wall in front of \emph{Krock} at an increasing distance from the its head. We will expect to reach a point where the model predict traversable even if the wall itself is too tall. Why? Because the robot will be able to travel more than the threshold before being stopped by the obstacle.

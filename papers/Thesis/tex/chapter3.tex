@@ -1,6 +1,7 @@
 \documentclass[../document.tex]{subfiles}
 \begin{document}
 \chapter{Implementation}
+\label{chap: implementation}
 This sections talks in detail about the framework implementation, starting from the utilized robot, then we will describe each step in the dataset generation, illustrate the utilized estimators and finishing showing the employed software.
 \section{Robot}
 We tested our framewotk on a a legged crocodile robot called \emph{Krock} developed at \href{https://duckduckgo.com/?q=EPFL&atb=v154-1__&ia=web}{EPFL}. The next figure shows the robot in real life with a cloat and in a simulated enviroment.
@@ -60,8 +61,10 @@ In our framework we fixed the gait configuration to normal, showed in figure \re
 % \caption{Krock differents gait configuration.}	
 % \end{figure}
 \section{Data Gathering}
+\label{sec: data-gathering}
 To train a traversability estimator we need a dataset. This section describe in detail how to create, collect and process the data gather from a simulated enviroment to generate a dataset we can use to perform supervised learning.
 \subsection{Heightmap generation}
+\label{subsec: heightmap-generation}
 To collect the data throught simulation we first need to generate meaningful terrain to be explored by the robot. Each map is stored as heightmap, a 2D array, an image, where each pixel's value represents the terrain height. For example, the following image shows an heightmap representing a real world quarry and the relative terrain.
 \begin{figure}[H]
     \centering
