@@ -88,9 +88,9 @@ class KrockWebotsPatches(KrockWebotsEnv):
 
     def reset(self):
         y = self.y_dim // 2
-        x = 36
+        x = 35.5
         print(x, y)
-        pose = spawn_points2webots_pose([x, y], self, orientation=[0, 0, 0, 0])
+        pose = spawn_points2webots_pose([x, y], self, orientation=[0, 0, 0, 0], z_offset=0.1)
         super().reset(pose=pose)
 
     def run(self, for_seconds):
@@ -150,7 +150,6 @@ class PatchAnswer(WebotsRunnablePatch, GrandCamAnswarable, HeatMapShowable, Maya
     def __init__(self, patch_size, info, *args, **kwargs):
         super().__init__(patch_size, *args, **kwargs)
         self.info = info
-
 
 
 
