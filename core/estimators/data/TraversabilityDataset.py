@@ -91,7 +91,7 @@ class TraversabilityDataset(Dataset):
         patch = self.transform(patch)
         to_return = patch, y
 
-        if self.return_info: to_return = patch, y, row['images']
+        if self.return_info: to_return = patch, y, row['images'], row['height']
 
         return to_return
 
