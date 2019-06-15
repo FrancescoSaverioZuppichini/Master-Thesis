@@ -169,7 +169,9 @@ class Patch(Mayavi3dPlottable):
     @classmethod
     def from_tensor(cls, tensor, *args, **kwargs):
         hm = tensor.squeeze().cpu().numpy()
-        return cls.from_hm(hm, *args, **kwargs)
+        p = cls.from_hm(hm, *args, **kwargs)
+        p.tensor = tensor
+        return p
 
     @classmethod
     def from_tensors(cls, tensors):

@@ -138,10 +138,11 @@ class WebotsRunnablePatch(Patch):
 
 class GrandCamAnswarable():
     def grad_cam(self, module, device, *args, **kwargs):
-        x = torch.tensor(self.hm)
-        x = x.unsqueeze(0).unsqueeze(0).to(device)
-        x = GradCam(module, device)(x, *args, **kwargs)
-        x = x[1]['cam']
+        # x = torch.tensor(self.hm)
+        x = self.tensor.unsqueeze(0).to(device)
+        x = GradCam(module, device)(x, guide=True,*args, **kwargs)
+        x = x[1]['cam'].squeeze()
+
         return Patch.from_hm(x / 255)
 
 

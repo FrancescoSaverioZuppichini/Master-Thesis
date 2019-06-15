@@ -33,6 +33,7 @@ class TraversabilityDataset(Dataset):
                  less_than=None,
                  down_sampling=None,
                  transform_with_label=None,
+                 return_info=False
                  ):
 
         self.df = df
@@ -41,25 +42,16 @@ class TraversabilityDataset(Dataset):
         self.patch_size = patch_size
         self.tr = tr
         self.time_window = time_window
-
         self.transform = transform
         self.transform_with_label = transform_with_label
         self.should_generate_paths = not 'images' in df
+        self.return_info = return_info
 
-        if 'advancement' not in self.df:
-            self.df = add_advancement(self.df, time_window)
-
-        if down_sampling is not None:
-            self.df = self.df[::down_sampling]
-
+        if 'advancement' not in self.df: self.df = add_advancement(self.df, time_window)
+        if down_sampling is not None: self.df = self.df[::down_sampling]
         if more_than is not None: self.df = self.df[self.df['advancement'] >= more_than]
         if less_than is not None: self.df = self.df[self.df['advancement'] <= less_than]
-        if tr is not None and len(self.df) > 0:
-            self.df["label"] = self.df["advancement"] > tr
-
-        if tr is None:
-            self.df["advancement"][self.df["advancement"] < 0] = 0
-
+        if tr is not None and len(self.df) > 0: self.df["label"] = self.df["advancement"] > tr
 
     def read_patch(self, img_name):
         patch = cv2.imread(self.patches_dir + '/' + img_name)
@@ -96,7 +88,12 @@ class TraversabilityDataset(Dataset):
         if 'label' in self.df and self.transform_with_label is not None:
             patch = self.transform_with_label(patch, row['label'])
 
-        return self.transform(patch), y
+        patch = self.transform(patch)
+        to_return = patch, y
+
+        if self.return_info: to_return = patch, y, row['images']
+
+        return to_return
 
     def __len__(self):
         return len(self.df)
