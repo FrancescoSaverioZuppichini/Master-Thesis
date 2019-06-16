@@ -1,5 +1,6 @@
 \documentclass[../document.tex]{subfiles}
 \begin{document}
+\todo[inline]{This chapter is under development!}
 \chapter{Interpretability}
 \label{chap: interpretability}
 In this section, we will evaluate the model's prediction to better understand it. We will find if there are any features in the patches that can confuse it and if the model's output is robust.
@@ -17,7 +18,10 @@ Lee et al. \cite{deepbelief}
     \caption{Figure from Lee et al. \cite{deepbelief} paper where they shown for different classes the low-level features (up) and the high-level features (down) learned by a convolution neural network.}
 \end{figure}
 So, a correctly trained network should be able to separate those features based on predicted classes. Intuitivelly, given two classes $\mathcal{A}$ and $\mathcal{B}$, for example \emph{cat} and \emph{dog}, the high-level features for each class should not be the same, otherwise the model may output a wrong prediction since the same feature is maped to different classes. 
-Thus, visualizing the inputs features vectors against each class can give a good quality estimation of the model since highly separable features yield a correct learning procedure.  Our model, MicroResNet, has a last convolution layer's features size of $[128, 3, 3 ]$. Since visualize a $128$ dimension vector is impossible, we reduce its dimension to $2$ by applying Principle Anyalisis Component (PCA) \cite{pca}. The following figures shows the features of $11$K images sampled from the train set label with their classes, \emph{traversable} and \emph{not traversable}.
+Thus, visualizing the inputs features vectors against each class can give a good quality estimation of the model since highly separable features yield a correct learning procedure.  Our model, MicroResNet, has a last convolution layer's features size of $[128, 3, 3 ]$. Since visualize a $128$ dimension vector is impossible, we reduce its dimension to $2$ by applying Principle Anyalisis Component (PCA) \cite{pca}. 
+
+\subsection{Train set}
+The following figures shows the features of $11$K images sampled from the train set label with their classes, \emph{traversable} and \emph{not traversable}.
 \begin{figure}[H]
     \centering
     \begin{subfigure}[b]{1\textwidth}
@@ -25,24 +29,39 @@ Thus, visualizing the inputs features vectors against each class can give a good
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
         \includegraphics[width=\linewidth]{../img/5/pca/pca-0.png}
+        \caption{Not Traversable}
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
         \includegraphics[width=\linewidth]{../img/5/pca/pca-1.png}
+        \caption{Traversable}
     \end{subfigure}
-\caption{Principal Component Analysis}
+\caption{Principal Component Analysis on the features space computed using the features from the last convolutional layers on the train dataset.}
 \end{figure}
-The two point clouds, left and right, are cleary separable meaning that the model was able to learn meaning features from the dataset. On the left there are the features of the not traversable images while on the right the ones for the traversable. One advatange of this procedure is that intrinsically, similar patches will be close to eachother helping to identify clusters of inputs. The following image shows the inputs based on their position in the features space.
+We can clearly distinguish two main clusters based on the labels, one on the left and one of the right. Those points are easily separable, even by human eyes, meaning that the model was able to learn meaning features from the dataset. Moreover, if we plot the density center, we can see that most of the samples per class are not very close.
+
+\begin{figure}[H]
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/pca/pca-0-density.png}
+        \caption{Not Traversable}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/pca/pca-1-density.png}
+        \caption{Traversable}
+    \end{subfigure}
+    \caption{Density plot for the points sampled from the train dataset in the features space. The centers of the cluster are not overlapping yielding a good separability and a correct learning.}
+    \end{figure}
+We can also identify patches based on their position in the features space, for example, the points on the top left cloud, are patches with walls or big bumps. On the other hand, the hardest patch to classify, or in separate in the features space, are the ones in the middle. Those are the patches with a relatively flat ground and small obstacles. One advatange of this procedure is that intrinsically, similar patches will be close to eachother helping to identify clusters of inputs. We decided to not show all images on the same plot to avoid overcrowing the image. Instead, we clusted the points using K-Means with $k=200$ clusters and then we took the patch that corresponded to the center point in each cluster. In this way, even if we are showing only a few inputs, we included all the meaningfull features. The following image shows the result. 
 \begin{figure}[H]
     \centering
     \begin{subfigure}[b]{1\textwidth}
         \includegraphics[width=\linewidth]{../img/5/pca/pca-patches-200.png}
     \end{subfigure}
-    \begin{subfigure}[b]{1\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/pca/pca-train-patches-highlight.jpg}
-    \end{subfigure}
-\caption{TODO}
+\caption{Patches corresponding of the points computer on the features space computed using the features from the last convolutional layers on the train dataset. Similar grounds are close to each other.}
 \end{figure}
+Patches with similar features are close to eachother. On the left-top side, we can distinguish highgly non traversable patches with walls/bumps in front of the robot. Going down, we start to encoter patches with ligher obstacles. On the platoue, there are traversable patches with small obstacles such as light bumps. It is important to notice that those patches are the closest ones to the non traversable ones, meaning that those are the most harder inputs for the model to classify. Going up on the right side, we see some small steps. Finally, on the top, we find all the downhill patches, the easiest ones to traverse.
 
+\subsection{Test set}
+We can apply the same procedure to evaluate the test set. This dataset is harder and present challanging situation for the robot, so we expected some points to be mixedup.
 \begin{figure}[H]
     \centering
     \begin{subfigure}[b]{1\textwidth}
@@ -56,12 +75,23 @@ The two point clouds, left and right, are cleary separable meaning that the mode
     \end{subfigure}
 \caption{TODO}
 \end{figure}
+Interesting, the traversable patches are really close to each other, while the others spans a very big surface. This means that there are lots of different terrains with different features that are not traversable. The traversable points are clustered near the center. Moreover, some points are not perfect separable. We plotted the density for each class to better understand where the most points are clusted,
+\begin{figure}[H]
+\begin{subfigure}[b]{0.48\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/pca/pca-test-0-density.png}
+    \caption{Not Traversable}
+\end{subfigure}
+\begin{subfigure}[b]{0.48\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/pca/pca-test-1-density.png}
+    \caption{Traversable}
+\end{subfigure}
+\caption{Density plot for the points sampled from the test dataset in the features space. The centers of the cluster are not overlapping yielding a good separability and a correct learning.}
+\end{figure}
+The two centers are really close to each other, this explain the lower AUC score than the validation set. We can also visualize the patches to better understand which inputs are causing the model to fail.
+\todo[inline]{add patches for the test set!}
 
-We can clearly see that patches with obstacles, bumps, bars and steps are correctly placed on the left side. Traversable inputs are on the right side, on the top part there are downhills. Goind down we can find little bumps and in the middle we have a big cloud of patches with rocks and small obstacles. Those patches are the most hard do classify since their features are the closest to the not traversable ones. 
- 
-% \input{./tex/chapter5-patches.tex}
-% \input{./tex/chapter5-quarry.tex}
 
+In the following section we will take a deep look at the test set to find which patches confuse the model. Most probably, those samples will be located between the two clusters center where the difference between classes' features is minimum.
 \section{Grad-CAM}
 Gradient-weighted Class Activation Mapping (Grad-CAM) \cite{gradcam} is a technique to produce \"visual explanations\" for convolutional neural networks. It highlights the regions of the input image that contribuite the most to the prediciton. 
 \begin{figure}[H]
@@ -74,4 +104,8 @@ Gradient-weighted Class Activation Mapping (Grad-CAM) \cite{gradcam} is a techni
 In detail, the output with respect to a target class is backpropagate while storing the gradient and the output in the last convolution. Then, global average is applyed to the saved gradient keeping the channel dimension in order to get a 1-d tensor, this will represent the importance of each channel in the target convolutional layer. We  each element of the convolutional layer outputs is multiplyed with the averaged gradients to create the grad cam. This whole procedure is fast and it is architecture independent.
 
 In detail, the output with respect to a target class is backpropagate while storing the gradient and the output in the last convolution. Then global average is applyed the saved gradient keeping the channel dimension in order to get a 1-d tensor, this will represent the importance of each channel in the target convolutional layer. We  each element of the convolutional layer outputs is multiplyed with the averaged gradients to create the grad cam. This whole procedure is fast and it is architecture independent.
+% \input{./tex/chapter5-quarry.tex}
+% \input{./tex/chapter5-patches.tex}
+%
+
 \end{document}
