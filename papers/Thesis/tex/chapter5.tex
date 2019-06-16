@@ -56,7 +56,7 @@ We can also identify patches based on their position in the features space, for 
     \begin{subfigure}[b]{1\textwidth}
         \includegraphics[width=\linewidth]{../img/5/pca/pca-patches-200.png}
     \end{subfigure}
-\caption{Patches corresponding of the points computer on the features space computed using the features from the last convolutional layers on the train dataset. Similar grounds are close to each other.}
+    \caption{Patches that cooresponds to coordinates in the features space of the last convolutional layers on the train dataset. Similar grounds are close to each other.}
 \end{figure}
 Patches with similar features are close to eachother. On the left-top side, we can distinguish highgly non traversable patches with walls/bumps in front of the robot. Going down, we start to encoter patches with ligher obstacles. On the platoue, there are traversable patches with small obstacles such as light bumps. It is important to notice that those patches are the closest ones to the non traversable ones, meaning that those are the most harder inputs for the model to classify. Going up on the right side, we see some small steps. Finally, on the top, we find all the downhill patches, the easiest ones to traverse.
 
@@ -84,12 +84,19 @@ Interesting, the traversable patches are really close to each other, while the o
 \begin{subfigure}[b]{0.48\textwidth}
     \includegraphics[width=\linewidth]{../img/5/pca/pca-test-1-density.png}
     \caption{Traversable}
+    \label{fig : pca-test-density-1}
 \end{subfigure}
 \caption{Density plot for the points sampled from the test dataset in the features space. The centers of the cluster are not overlapping yielding a good separability and a correct learning.}
 \end{figure}
-The two centers are really close to each other, this explain the lower AUC score than the validation set. We can also visualize the patches to better understand which inputs are causing the model to fail.
-\todo[inline]{add patches for the test set!}
-
+The two centers are really close to each other, this explain the lower AUC score than the validation set. We can also visualize the patches by plotting them using their features coordinates
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{1\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/pca/pca-test-patches-200-None-test.png}
+    \end{subfigure}
+\caption{Patches that cooresponds to coordinates in the features space of the last convolutional layers on the test dataset. Similar grounds are close to each other.}
+\end{figure}
+On the top left, from the not traversable cloud, we can see patches with a high level of bumps. Going down we find surfaces with huge walls in front of the robot, while going close to the center we start to see all the traversable patches. Those samples have not too steep slopes. If we move to the density center, green bouble shown in figure \ref{pca-test-density-1}, we encounter lots of flat patches with little obstacles. Going up on the right branch we find downhill and on the top there are falls. 
 
 In the following section we will take a deep look at the test set to find which patches confuse the model. Most probably, those samples will be located between the two clusters center where the difference between classes' features is minimum.
 \section{Grad-CAM}
@@ -105,7 +112,7 @@ In detail, the output with respect to a target class is backpropagate while stor
 
 In detail, the output with respect to a target class is backpropagate while storing the gradient and the output in the last convolution. Then global average is applyed the saved gradient keeping the channel dimension in order to get a 1-d tensor, this will represent the importance of each channel in the target convolutional layer. We  each element of the convolutional layer outputs is multiplyed with the averaged gradients to create the grad cam. This whole procedure is fast and it is architecture independent.
 % \input{./tex/chapter5-quarry.tex}
-% \input{./tex/chapter5-patches.tex}
+\input{./tex/chapter5-patches.tex}
 %
 
 \end{document}

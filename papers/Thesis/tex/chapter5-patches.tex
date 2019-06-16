@@ -1,5 +1,5 @@
-\documentclass[../document.tex]{subfiles}
-\begin{document}
+% \documentclass[../document.tex]{subfiles}
+% \begin{document}
 \section{Robustness}
 \label{sec: robustness}
 To test the model's robustness we created custom patches with different features, walls,bumps,ramps, and test the model's predictions against the real robot advancement obtained from the simulator. Hopefully, model's outputs should match the ground truth or show a degree of uncertainty in the edge cases. According to the previous experiments, we used a threshold of $20$cm and a time window of two seconds. 
@@ -83,7 +83,7 @@ To be sure the results are correct, we run the last not traversable  and the fir
     \caption{Correctly, when the distance between the robot and the wall is greater than the select treshold, in our case $20$cm, the patch is label as traversable.}
     \label{fig: walls-traversable}
 \end{figure}
-Furthermore, we increased the wall size of the first traversable patch, figure \ref{fig :walls-traversable}$(b)$, to $10$ and to $100$m to see if the model will be confused. Correctly, the predictions did no change and those patches were still labeled as traversable
+Furthermore, we increased the wall size of the first traversable patch, figure \ref{fig :walls-traversable}$(b)$, to $10$ and to $50$m to see if the model will be confused. Correctly, the predictions did no change and those patches were still labeled as traversable
 \begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.33\textwidth}
@@ -92,11 +92,10 @@ Furthermore, we increased the wall size of the first traversable patch, figure \
     \end{subfigure}   
     \begin{subfigure}[b]{0.33\textwidth}
         \includegraphics[width=\linewidth]{../img/5/custom_patches/walls_front/big-2-2d.png}
-        \caption{height $=100$m}
+        \caption{height $=50$m}
     \end{subfigure}   
 \caption{Two patches with a very tall wall at a distance $> tr$.}    
 \end{figure}
-\todo[inline]{WRONG, I must have change the patches somwehre}
 Correctly, the model classifies the patches as traversable and was not confused by the enourmous height of the two walls.
 
 \subsection{Increasing height walls ahead}
@@ -173,19 +172,27 @@ We can compare the model's prediction with the advancement computed in the simul
 In the first case, the simulator outputed and advancement of $21.2$cm meaning that Krock was able to overcome the obstacle, while it failed in the second case. Correctly, the predictions matched the real data.
 
 \subsection{Increasing height and distance walls ahead.}
-We combined the previous experiments and tested the model predictions against the ground truth for each height/distance combination. To reduce the number of samples and improve readability, we limited ourself to consider only patches with a wall tall between $5$cm and $20$cm, we know from previous sections patches with a value smaller and bigger obstacle are traversable and not traversable respectively. Similar, we set the wall's distance from Krock's head between $1$cm to $30$cm for the same reasons. The following image shows the traversability probability for each patch.
+We combined the previous experiments and tested the model predictions against the ground truth for each height/distance combination. To reduce the number of samples and improve readability, we limited ourself to consider only patches with a wall tall between $5$cm and $20$cm, we know from previous sections patches with a value smaller and bigger obstacle are traversable and not traversable respectively. Similar, we set the wall's distance from Krock's head between $1$cm to $30$cm for the same reasons. To evaluate the model's prediction, we run all the patches several time on the simulator and average the results. We highlighted the false positive and the false negative by red and blu respectively. Since we spawned the robot directly on the patch inside the simulator, the outputs may change across different runs. Sometimes, two runs on the same patch can produce different advancement due to some really small changes in the initial position of the robot caused the spawing procedure or some lag. So, to completness, we also shown the variance between all simulation's runs to highlighted cases where the advancement changes the most across different runs. 
+
 \begin{figure}[H]
     \centering
-\begin{subfigure}[b]{1\textwidth}
-    \includegraphics[width=\linewidth]{../img/5/custom_patches/walls_heights/walls_heights.png}
-    \end{subfigure}
-    \caption{Traversability probabilities for patches with a wall of increasing height and distance form Krock's head.}
+    \begin{subfigure}[b]{0.48\linewidth}
+        \includegraphics[width=\linewidth]{../img/5/custom_patches/walls_heights/walls_heights_preds.png}
+        \caption{Predictions}
+    \end{subfigure}   
+    \begin{subfigure}[b]{0.48\linewidth}
+        \includegraphics[width=\linewidth]{../img/5/custom_patches/walls_heights/walls_heights_advs.png}
+        \caption{Averaged real advancement}
+    \end{subfigure}   
+    \begin{subfigure}[b]{0.48\linewidth}
+        \includegraphics[width=\linewidth]{../img/5/custom_patches/walls_heights/walls_heights_std.png}
+        \caption{Standard deviation of the real advancement}
+    \end{subfigure}   
+\caption{TODO}    
 \end{figure}
-To evaluate the model's prediction, we run all the patches several time on the simulator and average the results. We highlighted the false positive and the false negative by red and blu respectively. The model's fails to predicts some of the edge cases. The false positive are the patches with a wall just ahead Krock of heights between \todo{todo}, while the false negative are the inputs at $20$cm. The overall accuracy is \todo{todo}. Even if the model wrongly classified some of the inputs, all those errors are in the edge cases where the predicted classes' probability is not maximum. So, even in those cases the model correctly shown uncertainty. Also, the prediction changes smoothly without any spikes accordendly to the features of the terrain. For example, if a wall was previous classified as untraversable, all the taller walls in the same position are classified with the same class.
+The model's fails to predicts some of the edge cases. The false positive are located in two regions: on the bottom left and on the top center. The first are the patches with a wall just ahead Krock of heights between $\approx 8 - 11$combination. The second cluster of false positive appears when the wall is at $20$cm, the treshold. Even if the model failed to classify those inputs, it shows a correct degree of uncertainty.
 
-\todo[inline]{missing ground truth heatmap}
-
-Since we spawned the robot directly on the patch inside the simulator, the outputs may change across different runs. Sometimes, two runs on the same patch can produce different advancement due to some really small changes in the initial position of the robot caused the spawing procedure or some lag. So, to completness, we also shows the variance between all simulation's runs to highlighted cases where the advancement changes the most across different runs. 
+The false negative, in the middle, are the inputs at distance close to the treshold and with a wall near the edge between traversable and not traversable. The overall accuracy is $91\%$. Even if the model wrongly classified some of the inputs, all those errors are in the edge cases where the predicted classes' probability is not maximum. Moreover, in most cases the model's shown uncertainty, especially on the false negative. Also, the prediction changes smoothly without any spikes accordendly to the features of the terrain. This shows a correct degree of understanding of the surface inputs. For instance, If the model outputs not traversable at height of $10$cm and at distance of $16$cm, then all the taller wall are correctly labeled as not traversable showing consistency and predibility. 
 \todo[inline]{FINISH}
 % \subsection{Wall under Krock}
 % By placing a wall taller than the Krock's distance from the ground the patch won't be traversable anymore since the robot will be lifted up or the back leg wil be stocked. So, as we did in the previous section we created forty patches with a wall from $1$cm to $20$cm in front of the rear legs.
@@ -346,4 +353,4 @@ We can add rocks to those patches to give Krock the ability to climb them better
 
 \subsection{Holes}
 \todo[inline]{do it}
-\end{document}
+% \end{document}
