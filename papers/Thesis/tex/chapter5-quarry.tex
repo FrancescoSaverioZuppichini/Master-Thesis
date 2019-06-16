@@ -1,287 +1,352 @@
-
+\documentclass[../document.tex]{subfiles}
+\begin{document}
 \section{Quarry dataset}
 \label{sec: quarry-dataset}
+After showing the model's capability of correctly separate classes' features we utilized Grad-CAM to visualize some of the samples in the test set. We divided those inputs in four classes based on the model's performance: worst, best, false positive and folse negative. We expect the worst and the best output to be on the left and the right branch of figure \ref{fig: pca-test-patches} respectively, while the other two categories to be in the mixed points.
+We randomly sampled twenty inputs from those set and appplied Grad-CAM as texture on the 3D render to better visualize which region of the inputs caused the prediction. 
+% \subsection{Best}
+% We start evaluating our model by using the test set composed by samples from the Quarry map. We expect the model to correctly classify the patches with easy to see features such as big obstacles, steep ramps and holes. Unfortunately, the dataset is not trivial and most of the patches are challenging to classify even to human eye. 
 
-We start evaluating our model by using the \emph{Quarry} map. We expect the model to correctly classify the patches with easy to see features such as big obstacles, steep ramps and holes. Unfortunately, the dataset is not trivial and most of the patches are challenging to classify even to human eye. 
+% For instance, if look at patches, for some of them is not so easy to estimate the advancement by human eye. This is due to the specific robot locomotion that depends on the starting pose. Our goal in this section is to explain the model predictions on different inputs. 
 
-For instance, if look at patches, for some of them is not so easy to estimate the advancement by human eye. This is due to the specific robot locomotion that depends on the starting pose. Our goal in this section is to explain the model predictions on different inputs. 
+\subsection{Best}
+
 % \chapter{Interpretability}
-
 \begin{figure}[H]
     \centering
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/best/patch-2d-0.png}
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/best/21-patch-3d-majavi-colormap-0.png}
+    \caption{0.21cm}
     \end{subfigure}
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/best/patch-2d-1.png}
-    \end{subfigure}  
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/best/patch-2d-2.png}
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/best/31-patch-3d-majavi-colormap-5.png}
+    \caption{0.24cm}
     \end{subfigure}
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/best/patch-2d-3.png}
-    \end{subfigure}  
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/best/patch-2d-4.png}
-    \end{subfigure}  
-
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/best/heatmap-2d-0.png}
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/best/36-patch-3d-majavi-colormap-10.png}
+    \caption{0.28cm}
     \end{subfigure}
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/best/heatmap-2d-1.png}
-    \end{subfigure}  
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/best/heatmap-2d-2.png}
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/best/38-patch-3d-majavi-colormap-15.png}
+    \caption{0.31cm}
     \end{subfigure}
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/best/heatmap-2d-3.png}
-    \end{subfigure}  
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/best/heatmap-2d-4.png}
-    \end{subfigure}  
-
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/best/grad-cam-2d-0.png}
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/best/40-patch-3d-majavi-colormap-20.png}
+    \caption{0.31cm}
     \end{subfigure}
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/best/grad-cam-2d-1.png}
-    \end{subfigure}  
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/best/grad-cam-2d-2.png}
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/best/44-patch-3d-majavi-colormap-25.png}
+    \caption{0.31cm}
     \end{subfigure}
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/best/grad-cam-2d-3.png}
-    \end{subfigure}  
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/best/grad-cam-2d-4.png}
-    \end{subfigure}  
-
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/best//patch-3d-majavi-colormap-0.png}
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/best/47-patch-3d-majavi-colormap-30.png}
+    \caption{0.34cm}
     \end{subfigure}
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/best//patch-3d-majavi-colormap-1.png}
-    \end{subfigure}  
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/best//patch-3d-majavi-colormap-2.png}
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/best/49-patch-3d-majavi-colormap-35.png}
+    \caption{0.34cm}
     \end{subfigure}
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/best//patch-3d-majavi-colormap-3.png}
-    \end{subfigure}  
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/best//patch-3d-majavi-colormap-4.png}
-    \end{subfigure}  
-
-\caption{Best}    
-\end{figure}
-
-
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/best/50-patch-3d-majavi-colormap-40.png}
+    \caption{0.35cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/best/51-patch-3d-majavi-colormap-45.png}
+    \caption{0.35cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/best/54-patch-3d-majavi-colormap-50.png}
+    \caption{0.36cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/best/56-patch-3d-majavi-colormap-55.png}
+    \caption{0.37cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/best/58-patch-3d-majavi-colormap-60.png}
+    \caption{0.38cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/best/60-patch-3d-majavi-colormap-65.png}
+    \caption{0.38cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/best/62-patch-3d-majavi-colormap-70.png}
+    \caption{0.38cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/best/63-patch-3d-majavi-colormap-75.png}
+    \caption{0.39cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/best/64-patch-3d-majavi-colormap-80.png}
+    \caption{0.39cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/best/67-patch-3d-majavi-colormap-85.png}
+    \caption{0.40cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/best/68-patch-3d-majavi-colormap-90.png}
+    \caption{0.40cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/best/71-patch-3d-majavi-colormap-95.png}
+    \caption{0.40cm}
+    \end{subfigure}
+    \end{figure}
+\subsection{Worst}
 \begin{figure}[H]
     \centering
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/worst/patch-2d-0.png}
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/worst/-31-patch-3d-majavi-colormap-0.png}
+    \caption{-0.31cm}
     \end{subfigure}
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/worst/patch-2d-1.png}
-    \end{subfigure}  
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/worst/patch-2d-2.png}
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/worst/-5-patch-3d-majavi-colormap-5.png}
+    \caption{-0.27cm}
     \end{subfigure}
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/worst/patch-2d-3.png}
-    \end{subfigure}  
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/worst/patch-2d-4.png}
-    \end{subfigure}  
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/worst/-2-patch-3d-majavi-colormap-10.png}
+    \caption{-0.09cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/worst/-1-patch-3d-majavi-colormap-15.png}
+    \caption{-0.08cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/worst/00-patch-3d-majavi-colormap-20.png}
+    \caption{-0.07cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/worst/00-patch-3d-majavi-colormap-25.png}
+    \caption{-0.06cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/worst/00-patch-3d-majavi-colormap-30.png}
+    \caption{-0.05cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/worst/00-patch-3d-majavi-colormap-35.png}
+    \caption{-0.04cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/worst/01-patch-3d-majavi-colormap-40.png}
+    \caption{-0.04cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/worst/01-patch-3d-majavi-colormap-45.png}
+    \caption{-0.03cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/worst/02-patch-3d-majavi-colormap-50.png}
+    \caption{-0.02cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/worst/03-patch-3d-majavi-colormap-55.png}
+    \caption{-0.02cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/worst/05-patch-3d-majavi-colormap-60.png}
+    \caption{-0.02cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/worst/06-patch-3d-majavi-colormap-65.png}
+    \caption{-0.02cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/worst/08-patch-3d-majavi-colormap-70.png}
+    \caption{-0.02cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/worst/09-patch-3d-majavi-colormap-75.png}
+    \caption{-0.02cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/worst/10-patch-3d-majavi-colormap-80.png}
+    \caption{-0.01cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/worst/12-patch-3d-majavi-colormap-85.png}
+    \caption{-0.01cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/worst/15-patch-3d-majavi-colormap-90.png}
+    \caption{-0.01cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.242\linewidth}
+    \includegraphics[width=\linewidth]{../img/5/quarry/worst/18-patch-3d-majavi-colormap-95.png}
+    \caption{-0.01cm}
+    \end{subfigure}
+    \end{figure}
+    \subsection{False Negative}
+    \begin{figure}[H]
+        \centering
+        \begin{subfigure}[b]{0.242\linewidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/-11-patch-3d-majavi-colormap-0.png}
+        \caption{-0.11cm}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.242\linewidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/-6-patch-3d-majavi-colormap-5.png}
+        \caption{-0.10cm}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.242\linewidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/-4-patch-3d-majavi-colormap-10.png}
+        \caption{-0.08cm}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.242\linewidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/-1-patch-3d-majavi-colormap-15.png}
+        \caption{-0.07cm}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.242\linewidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/00-patch-3d-majavi-colormap-20.png}
+        \caption{-0.07cm}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.242\linewidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/00-patch-3d-majavi-colormap-25.png}
+        \caption{-0.06cm}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.242\linewidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/02-patch-3d-majavi-colormap-30.png}
+        \caption{-0.06cm}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.242\linewidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/03-patch-3d-majavi-colormap-35.png}
+        \caption{-0.05cm}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.242\linewidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/05-patch-3d-majavi-colormap-40.png}
+        \caption{-0.05cm}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.242\linewidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/06-patch-3d-majavi-colormap-45.png}
+        \caption{-0.05cm}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.242\linewidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/07-patch-3d-majavi-colormap-50.png}
+        \caption{-0.05cm}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.242\linewidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/08-patch-3d-majavi-colormap-55.png}
+        \caption{-0.05cm}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.242\linewidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/09-patch-3d-majavi-colormap-60.png}
+        \caption{-0.05cm}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.242\linewidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/09-patch-3d-majavi-colormap-65.png}
+        \caption{-0.04cm}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.242\linewidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/11-patch-3d-majavi-colormap-70.png}
+        \caption{-0.02cm}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.242\linewidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/12-patch-3d-majavi-colormap-75.png}
+        \caption{-0.01cm}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.242\linewidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/13-patch-3d-majavi-colormap-80.png}
+        \caption{-0.01cm}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.242\linewidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/17-patch-3d-majavi-colormap-85.png}
+        \caption{-0.01cm}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.242\linewidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/18-patch-3d-majavi-colormap-90.png}
+        \caption{-0.01cm}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.242\linewidth}
+        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/19-patch-3d-majavi-colormap-95.png}
+        \caption{-0.00cm}
+        \end{subfigure}
+        \end{figure}
 
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/worst/heatmap-2d-0.png}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/worst/heatmap-2d-1.png}
-    \end{subfigure}  
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/worst/heatmap-2d-2.png}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/worst/heatmap-2d-3.png}
-    \end{subfigure}  
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/worst/heatmap-2d-4.png}
-    \end{subfigure}  
+        \subsection{False Positive}
 
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/worst/grad-cam-2d-0.png}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/worst/grad-cam-2d-1.png}
-    \end{subfigure}  
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/worst/grad-cam-2d-2.png}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/worst/grad-cam-2d-3.png}
-    \end{subfigure}  
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/worst/grad-cam-2d-4.png}
-    \end{subfigure}  
-
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/worst//patch-3d-majavi-colormap-0.png}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/worst//patch-3d-majavi-colormap-1.png}
-    \end{subfigure}  
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/worst//patch-3d-majavi-colormap-2.png}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/worst//patch-3d-majavi-colormap-3.png}
-    \end{subfigure}  
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/worst//patch-3d-majavi-colormap-4.png}
-    \end{subfigure}  
-
-\caption{Worst}    
-\end{figure}
-
-
-\begin{figure}[H]
-    \centering
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/patch-2d-0.png}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/patch-2d-1.png}
-    \end{subfigure}  
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/patch-2d-2.png}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/patch-2d-3.png}
-    \end{subfigure}  
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/patch-2d-4.png}
-    \end{subfigure}  
-
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/heatmap-2d-0.png}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/heatmap-2d-1.png}
-    \end{subfigure}  
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/heatmap-2d-2.png}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/heatmap-2d-3.png}
-    \end{subfigure}  
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/heatmap-2d-4.png}
-    \end{subfigure}  
-
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/grad-cam-2d-0.png}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/grad-cam-2d-1.png}
-    \end{subfigure}  
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/grad-cam-2d-2.png}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/grad-cam-2d-3.png}
-    \end{subfigure}  
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/grad-cam-2d-4.png}
-    \end{subfigure}  
-
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive//patch-3d-majavi-colormap-0.png}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive//patch-3d-majavi-colormap-1.png}
-    \end{subfigure}  
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive//patch-3d-majavi-colormap-2.png}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive//patch-3d-majavi-colormap-3.png}
-    \end{subfigure}  
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_positive//patch-3d-majavi-colormap-4.png}
-    \end{subfigure}  
-
-\caption{False Positive}    
-\end{figure}
-
-
-\begin{figure}[H]
-    \centering
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/patch-2d-0.png}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/patch-2d-1.png}
-    \end{subfigure}  
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/patch-2d-2.png}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/patch-2d-3.png}
-    \end{subfigure}  
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/patch-2d-4.png}
-    \end{subfigure}  
-
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/heatmap-2d-0.png}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/heatmap-2d-1.png}
-    \end{subfigure}  
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/heatmap-2d-2.png}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/heatmap-2d-3.png}
-    \end{subfigure}  
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/heatmap-2d-4.png}
-    \end{subfigure}  
-
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/grad-cam-2d-0.png}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/grad-cam-2d-1.png}
-    \end{subfigure}  
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/grad-cam-2d-2.png}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/grad-cam-2d-3.png}
-    \end{subfigure}  
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/grad-cam-2d-4.png}
-    \end{subfigure}  
-
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative//patch-3d-majavi-colormap-0.png}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative//patch-3d-majavi-colormap-1.png}
-    \end{subfigure}  
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative//patch-3d-majavi-colormap-2.png}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative//patch-3d-majavi-colormap-3.png}
-    \end{subfigure}  
-    \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/false_negative//patch-3d-majavi-colormap-4.png}
-    \end{subfigure}  
-
-\caption{False Negative}    
-\end{figure}
+        \begin{figure}[H]
+            \centering
+            \begin{subfigure}[b]{0.242\linewidth}
+            \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/20-patch-3d-majavi-colormap-0.png}
+            \caption{0.20cm}
+            \end{subfigure}
+            \begin{subfigure}[b]{0.242\linewidth}
+            \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/21-patch-3d-majavi-colormap-5.png}
+            \caption{0.21cm}
+            \end{subfigure}
+            \begin{subfigure}[b]{0.242\linewidth}
+            \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/22-patch-3d-majavi-colormap-10.png}
+            \caption{0.21cm}
+            \end{subfigure}
+            \begin{subfigure}[b]{0.242\linewidth}
+            \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/24-patch-3d-majavi-colormap-15.png}
+            \caption{0.21cm}
+            \end{subfigure}
+            \begin{subfigure}[b]{0.242\linewidth}
+            \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/24-patch-3d-majavi-colormap-20.png}
+            \caption{0.21cm}
+            \end{subfigure}
+            \begin{subfigure}[b]{0.242\linewidth}
+            \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/25-patch-3d-majavi-colormap-25.png}
+            \caption{0.21cm}
+            \end{subfigure}
+            \begin{subfigure}[b]{0.242\linewidth}
+            \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/26-patch-3d-majavi-colormap-30.png}
+            \caption{0.22cm}
+            \end{subfigure}
+            \begin{subfigure}[b]{0.242\linewidth}
+            \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/26-patch-3d-majavi-colormap-35.png}
+            \caption{0.22cm}
+            \end{subfigure}
+            \begin{subfigure}[b]{0.242\linewidth}
+            \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/26-patch-3d-majavi-colormap-40.png}
+            \caption{0.22cm}
+            \end{subfigure}
+            \begin{subfigure}[b]{0.242\linewidth}
+            \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/27-patch-3d-majavi-colormap-45.png}
+            \caption{0.23cm}
+            \end{subfigure}
+            \begin{subfigure}[b]{0.242\linewidth}
+            \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/27-patch-3d-majavi-colormap-50.png}
+            \caption{0.23cm}
+            \end{subfigure}
+            \begin{subfigure}[b]{0.242\linewidth}
+            \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/28-patch-3d-majavi-colormap-55.png}
+            \caption{0.23cm}
+            \end{subfigure}
+            \begin{subfigure}[b]{0.242\linewidth}
+            \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/30-patch-3d-majavi-colormap-60.png}
+            \caption{0.23cm}
+            \end{subfigure}
+            \begin{subfigure}[b]{0.242\linewidth}
+            \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/33-patch-3d-majavi-colormap-65.png}
+            \caption{0.23cm}
+            \end{subfigure}
+            \begin{subfigure}[b]{0.242\linewidth}
+            \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/34-patch-3d-majavi-colormap-70.png}
+            \caption{0.24cm}
+            \end{subfigure}
+            \begin{subfigure}[b]{0.242\linewidth}
+            \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/36-patch-3d-majavi-colormap-75.png}
+            \caption{0.24cm}
+            \end{subfigure}
+            \begin{subfigure}[b]{0.242\linewidth}
+            \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/39-patch-3d-majavi-colormap-80.png}
+            \caption{0.24cm}
+            \end{subfigure}
+            \begin{subfigure}[b]{0.242\linewidth}
+            \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/44-patch-3d-majavi-colormap-85.png}
+            \caption{0.24cm}
+            \end{subfigure}
+            \begin{subfigure}[b]{0.242\linewidth}
+            \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/59-patch-3d-majavi-colormap-90.png}
+            \caption{0.25cm}
+            \end{subfigure}
+            \begin{subfigure}[b]{0.242\linewidth}
+            \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/63-patch-3d-majavi-colormap-95.png}
+            \caption{0.25cm}
+            \end{subfigure}
+            \end{figure}
+\end{document}
