@@ -32,7 +32,16 @@ Thus, visualizing the inputs features vectors against each class can give a good
 \caption{Principal Component Analysis}
 \end{figure}
 The two point clouds, left and right, are cleary separable meaning that the model was able to learn meaning features from the dataset. On the left there are the features of the not traversable images while on the right the ones for the traversable. One advatange of this procedure is that intrinsically, similar patches will be close to eachother helping to identify clusters of inputs. The following image shows the inputs based on their position in the features space.
-
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{1\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/pca/pca-patches-200.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{1\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/pca/pca-train-patches-highlight.jpg}
+    \end{subfigure}
+\caption{TODO}
+\end{figure}
 
 \begin{figure}[H]
     \centering
@@ -47,6 +56,9 @@ The two point clouds, left and right, are cleary separable meaning that the mode
     \end{subfigure}
 \caption{TODO}
 \end{figure}
+
+We can clearly see that patches with obstacles, bumps, bars and steps are correctly placed on the left side. Traversable inputs are on the right side, on the top part there are downhills. Goind down we can find little bumps and in the middle we have a big cloud of patches with rocks and small obstacles. Those patches are the most hard do classify since their features are the closest to the not traversable ones. 
+ 
 % \input{./tex/chapter5-patches.tex}
 % \input{./tex/chapter5-quarry.tex}
 
