@@ -1,5 +1,5 @@
-% \documentclass[../document.tex]{subfiles}
-% \begin{document}
+\documentclass[../document.tex]{subfiles}
+\begin{document}
 \section{Robustness}
 \label{sec: robustness}
 To test the model's robustness we created custom patches with different features, walls,bumps,ramps, and test the model's predictions against the real robot advancement obtained from the simulator. Hopefully, model's outputs should match the ground truth or show a degree of uncertainty in the edge cases. According to the previous experiments, we used a threshold of $20$cm and a time window of two seconds. 
@@ -181,9 +181,11 @@ We combined the previous experiments and tested the model predictions against th
     \end{subfigure}
     \caption{Traversability probabilities for patches with a wall of increasing height and distance form Krock's head.}
 \end{figure}
-
+To evaluate the model's prediction, we run all the patches several time on the simulator and average the results. We highlighted the false positive and the false negative by red and blu respectively. The model's fails to predicts some of the edge cases. The false positive are the patches with a wall just ahead Krock of heights between \todo{todo}, while the false negative are the inputs at $20$cm. The overall accuracy is \todo{todo}. Even if the model wrongly classified some of the inputs, all those errors are in the edge cases where the predicted classes' probability is not maximum. So, even in those cases the model correctly shown uncertainty. Also, the prediction changes smoothly without any spikes accordendly to the features of the terrain. For example, if a wall was previous classified as untraversable, all the taller walls in the same position are classified with the same class.
 
 \todo[inline]{missing ground truth heatmap}
+
+Since we spawned the robot directly on the patch inside the simulator, the outputs may change across different runs. Sometimes, two runs on the same patch can produce different advancement due to some really small changes in the initial position of the robot caused the spawing procedure or some lag. So, to completness, we also shows the variance between all simulation's runs to highlighted cases where the advancement changes the most across different runs. 
 \todo[inline]{FINISH}
 % \subsection{Wall under Krock}
 % By placing a wall taller than the Krock's distance from the ground the patch won't be traversable anymore since the robot will be lifted up or the back leg wil be stocked. So, as we did in the previous section we created forty patches with a wall from $1$cm to $20$cm in front of the rear legs.
@@ -344,4 +346,4 @@ We can add rocks to those patches to give Krock the ability to climb them better
 
 \subsection{Holes}
 \todo[inline]{do it}
-% \end{document}
+\end{document}
