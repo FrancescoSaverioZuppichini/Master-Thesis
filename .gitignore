@@ -429,3 +429,4 @@ papers/Thesis/tex/chapter1.run.xml
 *.bcf
 *.gz
 *.xml
+*.svn-base

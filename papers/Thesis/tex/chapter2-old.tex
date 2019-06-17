@@ -5,7 +5,7 @@ This section gives a high-level overview of the steps in our approach. We will f
 \section{Robot: Krock}
 Our task is to estimate traversability for a legged crocodile robot called \emph{Krock} developed at \href{https://duckduckgo.com/?q=EPFL&atb=v154-1__&ia=web}{EPFL}.
 \emph{Krock}. Figure \ref{fig:krock} shows the robot in the simulated environment.
-\begin{figure}[H]
+\begin{figure} [htbp]
     \centering
     \includegraphics[width=0.5\linewidth]{../img/krock-1.jpg}
     \label{fig:krock}
@@ -14,7 +14,7 @@ Our task is to estimate traversability for a legged crocodile robot called \emph
 Krock has four legs, each one of them is equipped with three motors in order to rotate in each axis. The robot is also able to raise itself in three different configurations, gaits, using the four motors on the body connected to the legs. In addition, there are another set of two motors in the inner body part to increase \emph{Krock}'s move set. 
 The tail is composed by another set of three motors and can be used to perform a wide array of tasks.
 The robot is $85cm$ long and weights around $1.4kg$. The next figure \ref{fig:krock-top} shows \emph{Krock} from the top helping the reader understanding its composition and the correct ratio between its parts. Also, each motor is highlighted with a red marker.
-\begin{figure}[H]
+\begin{figure} [htbp]
 \centering
      \begin{subfigure}[b]{0.49\textwidth}
     \includegraphics[width=\textwidth]{../img/krock-top.jpg}
@@ -28,7 +28,7 @@ The robot is $85cm$ long and weights around $1.4kg$. The next figure \ref{fig:kr
 
 \end{figure}
 \emph{Krock}'s moves by lifting and moving forward one leg after the other. The following figure shows the robots going forward.
-	\begin{figure}[H]
+	\begin{figure} [htbp]
 \centering
     	\begin{subfigure}[b]{0.3\textwidth}
 			\includegraphics[width=\textwidth]{../img/krock-moving-1}
@@ -58,7 +58,7 @@ Our approach relies on simulations to collect the data needed to train the estim
 
 We generate fifteen synthetic $10x10$ meters long heightmaps with different features, such as walls, bumps and slopes using the same techniques described in \cite{omar2018traversability}. A heightmap is a gray image, formally a 2D array, where each element, pixel, represents a height value. Since each image has a range from $[0,255]$, we also need to scale them when needed. For this reason, we associated a height scaling value for each height map that is used to increase or decrease the steepness. The next figure shows some of the maps used. 
 
-\begin{figure}[H]
+\begin{figure} [htbp]
     	\begin{subfigure}[b]{0.3\textwidth}
 			\includegraphics[width=\textwidth]{../img/hm/bars1.png}
 			\caption{\emph{bars1}}
@@ -75,7 +75,7 @@ We generate fifteen synthetic $10x10$ meters long heightmaps with different feat
 	\caption{Some of the heightmaps used in the simulation.}	
 \end{figure}
 The following figure shows the 3d rendered version of the bars heightmap.
-\begin{figure}[H]
+\begin{figure} [htbp]
     \includegraphics[width=\textwidth]{../img/hm3d/bars1.png}
 	\label{fig: bars1-3d}
 	\caption{\emph{Bars1} 3d map}
@@ -85,7 +85,7 @@ To generate the train data, each map is loaded into the simulator, then the robo
 
 We fix the robot's gait in its standard configuration and run fifteen simulations for each map, where one simulation one robot spawns and death, with a height scale factor of one. We also decide to include steepest training samples by using one of the maps with a slope with heights factors from $[1,7]$. The following pictures show this specific map with different scaling factors. 
 
-\begin{figure}[H]
+\begin{figure} [htbp]
     	\begin{subfigure}[b]{0.5\textwidth}
 			\includegraphics[width=\textwidth]{../img/hm3d/slope_rocks2.png}
 			\caption{height $=1$}
@@ -104,7 +104,7 @@ We fix the robot's gait in its standard configuration and run fifteen simulation
 
 We also generate the test set, by running the robot in real-world environment, such as \emph{Quarry} a cave map, that we later use to test the fitted model. 
 \todo[inline]{Update this image, maybe a blender render? }
-\begin{figure}[H]
+\begin{figure} [htbp]
 \centering
 \includegraphics[width=\linewidth]{../img/querry-big-10.png}
 \caption{\emph{Quarry} map.}
@@ -114,7 +114,7 @@ We also generate the test set, by running the robot in real-world environment, s
 By observing the simulations we notice two problems. First, \emph{Krock}'s tail sometime gets under the body, second, if a random spawn strategy is used, in certain maps the agent may directly fell on an obstacle.
 
 To overcome the first problem, we decide to remove the tail after we ensure by asking the developers that this will not compromise the traversability. We immediately observe less noisy data. 
-\begin{figure}[H]
+\begin{figure} [htbp]
         \begin{subfigure}[b]{0.5\textwidth}
             \includegraphics[width=\textwidth]{../img/krock-tail.jpg}
         \end{subfigure}
@@ -129,7 +129,7 @@ To overcome the first problem, we decide to remove the tail after we ensure by a
 
 The second issue was more challenging. If the robot spawns on an obstacle then it will be stuck for all the simulation compromising the quality of the data. This is very important for the \emph{bars} map, where there are lots of wall of different sizes and the probability to fall on one of them is very high. So, for some maps, we guarantee that \emph{Krock} does not directly spawn into obstacles by only spawning the robot in the flat ground first. The following figures show the result of this strategy on the \emph{bars1} map where the robot was spawned where there is no obstacle. The following image shows different \emph{Krock}'s spawn position in the simulator on the \emph{bars1} map, the reader can notice that the robot is always placed where there are no obstacles under it.
 
-\begin{figure}[H]
+\begin{figure} [htbp]
 \centering
 \includegraphics[width=\linewidth]{../img/krock-spawn-20-bars1.png}
 \caption{\emph{Krock}'s spawns on the \emph{bars1} map.}
@@ -138,7 +138,7 @@ We run a total of \todo{add number of simulations} storing the results using ROS
 \section{Postprocessing}
 %In order to create the training dataset, we need to post process the data stored during the simulation. To train our classifier we need to first compute the advancement for each pose at each time for a specific time window, $pose_{it}$. Then, we can use it to crop a patch from the heightmap that was used in the simulation of the correct size. Such patch must include the whole \emph{Krock} footprint and the maximum possible advancement in a given time window. 
 %By keeping this final goal in mind, we quickly describe each step taken to reach it. Figure \ref{fig: pipeline} shows each step applied in the pipeline. 
-%\begin{figure}[H]
+%\begin{figure} [htbp]
 %\centering
 %\includegraphics[width=0.6\textwidth]{../img/pipeline}
 %\caption{Pipeline}

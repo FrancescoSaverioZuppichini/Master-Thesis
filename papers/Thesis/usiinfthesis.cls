@@ -91,15 +91,20 @@
 
 %font settings
 \RequirePackage[T1]{fontenc}
-% \RequirePackage[charter]{mathdesign}
-% \RequirePackage[scaled]{beramono}
-\renewcommand{\sfdefault}{uop}
-\renewcommand{\scshape}{%
-\not@math@alphabet\scshape\relax
-\ifthenelse{\equal{\f@family}{uop}}%
-{\fontshape{sc}\selectfont}%
-{\fontshape{fsc}\selectfont}%
-}
+\RequirePackage[charter]{mathdesign}
+\RequirePackage[scaled]{beramono}
+%\renewcommand{\sfdefault}{uop}
+%\renewcommand{\scshape}{%
+%\not@math@alphabet\scshape\relax
+%\ifthenelse{\equal{\f@family}{uop}}%
+%{\fontshape{sc}\selectfont}%
+%{\fontshape{fsc}\selectfont}%
+%}
+
+\renewcommand{\sfdefault}{phv}
+\renewcommand{\rmdefault}{ptm}
+\renewcommand{\ttdefault}{pcr}
+\normalfont\selectfont
 
 
 %sans-serif titles
@@ -388,7 +393,7 @@ date of the approved research program.\\[18mm]
     \renewcommand{\headrulewidth}{0pt}}
     \pagestyle{fancy}
     \renewcommand{\chaptermark}[1]{\markboth{\ ##1}{}}
-    \renewcommand{\chaptermark}[1]{\markright{\thesection\ ##1}}
+    \renewcommand{\sectionmark}[1]{\markright{\thesection\ ##1}}
     \ifthenelse{\boolean{@printversion}}{%
       \fancyhead{}
       \fancyhead[LE, RO]{\sf \thepage}
@@ -482,14 +487,14 @@ date of the approved research program.\\[18mm]
 \RequirePackage{textcomp}
 \RequirePackage{url}
 \RequirePackage{amsmath}
-% \RequirePackage[square]{natbib}
-% %%% lowercase header for bibliography and corresponding entry in the
-% %%% ToC. \bibsection is provided by the natbib package
-% \renewcommand\bibsection{
-% \chapter*{\bibname \@mkboth{\bibname}{\bibname}}
-% \ifthenelse{\boolean{@hypermode}}{\phantomsection}{}
-% \addcontentsline{toc}{chapter}{\bibname}
-% }
+%\RequirePackage[square]{natbib}
+%%% lowercase header for bibliography and corresponding entry in the
+%%% ToC. \bibsection is provided by the natbib package
+%\renewcommand\bibsection{
+%\chapter*{\bibname \@mkboth{\bibname}{\bibname}}
+%\ifthenelse{\boolean{@hypermode}}{\phantomsection}{}
+%\addcontentsline{toc}{chapter}{\bibname}
+%}
 
 %%% switch on hyperref support
 \ifthenelse{\boolean{@hypermode}}{%
