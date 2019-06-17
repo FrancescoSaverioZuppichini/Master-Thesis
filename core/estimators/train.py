@@ -169,7 +169,7 @@ def get_params():
             'val_size': 10,
             'test': None,
             'validation': None,
-            'model': 'microresnet#3-gate=7x7-n=1-se=True',
+            'model': 'microresnet#3-gate=7x7-n=1-se=True-regression',
             'dataset': '',
             'sampler': None,
             'num_samples': None,
@@ -182,7 +182,7 @@ def get_params():
             # 'optim': partial(torch.optim.SGD, momentum=0.95, weight_decay=1e-4),
             'optim':  torch.optim.Adam,
             'info': '',
-            'tr': 0.2,
+            'tr': None,
             'problem': 'new test 2',
             'name': 'microresnet#3-gate=7x7-n=1-se=True',
             'more_than': 0,
@@ -201,6 +201,7 @@ if __name__ == '__main__':
         DropoutAgumentation
 
     from torchsummary import summary
+
 
     class Encoder3x3(ResNetEncoder):
         def __init__(self, in_channel, depths, *args, **kwargs):
@@ -241,15 +242,22 @@ if __name__ == '__main__':
     #     x = r_noise(x, is_traversable)
     #     return x
     params = get_params()
-
-    shape = KrockPatchExtractStrategy.patch_shape(params['patch_size'])
-
     params['test'] = '/media/francesco/saetta/krock-dataset/new-test-random/'
-    params['train_transform'] = train_transform
-    # params['train_transform_with_label'] = RandomSimplexNoise(shape, p=0.7, n=500)
-    # train_and_evaluate = TrainAndEvaluate(params)
+    train_and_evaluate = TrainAndEvaluate(params)
 
-    summary(zoo[params['model']]().cuda(), (1, 78, 78))
+    for _ in range(5):
+        train_and_evaluate( params['model'])
+
+        # summary(zoo[params['model']]().cuda(), (1, 78, 78))
+
+    # shape = KrockPatchExtractStrategy.patch_shape(params['patch_size'])
+    #
+    # params['test'] = '/media/francesco/saetta/krock-dataset/new-test-random/'
+    # params['train_transform'] = train_transform
+    # # params['train_transform_with_label'] = RandomSimplexNoise(shape, p=0.7, n=500)
+    # # train_and_evaluate = TrainAndEvaluate(params)
+    #
+    # summary(zoo[params['model']]().cuda(), (1, 78, 78))
     # for _ in range(5):
     #     train_and_evaluate( params['model'])
 

@@ -6,7 +6,7 @@ This sections talks in detail about the implementation of the framework. We will
 \section{Robot}
 We tested our framewotk on a a legged crocodile robot called \emph{Krock} developed at \href{https://duckduckgo.com/?q=EPFL&atb=v154-1__&ia=web}{EPFL}. The next figure shows the robot in real life with a cloat and in a simulated enviroment.
 
-\begin{figure} [htbp]
+\begin{figure}[htbp]
     \centering
          \begin{subfigure}[b]{0.45\textwidth}
         \includegraphics[width=\textwidth]{../img/krock-real.jpg}
@@ -23,7 +23,7 @@ We tested our framewotk on a a legged crocodile robot called \emph{Krock} develo
 Krock has four legs, each one of them is equipped with three motors in order to rotate in each axis. The robot can raise itself in three different configurations, gaits, using the four motors on the body connected to the legs. In addition, there are another set of two motors in the inner body part to increase Krock's move set. 
 The tail is composed by another set of three motors and can be used to perform a wide array of tasks.
 The robot is $85cm$ long and weights around $1.4kg$. The next figure \ref{fig:krock-top} shows \emph{Krock} from the top helping the reader understanding its composition and the correct ratio between its parts. Also, each motor is highlighted with a red marker.
-\begin{figure} [htbp]
+\begin{figure}[htbp]
 \centering
      \begin{subfigure}[b]{0.49\textwidth}
     \includegraphics[width=\textwidth]{../img/krock-top.jpg}
@@ -37,7 +37,7 @@ The robot is $85cm$ long and weights around $1.4kg$. The next figure \ref{fig:kr
 
 \end{figure}
 \emph{Krock}'s moves by lifting and moving forward one leg after the other. The following figure shows the robots going forward.
-	\begin{figure} [htbp]
+	\begin{figure}[htbp]
 \centering
     	\begin{subfigure}[b]{0.3\textwidth}
 			\includegraphics[width=\textwidth]{../img/krock-moving-1}
@@ -66,7 +66,7 @@ To train a traversability estimator we need a dataset. This section describe in 
 \subsection{Heightmap generation}
 \label{subsec: heightmap-generation}
 To collect the data throught simulation we first need to generate meaningful terrain to be explored by the robot. Each map is stored as heightmap, a 2D array, an image, where each pixel's value represents the terrain height. For example, the following image shows an heightmap representing a real world quarry and the relative terrain.
-\begin{figure} [htbp]
+\begin{figure}[htbp]
     \centering
         \begin{subfigure}[b]{0.45\textwidth}
             \includegraphics[width=\textwidth]{../img/hm/querry-big-10.png}
@@ -83,7 +83,7 @@ We divide the maps into five main categories of terrains to cluster differents g
 
 \paragraph{Bumps:} 
 We genered four different maps with increasing bumps' height using simplex noise with features size $\in[200,100,50,25 ]$. 
-\begin{figure} [htbp]
+\begin{figure}[htbp]
     \centering
         \begin{subfigure}[b]{0.32\textwidth}
             \includegraphics[width=\textwidth]{../img/hm3d_borders/bumps0.png}
@@ -104,7 +104,7 @@ We genered four different maps with increasing bumps' height using simplex noise
     \caption{Bumps maps ($10\times10$m).}
 \end{figure}
 \paragraph{Bars:} In these maps there are wall with different shapes and heights. In 
-\begin{figure} [htbp]
+\begin{figure}[htbp]
     \centering
         \begin{subfigure}[b]{0.32\textwidth}
             \includegraphics[width=\textwidth]{../img/hm3d_borders/bars1.png}
@@ -117,7 +117,7 @@ We genered four different maps with increasing bumps' height using simplex noise
     \caption{Bars maps ($10\times10$m).}
 \end{figure}
 \paragraph{Rails:} Flat grounds with slots.
-\begin{figure} [htbp]
+\begin{figure}[htbp]
     \centering
         \begin{subfigure}[b]{0.32\textwidth}
             \includegraphics[width=\textwidth]{../img/hm3d_borders/rails1.png}
@@ -134,7 +134,7 @@ We genered four different maps with increasing bumps' height using simplex noise
     \caption{Rails maps ($10\times10$m).}
 \end{figure}
 \paragraph{Steps:} These are maps with various steps at increasing distance and frequency.
-\begin{figure} [htbp]
+\begin{figure}[htbp]
     \centering
         \begin{subfigure}[b]{0.32\textwidth}
             \includegraphics[width=\textwidth]{../img/hm3d_borders/steps1.png}
@@ -152,7 +152,7 @@ We genered four different maps with increasing bumps' height using simplex noise
 \end{figure}
 
 \paragraph{Slopes/Ramps:} Maps composed by uneven terrain scaled by different height factors from $3$ to $5$ used to include samples where \emph{Krock} has to climb.
-\begin{figure} [htbp]
+\begin{figure}[htbp]
     \centering
         \begin{subfigure}[b]{0.32\textwidth}
             \includegraphics[width=\textwidth]{../img/hm3d_borders/ramp0.png}
@@ -169,7 +169,7 @@ We genered four different maps with increasing bumps' height using simplex noise
     \caption{Slopes maps ($10\times10$m).}
 \end{figure}
 \paragraph{Holes} We also included a map with holes
-\begin{figure} [htbp]
+\begin{figure}[htbp]
     \centering
         \begin{subfigure}[b]{0.32\textwidth}
             \includegraphics[width=\textwidth]{../img/hm3d_borders/holes1.png}
@@ -186,9 +186,9 @@ To communicate with the simulator, Webots exposes a wide number of ROS services,
 We also implement one additional library called \href{https://github.com/FrancescoSaverioZuppichini/Master-Thesis/tree/master/core/simulation/agent}{\texttt{Agent}} to create reusable robot's interfaces independent from the simulator. The package supports callbacks that can be attached to each agent adding additional features such as storing its interaction. Finally, we used \emph{Gym} \cite{gym}, a toolkit to develop and evaluate reinforcement learning algorithms, to define our environment. Due to the library's popularity, the code can easily be shared with other researches or we may directly experiment with already made RL algorithm in the future without changing the underlying infrastructure.
 
 \subsection{Real world maps}
-To later evaluate the model's performance, we decide to use real world terrain. We gather several heightmaps produced by ground mapping flying drones from \href{https://www.sensefly.com/education/datasets/}{sensefly}'s dataset. 
+To later evaluate the model's performance, we decide to use real world terrain. We gather two heightmaps produced by ground mapping flying drones from \href{https://www.sensefly.com/education/datasets/}{sensefly}'s dataset, a quarry and a small village. Figure \ref{fig : real-maps} shows the original and a 3D render of the heightmap for each terrain
 \todo[inline]{include sullens}
-\begin{figure} [htbp]
+\begin{figure}[htbp]
     \centering
     \begin{subfigure}[b]{1\textwidth}
     \begin{subfigure}[b]{0.45\textwidth}
@@ -209,13 +209,14 @@ To later evaluate the model's performance, we decide to use real world terrain. 
     \caption{A small village.} 
 \end{subfigure}
 \caption{Real world maps obtained from \href{https://www.sensefly.com/education/datasets/}{sensefly}'s dataset. The left images shows the real world location while on the right a render in 3D of the coresponding heightmaps. Booth images have a maximum height of 10m.}  
+\label{fig : real-maps}
 \end{figure}
 \section{Simulation}
 To collect \emph{Krock}'s interaction with the environment, we spawn the robot on the ground and let it move forward for $t$ seconds. We repeat this process $n$ times per each map.
     Unfortunately, spawning the robot is not a trivial task. In certain maps, for instance, \emph{bars1}, a map with tons of walls, we must avoid spawning Krock on an obstacle otherwise the run will be ruined by \emph{Krock} getting stuck at the beginning introducing noise in the dataset. To solve the problem, we defined two spawn strategies, a random spawn and a flat ground spawn strategy. The first one is used in most of the maps without big obstacles such as \emph{slope\_rocks}. This stragety just spawn the robot on random position and rotation. 
     While, the flat ground strategy isfirst selects suitable spawn positions by using a sliding window on the heightmap of size equal Krock's footprint and check if the mean pixel value is lower than a small threshold. If so, we store the center coordinates of the patch as a candidate spawing point. Intuitively, if a patch is flat then its mean value will be close to zero.
 Since there may be more flat spawing positions than simulations needed, we have to reduce the size of the candidate points. To maintaing the correct distribution on the map to avoid spawing the robot always in the same cloud of points, we used K-Means with $k$ clusters where $k$ is equal to the number of simulations we wish to run. By clustering, we guarantee to cover all region of the map removing any bias. The following picture shows this strategy on \emph{bars1}. 
-\begin{figure} [htbp]
+\begin{figure}[htbp]
     \begin{subfigure}[b]{0.45\textwidth}
         \includegraphics[width=\textwidth]{../img/3/spawn/flat-spawn-10.png}
         \caption{Flat regions}
@@ -308,7 +309,7 @@ Each patch must contain both Krock's footprint, to include the situations where 
 To find out the correct value, we must compute the maximum advancement on a flat ground for the $\Delta t$ and use it to calculate the final size of the patch. We compute it by running some simulations of \emph{Krock} on flat ground and averaging the advancement getting a value of $71$cm in our $\Delta t = 2$s.
 
 Each patch must include Krock's footprint and the maximum possible distance it can travel is a $\Delta t$. So, since Krock's pose was stored from IMU located in the juncture between the head and the legs, we have to crop from behind its length, $85$cm minus the offset between the IMU and the head, $14$cm. Then, we have to take $71$cm, the maximum advancement with a $\Delta t = 2$s plus the removed offset. The following figure visualizes the patch extraction process. 
-\begin{figure} [htbp]
+\begin{figure}[htbp]
     \centering
     \begin{subfigure}[b]{0.66\textwidth}
         \includegraphics[width=\textwidth]{../img/3/crop/crop.png}
@@ -329,20 +330,20 @@ Lastly, we create a final dataframe containing the map coordinates, the advancem
 The whole pipeline takes less than one hour to run the first time with 16 threads, and, once it is cached, less than fifteen minutes to extract all the patches. In total, we created almost half a milion images.
 
 Once we extract the patches, we can always re-compute the advancement without re-running the whole pipeline. The next figure show the proposed pipeline.
-\begin{figure} [htbp] 
+\begin{figure}[htbp] 
 \centering
 \includegraphics[width=0.4\textwidth]{../img/postprocessing-pipeline.png}
 \caption{Postprocessing Pipeline flow graph, starting from the top.}
 \label{fig: postprocessing-pipeline}
 \end{figure}
 The following figure shows the mean advancement across all the maps used to train the model in a range of $\pm 0.70$cm, the maximum advancment the used time window, $\Delta t = 2$s.
-\begin{figure} [htbp]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=\linewidth]{../img/datasets/box_for_each_map.png}
     \caption{Advancement on each map with a $\Delta t = 2$s in ascendent order.}
 \end{figure}
 As sanity check, we visualize some of the patches with best and worst advancement. Patches with high advancemnet should not include big obstacle and viceversa.
-\begin{figure} [htbp]
+\begin{figure}[htbp]
     \centering
     \begin{subfigure}[b]{0.19\textwidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/all/best/35-patch-3d-majavi-colormap-0.png}
@@ -386,7 +387,7 @@ As sanity check, we visualize some of the patches with best and worst advancemen
     \end{subfigure}
     \caption{Patches with high advancement \emph{Quarry} using a $\Delta t = 2$s.}
 \end{figure}
-    \begin{figure} [htbp]
+    \begin{figure}[htbp]
         \centering
         \begin{subfigure}[b]{0.19\textwidth}
         \includegraphics[width=\linewidth]{../img/5/quarry/all/worst/-8-patch-3d-majavi-colormap-0.png}
@@ -441,7 +442,7 @@ To decide whether a patch is traversable or not traversable we need to decide a 
 Ideally, the threshold should small enough to include as less as possible false positive and big enough to cover all the cases where Krock gets stuck. We empirically compute the threshold's value by spawing Krock in front of a bumps and a ramp and let it walk.
 \paragraph{Bumps} We spawned the robot on the \emph{bumps3} map close to the end and let it go for 20 seconds. The following figure shows Krock in the simulated environment.
 
-\begin{figure} [htbp]
+\begin{figure}[htbp]
 \centering
     \begin{subfigure}[b]{0.45\textwidth}
     \includegraphics[width=\linewidth]{../img/3/find_tr/krock-bumps.jpg}
@@ -451,7 +452,7 @@ Ideally, the threshold should small enough to include as less as possible false 
 
 Due to its characteristic locomotion, Krock tries to overcome the obstacle using the legs to move itself to the top but it fell backs producing a spicky advancement where first it is positive and then negative. The following picture shows the advancemnet on this map with different time windows, $\Delta t$, the greater the smoother.
 
-\begin{figure} [htbp]
+\begin{figure}[htbp]
     \centering
     \begin{subfigure}[b]{0.45\textwidth}
         \includegraphics[width=\linewidth]{../img/3/find_tr/100-bumps3}
@@ -464,7 +465,7 @@ A wheel robot, on the other hand, will not produce such graph since it cannot fr
 
 \paragraph{Ramps}
 The trehsold should be small enough to not create any false positive, patches that are traversable but were classified as not. So, we let the robot walk up hill on the $slope_rocks1$ map with a height scaling factor set to $5$. We knew from empirical experiment that the robot is able to climp this steep ramp. The following figure shows the advancement.
-\begin{figure} [htbp]
+\begin{figure}[htbp]
     \centering
     \begin{subfigure}[b]{0.45\textwidth}
         \includegraphics[width=\linewidth]{../img/3/find_tr/100-slope_rocks1}
@@ -479,7 +480,16 @@ The mean value is around $0.4$cm over a $\Delta t =2$s that is impressive consid
 \label{sec: estimator}
 In this section we described the choices behind the evaluated network architecture.
 \subsection{Vanilla Model}
-The original model proposed by Chavez-Garcia et all \cite{omar2018traversability} is a CNN composed by a two $3 \times 3$ convolution layer with $5$ filters; $2 \times 2$ Max-Pooling layer; $3 \times 3$ convolution layer with $5$ filters; a fully connected layer with 128 outputs neurons and a fully connected layers with two neurons. 
+The original model proposed by Chavez-Garcia et all \cite{omar2018traversability} is a CNN composed by a two $3 \times 3$ convolution layer with $5$ filters; $2 \times 2$ Max-Pooling layer; $3 \times 3$ convolution layer with $5$ filters; a fully connected layer with 128 outputs neurons and a fully connected layers with two neurons. Figure \ref{fig : omar} visualize the architecture. 
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{0.25\linewidth}
+        \includegraphics[width=\linewidth]{../img/3/models/transparent-omar.png}
+    \end{subfigure}
+    \caption{Vanilla model proposed by Chavez-Garcia et al. \cite{omar2018traversability}. The rectangle represent the building block of each layer. Convolutiol layers are described by the kernel size, the number of filters and the stride.}
+    \label{fig : omar}
+\end{figure}
 \subsection{ResNet}
 We adopt a Residual network, ResNet \cite{he2015deep}, variant. Residual networks are deep convolutional networks consisting of many stacked \" Residual Units \". Intuitively, the residual unit allows the input of a layer to contribute to the next layer's input by being added to the current layer's output. Due to possible different features dimension, the input must go through and identify map to make the addition possible. This allows a stronger gradient flows and mitigates the degradation problem. A \"Residual Units \" is composed by a two $3x3$ \emph{Convolution}, \emph{Batchnorm} \cite{ioffe2015batch} and a \emph{Relu} blocks. Formally defined as: 
 \begin{equation}
@@ -488,7 +498,7 @@ We adopt a Residual network, ResNet \cite{he2015deep}, variant. Residual network
 \end{equation}
 Where, $x$ and $y$ are the input and output vector of the layers considered. The function $\mathcal{F}\left(\mathbf{x},\left\{W_{i}\right\}\right)$ is the residual mapping to be learn and $h$ is the identity mapping. The next figure visualises the equation.
 \todo[inline]{add resnet image or table}
-\begin{figure} [htbp]
+\begin{figure}[htbp]
     \centering
     \includegraphics[scale=0.3]{../img/implementation/estimator/resnet_block.png}
     \caption{\emph{Resnet} block \cite{he2015deep}}
@@ -497,7 +507,7 @@ When the input and output shapes mistmatch, the \emph{identity map} is applyed t
 \subsection{Preactivation}
 Following the recent work of He et al. \cite{he2015identity} we adopt \emph{pre-activation} in each block.\emph{Pre-activation} works by just reversing the order of the operations in a block.
 
-\begin{figure} [htbp]
+\begin{figure}[htbp]
     \centering
     \includegraphics[scale=0.2]{../img/implementation/estimator/preactivation.png}
     \caption{\emph{Preactivation} \cite{he2015identity}}
@@ -506,7 +516,7 @@ Following the recent work of He et al. \cite{he2015identity} we adopt \emph{pre-
 Finally, we also used the \emph{Squeeze and Excitation} (SE) module \cite{hu2017squeeze}. It is a form of attention that weights the channel of each convolutional operation by learnable scaling factors. Formally, for a given transformation, e.g. Convolution, defined as $\bm{F}_{tr}  : \bm{X} \mapsto \bm{U}$, $\bm{X} \in mathbb{R}^{H' \times W' \times C'}$, $\bm{U} \in \mathbb{R}^{H \times W \times C}$, the SE module first squeeze the information by using average pooling, $\bm{F}_{sq}$, the it excitates them using learnable weights, $\bm{F}_{ex}$ and finally, adaptive recalibration is performed, $\bm{F}_{scale}$.
 The next figure visualises the SE module.
 
-\begin{figure} [htbp]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=\linewidth]{../img/implementation/estimator/se.png}
     \caption{\emph{Squeeze and Excitation} \cite{hu2017squeeze}}
@@ -517,9 +527,9 @@ Our network is composed by $n$ ResNet blocks, a depth of $d$ and a channel incre
 LeakyRelu(x)=\left\{\begin{array}{ll}{x} & {\text { if } x>0} \\ {0.1 x} & {\text { otherwise }}\end{array}\right.
 \end{equation}
 
-We called this model architecture \emph{MicroResNet}. We evaluated $n=[1,2], d=3$ with and without squeeze and excitation and with the two differents \emph{head}'s convolution. All the networks have a starting channel size of $16$. The following table shows the architecture from top to bottom.
+We called this model architecture \emph{MicroResNet}. We evaluated $n=[1,2], d=3$ with and without squeeze and excitation and with the two differents \emph{head}'s convolution. All the networks have a starting channel size of $16$. Table \ref{tab : microresnet} shows some of the architecture from top to bottom with, while figure \ref{fig : microresnet} visualize the final architecture we adopted  the architecture with initial features size of $16$ and stride of $2$. 
 
-\begin{table} [htbp]
+\begin{table}[htbp]
     \centering
     \ra{1.2}
         \begin{tabular}{@{}l|c|c|c|cc@{}}
@@ -561,15 +571,28 @@ We called this model architecture \emph{MicroResNet}. We evaluated $n=[1,2], d=3
                \hline 
         \end{tabular}
         \caption{MicroResNet architecture. First layer is on the top. Some architecture's blocks are equal across models, this is shows by sharing columns in the table.}
+        \ref{tab : microresnet}
     \end{table}
 \todo[inline]{this table sucks}
 Our models have approximately $35$ times less parameters than the smalles ResNet model, ResNet18, that has $11$M parameters. To simplicity we will use the following notation to describe each architecture variant: \texttt{MicroResNet-{3x3/7x7}-{/SE}}.
 \todo[inline]{ask omar help to add margin in the rows}
 \todo[inline]{add model picture}
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{0.25\textwidth}
+        \includegraphics[width=\textwidth]{../img/3/models/transparent-microresnet.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.25\textwidth}
+        \includegraphics[width=\textwidth]{../img/3/models/transparent-microresnet-se.png}
+    \end{subfigure} 
+
+    \caption{MicroResNet with initial features size of $16$ and stride of $2$ with and without the Squeeze and Excitation module. The rectangle represent the building block of each layer. Convolutiol layers are described by the kernel size, the number of filters and the stride. Lines and dashed lines between layers represents the residual operations and the shortup respectively.}
+    \label{fig : microresnet}
+\end{figure}
 
 \section{Normalization}
 Before feeding the data to the models, we need to make the patches height invariant to correctly normalize different patches taken from different maps with different height scaling factor. To do so, we subtract the height of the map corresponding \emph{Krock}'s position from the patch to correctly center it. The following figure shows the normalization process on the patch with the square in the middle.
-\begin{figure} [htbp]
+\begin{figure}[htbp]
     \centering
     \begin{subfigure}[b]{0.32\textwidth}
         \includegraphics[width=\textwidth]{../img/data-aug/2d/square-middle.png}
@@ -599,34 +622,35 @@ Data augmentation is used to change the input of a model in order to produce mor
 \subsection{Dropout}
 Dropout is a technique to randomly set some pixels to zero, in our case we flat some random pixel in the patch. 
 \subsection{Coarse Dropout}
-Similar to dropout, it sets to zero random regions of pixels with defined boundaries. Figure 
+Similar to dropout, it sets to zero random regions of pixels with defined boundaries. 
 \subsection{Simplex Noise} 
 Simplex Noise is a form of Perlin noise that is mostly used in ground generation. Our idea is to add some noise to make the network generalize better since lots of training maps have only obstacles in flat ground. Since it is computationally expensive, we randomly fist apply the noise to five hundred images with only zeros. Then, we randomly scaled them and add to the input image. 
-\begin{figure} [htbp]
+\begin{figure}[htbp]
     \centering
 
-        \begin{subfigure}[b]{0.45\textwidth}
+        \begin{subfigure}[b]{0.23\textwidth}
             \includegraphics[width=\textwidth]{../img/data-aug/3d/simplex1.png}
             \caption{Features size = 10}
         \end{subfigure}
-        \begin{subfigure}[b]{0.45\linewidth}
+        \begin{subfigure}[b]{0.23\linewidth}
             \includegraphics[width=\textwidth]{../img/data-aug/3d/simplex2.png}
             \caption{Features size = 20}
             \end{subfigure}    
-          \begin{subfigure}[b]{0.45\textwidth}
+          \begin{subfigure}[b]{0.23\textwidth}
             \includegraphics[width=\textwidth]{../img/data-aug/3d/simplex3.png}
             \caption{Features size = 30}
         \end{subfigure}    
-        \begin{subfigure}[b]{0.45\textwidth}
+        \begin{subfigure}[b]{0.23\textwidth}
             \includegraphics[width=\textwidth]{../img/data-aug/3d/simplex4.png}
             \caption{Features size = 40}
         \end{subfigure}    
+    \caption{Simplex noise on flat ground. The feature size corespond to the amount of noise we introduce in the surface. A lower value produces noisy grounds, while a bigger one smoother terrains.}    
     \label{fig: simplex-noise}
-    \caption{Simplex Noise on flat ground. The feature size corespond to the amount of noise we introduce in the surface. A lower value will produce rocky grounds, while a bigger one bumps.}    
+
 \end{figure}
 
-The following images show the tree data augmentation techniques used applied the input image.
-\begin{figure} [htbp]
+Figure \ref{fig: data-aug} shows the tree data augmentation techniques used applied the input image.
+\begin{figure}[htbp]
     \centering
         \begin{subfigure}[b]{0.32\textwidth}
             \includegraphics[width=\textwidth]{../img/data-aug/3d/center-dropout-mayavi.png}
@@ -651,7 +675,7 @@ The following images show the tree data augmentation techniques used applied the
 \end{figure}
 To ensure we do create untraversable patches from traversable patch we limited the coarse dropout region to only few centiments and we apply a smoother simplex noise on traversable patches. In detail,
 
-% \begin{figure} [htbp]
+% \begin{figure}[htbp]
 %     \centering
 %         \begin{subfigure}[b]{0.23\textwidth}
 %             \includegraphics[width=\textwidth]{../img/data-aug/2d/wall.png}
@@ -685,7 +709,7 @@ We quickly list the most important tools and libraries adopted in this project:
     \item PyTorch
     \item FastAI
     \item imgaug
-    \item Blender
+    \item mayavi
 \end{itemize}
 The framework was entirely developed on Ubuntu 18.10 with Python 3.6.
 
