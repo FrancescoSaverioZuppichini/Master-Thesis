@@ -3,8 +3,8 @@
 \usepackage{subfiles}
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
-\usepackage{biblatex}
-% \usepackage{natbib}
+%\usepackage{biblatex}
+\usepackage{natbib}
 \usepackage{todonotes}
 \usepackage{float}
 \usepackage{subcaption}
@@ -45,7 +45,7 @@
 \Month{June} %compulsory
 \Year{2019} %compulsory, put only the year
 \place{Lugano} %compulsory
-\addbibresource{bibliography.bib}
+%\addbibresource{bibliography.bib}
 
 \begin{document}
 
@@ -86,8 +86,10 @@
 \subfile{./tex/conclusion.tex}
 %\clearpage
 
-\printbibliography
-% \bibliographystyle{plainnat}
-% \bibliography{bibliography}
+\backmatter
+
+%\printbibliography
+\bibliographystyle{abbrv}
+\bibliography{bibliography}
 
 \end{document}

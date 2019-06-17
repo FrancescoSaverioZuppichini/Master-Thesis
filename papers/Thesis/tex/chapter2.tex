@@ -4,7 +4,7 @@
 \label{chap: methodology}
 We developed a framework to learn traversability directly on ground patches for any robot using purely simulated data. The core idea, originally proposed by Chavez-Garcia et al. \cite{omar2018traversability}, is simple yet elegant, a robot is let travel into a simulator on different synthetic terrains, while storing its interactions to later crop a region of ground, a patch, around each traveled position and directly train a neural network on them to predict traversability. Figure \ref{fig : pipeline} shows the framework's steps.
 
-\begin{figure}[H]
+\begin{figure} [htbp]
     \centering
         \includegraphics[width=\textwidth]{../img/method.png}
     \caption{The framework's main building block in counter-clockwise order. First, we generated meaningful synthetic grounds, then we let the robot spawn and walk on them in a simulated environment while storing its interactions. Later, we crop a region of ground, a patch, for each simulation trajectory around the robot according to its locomotion. We labeled those images using a defined threshold and fit a deep convolutional neural network to predict traversability. }
@@ -14,7 +14,7 @@ Collecting data through simulation has several main advantages such as variety, 
 Furthermore, we are not limited by real constraint and we can design the ground to maximize the variety of robot interactions. We can artificial design maps to include any kind of situations and challenges.
 Clearly, this also reduces the time required to collect the robot's interactions with the terrain. The time could be further minimized by running different simulations in parallel bypassing the demand for more physical hardware.
 To create a quality dataset, we must generate a series of various surfaces and ensure their diversity. Intuitively, those maps should be small enough to allow fast exploration but big enough to include several features. With modern ground generation techniques, it is fairly straightforward to generate a rich array of terrains with different characteristics such us bumps, ramps, slopes in different levels and sizes. There are several methods to represent terrain, we utilize heightmap where the height component of the ground is stored as pixels in a gray image. Practically, the brightness describes the height. The following figure shows a small collection of synthetic terrains with different features.
-\begin{figure}[H]
+\begin{figure} [htbp]
     \centering
     \begin{subfigure}[b]{0.24\textwidth}
         \includegraphics[width=\linewidth]{../img/hm3d/bars1.png}
@@ -37,7 +37,7 @@ To create a quality dataset, we must generate a series of various surfaces and e
 To let the robot interacts with them, each map can be simply loaded into a simulator. To ensure a correct exploration of each terrain, we randomly spawn the robot multiple times on the same map and let it walk for a fixed amount of time. Randomly spawn the robot on the surface reduce the possibility to repeatedly visiting the same spot and it maximizes the robot's exploration.
 
 The robot position is tracked and stored during simulation in order to extract a small portion of ground, patches, around each of its trajectory's position. In practice, the patches are cropped from the original image using a specific size based on the robot's footprint and its velocity. Each resulting image is labeled using a minimum advancement based on the robot's characteristic. We tested our framework on a legged crocodile-like robot called \emph{Krock}. Due to its four legs, the robot has very unique locomotion allowing it to overcome different obstacles making estimate traversability more challenging. Figure \ref{patch-extraction} helps to visualize the procedure. The dataset generation process in explain in detail in section \ref{sec: data-gathering}. while 
-\begin{figure}[H]
+\begin{figure} [htbp]
     \centering
     \begin{subfigure}[b]{0.66\textwidth}
     \includegraphics[width=\textwidth]{../img/krock-bars-correct-small.png}

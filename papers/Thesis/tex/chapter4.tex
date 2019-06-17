@@ -49,7 +49,7 @@ We compared two different \emph{micro-resnet} and the \emph{vanilla} cnn from th
 Based on this data We select \emph{micro-resnet} with squeeze and excitation and a starting convolution's kernel size of $7\times7$ with stride of $2$. This model has one third of the parameter of the origal model proposed by Chavez-Garcia et all \cite{omar2018traversability}. 
 
 As proof of work, we also train the best network architecture, MicroResnetSE with a first convolution's kernel size of $7 \times 7$ and stride$=2$, with and without the Squeeze and Excitation operator.
-\begin{table*}[h]
+\begin{table*} [htbp]
   \centering
   \ra{1.2}
   \begin{tabular}{@{}lccc@{}}
@@ -65,7 +65,7 @@ As proof of work, we also train the best network architecture, MicroResnetSE wit
 
 \section{Final results}
 The following table shows in deep the score of the best network for each dataset.
-\begin{table*}[h]
+\begin{table*} [htbp]
     \centering
     \ra{1.2}
     \begin{tabular}{@{}llccccc@{}}
@@ -94,7 +94,7 @@ We qualitative evaluate the model predictions by plotting the traversability pro
 \subsection{Quarry}
 The first map we evaluate is Quarry, this map is $32\times 32$m long and has a maximum height of $10$m. We can use some of the terrain interesting features, such as are three bis slopes and the rocky ground on top, to evaluate the model. For instance, w expect the trail on the slopes to be traversable at almost any rotation, expecially from left to right and viceversa. While, the top part should be hard to traverse in almost any case. The following figure shows the traversability probability directly on the map. 
 \todo[inline]{some where place the colormap bar}
-\begin{figure}[H]
+\begin{figure} [htbp]
 \centering
 \begin{subfigure}[b]{0.45\textwidth}
   \includegraphics[width=\linewidth]{../img/4/traversability/quarry/-270.png} 
@@ -125,7 +125,7 @@ The first map we evaluate is Quarry, this map is $32\times 32$m long and has a m
 \subsection{Bars}
 Bars is a map composed by different heights wall, thus we expect similar probabilities with different orientation.
 
-\begin{figure}[H]
+\begin{figure} [htbp]
   \centering
   \begin{subfigure}[b]{0.45\textwidth}
     \includegraphics[width=\linewidth]{../img/4/traversability/bars/-270.png} 
@@ -152,7 +152,7 @@ Bars is a map composed by different heights wall, thus we expect similar probabi
 
 This is a hard map for the robot due to the high number of not traversable walls. Interesting, we can identify a tunnel near the bottom center of the maps that shows how the model correctly label those patches depending on the orientation. The following figure highlight this detail.
 
-\begin{figure}[H]
+\begin{figure} [htbp]
   \centering
   \begin{subfigure}[b]{0.23\textwidth}
     \includegraphics[width=\linewidth]{../img/4/traversability/bars/tunnel/-270-crop.png} 
@@ -180,7 +180,7 @@ This is a hard map for the robot due to the high number of not traversable walls
 \subsection{Small village}
 The following image shows the traversability probability on the small image map.
 
-\begin{figure}[H]
+\begin{figure} [htbp]
   \centering
   \begin{subfigure}[b]{0.45\textwidth}
     \includegraphics[width=\linewidth]{../img/4/traversability/sullens/-270.png} 
@@ -205,7 +205,7 @@ The following image shows the traversability probability on the small image map.
   \caption{Traversability probability on the map of a small village for different Krock's rotation. The surface cover $30\times 30$m and has a maximum height of $10$m. The values are obtained by sliding a window on the map to create the patches and then predict the traversability for each one of them.}
   \end{figure}
   All the streest were label as traversble, while the roofs' traversability depend on the orientation. For example, most steep roofs are not traversble when walking up hill. On the other hand, if krock walk side by side they can be traverse. The following figure shows this behaviour on the church's roof.
-  \begin{figure}[H]
+  \begin{figure} [htbp]
     \centering
     \begin{subfigure}[b]{0.45\textwidth}
       \includegraphics[width=\linewidth]{../img/4/traversability/sullens-church/-270.png} 
