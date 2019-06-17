@@ -19,10 +19,10 @@
 
 %%% identification
 \NeedsTeXFormat{LaTeX2e}[1995/12/01]
-\ProvidesClass{usiinfthesis}[2010/04/14 v. 1.1.2 %
+\ProvidesClass{usiinfthesis}[2009/09/30 v. 1.0.8 %
  USI Informatics Doctoral Dissertation class]
 %%% initial code
-\RequirePackage{xifthen}
+\RequirePackage{ifthen}
 %%% true to produce a version suitable for printing
 \newboolean{@printversion}
 %%% true to enable automatic loading of hyperref package
@@ -41,13 +41,6 @@
 \newboolean{@mscthesis}
 % true if a master specialization is provided
 \newboolean{@mscspec}
-% true if the lulu options is provided
-\newboolean{@lulu}
-\DeclareOption{lulu}{%
-\setboolean{@lulu}{true}
-\setboolean{@crn}{true}
-%\setboolean{@crn}{true}
-}
 %%% declaration of options
 \DeclareOption{print}{\setboolean{@printversion}{true}}
   {%redefine margins to match oneside layout
@@ -80,27 +73,29 @@
 \ProcessOptions \relax
 \typeout{*** Please report bugs, comments, suggestions, and improvements
   to: }
-\typeout{*** Domenico Bianculli <domenico.bianculli@usi.ch>}
-\typeout{*** Jochen Wuttke <wuttkej@usi.ch>}
+\typeout{*** Domenico Bianculli <domenico.bianculli@lu.unisi.ch>}
+\typeout{*** Jochen Wuttke <wuttkej@lu.unisi.ch>}
 %%% package loading
-\ifthenelse{\boolean{@lulu}}
-{\LoadClass[a4paper,10pt,twoside,onecolumn,openright,titlepage]{book}}
-{\LoadClass[a4paper,twoside,onecolumn,openright,titlepage]{book}}
+\LoadClass[a4paper,12pt,twoside,onecolumn,final,openright,titlepage]{book}
 %%% main code
 
 
 %font settings
 \RequirePackage[T1]{fontenc}
-% \RequirePackage[charter]{mathdesign}
-% \RequirePackage[scaled]{beramono}
-\renewcommand{\sfdefault}{uop}
-\renewcommand{\scshape}{%
-\not@math@alphabet\scshape\relax
-\ifthenelse{\equal{\f@family}{uop}}%
-{\fontshape{sc}\selectfont}%
-{\fontshape{fsc}\selectfont}%
-}
+\RequirePackage[charter]{mathdesign}
+\RequirePackage[scaled]{beramono}
+\renewcommand{\sfdefault}{helve}
+%\renewcommand{\scshape}{%
+%\not@math@alphabet\scshape\relax
+%\ifthenelse{\equal{\f@family}{helve}}%
+%{\fontshape{sc}\selectfont}%
+%{\fontshape{fsc}\selectfont}%
+%}
 
+\renewcommand{\sfdefault}{phv}
+\renewcommand{\rmdefault}{ptm}
+\renewcommand{\ttdefault}{pcr}
+\normalfont\selectfont
 
 %sans-serif titles
 \RequirePackage{sectsty}
@@ -108,18 +103,11 @@
 
 %geometry
 \RequirePackage[a4paper]{geometry}
-\geometry{hscale=0.66}
+\geometry{hscale=0.67}
 \ifthenelse{\boolean{@printversion}}{}%
 {  \geometry{asymmetric}
   \geometry{bindingoffset=0pt,hmarginratio=1:1}
 }
-\ifthenelse{\boolean{@lulu}}%
-{
-  \renewcommand\@ptsize{0}%% set font size to 10pt
-  \geometry{papersize={6in, 9in}}
-  \geometry{inner=.625in, outer=.5in, top=.5in, bottom=0.75in,  
-  includehead,includefoot,twoside}
-}{}
 
 
 %%% fancy headers
@@ -136,80 +124,21 @@
 }
 %modifying captions
 \RequirePackage[font=sf,labelsep=period]{caption}
-%datatool
-\RequirePackage{datatool}
-\RequirePackage{calc}
-
-%commands to print empty values in the database 
-\newcommand{\print@blank}[1]{\ifthenelse{\equal{#1}{!blank!}}{}{#1\ }}
-\newcommand{\print@empty}[1]{\ifthenelse{\equal{#1}{!blank!}}{}{#1}}
-%%% populate the committee database
-%%% format of the rows (name of the columns in brackets) :
-%%% Title [title], First and Middle [first], Last [last], Affiliation
-%%% [aff], Type ([a]dvisor, [c]oadvisor, [e]xternal, [i]nternal) [type]
-\newenvironment{committee}{%
-\DTLnewdb{committee}
-}%
-{%
-\DTLsort{last}{committee}
-}
-
-\newcounter{advisors}
-\newcommand{\advisor}[4][Universit\`a della Svizzera Italiana, Switzerland]{%
-\DTLnewrow{committee}
-\ifthenelse{\isempty{#2}}{\DTLnewdbentry{committee}{title}{!blank!}}{%
-\DTLnewdbentry{committee}{title}{#2}}
-\DTLnewdbentry{committee}{first}{#3}
-\DTLnewdbentry{committee}{last}{#4}
-\DTLnewdbentry{committee}{aff}{#1}
-\DTLnewdbentry{committee}{type}{a}
-\stepcounter{advisors}
-}
-
-
-\newcounter{coadvisors}
-\newcommand{\coadvisor}[4]{%
-\DTLnewrow{committee}
-\ifthenelse{\isempty{#1}}{\DTLnewdbentry{committee}{title}{!blank!}}{%
-\DTLnewdbentry{committee}{title}{#1}}
-\DTLnewdbentry{committee}{first}{#2}
-\DTLnewdbentry{committee}{last}{#3}
-\DTLnewdbentry{committee}{aff}{#4}
-\DTLnewdbentry{committee}{type}{c}
-\stepcounter{coadvisors}
-}
-
-\newcounter{internalmembers}
-\newcommand{\internalmember}[4][Universit\`a della Svizzera Italiana, Switzerland]{%
-\DTLnewrow{committee}
-\ifthenelse{\isempty{#2}}{\DTLnewdbentry{committee}{title}{!blank!}}{%
-\DTLnewdbentry{committee}{title}{#2}}
-\DTLnewdbentry{committee}{first}{#3}
-\DTLnewdbentry{committee}{last}{#4}
-\DTLnewdbentry{committee}{aff}{#1}
-\DTLnewdbentry{committee}{type}{i}
-\stepcounter{internalmembers}
-}
-
-\newcounter{externalmembers}
-\newcommand{\externalmember}[4]{%
-\DTLnewrow{committee}
-\ifthenelse{\isempty{#1}}{\DTLnewdbentry{committee}{title}{!blank!}}{%
-\DTLnewdbentry{committee}{title}{#1}}
-\DTLnewdbentry{committee}{first}{#2}
-\DTLnewdbentry{committee}{last}{#3}
-\DTLnewdbentry{committee}{aff}{#4}
-\DTLnewdbentry{committee}{type}{e}
-\stepcounter{externalmembers}
-}
-
 
 
 %%% additional titlepage content commands
-\newcommand{\programDirector}[1]{\gdef\@progdir{#1}}
 \newcommand{\subtitle}[1]{\gdef\@subtitle{#1}\setboolean{@subtitle}{true}}
+
+
+\newcommand{\advisor}[1]{\gdef\@advisor{#1}}
+\newcommand{\@advisor}{\@latex@error{No \noexpand\advisor given}\@ehc}
+
 \newcommand{\Month}[1]{\gdef\@month{#1}}
 \newcommand{\Year}[1]{\gdef\@year{#1}}
+\newcommand{\@year}{\@latex@error{No submission year with command \noexpand\Year given}\@ehc}
+
+\newcommand{\coadvisor}[1]{\gdef\@coadvisor{#1}\setboolean{@coadvisor}{true}}
+
 \newcommand{\specialization}[1]{\gdef\@specialization{#1}\setboolean{@mscspec}{true}}
 
 %%% title page
@@ -228,7 +157,7 @@
     \ifthenelse{\boolean{@mscthesis}}{Master's Thesis}{Doctoral
     Dissertation}
     {submitted to the}\\[2mm]
-    {Faculty of Informatics of the \em{Universit\`a della Svizzera Italiana}}\\[2mm]
+    {Faculty of Informatics of the Universit\`a della Svizzera Italiana}\\[2mm]
     {in partial fulfillment of the requirements for the degree of}\\[2mm]
      \ifthenelse{\boolean{@mscthesis}}{%
      Master of Science in Informatics%
@@ -240,16 +169,8 @@
     \vfill
     
     {under the supervision of}\\[2mm]
-    \DTLforeach*[\DTLiseq{\type}{a}]{committee}%
-    {\actitle=title,\first=first,\last=last,\type=type}{%
-     {\large {\DTLiffirstrow{}{, }\print@blank{\actitle}\first \ \last}}%
-    }
-    \ifthenelse{\value{coadvisors} > 0}{%
-    \\[2mm] co-supervised by\\[2mm]
-    \DTLforeach*[\DTLiseq{\type}{c}]{committee}%
-    {\actitle=title,\first=first,\last=last,\type=type}{%
-     {\large {\DTLiffirstrow{}{, }\print@blank{\actitle}\first \ \last}}%
-    }}{}
+    \ifthenelse{\boolean{@coadvisor}}{{\large {\@advisor\ and \@coadvisor}}\\}
+    {{\large {\@advisor}}\\}
     \vfill
     {\@month\ \@year}\\
   \end{center}
@@ -273,6 +194,12 @@
 
 %% additional frontmatter content commands
 
+\newcommand{\programDirector}[1]{\gdef\@progdir{#1}}
+\newcommand{\@progdir}{\@latex@error{No \noexpand\programDirector given}\@ehc}
+\newcommand{\committee}[1]{\gdef\@committee{\begin{tabular}{ll}\\%
+#1
+\end{tabular}\\}}
+\newcommand{\committeeMember}[2]{\bf #1 & #2\\}
 \newcommand{\dedication}[1]{\gdef\@dedication{#1}\setboolean{@dedication}{true}}
 \newcommand{\openepigraph}[2]{\gdef\@openepigraph{\epigraph{#1}{#2}}\setboolean{@epigraph}{true}}
 \newcommand\Day[1]{\gdef\@dateaccepted{#1}}
@@ -317,57 +244,42 @@ date of the approved research program.\\[18mm]
     \pagenumbering{roman}
   \setcounter{page}{1}
     \pagestyle{hrulefpage}
-    \ifthenelse{\boolean{@lulu}}{}{%No committee page in book
      \ifthenelse{\boolean{@mscthesis}}{}{%
-     \begin{center}
+    \begin{center}
     \vspace{1cm}
     \noindent {\large {\bf \sffamily Dissertation Committee}}\\[2mm]
     \vspace{12mm}
-   \begin{tabular}{l@{}r@{\ }ll}
-    %others
-     \DTLforeach*[\DTLiseq{\type}{i}]{committee}%
-     {\actitle=title,\first=first,\last=last,\type=type,\aff=aff}{%
-     &%ack to remove spurious leading space in [i] rows
-     \textbf{\print@empty{\actitle}} &
-     \textbf{\first \ \last} & \aff\\ 
-     }
-     \\
-     \DTLforeach*[\DTLiseq{\type}{e}]{committee}%
-     {\actitle=title,\first=first,\last=last,\type=type,\aff=aff}{%
-     &%ack to remove spurious leading space in [e] rows
-     \textbf{\print@empty{\actitle}} &
-     \textbf{\first \ \last} & \aff\\ 
-     }
-    \end{tabular}
+  %\begin{center}
+      \@committee
+  %\end{center}
+    \vfill
+    \vfill
     \vfill
     \noindent {Dissertation accepted on \@dateaccepted\ \@month\
-    \@year}
-    \vfill
-    \vfill
-    %advisor
-    \DTLforeach*[\DTLiseq{\type}{a}]{committee}%
-    {\actitle=title,\first=first,\last=last,\type=type,\aff=aff}{%
-        \rule{.5\textwidth}{0.2mm} \\
-        \textbf{\print@blank{\actitle}\first \ \last} \\
-        Research Advisor \\ \aff
-        \vfill
-    }
-    %coadvisor
-    \DTLforeach*[\DTLiseq{\type}{c}]{committee}%
-    {\actitle=title,\first=first,\last=last,\type=type,\aff=aff}{%
-        \rule{.5\textwidth}{0.2mm} \\
-        \textbf{\print@blank{\actitle}\first \ \last}\\ Research Co-Advisor \\ \aff
-        \vfill
-    }
-    %director
-    \rule{.5\textwidth}{0.2mm} \\ \textbf{\@progdir} \\ PhD
-    Program Director  \vfill
+    \@year}\\[18mm]
+    \begin{tabular}{cc}
+     \rule{0.45\textwidth}{0.2mm} & \rule{0.45\textwidth}{0.2mm}\\
+     \if@coadvisor
+      Research Advisor & Co-Advisor\\\addlinespace
+      \bf \@advisor & \bf \@coadvisor\\\addlinespace
+      & \\\addlinespace
+      & \\\addlinespace
+      \multicolumn{2}{c}{\rule{0.45\textwidth}{0.2mm}}\\\addlinespace
+      \multicolumn{2}{c}{PhD Program Director}\\\addlinespace
+      \multicolumn{2}{c}{\bf \@progdir}\\\addlinespace
+      \end{tabular}
+     \else
+      Research Advisor & PhD Program Director\\\addlinespace
+      \bf \@advisor & \bf \@progdir\\\addlinespace
+      \end{tabular}
+      \vfill
+    \fi
     \end{center}
+    
     \clearpage
     }
   \@authdecl
    \ifthenelse{\boolean{@mscthesis}}{\thispagestyle{empty}\cleardoublepage}{}
-   }%end lulu exclude
   \pagestyle{plain}
 
   \ifthenelse{\boolean{@dedication}}{%
@@ -388,7 +300,7 @@ date of the approved research program.\\[18mm]
     \renewcommand{\headrulewidth}{0pt}}
     \pagestyle{fancy}
     \renewcommand{\chaptermark}[1]{\markboth{\ ##1}{}}
-    \renewcommand{\chaptermark}[1]{\markright{\thesection\ ##1}}
+    \renewcommand{\sectionmark}[1]{\markright{\thesection\ ##1}}
     \ifthenelse{\boolean{@printversion}}{%
       \fancyhead{}
       \fancyhead[LE, RO]{\sf \thepage}
@@ -481,10 +393,10 @@ date of the approved research program.\\[18mm]
 \RequirePackage{graphicx}
 \RequirePackage{textcomp}
 \RequirePackage{url}
-\RequirePackage{amsmath}
+% \RequirePackage{amsmath}
 % \RequirePackage[square]{natbib}
-% %%% lowercase header for bibliography and corresponding entry in the
-% %%% ToC. \bibsection is provided by the natbib package
+%%% lowercase header for bibliography and corresponding entry in the
+%%% ToC. \bibsection is provided by the natbib package
 % \renewcommand\bibsection{
 % \chapter*{\bibname \@mkboth{\bibname}{\bibname}}
 % \ifthenelse{\boolean{@hypermode}}{\phantomsection}{}

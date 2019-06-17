@@ -2,8 +2,9 @@
 \begin{document}
 \section{Quarry dataset}
 \label{sec: quarry-dataset}
-After showing the model's capability of correctly separate classes' features we utilized Grad-CAM to visualize some of the samples in the test set. We divided those inputs in four classes based on the model's performance: worst, best, false positive and folse negative. We expect the worst and the best output to be on the left and the right branch of figure \ref{fig: pca-test-patches} respectively, while the other two categories to be in the mixed points.
-We randomly sampled twenty inputs from those set and appplied Grad-CAM as texture on the 3D render to better visualize which region of the inputs caused the prediction. 
+After showing the model's capability of correctly separate classes' features we utilized Grad-CAM to visualize some of the samples in the test set. The aim of this section is to show how the model looks at meaningfull features in each inputs to make the prediction even if its prediciton is wrong. For instance, imagine we feed to the model a not traversable patch with an obstacle and the network label is as traversable. Obsliously, the output is wrong but two situation may happened that effect the degree of 'wrongness'. First, the model could just have ignored the obstcle and looked away, meaning if was not even able to understand it should have loook there. Second, the network could have correctly look at the obstacle but thouhgt that maybe the obstacle was not tall enough, showing a correct ability to find and use important features in the map. We showned that, even when the predictions are wrong, our model always look at the most important features of each input to determine its traversability. 
+
+We divided those inputs in four classes based on the model's performance: worst, best, false positive and folse negative. Then, we took twenty inputs from those sets and appplied Grad-CAM as texture on the 3D render to better visualize which region of the inputs caused the prediction. 
 % \subsection{Best}
 % We start evaluating our model by using the test set composed by samples from the Quarry map. We expect the model to correctly classify the patches with easy to see features such as big obstacles, steep ramps and holes. Unfortunately, the dataset is not trivial and most of the patches are challenging to classify even to human eye. 
 
@@ -119,268 +120,342 @@ Moreover, in other patches \ref{fig : quarry-best-1},  \ref{fig : quarry-best-8}
     \end{figure}
 
 \subsection{Worst}
+Those are the not traversable patches, we ordered by advancement. In this case, the region highlighted by the Grad-CAM are the features in the ground that contribute the most to make the patch not traversable. For instance, in some patches, \ref{fig : quarry-worst-1}, \ref{fig : quarry-worst-5}, \ref{fig : quarry-worst-19}, the most not traversable features is directly under the robot legs, similar as before. While, for the others samples, \ref{fig : quarry-worst-0}, \ref{fig : quarry-worst-2}, \ref{fig : quarry-worst-3}, \ref{fig : quarry-worst-4}, ..., the attention of the network is on the obstacles in front of the robot. This is oblious in  \ref{fig : quarry-worst-2}, \ref{fig : quarry-worst-2}, \ref{fig : quarry-worst-4}, where the big wall on the right is almost totally highlighted. So, also in this case, the model is able to understand which part of the patch cause the prediciton. 
 \begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/worst/-35-patch-3d-majavi-colormap-0.png}
     \caption{-0.36cm}
+    \label{fig : quarry-worst-0}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/worst/-7-patch-3d-majavi-colormap-10.png}
     \caption{-0.08cm}
+    \label{fig : quarry-worst-1}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/worst/-4-patch-3d-majavi-colormap-20.png}
     \caption{-0.05cm}
+    \label{fig : quarry-worst-2}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/worst/-3-patch-3d-majavi-colormap-30.png}
     \caption{-0.03cm}
+    \label{fig : quarry-worst-3}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/worst/-2-patch-3d-majavi-colormap-40.png}
     \caption{-0.02cm}
+    \label{fig : quarry-worst-4}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/worst/-1-patch-3d-majavi-colormap-50.png}
     \caption{-0.01cm}
+    \label{fig : quarry-worst-5}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/worst/00-patch-3d-majavi-colormap-60.png}
     \caption{-0.01cm}
+    \label{fig : quarry-worst-6}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/worst/00-patch-3d-majavi-colormap-70.png}
     \caption{0.00cm}
+    \label{fig : quarry-worst-7}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/worst/00-patch-3d-majavi-colormap-80.png}
     \caption{0.01cm}
+    \label{fig : quarry-worst-8}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/worst/01-patch-3d-majavi-colormap-90.png}
     \caption{0.02cm}
+    \label{fig : quarry-worst-9}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/worst/02-patch-3d-majavi-colormap-100.png}
     \caption{0.02cm}
+    \label{fig : quarry-worst-10}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/worst/03-patch-3d-majavi-colormap-110.png}
     \caption{0.03cm}
+    \label{fig : quarry-worst-11}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/worst/04-patch-3d-majavi-colormap-120.png}
     \caption{0.05cm}
+    \label{fig : quarry-worst-12}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/worst/06-patch-3d-majavi-colormap-130.png}
     \caption{0.06cm}
+    \label{fig : quarry-worst-13}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/worst/07-patch-3d-majavi-colormap-140.png}
     \caption{0.08cm}
+    \label{fig : quarry-worst-14}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/worst/09-patch-3d-majavi-colormap-150.png}
     \caption{0.10cm}
+    \label{fig : quarry-worst-15}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/worst/11-patch-3d-majavi-colormap-160.png}
     \caption{0.11cm}
+    \label{fig : quarry-worst-16}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/worst/13-patch-3d-majavi-colormap-170.png}
     \caption{0.13cm}
+    \label{fig : quarry-worst-17}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/worst/15-patch-3d-majavi-colormap-180.png}
     \caption{0.15cm}
+    \label{fig : quarry-worst-18}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/worst/17-patch-3d-majavi-colormap-190.png}
     \caption{0.17cm}
+    \label{fig : quarry-worst-19}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/worst/19-patch-3d-majavi-colormap-200.png}
     \caption{0.20cm}
+    \label{fig : quarry-worst-20}
     \end{subfigure}
+    \label{fig : quarry-worst}
     \end{figure}
+
 \subsection{False Negative}
+Those are the inputs that were labeled as negative but predicted as positive. There are lots of interesting cases, we can cluster those patches in three groups: obstacles ahead, slopes and wall parallele to the robot. In figures \ref{fig : quarry-false_negative-0}, \ref{fig : quarry-false_negative-5}, \ref{fig : quarry-false_negative-13}, the models is looking at the obstacle in front of the robot.  Slopes, figures \ref{fig : quarry-false_negative-1}, \ref{fig : quarry-false_negative-8}, \ref{fig : quarry-false_negative-11}, \ref{fig : quarry-false_negative-14}, \ref{fig : quarry-false_negative-15}, \ref{fig : quarry-false_negative-19}, are not completely smooth, making harder to classify them. The last cluster of inputs are the ones with a wall parallel to the robot, figures \ref{fig : quarry-false_negative-13} and \ref{fig : quarry-false_negative-19}. In those cases the model looks at the initial position of the robot, left, and the final part of the patch. Intuitivelly, is trying to understand if the robot fits on the trail. 
+
+In general, most of the region of interested on those patches are located on the left, close to the position of the robot's leg. Correctly, even if the prediction is wrong, the model looks at the first region of the surface, located near the legs, that can cause non traversability. This shown a correct behaviour even with wrongly prediciton meaning that the network is always looking in the correct spot. 
 \begin{figure}[H]
-    \centering
-    \begin{subfigure}[b]{0.192\linewidth}
-    \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/-14-patch-3d-majavi-colormap-0.png}
-    \caption{-0.14cm}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.192\linewidth}
-    \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/-6-patch-3d-majavi-colormap-10.png}
-    \caption{-0.07cm}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.192\linewidth}
-    \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/-4-patch-3d-majavi-colormap-20.png}
-    \caption{-0.05cm}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.192\linewidth}
-    \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/-2-patch-3d-majavi-colormap-30.png}
-    \caption{-0.02cm}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.192\linewidth}
-    \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/00-patch-3d-majavi-colormap-40.png}
-    \caption{-0.00cm}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.192\linewidth}
-    \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/01-patch-3d-majavi-colormap-50.png}
-    \caption{0.01cm}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.192\linewidth}
-    \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/02-patch-3d-majavi-colormap-60.png}
-    \caption{0.03cm}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.192\linewidth}
-    \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/04-patch-3d-majavi-colormap-70.png}
-    \caption{0.04cm}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.192\linewidth}
-    \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/05-patch-3d-majavi-colormap-80.png}
-    \caption{0.06cm}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.192\linewidth}
-    \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/06-patch-3d-majavi-colormap-90.png}
-    \caption{0.07cm}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.192\linewidth}
-    \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/08-patch-3d-majavi-colormap-100.png}
-    \caption{0.08cm}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.192\linewidth}
-    \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/09-patch-3d-majavi-colormap-110.png}
-    \caption{0.09cm}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.192\linewidth}
-    \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/10-patch-3d-majavi-colormap-120.png}
-    \caption{0.11cm}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.192\linewidth}
-    \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/11-patch-3d-majavi-colormap-130.png}
-    \caption{0.12cm}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.192\linewidth}
-    \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/12-patch-3d-majavi-colormap-140.png}
-    \caption{0.13cm}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.192\linewidth}
-    \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/14-patch-3d-majavi-colormap-150.png}
-    \caption{0.14cm}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.192\linewidth}
-    \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/15-patch-3d-majavi-colormap-160.png}
-    \caption{0.15cm}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.192\linewidth}
-    \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/16-patch-3d-majavi-colormap-170.png}
-    \caption{0.17cm}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.192\linewidth}
-    \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/17-patch-3d-majavi-colormap-180.png}
-    \caption{0.18cm}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.192\linewidth}
-    \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/18-patch-3d-majavi-colormap-190.png}
-    \caption{0.18cm}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.192\linewidth}
-    \includegraphics[width=\linewidth]{../img/5/quarry/false_negative/19-patch-3d-majavi-colormap-200.png}
-    \caption{0.19cm}
-    \end{subfigure}
-    \end{figure}
+\centering
+\begin{subfigure}[b]{0.192\linewidth}
+\includegraphics[width=\linewidth]{../img/5/quarry/false_negative/-14-patch-3d-majavi-colormap-0.png}
+\caption{-0.14cm}
+\label{fig : quarry-false_negative-0}
+\end{subfigure}
+\begin{subfigure}[b]{0.192\linewidth}
+\includegraphics[width=\linewidth]{../img/5/quarry/false_negative/-6-patch-3d-majavi-colormap-10.png}
+\caption{-0.07cm}
+\label{fig : quarry-false_negative-1}
+\end{subfigure}
+\begin{subfigure}[b]{0.192\linewidth}
+\includegraphics[width=\linewidth]{../img/5/quarry/false_negative/-4-patch-3d-majavi-colormap-20.png}
+\caption{-0.05cm}
+\label{fig : quarry-false_negative-2}
+\end{subfigure}
+\begin{subfigure}[b]{0.192\linewidth}
+\includegraphics[width=\linewidth]{../img/5/quarry/false_negative/-2-patch-3d-majavi-colormap-30.png}
+\caption{-0.02cm}
+\label{fig : quarry-false_negative-3}
+\end{subfigure}
+\begin{subfigure}[b]{0.192\linewidth}
+\includegraphics[width=\linewidth]{../img/5/quarry/false_negative/00-patch-3d-majavi-colormap-40.png}
+\caption{-0.00cm}
+\label{fig : quarry-false_negative-4}
+\end{subfigure}
+\begin{subfigure}[b]{0.192\linewidth}
+\includegraphics[width=\linewidth]{../img/5/quarry/false_negative/01-patch-3d-majavi-colormap-50.png}
+\caption{0.01cm}
+\label{fig : quarry-false_negative-5}
+\end{subfigure}
+\begin{subfigure}[b]{0.192\linewidth}
+\includegraphics[width=\linewidth]{../img/5/quarry/false_negative/02-patch-3d-majavi-colormap-60.png}
+\caption{0.03cm}
+\label{fig : quarry-false_negative-6}
+\end{subfigure}
+\begin{subfigure}[b]{0.192\linewidth}
+\includegraphics[width=\linewidth]{../img/5/quarry/false_negative/04-patch-3d-majavi-colormap-70.png}
+\caption{0.04cm}
+\label{fig : quarry-false_negative-7}
+\end{subfigure}
+\begin{subfigure}[b]{0.192\linewidth}
+\includegraphics[width=\linewidth]{../img/5/quarry/false_negative/05-patch-3d-majavi-colormap-80.png}
+\caption{0.06cm}
+\label{fig : quarry-false_negative-8}
+\end{subfigure}
+\begin{subfigure}[b]{0.192\linewidth}
+\includegraphics[width=\linewidth]{../img/5/quarry/false_negative/06-patch-3d-majavi-colormap-90.png}
+\caption{0.07cm}
+\label{fig : quarry-false_negative-9}
+\end{subfigure}
+\begin{subfigure}[b]{0.192\linewidth}
+\includegraphics[width=\linewidth]{../img/5/quarry/false_negative/08-patch-3d-majavi-colormap-100.png}
+\caption{0.08cm}
+\label{fig : quarry-false_negative-10}
+\end{subfigure}
+\begin{subfigure}[b]{0.192\linewidth}
+\includegraphics[width=\linewidth]{../img/5/quarry/false_negative/09-patch-3d-majavi-colormap-110.png}
+\caption{0.09cm}
+\label{fig : quarry-false_negative-11}
+\end{subfigure}
+\begin{subfigure}[b]{0.192\linewidth}
+\includegraphics[width=\linewidth]{../img/5/quarry/false_negative/10-patch-3d-majavi-colormap-120.png}
+\caption{0.11cm}
+\label{fig : quarry-false_negative-12}
+\end{subfigure}
+\begin{subfigure}[b]{0.192\linewidth}
+\includegraphics[width=\linewidth]{../img/5/quarry/false_negative/11-patch-3d-majavi-colormap-130.png}
+\caption{0.12cm}
+\label{fig : quarry-false_negative-13}
+\end{subfigure}
+\begin{subfigure}[b]{0.192\linewidth}
+\includegraphics[width=\linewidth]{../img/5/quarry/false_negative/12-patch-3d-majavi-colormap-140.png}
+\caption{0.13cm}
+\label{fig : quarry-false_negative-14}
+\end{subfigure}
+\begin{subfigure}[b]{0.192\linewidth}
+\includegraphics[width=\linewidth]{../img/5/quarry/false_negative/14-patch-3d-majavi-colormap-150.png}
+\caption{0.14cm}
+\label{fig : quarry-false_negative-15}
+\end{subfigure}
+\begin{subfigure}[b]{0.192\linewidth}
+\includegraphics[width=\linewidth]{../img/5/quarry/false_negative/15-patch-3d-majavi-colormap-160.png}
+\caption{0.15cm}
+\label{fig : quarry-false_negative-16}
+\end{subfigure}
+\begin{subfigure}[b]{0.192\linewidth}
+\includegraphics[width=\linewidth]{../img/5/quarry/false_negative/16-patch-3d-majavi-colormap-170.png}
+\caption{0.17cm}
+\label{fig : quarry-false_negative-17}
+\end{subfigure}
+\begin{subfigure}[b]{0.192\linewidth}
+\includegraphics[width=\linewidth]{../img/5/quarry/false_negative/17-patch-3d-majavi-colormap-180.png}
+\caption{0.18cm}
+\label{fig : quarry-false_negative-18}
+\end{subfigure}
+\begin{subfigure}[b]{0.192\linewidth}
+\includegraphics[width=\linewidth]{../img/5/quarry/false_negative/18-patch-3d-majavi-colormap-190.png}
+\caption{0.18cm}
+\label{fig : quarry-false_negative-19}
+\end{subfigure}
+\begin{subfigure}[b]{0.192\linewidth}
+\includegraphics[width=\linewidth]{../img/5/quarry/false_negative/19-patch-3d-majavi-colormap-200.png}
+\caption{0.19cm}
+\label{fig : quarry-false_negative-20}
+\end{subfigure}
+\label{fig : quarry-false_negative}
+\end{figure}
+
 \subsection{False Positive}
+Those are the most interesting ones, they are the samples that were labeled as traversable but predicted as not traversable. They includes different types of patches, obstacles ahead, slopes and flat regions. In each case the model looks at meaningfull features in the patches that can effect traversability. In the slopes, \ref{fig : quarry-false_positive-8} and \ref{false_positive-9}, the first part of the surface is highlighted. Similar as before, the model is looking if the rear legs will be able to move and thought that those small steps will cause the robot not advance enough. The same consideration can be done for figure \ref{fig : quarry-false_positive-5}. On the other hand, some inputs. definitely confused the model. For instance, in figures \ref{fig : quarry-false_positive-7} and \ref{fig : quarry-false_positive-18} the model is more interested in the big obstacle on the right part. This lead to classify those patches as not traversable, even if the obstacle is more distant than the treshold, in this case the network was totally confused. Interesting, figure \ref{fig : quarry-false_positive-13} shows an almost identical situation in which the network correctly looks at the initial part of the ground. We can deduce that even if the in almost any cases the network's prediction is caused by the correct part of the inputs, it can be confused by big obstacle near the end.
 \begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/20-patch-3d-majavi-colormap-0.png}
     \caption{0.20cm}
+    \label{fig : quarry-false_positive-0}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/20-patch-3d-majavi-colormap-12.png}
     \caption{0.21cm}
+    \label{fig : quarry-false_positive-1}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/22-patch-3d-majavi-colormap-24.png}
     \caption{0.22cm}
+    \label{fig : quarry-false_positive-2}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/23-patch-3d-majavi-colormap-36.png}
     \caption{0.23cm}
+    \label{fig : quarry-false_positive-3}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/24-patch-3d-majavi-colormap-48.png}
     \caption{0.24cm}
+    \label{fig : quarry-false_positive-4}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/25-patch-3d-majavi-colormap-60.png}
     \caption{0.25cm}
+    \label{fig : quarry-false_positive-5}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/25-patch-3d-majavi-colormap-72.png}
     \caption{0.26cm}
+    \label{fig : quarry-false_positive-6}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/26-patch-3d-majavi-colormap-84.png}
     \caption{0.27cm}
+    \label{fig : quarry-false_positive-7}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/27-patch-3d-majavi-colormap-96.png}
     \caption{0.27cm}
+    \label{fig : quarry-false_positive-8}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/27-patch-3d-majavi-colormap-108.png}
     \caption{0.28cm}
+    \label{fig : quarry-false_positive-9}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/29-patch-3d-majavi-colormap-120.png}
     \caption{0.29cm}
+    \label{fig : quarry-false_positive-10}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/30-patch-3d-majavi-colormap-132.png}
     \caption{0.30cm}
+    \label{fig : quarry-false_positive-11}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/31-patch-3d-majavi-colormap-144.png}
     \caption{0.32cm}
+    \label{fig : quarry-false_positive-12}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/33-patch-3d-majavi-colormap-156.png}
     \caption{0.34cm}
+    \label{fig : quarry-false_positive-13}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/35-patch-3d-majavi-colormap-168.png}
     \caption{0.35cm}
+    \label{fig : quarry-false_positive-14}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/36-patch-3d-majavi-colormap-180.png}
     \caption{0.36cm}
+    \label{fig : quarry-false_positive-15}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/38-patch-3d-majavi-colormap-192.png}
     \caption{0.39cm}
+    \label{fig : quarry-false_positive-16}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/41-patch-3d-majavi-colormap-204.png}
     \caption{0.41cm}
+    \label{fig : quarry-false_positive-17}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/46-patch-3d-majavi-colormap-216.png}
     \caption{0.46cm}
+    \label{fig : quarry-false_positive-18}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/51-patch-3d-majavi-colormap-228.png}
     \caption{0.52cm}
+    \label{fig : quarry-false_positive-19}
     \end{subfigure}
     \begin{subfigure}[b]{0.192\linewidth}
     \includegraphics[width=\linewidth]{../img/5/quarry/false_positive/61-patch-3d-majavi-colormap-240.png}
     \caption{0.62cm}
+    \label{fig : quarry-false_positive-20}
     \end{subfigure}
+    \label{fig : quarry-false_positive}
     \end{figure}
+
 
 \end{document}
