@@ -53,6 +53,7 @@ Clearly, there is some distance between the centers. Furthermore, we can directl
         \includegraphics[width=\linewidth]{../img/5/pca/pca-patches-200.png}
     \end{subfigure}
     \caption{Patches plotted using the coordinate of the features vector obtained from the last convolutional layer's output and then reduced using PCA to a two-dimensional vector. Similar grounds are close to each other.}
+    \label{fig : pca-patches-200}
 \end{figure}
 Definitely, patches with similar features are close to each other yielding a quality features encoding. On the left-top side, we can distinguish highly untraversable patches with walls/bumps in front of the robot. Going down, we encounter patches with smaller obstacles. On the plateau, there are traversable patches with small obstacles such as light bumps. Importantly,  those patches are the closest ones to the not traversable ones, so they were the hardest to separate, thus, to classify.  Going up on the right side, we see some grounds with small steps. Finally, on the top, we find all the downhill patches, the simplest ones to traverse.
 
@@ -107,7 +108,7 @@ Gradient-weighted Class Activation Mapping (Grad-CAM) \cite{gradcam} is a techni
 \end{figure}
 In detail, the output with respect to a target class is backpropagated while storing the gradient and the output in the last convolution. Then, a global average is applied to the saved gradient keeping the channel dimension in order to get a 1-d tensor, this will represent the importance of each channel in the target convolutional layer. After, each element of the convolutional layer outputs is multiplied with the averaged gradients to create the grad cam. This whole procedure is fast and it is architecture independent.
 
-\input{./tex/chapter5-quarry.tex}
+% \input{./tex/chapter5-quarry.tex}
 % \input{./tex/chapter5-patches.tex}
 %
 

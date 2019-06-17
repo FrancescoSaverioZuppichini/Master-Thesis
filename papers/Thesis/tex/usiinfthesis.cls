@@ -91,8 +91,8 @@
 
 %font settings
 \RequirePackage[T1]{fontenc}
-\RequirePackage[charter]{mathdesign}
-\RequirePackage[scaled]{beramono}
+% \RequirePackage[charter]{mathdesign}
+% \RequirePackage[scaled]{beramono}
 %\renewcommand{\sfdefault}{uop}
 %\renewcommand{\scshape}{%
 %\not@math@alphabet\scshape\relax
