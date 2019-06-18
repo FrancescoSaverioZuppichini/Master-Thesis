@@ -199,6 +199,7 @@ To later evaluate the model's performance, we decide to use real world terrain. 
         \includegraphics[width=\textwidth]{../img/hm3d_borders/querry-big-10.png}
     \end{subfigure}
     \caption{Quarry}
+    \label{fig : real-maps-quarry}
 \end{subfigure}
 \begin{subfigure}[b]{1\textwidth}
     \begin{subfigure}[b]{0.45\textwidth}
@@ -555,6 +556,8 @@ The mean $\approx 0.4$cm over a $\Delta t =2$, an impressive value considering t
 \label{sec: estimator}
 In this section we described the choices behind the evaluated network architecture.
 \subsection{Vanilla Model}
+\label{subsec : vanilla-cnn}
+
 The original model proposed by Chavez-Garcia et all \cite{omar2018traversability} is a CNN composed by a two $3 \times 3$ convolution layer with $5$ filters; $2 \times 2$ Max-Pooling layer; $3 \times 3$ convolution layer with $5$ filters; a fully connected layer with 128 outputs neurons and a fully connected layers with two neurons. Figure \ref{fig : omar} visualizes the architecture. 
 
 \begin{figure}[htbp]
@@ -597,6 +600,7 @@ The next figure visualises the SE module.
     \caption{\emph{Squeeze and Excitation} \cite{hu2017squeeze}}
 \end{figure}
 \subsection{MicroResNet}
+\label{subsec : micro-resnets}
 Our network is composed by $n$ ResNet blocks, a depth of $d$ and a channel incrementing factor of $2$. Since ResNet assumed an input size of $224\times224$ and perform an aggressive features extraction in the first layer, we called it \emph{head}, as showed in \todo{ref to Resnet Table} we decided to adopt a less aggressive convolution. We tested two kernel sized of $7\times7$ and $3\times3$ with stride of $2$ and $1$ respectively. Lastly, we used LeakyReLU \cite{leakyrelu} with a negative slope of $0.1$ instead of ReLU to allow a better gradient flow during backpropagation. LeakyRelu is defined as follows
 \begin{equation}
 LeakyRelu(x)=\left\{\begin{array}{ll}{x} & {\text { if } x>0} \\ {0.1 x} & {\text { otherwise }}\end{array}\right.

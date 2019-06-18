@@ -9,12 +9,11 @@ We run all the experiment on a Ubuntu 18.10  work station equipped with a Ryzen 
 \section{Dataset}
 To perform classification, we select a threshold of $0.2$m on a time window, $\Delta t$, of two seconds to label the patches, meaning that a patch with an advancement less than $20$ centimeters is labeled as \emph{no traversable} and viceversa. This processed is explained in detail in the previous chapter. While for the regression, we did not label the patch and directly regress on the advancement.
 
-Initially, to train the models we first use Standard Gradient Descent with momentum set to $0.95$, weight decay to $1e-4$ and an initial learning rate of $1e-3$ as was originally proposed in He et al. \cite{he2015deep}. However, we later utilize Leslie Smith's 1cycle policy \cite{1cycle} that allows us to trian the network faster and with an higher accuracy. We minimise the binary Cross Entropy for the classifier and the  Mean Square Error (MSE) for the regressor.
+Initially, to train the models we first use Standard Gradient Descent with momentum set to $0.95$, weight decay to $1e-4$ and an initial learning rate of $1e-3$ as was originally proposed in He et al. \cite{he2015deep}. However, we later utilize Leslie Smith's 1cycle policy \cite{1cycle} that allows us to trian the network faster and with an higher accuracy. We minimise the Binary Cross Entropy (BCE) for the classifier and the  Mean Square Error (MSE) for the regressor.
 \subsection{Experimental validation}
-We select as \emph{validation} set ten percent of the training data. Since we store each run of Krock as a \emph{.csv} file, validation and train set do not overlap. 
-The test set is composed entirely by the Quarry map, a real world scenario. Table \ref{table: maps} tells in detail the configuration used in each map of all sets.
+We select as \emph{validation} set ten percent of the training data. Since we store each run of Krock as a \emph{.csv} file, validation and train set do not overlap. We also evaluated the model on the \emph{arck rocks} map, a $10\times10$m terrain with a big rocky bumps in the middle.
+The test set is composed entirely by the quarry map \ref{fig : real-maps-quarry}, a real world scenario. Table \ref{table: maps} describes in detail the configuration used in each map for all datasets.
 
-We also evaluate the model on the following additonal maps
 \todo[inline]{ add arck rocks}
 \subsection{Metrics}
 
@@ -25,7 +24,7 @@ We also evaluate the model on the following additonal maps
 \paragraph{Regression:} We used the Mean Square Error to evaluate the model's performance.
 \section{Quantitative results}
 \subsection{Model selection}
-We compared two different \emph{micro-resnet} and the \emph{vanilla} cnn from the previous Chapter. We evaluate those models using a time window of two second, a threshold of $20$cm and the data augmentation techniques described before. We run five experiments per architecture and we select the best performing network, the results are showed in the following table. 
+We compared two different MicroRenset \ref{subsec : micro-resnet} and the Vanilla cnn \ref{subsec : vanilla-cnn} proposed in the original work \cite{omar2018traversability}. We evaluated those models using a time window of two second, a threshold of $20$cm and we applied data augmentation as we descibed in section \ref{sec: data-aug}. We run five experiments per architecture and we selected the best performing network. Table \ref{tab : models-results-comparison} shows the results for each architecture.
 
 \begin{table*}[ht]
   \centering
@@ -43,12 +42,12 @@ We compared two different \emph{micro-resnet} and the \emph{vanilla} cnn from th
   \bottomrule   
 \end{tabular}
 \caption{Model comparison on the test set.}
+\label{tab : models-results-comparison}
 \end{table*}
-\todo[inline]{Luca told me is better to split the models like Model1 and Model2 etc}
 
 Based on this data We select \emph{micro-resnet} with squeeze and excitation and a starting convolution's kernel size of $7\times7$ with stride of $2$. This model has one third of the parameter of the origal model proposed by Chavez-Garcia et all \cite{omar2018traversability}. 
 
-As proof of work, we also train the best network architecture, MicroResnetSE with a first convolution's kernel size of $7 \times 7$ and stride$=2$, with and without the Squeeze and Excitation operator.
+As proof of work, we also train the best network architecture, MicroResnetSE with a first convolution's kernel size of $7 \times 7$ and stride$=2$ \ref{ fig : microresnet-se}, with and without the Squeeze and Excitation operator.
 \begin{table*} [htbp]
   \centering
   \ra{1.2}
@@ -60,7 +59,7 @@ As proof of work, we also train the best network architecture, MicroResnetSE wit
    Mean & 0.867 & \textbf{0.888} & $+0.021$ \\
   \bottomrule   
 \end{tabular}
-\caption{AUC top value and mean value for MicroResnet with a fist convolution of $7\times7$ and stride $=2$ with and without the SE module. The improvement is the same.}
+\caption{AUC top value and mean value for MicroResnet with a fist convolution of $7\times7$ and stride $=2$ with and without the SE module. The SE module boosts the performance by $0.021$.}
 \end{table*}
 
 \section{Final results}
@@ -72,19 +71,44 @@ Table \ref{tab : classification-results} table shows in deep the score of the be
     \begin{tabular}{@{}llccccc@{}}
     \toprule
     % \multicolumn{8}{c}{Quantitative evaluation in simulation} \\
-    \multicolumn{2}{c}{Dataset} && \multicolumn{2}{c}{micro-resnet} & Size & Resolution(cm/px) \\
+    \multicolumn{2}{c}{Dataset} && \multicolumn{2}{c}{micro-resnet} & Size(m) & Resolution(cm/px) \\
     \cmidrule{1-2} \cmidrule{4-5}
     Type     &  Name  & Samples & ACC  &  AUC    & & \\
     \toprule
-      \multirow{3}{*}{Synthetic}  & Training   & 429312 & - & - & & 2\\
-      &  Validation   & 44032 &  95.2 \% &  0.961 & & 2 \\
-      & Arc Rocks & 37273 &  85.5 \% &  0.888 & & 2 \\
+      \multirow{3}{*}{Synthetic}  & Training   & 429312 & - & - & $10\times10$ & 2\\
+      &  Validation   & 44032 &  95.2 \% &  0.961 & $10\times10$ & 2 \\
+      & Arc Rocks & 37273 &  85.5 \% &  0.888 & $10\times10$ & 2 \\
       \cmidrule{2-7}
-    \multirow{3}{*}{\makecell[l]{Real\\evaluation}} & Quarry & 36224 &  88.2 \%&  0.896& & 2\\
+    Real\\evaluation & Quarry & 36224 &  88.2 \%&  0.896& $32\times32$ & 2\\
+    % \multirow{1}{*}{\makecell[l]{Real\\evaluation}} & Quarry & 36224 &  88.2 \%&  0.896& & 2\\
     \bottomrule   
 \end{tabular}
 \caption{Classification results on different datasets.}
 \label{tab : classification-results}
+\end{table*}
+
+\subsubsection{Regression}
+Table \ref{tab : regression-results} table shows in deep the score of the best network for each dataset.
+\begin{table*}[htbp]
+    \centering
+    \ra{1.2}
+    \begin{tabular}{@{}llcccc@{}}
+    \toprule
+    % \multicolumn{8}{c}{Quantitative evaluation in simulation} \\
+    \multicolumn{2}{c}{Dataset} & \multicolumn{2}{c}{micro-resnet} & Size & Resolution(cm/px) \\
+    \cmidrule{1-2} \cmidrule{4-5}
+    Type     &  Name  & Samples & MSE      & \\
+    \toprule
+      \multirow{3}{*}{Synthetic}  & Training  &  - & - &$10\times10$  & 2\\
+      &  Validation   & 44032 &  0.006  &  $10\times10$ & 2 \\
+      & Arc Rocks & 37273 & 0.020  &  $10\times10$& 2 \\
+      \cmidrule{2-6}
+    Real\\evaluation & Quarry & 36224 &  0.022 & $32\times32$ & 2\\
+    % \multirow{1}{*}{\makecell[l]{Real\\evaluation}} & Quarry & 36224 &  88.2 \%&  0.896& & 2\\
+    \bottomrule   
+\end{tabular}
+\caption{Classification results on different datasets.}
+\label{tab : regression-results}
 \end{table*}
 % Moreover, we would like to also show the different steps we made to reach this result. The following table shows the metric's score without any data-augmentation.
 % Adding dropout increases the results.
