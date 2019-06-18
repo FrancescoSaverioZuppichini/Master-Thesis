@@ -64,8 +64,9 @@ As proof of work, we also train the best network architecture, MicroResnetSE wit
 \end{table*}
 
 \section{Final results}
-The following table shows in deep the score of the best network for each dataset.
-\begin{table*} [htbp]
+\subsubsection{Classification}
+Table \ref{tab : classification-results} table shows in deep the score of the best network for each dataset. We obtained $95\%$ accuracy and $0.96$ AUC on the validation set and $88\%$ accuracy and $0.89$ AUC on the test set.
+\begin{table*}[htbp]
     \centering
     \ra{1.2}
     \begin{tabular}{@{}llccccc@{}}
@@ -80,11 +81,10 @@ The following table shows in deep the score of the best network for each dataset
       & Arc Rocks & 37273 &  85.5 \% &  0.888 & & 2 \\
       \cmidrule{2-7}
     \multirow{3}{*}{\makecell[l]{Real\\evaluation}} & Quarry & 36224 &  88.2 \%&  0.896& & 2\\
-    & foo & TODO & & & & \\
-    & baaa & TODO & & & & \\
     \bottomrule   
 \end{tabular}
-\caption{Final results on different datasets.}
+\caption{Classification results on different datasets.}
+\label{tab : classification-results}
 \end{table*}
 % Moreover, we would like to also show the different steps we made to reach this result. The following table shows the metric's score without any data-augmentation.
 % Adding dropout increases the results.

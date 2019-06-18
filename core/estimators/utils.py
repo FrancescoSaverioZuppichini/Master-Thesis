@@ -13,9 +13,7 @@ from torch.utils.data import DataLoader
 from estimators.models import zoo
 from fastai.train import Learner, DataBunch, DatasetType
 from torch.nn.functional import softmax
-
-
-
+from fastai.layers import CrossEntropyFlat, MSELossFlat
 
 
 def load_model(path: str, model: Module):
@@ -24,19 +22,23 @@ def load_model(path: str, model: Module):
 
     return model
 
-def get_learner(model_name, model_dir, callbacks, load_metric='roc_auc', dataset=None, *args, **kwargs):
+
+def get_learner(model_name, model_dir, callbacks, criterion=CrossEntropyFlat(),
+                load_metric='roc_auc', dataset=None, *args, **kwargs):
     model = zoo[model_name]()
     if dataset is None: dataset = TraversabilityDataset.from_root(*args, **kwargs)
     test_dl = DataLoader(dataset,
                          shuffle=False, batch_size=128, num_workers=16)
 
     learner = Learner(data=DataBunch(test_dl, test_dl, test_dl=test_dl), model=model,
+                      loss_func=criterion,
                       callbacks=callbacks,
                       model_dir=model_dir)
 
     learner.load(load_metric)
 
     return learner, dataset
+
 
 def load_model_from_name(model_path, model_name):
     model = zoo[model_name]()
@@ -59,9 +61,11 @@ def get_probs_and_labels_from_preds(preds):
 
     return probs, labels
 
+
 def false_something(self, something):
     correct = self.df.loc[self.df['label'] == something]
     return correct.loc[correct['prediction'] != something]
+
 
 def hmshow(hm, title='', *args, **kwargs):
     fig = plt.figure()
@@ -70,16 +74,19 @@ def hmshow(hm, title='', *args, **kwargs):
     plt.show()
     return fig
 
+
 def read_patch(patch_path):
     patch = cv2.imread(patch_path)
     patch = cv2.cvtColor(patch, cv2.COLOR_BGR2GRAY)
 
     return patch
 
+
 def get_patches_form_df(df, image_dir):
     patches = []
 
-    if 'images' in df.columns: patches = df['images']
+    if 'images' in df.columns:
+        patches = df['images']
     else:
         for img_path in df['image_path']:
             img = cv2.imread(image_dir + img_path)
@@ -87,7 +94,6 @@ def get_patches_form_df(df, image_dir):
             patches.append(img)
 
     return patches
-
 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')

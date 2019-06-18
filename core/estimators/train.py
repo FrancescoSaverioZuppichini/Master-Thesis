@@ -186,7 +186,7 @@ def get_params():
             'tr': None,
             'problem': 'new test 2',
             'name': 'microresnet#3-gate=7x7-n=1-se=True',
-            'more_than': 0,
+            'more_than': None,
             'less_than': None,
             'down_sampling': None,
             'time_window': 50 * 2,
@@ -248,7 +248,7 @@ if __name__ == '__main__':
     params['train_transform'] = train_transform
     train_and_evaluate = TrainAndEvaluate(params)
 
-    for _ in range(5):
+    for _ in range(3):
         train_and_evaluate( params['model'])
 
         # summary(zoo[params['model']]().cuda(), (1, 78, 78))

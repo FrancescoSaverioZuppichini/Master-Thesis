@@ -2,5 +2,11 @@
 \begin{document}
 \chapter{Conclusions}
 \label{chap : conclusions}
+We developed a complete framework for traversability estimation based entirely on simulation data and applicable to any ground robot. Simulation data allowed cheap, fast, quality and massive data gathered since 1) no real robot was used 2) simulations can be run faster than real-time and parallelize 3) maps can be engineered to maximize robots exploration and interactions with specific features 4) simulations can be run for any amount of time. 
 
+We trained a classifier to learn the robot's locomotion by supervised learning directly on ground patches. We tested the pipeline on a legged crocodile-like robot. The robot has unique locomotion that is able to overcome more obstacles than normal wheels robots making the estimation more challenging.
+We utilized a deep convolutional neural network to regress and classify the patches. We have shown both methods to be effective and we selected the latter due to its better accuracy once a threshold is fixed.
+We quantitatively measured the model's performance using different numeric metrics. Then, we visualized the traversability probability on real-world terrain to qualitatively evaluate the network. Later, we tested the estimator's capability of correctly extracting meaningful features from the patches. First, we proved that features were correctly aggregate and separate based on their classes. Then, we explored different samples from the train set by visualizing with part of the surfaces caused the model's prediction. We discovered that the model always looks at the correct spot. Finally, we stressed the network's strength and robustness by comparing different custom patches with the real advancement computed in the simulator. The results showed that the model expressed a correct degree of uncertainty in some edge cases while been able to properly classify most samples.
+
+\todo[inline]{weakness of the method}
 \end{document}
