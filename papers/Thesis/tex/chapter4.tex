@@ -63,7 +63,7 @@ As proof of work, we also train the best network architecture, MicroResnetSE wit
 \end{table*}
 
 \section{Final results}
-\subsubsection{Classification}
+\subsection{Classification}
 Table \ref{tab : classification-results} table shows in deep the score of the best network for each dataset. We obtained $95\%$ accuracy and $0.96$ AUC on the validation set and $88\%$ accuracy and $0.89$ AUC on the test set.
 \begin{table*}[htbp]
     \centering
@@ -71,7 +71,7 @@ Table \ref{tab : classification-results} table shows in deep the score of the be
     \begin{tabular}{@{}llccccc@{}}
     \toprule
     % \multicolumn{8}{c}{Quantitative evaluation in simulation} \\
-    \multicolumn{2}{c}{Dataset} && \multicolumn{2}{c}{micro-resnet} & Size(m) & Resolution(cm/px) \\
+    \multicolumn{2}{c}{Dataset} && \multicolumn{2}{c}{MicroResNet} & Size(m) & Resolution(cm/px) \\
     \cmidrule{1-2} \cmidrule{4-5}
     Type     &  Name  & Samples & ACC  &  AUC    & & \\
     \toprule
@@ -87,7 +87,7 @@ Table \ref{tab : classification-results} table shows in deep the score of the be
 \label{tab : classification-results}
 \end{table*}
 
-\subsubsection{Regression}
+\subsection{Regression}
 Table \ref{tab : regression-results} table shows in deep the score of the best network for each dataset.
 \begin{table*}[htbp]
     \centering
@@ -95,7 +95,7 @@ Table \ref{tab : regression-results} table shows in deep the score of the best n
     \begin{tabular}{@{}llcccc@{}}
     \toprule
     % \multicolumn{8}{c}{Quantitative evaluation in simulation} \\
-    \multicolumn{2}{c}{Dataset} & \multicolumn{2}{c}{micro-resnet} & Size & Resolution(cm/px) \\
+    \multicolumn{2}{c}{Dataset} & & \multicolumn{1}{c}{MicroResNet} & Size & Resolution(cm/px) \\
     \cmidrule{1-2} \cmidrule{4-5}
     Type     &  Name  & Samples & MSE      & \\
     \toprule
@@ -110,13 +110,28 @@ Table \ref{tab : regression-results} table shows in deep the score of the best n
 \caption{Classification results on different datasets.}
 \label{tab : regression-results}
 \end{table*}
+The regressor is more flexible. We can use the same model in different situations by just see if the predicted advancement is greater or lower than a threshold. However, we always need to fix a threshold to classify a patch and once the value is fixed, the classifier drastically outperforms the regressor. The classifier is able to generalize better thanks to data augmentation that cannot be applied when predicting directly the advancement since it will change its value. Intuitively, if we transform an untraversable surface by applying the data argumentation techniques illustrated in section \ref{sec: data-aug} we do not change its label. While it will change the actual advancement. Table \ref{tab : reg-clas} shows that the accuracy of a classifier is greater than a regressor using the same model, MicroResNet7x7-SE, and a fixed threshold of twenty centimeters. For this reason, all the next evaluation have been done using the best performing classifier and not the regressor.
+\begin{table*}[htbp]
+  \centering
+  \ra{1.2}
+  \begin{tabular}{@{}lcc@{}}
+  \toprule
+  &  Regression & Classification  \\
+  \cline{1-3}
+   Top & $72.8\%$ & \textbf{88.2\%} \\
+   Mean & $73.6\%$ & \textbf{87.8\%} \\
+  \bottomrule   
+\end{tabular}
+\caption{Regression and classification accuracy for the same model,  MicroResNet7x7-SE, once a threshold of $20$cm is fixed. The classifier outperforms the regressor by $15\%$.}
+\label{tab : reg-clas}
+\end{table*}
 % Moreover, we would like to also show the different steps we made to reach this result. The following table shows the metric's score without any data-augmentation.
 % Adding dropout increases the results.
 % With dropout plus coarse dropout.
 \section{Qualitative results}
-We qualitative evaluate the model predictions by plotting the traversability probability on different maps in 3D.  We used a sliding window to extract the patches from the tested maps to collect the model's predictions. Then, we created a texture based on the traversable probability, we have colored it using a colormap and finally applied on the 3D model of each map. We evaluated four rotations, from bottom to top, top to bottom, left to right and right to left since those are the most human understandable. By using those angles, we can optimize the cropping process since there is not need to rotate each patch based on the Krock's head position. Instead, we can just rotate the entire map beforehand. 
+We qualitative evaluate the classifier predictions by plotting the traversability probability on different maps in 3D.  We used a sliding window to extract the patches from the tested maps to collect the model's predictions. Then, we created a texture based on the traversable probability, we have colored it using a colormap and finally applied on the 3D model of each map. We evaluated four rotations, from bottom to top, top to bottom, left to right and right to left since those are the most human understandable. By using those angles, we can optimize the cropping process since there is not need to rotate each patch based on the Krock's head position. Instead, we can just rotate the entire map beforehand. 
 \subsection{Quarry}
-The first map we evaluate is Quarry, this map is $32\times 32$m long and has a maximum height of $10$m. We can use some of the terrain interesting features, such as are three bis slopes and the rocky ground on top, to evaluate the model. For instance, w expect the trail on the slopes to be traversable at almost any rotation, expecially from left to right and viceversa. While, the top part should be hard to traverse in almost any case. The following figure shows the traversability probability directly on the map. 
+The first map we evaluate is Quarry, this map is $32\times 32$m long and has a maximum height of $10$m. We can use some of the terrain interesting features, such as are three bis slopes and the rocky ground on top, to evaluate the model. For instance, w expect the trail on the slopes to be traversable at almost any rotation, expecially from left to right and viceversa. While, the top part should be hard to traverse in almost any case. Figure \ref{fig : quarry-trav} shows the traversability probability directly on the map. 
 \todo[inline]{some where place the colormap bar}
 \begin{figure} [htbp]
 \centering
@@ -140,14 +155,15 @@ The first map we evaluate is Quarry, this map is $32\times 32$m long and has a m
     \subcaption{Robot moving from right to left} 
     % \label{fig: quarry-r2l}
 \end{subfigure}
-\caption{Traversability probability on the Quarry map, $32\times 32$m, for different Krock's rotation. The values are obtained by sliding a window on the map to create the patches and then predict the traversability for each one of them.}
+\caption{Traversability probability on the Quarry map, $32\times 32$m, for different Krock's rotation. The values are obtained by sliding a window on the map to create the patches to predict their traversability.}
+\label{fig : quarry-trav}
 \end{figure}
  Correctly, the lower part of the map, composed by flat regions, was label with high confidence as traversable in all rotations. On the other hand, the traversability of the  slopes and the bumps on the top region depends on the robot orientation.
  
 %  One oblious example are the slopes on then zig-zag trail. When the robot is moving up-hill, figure \ref{fig: quarry-b2t}, the propability to traverse those steep patches is low. But, if we travel down hill, figure \ref{fig: quarry-t2b}, then the slopes are traversable. This is also true, when the robot is moving from left to right and right to left, figure \ref{fig: quarry-l2r} and \ref{fig: quarry-r2l} is able to travel the slopes since the inclination is not too big to make the robot fall. 
  
 \subsection{Bars}
-Bars is a map composed by different heights wall, thus we expect similar probabilities with different orientation.
+Bars is a map composed by different heights wall, thus we expected similar probabilities with different orientation. Figure \ref{bars-trav} shows the traversability probabilities on the terrain.
 
 \begin{figure} [htbp]
   \centering
@@ -171,10 +187,10 @@ Bars is a map composed by different heights wall, thus we expect similar probabi
       \subcaption{Robot moving from right to left} 
       % \label{fig: bars-r2l}
   \end{subfigure}
-  \caption{Traversability probability on the bars map, $10\times 10$m, for different Krock's rotation. The values are obtained by sliding a window on the map to create the patches and then predict the traversability for each one of them.}
+  \caption{Traversability probability on the bars map, a $10\times 10$m , for different Krock's rotation. The values are obtained by sliding a window on the map to create the patches to predict their traversability.}
+  \label{fig : bars-trav}
   \end{figure}
-
-This is a hard map for the robot due to the high number of not traversable walls. Interesting, we can identify a tunnel near the bottom center of the maps that shows how the model correctly label those patches depending on the orientation. The following figure highlight this detail.
+Definitely, this was a hard map for the robot due to the high number of not traversable walls. Interesting, we can identify a tunnel near the bottom center of the maps that shows how the model correctly label those patches depending on the orientation. Figure \ref{fig : bars-tunnel-trav} highlights this detail.
 
 \begin{figure} [htbp]
   \centering
@@ -199,10 +215,11 @@ This is a hard map for the robot due to the high number of not traversable walls
       % \label{fig: bars-r2l}
   \end{subfigure}
   \caption{Detail of a region in the bars map where there are two walls forming a tunnel. Correctly, when the robot is travel following the trail the region is label as traversable.}
+  \label{fig : bars-tunnel-trav}
   \end{figure}
 
 \subsection{Small village}
-The following image shows the traversability probability on the small image map.
+We applied the same procedure to also a $10\times10$m small village map. Figure \ref{fig : small-village-trav} describes its traversability for four different rotations.
 
 \begin{figure} [htbp]
   \centering
@@ -226,9 +243,10 @@ The following image shows the traversability probability on the small image map.
       \subcaption{Robot moving from right to left} 
       % \label{fig: bars-r2l}
   \end{subfigure}
-  \caption{Traversability probability on the map of a small village for different Krock's rotation. The surface cover $30\times 30$m and has a maximum height of $10$m. The values are obtained by sliding a window on the map to create the patches and then predict the traversability for each one of them.}
+  \caption{Traversability probability on the map of a small village for different Krock's rotation. The surface cover $30\times 30$m and has a maximum height of $10$m. The values are obtained by sliding a window on the map to create the patches to predict their traversability.}
+  \label{fig : small-village-trav}
   \end{figure}
-  All the streest were label as traversble, while the roofs' traversability depend on the orientation. For example, most steep roofs are not traversble when walking up hill. On the other hand, if krock walk side by side they can be traverse. The following figure shows this behaviour on the church's roof.
+  All the streest were label as traversble, while the church's roof traversability depend on the orientation. For example, most steep roofs are not traversble when walking up hill. On the other hand, if krock walk side by side they can be traverse. Figure \ref{fig : small-village-roof-trav} shows this behaviour on the church's roof.
   \begin{figure} [htbp]
     \centering
     \begin{subfigure}[b]{0.45\textwidth}
@@ -251,6 +269,7 @@ The following image shows the traversability probability on the small image map.
         \subcaption{Robot moving from right to left} 
         % \label{fig: bars-r2l}
     \end{subfigure}
-    \caption{Detail of the church in the small village map for different Krock's rotation. We can notice for the first two image one part of the roof is traversable and vicevera. While for the last two the robot can correctly travel til the end.}
+    \caption{Detail of the church in the small village map for different Krock's rotation. All the fours images are correctly labeled accordingly to the robot orientation. In the first two images only downhill part of the roof is traversable. While in the last two the robot is able to travel till the end.}
+    \label{fig :  small-village-roof-trav}
     \end{figure}
 \end{document}
