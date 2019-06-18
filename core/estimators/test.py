@@ -25,7 +25,7 @@ criterion = MSELossFlat()
 # patches_dir = '/media/francesco/saetta/krock-dataset/new-new-val/{}/patches/'.format(time_window)
 
 model_name = 'microresnet#3-gate=7x7-n=1-se=True-regression'
-model_dir = '/media/francesco/Carino/vaevictis/data/1560843520.8769257'
+model_dir = '/media/francesco/Carino/vaevictis/data/1560857566.16732'
 
 # vis = DataFrameVisualization.from_root(test_root)
 # vis(tr=0.45)
@@ -37,6 +37,7 @@ learner, dl = get_learner(model_name, model_dir, callbacks=[], load_metric='loss
                           patches_dir=patches_dir,
                           transform=get_transform(),
                           time_window=50 * 2,
+                          # more_than=0,
                           patch_size=0.7)
 
 # learner.model.eval()
