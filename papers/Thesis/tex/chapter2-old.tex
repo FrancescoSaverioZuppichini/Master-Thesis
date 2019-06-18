@@ -146,7 +146,7 @@ We run a total of \todo{add number of simulations} storing the results using ROS
 %\end{figure}
 
 We implemented an easy to use API \todo{link to the project} to define a cascade stream of function that is applied one after the other using a multi-thread queue to speed-up the process.
-First, we convert each \emph{.bag} file into a \emph{.csv} file and store it since this operation must be done only once. Then, we define a time window $t$ and for each entry in one simulation run we compute the future advancement using booth position and angle from the pose, we also store the resulting data frame into a \emph{.csv} file. During the process, we also clean the data by removing the samples in which the robot was upside down or out of the map.
+First, we convert each \emph{.bag} file into a \emph{.csv} file and store it since this operation must be done only once. Then, we define a time window $t$ and for each entry in one simulation run we compute the future advancement using both position and angle from the pose, we also store the resulting data frame into a \emph{.csv} file. During the process, we also clean the data by removing the samples in which the robot was upside down or out of the map.
 
 Finally, we crop from each heightmap the patches corresponding to each data point. To compute the patch size need to know the maximum possible advancement of \emph{Krock} for a specific time window. In order to find it, we run \emph{Krock} on a flat ground map and we take the mean across all of them. We observer a mean advancement of $33cm$ per second.
 

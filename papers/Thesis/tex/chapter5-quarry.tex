@@ -1,13 +1,23 @@
 % \documentclass[../document.tex]{subfiles}
 % \begin{document}
-\section{Quarry dataset}
+\section{Test dataset exploration}
 \label{sec: quarry-dataset}
 After showing the model's capability of correctly separate classes' features we utilized Grad-CAM to visualize some patches inside the quarry dataset. The aim of this section is to show how the model looks at meaningful features in each input to make the prediction even when it fails. For instance, imagine we feed to the model a not traversable patch with an obstacle and the network label is as traversable. Clearly, the output is wrong but the model's error may be caused by two different situations. The first one, the model could just have ignored the obstacle and looked away, meaning that it was not even able to understand there was an obstacle in the first place. Second, the network could have correctly look at the obstacle but thought that obstacle is traversable, showing the correct ability to find and use important features in the map. In the following sections, we showed that, even when the predictions are wrong, our model always look at the most important features of each input to determine its traversability. 
 
-We divided the dataset patches into four classes based on the model's performance: worst, best, false positive and false negative. Then, we took twenty inputs from those sets and applied Grad-CAM to generate a  texture that we placed on 3D render to better visualize which region of the inputs caused the prediction. 
+We divided the dataset patches into four classes based on the model's performance: worst, best, false positive and false negative. Then, we took twenty inputs from those sets and applied a technique called Grad-CAM to visualize which part of the ground the model is looking. Those regions are highlighted in 3D render to better visualize which spot of the inputs caused the prediction. Before starting the exploration, let us introduce the method that allowed us to identify regions of interest on the patches. 
 % \subsection{Best}
 % We start evaluating our model by using the test set composed by samples from the Quarry map. Grad-CAM is an extremely powerful tool to interpret the results in this situation since most of the patches are hard to classify even at humans eye since they include different features on the same surface.
-
+\subsection{Grad-CAM}
+Before starting the exploration, let us introduce the method that allowed us to identify region of interest on the patches. Gradient-weighted Class Activation Mapping (Grad-CAM) \cite{gradcam} is a technique to produce \"visual explanations\" for convolutional neural networks. It highlights the regions of the input image that contribute the most to the predictions. For example, given a classifier able to recognize cats and cat image, Grad-CAM will point outs the cat.
+\begin{figure} [htbp]
+    \centering
+    \begin{subfigure}[b]{1\textwidth}
+        \includegraphics[width=\linewidth]{../img/5/grad_cam1.png}
+    \end{subfigure}
+\caption{Grad-CAM procedure on an input image. Image from the original paper \cite{gradcam}.}
+\label{fig: gradcam}
+\end{figure}
+In detail, the output with respect to a target class is backpropagated while storing the gradient and the last convolution layer's output. Then, a global average is applied to the saved gradient keeping the channel dimension in order to get a 1-d tensor, this will represent the importance of each channel in the target convolutional layer. After, each element of the convolutional layer outputs is multiplied with the averaged gradients to create the grad cam. This whole procedure is fast and it is architecture independent. The procedure is summarized by figure \ref{fig : gradcam}
 
 \subsection{Best}
 The best patches are the inputs labeled and predicted traversable. We plotted twenty different images sampled uniformly according to the robot advancement to include as many interesting situations as possible. We recognized two main clusters of images: flat and slopes. The models is mostly interested in the left part of the patches with uneven ground on the left region, \ref{fig : quarry-best-0}, \ref{fig : quarry-best-2}, \ref{fig : quarry-best-3}, \ref{fig : quarry-best-4}, \ref{fig : quarry-best-15}, \ref{fig : quarry-best-16}, \ref{fig : quarry-best-17}, \ref{fig : quarry-best-18}.  This is due to the fact that an obstacle in that reason will block the rear legs and prevent the robot to advance. 
