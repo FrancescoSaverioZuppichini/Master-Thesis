@@ -20,7 +20,7 @@ We tested our framewotk on a a legged crocodile-like robot called \emph{Krock} d
            \label{fig: krock}
 
     \end{figure}
-    K-rock robot was created for the porpuse of montoring real crocodiles, hence it must walk and behave realistically enough to fool the real crocodiles. Krock has four legs, each one of them is equipped with three motors in order to rotate in each axis. The robot can raise itself in three different configurations, gaits, using the four motors on the body connected to the legs. In addition, there are another set of two motors in the inner body part to increase Krock's move set. 
+    Krock robot was created for the porpuse of montoring real crocodiles, hence it must walk and behave realistically enough to fool the real crocodiles. Krock has four legs, each one of them is equipped with three motors in order to rotate in each axis. The robot can raise itself in three different configurations, gaits, using the four motors on the body connected to the legs. In addition, there are another set of two motors in the inner body part to increase Krock's move set. 
 The tail is composed by another set of three motors and can be used to perform a wide array of tasks.
 The robot is $85cm$ long, weights around $1.4kg$ and in its standard gait configuration its distance from the ground is $16$cm. The next figure \ref{fig:krock-top} shows \emph{Krock} from the top helping the reader understanding its composition and the correct ratio between its parts. Also, each motor is highlighted with a red marker.
 \begin{figure}[htbp]
@@ -62,7 +62,7 @@ In our framework we fixed the gait configuration to normal, showed in figure \re
 % \end{figure}
 \section{Data Gathering}
 \label{sec: data-gathering}
-To train a traversability estimator we need a dataset. This section describe in detail how to create, collect and process the data gather from a simulated enviroment to generate a dataset we can use to perform supervised learning.
+This section describe in detail how we created, collected and processed the synthetic dataset used to train the traversability estimator in supervised way.
 \subsection{Heightmap generation}
 \label{subsec: heightmap-generation}
 To collect the data throught simulation we first need to generate meaningful terrain to be explored by the robot. Each map is stored as a 2D image where each pixel's value represents the terrain's height. For example, the following image shows an heightmap representing a real world quarry and the relative terrain.
@@ -187,7 +187,6 @@ We also implement one additional library called \href{https://github.com/Frances
 
 \subsection{Real world maps}
 To later evaluate the model's performance, we decide to use real world terrain. We gather two heightmaps produced by ground mapping flying drones from \href{https://www.sensefly.com/education/datasets/}{sensefly}'s dataset, a quarry and a small village. Figure \ref{fig : real-maps} shows the original and a 3D render of the heightmap for each terrain
-\todo[inline]{include sullens}
 \begin{figure}[htbp]
     \centering
     \begin{subfigure}[b]{1\textwidth}
@@ -301,8 +300,7 @@ Then, we load the dataframes with the respective heightmaps and start the data c
 After cleaning the data, we convert \emph{Krock}quaternion rotation to Euler notation using the \href{https://duckduckgo.com/?q=ros+tf&atb=v154-1__&ia=web}{\texttt{tf}} package from ROS. Then, we extract the $\sin$ and $\cos$ from the Euler orientation last component and store them in a column.
 Before caching again the resulting dataframes into \emph{.csv} files, we convert the robot's position into heightmap's coordinates that are used later to crop the correct region of the map.
 
-To compute the robot's advancement in a time window $\Delta t$ we look for each stored pose ,$p_t$, in the future, $p_{t + \Delta t}$, and see how far it went. This is describe by the following equation: 
-\todo[inline]{ask omar}
+To compute the robot's advancement in a time window $\Delta t$ we look for each stored pose ,$p_t$, in the future, $p_{t + \Delta t}$, and see how far it went. 
 The correct value of $\Delta t$ is crucial. We want a time window small enough to avoid smoothing to much the advancement and making obstacle traversale, and big enough to include the full legs motion. We empirically set $\Delta t = 2$ since it allows Krock to move both its legs and does not flat the advancement too much. 
 \subsection{Extract patches}
 Each patch must contain both Krock's footprint, to include the situations where the obstacle is under the robot, and certain amount of ground region in front of it. Intuitively, we want to include in each patch the correct amount of future informations according to the selected time window. Thus, we should add the maximum possible ground that Krock could traverse. 
@@ -512,7 +510,7 @@ As sanity check, we visualized some of the patches from the train set ordered by
 All the handles used to postprocess the data are available as a python \href{https://github.com/FrancescoSaverioZuppichini/Master-Thesis/tree/master/core/utilities/postprocessing/handlers}{package}. Also, we create an easy to use API called \href{https://github.com/FrancescoSaverioZuppichini/Master-Thesis/tree/master/core/utilities/pipeline}{\texttt{pipeline}} to define a cascade stream of function that is applied one after the other using a multi-thread queue to speed-up the process.
 
 \subsection{Label patches}
-\label{sec: label-patches}
+\label{seseec: label-patches}
 To decide whether a patch is traversable or not traversable we need to decide a \emph{threshold}, $tr$, such as if a patches has an advancement major than $tr$ it is label as traversable and viceversa. Formally, a patch $p_i$ is label as \emph{not traversable} if the advancement in a given time window $\Delta t = 2$ is less than the threshold $tr_{\Delta t = n}$
 
 Ideally, the threshold should small enough to include as less as possible false positive and big enough to cover all the cases where Krock gets stuck. We empirically compute the threshold's value by spawing Krock in front of a bumps and a ramp and let it walk.
@@ -554,7 +552,7 @@ The mean $\approx 0.4$cm over a $\Delta t =2$, an impressive value considering t
 
 \section{Estimator}
 \label{sec: estimator}
-In this section we described the choices behind the evaluated network architecture.
+In this section we described the choices behind the evaluated network architectures.
 \subsection{Vanilla Model}
 \label{subsec : vanilla-cnn}
 
@@ -569,13 +567,12 @@ The original model proposed by Chavez-Garcia et all \cite{omar2018traversability
     \label{fig : omar}
 \end{figure}
 \subsection{ResNet}
-We adopt a Residual network, ResNet \cite{he2015deep}, variant. Residual networks are deep convolutional networks consisting of many stacked \" Residual Units \". Intuitively, the residual unit allows the input of a layer to contribute to the next layer's input by being added to the current layer's output. Due to possible different features dimension, the input must go through and identify map to make the addition possible. This allows a stronger gradient flows and mitigates the degradation problem. A \"Residual Units \" is composed by a two $3x3$ \emph{Convolution}, \emph{Batchnorm} \cite{ioffe2015batch} and a \emph{Relu} blocks. Formally defined as: 
+We adopt a Residual Network, ResNet \cite{he2015deep}, variant. Residual networks are deep convolutional networks consisting of many stacked \" Residual Units \". Intuitively, the residual unit allows the input of a layer to contribute to the next layer's input by being added to the current layer's output. Due to possible different features dimension, the input must go through and identify map to make the addition possible. This allows a stronger gradient flows and mitigates the degradation problem. A \"Residual Units \" is composed by a two $3x3$ \emph{Convolution}, \emph{Batchnorm} \cite{ioffe2015batch} and a \emph{Relu} blocks. Formally defined as: 
 \begin{equation}
     \mathbf{y}=\mathcal{F}\left(\mathbf{x},\left\{W_{i}\right\}\right)+h(\mathbf{x})
     \label{eq : resnet}
 \end{equation}
 Where, $x$ and $y$ are the input and output vector of the layers considered. The function $\mathcal{F}\left(\mathbf{x},\left\{W_{i}\right\}\right)$ is the residual mapping to be learn and $h$ is the identity mapping. The next figure visualises the equation.
-\todo[inline]{add resnet image or table}
 \begin{figure}[htbp]
     \centering
     \includegraphics[scale=0.3]{../img/implementation/estimator/resnet_block.png}
@@ -583,7 +580,7 @@ Where, $x$ and $y$ are the input and output vector of the layers considered. The
 \end{figure}
 When the input and output shapes mistmatch, the \emph{identity map} is applyed to the input as a $3x3$ Convolution with a stride of 2 to mimic the polling operator. A single block is composed by a $3x3$ \emph{Convolution}, \emph{Batchnorm} and a \emph{Relu} activation function. 
 \subsection{Preactivation}
-Following the recent work of He et al. \cite{he2015identity} we adopt \emph{pre-activation} in each block.\emph{Pre-activation} works by just reversing the order of the operations in a block.
+Following the recent work of He et al. \cite{he2015identity} we adopted \emph{pre-activation} in each block.\emph{Pre-activation} works by just reversing the order of the operations in a block.
 
 \begin{figure}[htbp]
     \centering
@@ -601,13 +598,12 @@ The next figure visualises the SE module.
 \end{figure}
 \subsection{MicroResNet}
 \label{subsec : micro-resnets}
-Our network is composed by $n$ ResNet blocks, a depth of $d$ and a channel incrementing factor of $2$. Since ResNet assumed an input size of $224\times224$ and perform an aggressive features extraction in the first layer, we called it \emph{head}, as showed in \todo{ref to Resnet Table} we decided to adopt a less aggressive convolution. We tested two kernel sized of $7\times7$ and $3\times3$ with stride of $2$ and $1$ respectively. Lastly, we used LeakyReLU \cite{leakyrelu} with a negative slope of $0.1$ instead of ReLU to allow a better gradient flow during backpropagation. LeakyRelu is defined as follows
+The proposed network's architecture is composed by $n$ ResNet blocks and channel incrementing factor of $2$. Originally, ResNet was used to classify RGB images with $224\times224$ pixels and  used an aggressive convolution and max-polling operation in the first layer to reduce the images's size. We decided to adopt a less aggressive convolution motivited by the smaller size of our inputs. We tested two kernel sized: $7\times7$ and $3\times3$ with stride of $2$ and $1$ respectively. Lastly, we used LeakyReLU \cite{leakyrelu} with a negative slope of $0.1$ instead of ReLU to allow a better gradient flow during backpropagation. LeakyRelu is defined as follows
 \begin{equation}
 LeakyRelu(x)=\left\{\begin{array}{ll}{x} & {\text { if } x>0} \\ {0.1 x} & {\text { otherwise }}\end{array}\right.
 \end{equation}
 
-We called this model architecture \emph{MicroResNet}. We evaluated $n=[1,2], d=3$ with and without squeeze and excitation and with the two differents \emph{head}'s convolution. All the networks have a starting channel size of $16$. Table \ref{tab : microresnet} shows some of the architecture from top to bottom with, while figure \ref{fig : microresnet} visualizes the final architecture we adopted the architecture with initial features size of $16$ and stride of $2$. 
-
+We called this model architecture \emph{MicroResNet}. We proposed four networks layouts: with $n=1$ and two fist layers setups, $3\times3$ stride $=1$ and $7\times7$, with and without the Squeeze and Excitation module. Those models can be used both for regression and classification by only chaning the output size of the fully connected later, $2$ for classification and $1$ for regression. All others layers are equals. Figure \ref{fig : microresnet} add additional informations.
 \begin{table}[htbp]
     \centering
     \ra{1.2}
@@ -644,27 +640,30 @@ We called this model architecture \emph{MicroResNet}. We evaluated $n=[1,2], d=3
                &  \multicolumn{4}{c}{average pool, $1$-d fc, softmax} \\ 
                \hline
         
-               Parameters &  313,642 & 302,610  &  \textbf{314,282} & 303,250 \\
+               Parameters &  313,642 & 302,610  &  314,28 & 303,250 \\
             \hline
-               Size (MB) & 5.93 & 5.71 &  \textbf{2.41} & 2.32 \\ 
+               Size (MB) & 5.93 & 5.71 &  2.41 & 2.32 \\ 
                \hline 
         \end{tabular}
         \caption{MicroResNet architecture. First layer is on the top. Some architecture's blocks are equal across models, this is shows by sharing columns in the table.}
         \ref{tab : microresnet}
     \end{table}
-\todo[inline]{this table sucks}
-Our models have approximately $35$ times less parameters than the smalles ResNet model, ResNet18, that has $11$M parameters. To simplicity we will use the following notation to describe each architecture variant: \texttt{MicroResNet-{3x3/7x7}-{/SE}}.
-\todo[inline]{ask omar help to add margin in the rows}
-\todo[inline]{add model picture}
+Our models have approximately $35$ times less parameters than the smalles ResNet model, ResNet18 \cite{he2015deep}, that has $11$M parameters. To simplicity we used the following notation to describe each architecture variant: \texttt{MicroResNet-{3x3/7x7}-{/SE}}.
 \begin{figure}[htbp]
     \centering
-    \begin{subfigure}[b]{0.25\textwidth}
-        \includegraphics[width=\textwidth]{../img/3/models/transparent-microresnet.png}
+    \begin{subfigure}[b]{0.22\textwidth}
+        \includegraphics[width=\textwidth]{../img/3/models/transparent-microresnet3x3.png}
     \end{subfigure}
-    \begin{subfigure}[b]{0.25\textwidth}
-        \includegraphics[width=\textwidth]{../img/3/models/transparent-microresnet-se.png}
+    \begin{subfigure}[b]{0.22\textwidth}
+        \includegraphics[width=\textwidth]{../img/3/models/transparent-microresnet3x3-se.png}
     \end{subfigure} 
-    \caption{MicroResNet with initial features size of $16$ and stride of $2$ with and without the Squeeze and Excitation module. The rectangle represent the building block of each layer. Convolutiol layers are described by the kernel size, the number of filters and the stride. Lines and dashed lines between layers represent the residual operations and the shortcut respectively.}
+    \begin{subfigure}[b]{0.22\textwidth}
+        \includegraphics[width=\textwidth]{../img/3/models/transparent-microresnet7x7.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.22\textwidth}
+        \includegraphics[width=\textwidth]{../img/3/models/transparent-microresnet7x7-se.png}
+    \end{subfigure} 
+    \caption{MicroResNet architectures for classification. All models have an initial features size of $16$ and $n=1$ with and without the Squeeze and Excitation module. The rectangle represent the building block of each layer. Convolutiol layers are described by the kernel size, the number of filters and the stride. Lines and dashed lines between layers represent the residual operations and the shortcut respectively.}
     \label{fig : microresnet}
 \end{figure}
 
@@ -751,30 +750,7 @@ Figure \ref{fig: data-aug} shows the tree data augmentation techniques used appl
     \label{fig: data-aug}
     \caption{Data augmentation applied on a patch. First we randomly set to flat some small regions of the ground. Then, we slighty mutate the surface using simplex noise.}    
 \end{figure}
-To ensure we do create untraversable patches from traversable patch we limited the coarse dropout region to only few centiments and we apply a smoother simplex noise on traversable patches. In detail,
-
-% \begin{figure}[htbp]
-%     \centering
-%         \begin{subfigure}[b]{0.23\textwidth}
-%             \includegraphics[width=\textwidth]{../img/data-aug/2d/wall.png}
-%             \caption{Walls}
-%         \end{subfigure}
-%         \begin{subfigure}[b]{0.23\linewidth}
-%             \includegraphics[width=\textwidth]{../img/data-aug/2d/wall-aug.png}
-%             \caption{Walls aug}
-%         \end{subfigure}    
-%         \begin{subfigure}[b]{0.23\textwidth}
-%             \includegraphics[width=\textwidth]{../img/data-aug/2d/ramp.png}
-%             \caption{Ramp}
-%         \end{subfigure}
-%         \begin{subfigure}[b]{0.23\linewidth}
-%             \includegraphics[width=\textwidth]{../img/data-aug/2d/ramp-aug.png}
-%             \caption{Ramp aug}
-%         \end{subfigure}    
-%     \label{fig: others-aug}
-%     \caption{Data augmentation applyed first on a patch with two walls, then on a ramp.}    
-% \end{figure}
-un all the traning epochs, we augmented $80\%$ of the input images with dropout and coarse dropout. Dropout has a probability between $0.05$ and $0.1$ and coarse dropout has a probability of $0.02$ and $0.1$ with a size of the lower resolution image from which to sample the dropout between $0.6$ and $0.8$. Simplex noise was applied on the $70\%$ of the training data samples with a feature size between $1$ and $50$ with a random scaling factor between $15 - 25$ and $5 - 15$ from traversable and not traversable patches respectively. 
+To ensure we do create untraversable patches from traversable patch we limited the coarse dropout region to only few centiments and we apply a smoother simplex noise on traversable patches. In detail, in all the traning epochs, we augmented $80\%$ of the input images with dropout and coarse dropout. Dropout has a probability between $0.05$ and $0.1$ and coarse dropout has a probability of $0.02$ and $0.1$ with a size of the lower resolution image from which to sample the dropout between $0.6$ and $0.8$. Simplex noise was applied on the $70\%$ of the training data samples with a feature size between $1$ and $50$ with a random scaling factor between $15 - 25$ and $5 - 15$ from traversable and not traversable patches respectively. 
 
 \section{Tools}
 We quickly list the most important tools and libraries adopted in this project. The framework was entirely developed on Ubuntu 18.10 with Python 3.6.
