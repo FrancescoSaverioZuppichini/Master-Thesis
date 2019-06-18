@@ -513,6 +513,7 @@ As sanity check, we visualized some of the patches from the train set ordered by
 All the handles used to postprocess the data are available as a python \href{https://github.com/FrancescoSaverioZuppichini/Master-Thesis/tree/master/core/utilities/postprocessing/handlers}{package}. Also, we create an easy to use API called \href{https://github.com/FrancescoSaverioZuppichini/Master-Thesis/tree/master/core/utilities/pipeline}{\texttt{pipeline}} to define a cascade stream of function that is applied one after the other using a multi-thread queue to speed-up the process.
 
 \subsection{Label patches}
+\label{sec: label-patches}
 To decide whether a patch is traversable or not traversable we need to decide a \emph{threshold}, $tr$, such as if a patches has an advancement major than $tr$ it is label as traversable and viceversa. Formally, a patch $p_i$ is label as \emph{not traversable} if the advancement in a given time window $\Delta t = 2$ is less than the threshold $tr_{\Delta t = n}$
 
 Ideally, the threshold should small enough to include as less as possible false positive and big enough to cover all the cases where Krock gets stuck. We empirically compute the threshold's value by spawing Krock in front of a bumps and a ramp and let it walk.

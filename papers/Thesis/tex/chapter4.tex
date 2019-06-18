@@ -2,29 +2,29 @@
 \begin{document}
 \chapter{Results}
 \label{chap: results}
-In the section we show and evaluate the model's results. We will start by presenting to the reader the networks score on each metric, then we will use the best model to predict the traversability in real world terrains. 
+In the section, we describe and evaluate the model's results. We first show the model selection process. Then we quantitatively evaluate the classifier and regressor performance on different numerical scores. Later, we compare the two approaches and select the classifier. Finally, we qualitatively evaluate the best model by predicting traversability in real-world terrains. 
 \section{Experiment setup}
 % \subsection{Hardware}
 We run all the experiment on a Ubuntu 18.10  work station equipped with a Ryzen 2700x, a powerful CPU with 8 cores and 16 threads, and a NVIDIA 1080 GPU with 8GB of dedicated RAM.
 \section{Dataset}
-To perform classification, we select a threshold of $0.2$m on a time window, $\Delta t$, of two seconds to label the patches, meaning that a patch with an advancement less than $20$ centimeters is labeled as \emph{no traversable} and viceversa. This processed is explained in detail in the previous chapter. While for the regression, we did not label the patch and directly regress on the advancement.
+To perform classification, we selected a threshold of $0.2$m, according to the process explained in section \ref{sec: label-patches}, on a time window, $\Delta t$, of two seconds to label the patches, meaning that a patch with an advancement less than $20$ centimeters are labeled as \emph{no traversable} and vice-versa. For the regression thanks, we did not label the patch and directly regress on the raw advancement.
 
-Initially, to train the models we first use Standard Gradient Descent with momentum set to $0.95$, weight decay to $1e-4$ and an initial learning rate of $1e-3$ as was originally proposed in He et al. \cite{he2015deep}. However, we later utilize Leslie Smith's 1cycle policy \cite{1cycle} that allows us to trian the network faster and with an higher accuracy. We minimise the Binary Cross Entropy (BCE) for the classifier and the  Mean Square Error (MSE) for the regressor.
+Initially, to train the models we first used Standard Gradient Descent with momentum set to $0.95$, weight decay to $1e-4$ and an initial learning rate of $1e-3$ as was originally proposed in He et al. \cite{he2015deep}. However, we later switched Leslie Smith's 1cycle policy \cite{1cycle} that allowed us to train the network faster and with higher accuracy. The average training time is $\approx 10$ minutes. We minimized the Binary Cross Entropy (BCE) for the classifier and the  Mean Square Error (MSE) for the regressor.
 \subsection{Experimental validation}
-We select as \emph{validation} set ten percent of the training data. Since we store each run of Krock as a \emph{.csv} file, validation and train set do not overlap. We also evaluated the model on the \emph{arck rocks} map, a $10\times10$m terrain with a big rocky bumps in the middle.
-The test set is composed entirely by the quarry map \ref{fig : real-maps-quarry}, a real world scenario. Table \ref{table: maps} describes in detail the configuration used in each map for all datasets.
+We selected as \emph{validation} set ten percent of the training data. Since we stored each run of Krock as a \emph{.csv} file, validation and train set do not overlap. We also assessed the model's performance on the \emph{arck rocks} map, a $10\times10$m terrain with a big rocky bump in the middle.
+The test set is composed entirely by the quarry map \ref{fig : real-maps-quarry}, a real-world terrain. Table \ref{table: maps} describes in detail the configuration used in to generate all datasets.
 
 \todo[inline]{ add arck rocks}
 \subsection{Metrics}
 
-\paragraph{Classification:} To evaluate the model's classification performance we used two metrics: \emph{accuracy} and \emph{AUC-ROC Curve}. Accuracy scores the number of correct predictions made by the network while AUC-ROC Curve represents degree or measure of separability, informally it tells how much model is capable of distinguishing between classes. For each experiment, we select the model with the higher AUC-ROC Curve during training to be evaluated on the test set.
+\paragraph{Classification:} To evaluate the model's classification performance we used two metrics: \emph{accuracy} and \emph{AUC-ROC Curve}. Accuracy scores the number of correct predictions made by the network while the AUC-ROC Curve represents degree or measure of separability, informally it tells how much model is capable of distinguishing between classes. For each experiment, we selected the model with the higher AUC-ROC Curve during training to be evaluated on the test set.
 
 
 
 \paragraph{Regression:} We used the Mean Square Error to evaluate the model's performance.
 \section{Quantitative results}
 \subsection{Model selection}
-We compared two different MicroRenset \ref{subsec : micro-resnet} and the Vanilla cnn \ref{subsec : vanilla-cnn} proposed in the original work \cite{omar2018traversability}. We evaluated those models using a time window of two second, a threshold of $20$cm and we applied data augmentation as we descibed in section \ref{sec: data-aug}. We run five experiments per architecture and we selected the best performing network. Table \ref{tab : models-results-comparison} shows the results for each architecture.
+We compared two different MicroRenset \ref{subsec : micro-resnet}, MicroRenset-3x3-SE and MicroRenset-7x7-SE with the initial channel dimension of $16$  and the Vanilla CNN \ref{subsec : vanilla-cnn} proposed in the original work \cite{omar2018traversability}.  Ideally, the second MicroResnet model should be able to extrapolate more features from the patch thanks to the big kernel size. We evaluated those models using a time window of two seconds, a threshold of $20$cm and we applied data augmentation as we described in section \ref{sec: data-aug}. We run five experiments per architecture and we selected the best performing network. Table \ref{tab : models-results-comparison} shows the results for each architecture.
 
 \begin{table*}[ht]
   \centering
@@ -45,9 +45,9 @@ We compared two different MicroRenset \ref{subsec : micro-resnet} and the Vanill
 \label{tab : models-results-comparison}
 \end{table*}
 
-Based on this data We select \emph{micro-resnet} with squeeze and excitation and a starting convolution's kernel size of $7\times7$ with stride of $2$. This model has one third of the parameter of the origal model proposed by Chavez-Garcia et all \cite{omar2018traversability}. 
+Based on this data, we selected MicroResNet-7x7 with squeeze and excitation. The model has a first convolution's kernel size of $7\times7$ with a stride of $2$. This network has one-third of the parameter of the original model proposed by Chavez-Garcia et all \cite{omar2018traversability} making faster to train and lighter to deploy. 
 
-As proof of work, we also train the best network architecture, MicroResnetSE with a first convolution's kernel size of $7 \times 7$ and stride$=2$ \ref{ fig : microresnet-se}, with and without the Squeeze and Excitation operator.
+As proof of work, we also train the best network architecture, MicroResnetSE with a first convolution's kernel size of $7 \times 7$ and stride$=2$ \ref{ fig : microresnet-se}, with and without the squeeze and excitation operator. Table \ref{tab : micro-resnet-res-se} confirms the squeeze operator boosted performance while adding just a bunch of parameters.
 \begin{table*} [htbp]
   \centering
   \ra{1.2}
@@ -59,7 +59,8 @@ As proof of work, we also train the best network architecture, MicroResnetSE wit
    Mean & 0.867 & \textbf{0.888} & $+0.021$ \\
   \bottomrule   
 \end{tabular}
-\caption{AUC top value and mean value for MicroResnet with a fist convolution of $7\times7$ and stride $=2$ with and without the SE module. The SE module boosts the performance by $0.021$.}
+\caption{AUC top value and mean value for MicroResnet with a fist convolution of $7\times7$ and stride $=2$ with and without the SE module. The SE module boosts the performance by $0.021$ while keeping the number of parameters almost identical.}
+\label{tab : micro-resnet-res-se}
 \end{table*}
 
 \section{Final results}
@@ -129,9 +130,9 @@ The regressor is more flexible. We can use the same model in different situation
 % Adding dropout increases the results.
 % With dropout plus coarse dropout.
 \section{Qualitative results}
-We qualitative evaluate the classifier predictions by plotting the traversability probability on different maps in 3D.  We used a sliding window to extract the patches from the tested maps to collect the model's predictions. Then, we created a texture based on the traversable probability, we have colored it using a colormap and finally applied on the 3D model of each map. We evaluated four rotations, from bottom to top, top to bottom, left to right and right to left since those are the most human understandable. By using those angles, we can optimize the cropping process since there is not need to rotate each patch based on the Krock's head position. Instead, we can just rotate the entire map beforehand. 
+We qualitative evaluate the classifier predictions by plotting the traversability probability on different maps in 3D.  We used a sliding window to extract the patches from the tested maps to collect the model's predictions. Then, we created a texture based on the traversable probability, we have colored it using a colormap and finally applied on the 3D model of each map. We evaluated four rotations, from bottom to top, top to bottom, left to right and right to left since those are the most human understandable. By using those angles, we can optimize the cropping process since to avoid rotate each patch based on the Krock's head position. Instead, we can just rotate the entire map beforehand. 
 \subsection{Quarry}
-The first map we evaluate is Quarry, this map is $32\times 32$m long and has a maximum height of $10$m. We can use some of the terrain interesting features, such as are three bis slopes and the rocky ground on top, to evaluate the model. For instance, w expect the trail on the slopes to be traversable at almost any rotation, expecially from left to right and viceversa. While, the top part should be hard to traverse in almost any case. Figure \ref{fig : quarry-trav} shows the traversability probability directly on the map. 
+The first map we evaluate is Quarry, this map is $32\times 32$m long and has a maximum height of $10$m. We can use some of the terrain interesting features, such as are three bis slopes and the rocky ground on the top, to evaluate the model. For instance, w expect the trail on the slopes to be traversable at almost any rotation, especially from left to right and vice-versa. The top part should be hard to traverse in almost any case. Figure \ref{fig : quarry-trav} shows the traversability probability directly on the map. 
 \todo[inline]{some where place the colormap bar}
 \begin{figure} [htbp]
 \centering
@@ -158,12 +159,10 @@ The first map we evaluate is Quarry, this map is $32\times 32$m long and has a m
 \caption{Traversability probability on the Quarry map, $32\times 32$m, for different Krock's rotation. The values are obtained by sliding a window on the map to create the patches to predict their traversability.}
 \label{fig : quarry-trav}
 \end{figure}
- Correctly, the lower part of the map, composed by flat regions, was label with high confidence as traversable in all rotations. On the other hand, the traversability of the  slopes and the bumps on the top region depends on the robot orientation.
- 
-%  One oblious example are the slopes on then zig-zag trail. When the robot is moving up-hill, figure \ref{fig: quarry-b2t}, the propability to traverse those steep patches is low. But, if we travel down hill, figure \ref{fig: quarry-t2b}, then the slopes are traversable. This is also true, when the robot is moving from left to right and right to left, figure \ref{fig: quarry-l2r} and \ref{fig: quarry-r2l} is able to travel the slopes since the inclination is not too big to make the robot fall. 
- 
+ Correctly, the lower part of the map, composed by flat regions, was labeled with high confidence as traversable in all rotations. On the other hand, the traversability of the slopes and the bumps on the top region depends on the robot orientation.
+
 \subsection{Bars}
-Bars is a map composed by different heights wall, thus we expected similar probabilities with different orientation. Figure \ref{bars-trav} shows the traversability probabilities on the terrain.
+Bars is a map composed of different heights wall, thus we expected similar probabilities with different orientation. Figure \ref{bars-trav} shows the traversability probabilities on the terrain.
 
 \begin{figure} [htbp]
   \centering
@@ -243,10 +242,10 @@ We applied the same procedure to also a $10\times10$m small village map. Figure 
       \subcaption{Robot moving from right to left} 
       % \label{fig: bars-r2l}
   \end{subfigure}
-  \caption{Traversability probability on the map of a small village for different Krock's rotation. The surface cover $30\times 30$m and has a maximum height of $10$m. The values are obtained by sliding a window on the map to create the patches to predict their traversability.}
+  \caption{Traversability probability on the map of a small village for different Krock's rotation. The surface covers $30\times 30$m and has a maximum height of $10$m. The values are obtained by sliding a window on the map to create the patches to predict their traversability.}
   \label{fig : small-village-trav}
   \end{figure}
-  All the streest were label as traversble, while the church's roof traversability depend on the orientation. For example, most steep roofs are not traversble when walking up hill. On the other hand, if krock walk side by side they can be traverse. Figure \ref{fig : small-village-roof-trav} shows this behaviour on the church's roof.
+  All the streets were label as traversable, while the church's roof traversability depend on the orientation. For example, most steep roofs are not traversable when walking uphill. On the other hand, if krock walks side by side they can be traversed. Figure \ref{fig : small-village-roof-trav} shows this behavior on the church's roof.
   \begin{figure} [htbp]
     \centering
     \begin{subfigure}[b]{0.45\textwidth}
