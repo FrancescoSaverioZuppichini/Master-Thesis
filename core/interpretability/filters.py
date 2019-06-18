@@ -6,6 +6,12 @@ class Shuffle():
     def __call__(self, df):
         return self.f(df.sample(frac=1, random_state=0))
 
+class All():
+    name = 'all'
+
+    def __call__(self, df):
+        return df
+
 class Best():
     name = 'best'
 

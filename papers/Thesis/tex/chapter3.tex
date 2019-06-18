@@ -342,105 +342,179 @@ The following figure shows the mean advancement across all the maps used to trai
     \includegraphics[width=\linewidth]{../img/datasets/box_for_each_map.png}
     \caption{Advancement on each map with a $\Delta t = 2$s in ascendent order.}
 \end{figure}
-As sanity check, we visualize some of the patches with best and worst advancement. Patches with high advancemnet should not include big obstacle and viceversa.
-\begin{figure}[htbp]
+As sanity check, we visualized some of the patches from the train set ordered by advancement, to conclude the data generation process was correct. Tigure \ref{fig : train-patches-sample} shows a sample of fourty patches.
+\begin{figure}[htbp] 
     \centering
     \begin{subfigure}[b]{0.19\textwidth}
-    \includegraphics[width=\linewidth]{../img/5/quarry/all/best/35-patch-3d-majavi-colormap-0.png}
+    \includegraphics[width=\linewidth]{../img/5/train/all/-1-patch-3d-majavi-3.png}
+    \caption{$-1$cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/train/all/-3-patch-3d-majavi-2.png}
+    \caption{$-3$cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/train/all/-372-patch-3d-majavi-0.png}
+    \caption{$-3$cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/train/all/-6-patch-3d-majavi-1.png}
+    \caption{$-6$cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/train/all/00-patch-3d-majavi-4.png}
+    \caption{$00$cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/train/all/01-patch-3d-majavi-5.png}
+    \caption{$01$cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/train/all/02-patch-3d-majavi-6.png}
+    \caption{$02$cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/train/all/03-patch-3d-majavi-7.png}
+    \caption{$03$cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/train/all/05-patch-3d-majavi-8.png}
+    \caption{$05$cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/train/all/08-patch-3d-majavi-9.png}
+    \caption{$08$cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/train/all/11-patch-3d-majavi-10.png}
+    \caption{$11$cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/train/all/14-patch-3d-majavi-11.png}
+    \caption{$14$cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/train/all/17-patch-3d-majavi-12.png}
+    \caption{$17$cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/train/all/20-patch-3d-majavi-13.png}
+    \caption{$20$cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/train/all/23-patch-3d-majavi-14.png}
+    \caption{$23$cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/train/all/26-patch-3d-majavi-15.png}
+    \caption{$26$cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/train/all/30-patch-3d-majavi-16.png}
+    \caption{$30$cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/train/all/33-patch-3d-majavi-17.png}
+    \caption{$33$cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/train/all/35-patch-3d-majavi-18.png}
     \caption{$35$cm}
     \end{subfigure}
     \begin{subfigure}[b]{0.19\textwidth}
-    \includegraphics[width=\linewidth]{../img/5/quarry/all/best/38-patch-3d-majavi-colormap-1.png}
+    \includegraphics[width=\linewidth]{../img/5/train/all/38-patch-3d-majavi-19.png}
     \caption{$38$cm}
     \end{subfigure}
     \begin{subfigure}[b]{0.19\textwidth}
-    \includegraphics[width=\linewidth]{../img/5/quarry/all/best/44-patch-3d-majavi-colormap-2.png}
-    \caption{$44$cm}
+    \includegraphics[width=\linewidth]{../img/5/train/all/40-patch-3d-majavi-20.png}
+    \caption{$40$cm}
     \end{subfigure}
     \begin{subfigure}[b]{0.19\textwidth}
-    \includegraphics[width=\linewidth]{../img/5/quarry/all/best/45-patch-3d-majavi-colormap-3.png}
+    \includegraphics[width=\linewidth]{../img/5/train/all/43-patch-3d-majavi-21.png}
+    \caption{$43$cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/train/all/45-patch-3d-majavi-22.png}
     \caption{$45$cm}
     \end{subfigure}
     \begin{subfigure}[b]{0.19\textwidth}
-    \includegraphics[width=\linewidth]{../img/5/quarry/all/best/49-patch-3d-majavi-colormap-4.png}
+    \includegraphics[width=\linewidth]{../img/5/train/all/47-patch-3d-majavi-23.png}
+    \caption{$47$cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/train/all/49-patch-3d-majavi-24.png}
     \caption{$49$cm}
     \end{subfigure}
     \begin{subfigure}[b]{0.19\textwidth}
-    \includegraphics[width=\linewidth]{../img/5/quarry/all/best/51-patch-3d-majavi-colormap-5.png}
+    \includegraphics[width=\linewidth]{../img/5/train/all/51-patch-3d-majavi-25.png}
     \caption{$51$cm}
     \end{subfigure}
     \begin{subfigure}[b]{0.19\textwidth}
-    \includegraphics[width=\linewidth]{../img/5/quarry/all/best/65-patch-3d-majavi-colormap-6.png}
+    \includegraphics[width=\linewidth]{../img/5/train/all/53-patch-3d-majavi-26.png}
+    \caption{$53$cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/train/all/54-patch-3d-majavi-27.png}
+    \caption{$54$cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/train/all/56-patch-3d-majavi-28.png}
+    \caption{$56$cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/train/all/57-patch-3d-majavi-29.png}
+    \caption{$57$cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/train/all/59-patch-3d-majavi-30.png}
+    \caption{$59$cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/train/all/60-patch-3d-majavi-31.png}
+    \caption{$60$cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/train/all/62-patch-3d-majavi-32.png}
+    \caption{$62$cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/train/all/63-patch-3d-majavi-33.png}
+    \caption{$63$cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/train/all/65-patch-3d-majavi-34.png}
     \caption{$65$cm}
     \end{subfigure}
     \begin{subfigure}[b]{0.19\textwidth}
-    \includegraphics[width=\linewidth]{../img/5/quarry/all/best/67-patch-3d-majavi-colormap-7.png}
+    \includegraphics[width=\linewidth]{../img/5/train/all/66-patch-3d-majavi-35.png}
+    \caption{$66$cm}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/train/all/67-patch-3d-majavi-36.png}
     \caption{$67$cm}
     \end{subfigure}
     \begin{subfigure}[b]{0.19\textwidth}
-    \includegraphics[width=\linewidth]{../img/5/quarry/all/best/67-patch-3d-majavi-colormap-8.png}
-    \caption{$67$cm}
+    \includegraphics[width=\linewidth]{../img/5/train/all/69-patch-3d-majavi-37.png}
+    \caption{$69$cm}
     \end{subfigure}
     \begin{subfigure}[b]{0.19\textwidth}
-    \includegraphics[width=\linewidth]{../img/5/quarry/all/best/72-patch-3d-majavi-colormap-9.png}
-    \caption{$72$cm}
+    \includegraphics[width=\linewidth]{../img/5/train/all/70-patch-3d-majavi-38.png}
+    \caption{$70$cm}
     \end{subfigure}
-    \caption{Patches with high advancement \emph{Quarry} using a $\Delta t = 2$s.}
-\end{figure}
-    \begin{figure}[htbp]
-        \centering
-        \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/all/worst/-8-patch-3d-majavi-colormap-0.png}
-        \caption{$-8$cm}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/all/worst/00-patch-3d-majavi-colormap-1.png}
-        \caption{$00$cm}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/all/worst/01-patch-3d-majavi-colormap-2.png}
-        \caption{$01$cm}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/all/worst/01-patch-3d-majavi-colormap-3.png}
-        \caption{$01$cm}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/all/worst/02-patch-3d-majavi-colormap-4.png}
-        \caption{$02$cm}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/all/worst/03-patch-3d-majavi-colormap-5.png}
-        \caption{$03$cm}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/all/worst/06-patch-3d-majavi-colormap-6.png}
-        \caption{$06$cm}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/all/worst/06-patch-3d-majavi-colormap-7.png}
-        \caption{$06$cm}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/all/worst/10-patch-3d-majavi-colormap-8.png}
-        \caption{$10$cm}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.19\textwidth}
-        \includegraphics[width=\linewidth]{../img/5/quarry/all/worst/18-patch-3d-majavi-colormap-9.png}
-        \caption{$18$cm}
-        \end{subfigure}
-        \caption{Patches with low advancement \emph{Quarry} a $\Delta t = 2$s.}
+    \begin{subfigure}[b]{0.19\textwidth}
+    \includegraphics[width=\linewidth]{../img/5/train/all/73-patch-3d-majavi-39.png}
+    \caption{$73$cm}
+    \end{subfigure}
+    \caption{Sample of extracted patches from the train set ordered by advancement. The first patches have mostly obstacle close to the robot's head, while the latter have smooter surfaces.}
+    \label{fig : train-patches-sample}
     \end{figure}
-\todo[inline]{make them gray}
-Corretly, the patches with a high advancement have descent, small obstacle or they are flat. Contrarily, samples with low advancement have untraversable features such as bumps or too steep slopes.
-
 All the handles used to postprocess the data are available as a python \href{https://github.com/FrancescoSaverioZuppichini/Master-Thesis/tree/master/core/utilities/postprocessing/handlers}{package}. Also, we create an easy to use API called \href{https://github.com/FrancescoSaverioZuppichini/Master-Thesis/tree/master/core/utilities/pipeline}{\texttt{pipeline}} to define a cascade stream of function that is applied one after the other using a multi-thread queue to speed-up the process.
 
 \subsection{Label patches}
 To decide whether a patch is traversable or not traversable we need to decide a \emph{threshold}, $tr$, such as if a patches has an advancement major than $tr$ it is label as traversable and viceversa. Formally, a patch $p_i$ is label as \emph{not traversable} if the advancement in a given time window $\Delta t = 2$ is less than the threshold $tr_{\Delta t = n}$
 
 Ideally, the threshold should small enough to include as less as possible false positive and big enough to cover all the cases where Krock gets stuck. We empirically compute the threshold's value by spawing Krock in front of a bumps and a ramp and let it walk.
-\paragraph{Bumps} We spawned the robot on the \emph{bumps3} map close to the end and let it go for 20 seconds. The following figure shows Krock in the simulated environment.
+\paragraph{Bumps} We spawned the robot on the \emph{bumps3} map close to the end and let it go for 20 seconds. Figure \ref{ krock-bumps-sim} shows Krock in the simulated environment.
 
 \begin{figure}[htbp]
 \centering
@@ -448,39 +522,39 @@ Ideally, the threshold should small enough to include as less as possible false 
     \includegraphics[width=\linewidth]{../img/3/find_tr/krock-bumps.jpg}
     \end{subfigure}
 \caption{Krock tries to overcome an obstacle in the \emph{bumps3} map.}
+\label{fig : krock-bumps-sim}
 \end{figure}
 
-Due to its characteristic locomotion, Krock tries to overcome the obstacle using the legs to move itself to the top but it fell backs producing a spicky advancement where first it is positive and then negative. The following picture shows the advancemnet on this map with different time windows, $\Delta t$, the greater the smoother.
+Due to its characteristic locomotion, Krock tries to overcome the obstacle using its legs to move itself to the top but it fell backs producing a spicky advancement where first it is positive and then negative. Figure \ref{fig : krock-bumps-advs} shows the advancemnet on this map with $\Delta t = 2$, we can notice the noisy output.
 
 \begin{figure}[htbp]
     \centering
     \begin{subfigure}[b]{0.45\textwidth}
         \includegraphics[width=\linewidth]{../img/3/find_tr/100-bumps3}
-        \caption{$\Delta t = 2$s.}
     \end{subfigure}
 
 \caption{Advancement over time with  $\Delta t = 2$ on \emph{bumps3}.}
+\label{fig : krock-bumps-advs}
 \end{figure}
 A wheel robot, on the other hand, will not produce such graph since it cannot free itself easily from an obstacle. Image a wheel robot moving forward, once it hits an obstance it stops moving, if we plot its advancement in this situation it will look more like a step than a series of spikes.
 
 \paragraph{Ramps}
-The trehsold should be small enough to not create any false positive, patches that are traversable but were classified as not. So, we let the robot walk up hill on the $slope_rocks1$ map with a height scaling factor set to $5$. We knew from empirical experiment that the robot is able to climp this steep ramp. The following figure shows the advancement.
+The trehsold should be small enough to not create any false positive, patches that are traversable but were classified as not. So, we let the robot walk up hill on the $slope_rocks1$ map with a height scaling factor set to $5$. We knew from empirical experiment that the robot is able to climp this steep ramp, the advancement is showed in figure \ref{fig : krock-ramps-sim}.
 \begin{figure}[htbp]
     \centering
     \begin{subfigure}[b]{0.45\textwidth}
         \includegraphics[width=\linewidth]{../img/3/find_tr/100-slope_rocks1}
-        \caption{$\Delta t = 2$s.}
     \end{subfigure}
-    
     \caption{Advancement over time with $\Delta t = 2$s on \emph{slope\_rocks3}.}
+    \label{fig : krock-ramps-sim}
 \end{figure}
-The mean value is around $0.4$cm over a $\Delta t =2$s that is impressive considering the steepest of the surface. We can use this information combined with the previous experiment to choose a threshold that is beetween the upper bound of \emph{bumps} and beetween the lower bound of \emph{slope\_rocks1}. This will ensure to minimize the false positive. A good value is $tr_{\Delta t = 2s} = 20cm$. 
+The mean $\approx 0.4$cm over a $\Delta t =2$, an impressive value considering the steepest of the surface. We can use this information combined with the previous experiment to choose a threshold that is beetween the upper bound of \emph{bumps} and beetween the lower bound of \emph{slope\_rocks1}. This will ensure to minimize the false positive. A good value is $tr_{\Delta t = 2s} = 20cm$. 
 
 \section{Estimator}
 \label{sec: estimator}
 In this section we described the choices behind the evaluated network architecture.
 \subsection{Vanilla Model}
-The original model proposed by Chavez-Garcia et all \cite{omar2018traversability} is a CNN composed by a two $3 \times 3$ convolution layer with $5$ filters; $2 \times 2$ Max-Pooling layer; $3 \times 3$ convolution layer with $5$ filters; a fully connected layer with 128 outputs neurons and a fully connected layers with two neurons. Figure \ref{fig : omar} visualize the architecture. 
+The original model proposed by Chavez-Garcia et all \cite{omar2018traversability} is a CNN composed by a two $3 \times 3$ convolution layer with $5$ filters; $2 \times 2$ Max-Pooling layer; $3 \times 3$ convolution layer with $5$ filters; a fully connected layer with 128 outputs neurons and a fully connected layers with two neurons. Figure \ref{fig : omar} visualizes the architecture. 
 
 \begin{figure}[htbp]
     \centering
@@ -527,7 +601,7 @@ Our network is composed by $n$ ResNet blocks, a depth of $d$ and a channel incre
 LeakyRelu(x)=\left\{\begin{array}{ll}{x} & {\text { if } x>0} \\ {0.1 x} & {\text { otherwise }}\end{array}\right.
 \end{equation}
 
-We called this model architecture \emph{MicroResNet}. We evaluated $n=[1,2], d=3$ with and without squeeze and excitation and with the two differents \emph{head}'s convolution. All the networks have a starting channel size of $16$. Table \ref{tab : microresnet} shows some of the architecture from top to bottom with, while figure \ref{fig : microresnet} visualize the final architecture we adopted  the architecture with initial features size of $16$ and stride of $2$. 
+We called this model architecture \emph{MicroResNet}. We evaluated $n=[1,2], d=3$ with and without squeeze and excitation and with the two differents \emph{head}'s convolution. All the networks have a starting channel size of $16$. Table \ref{tab : microresnet} shows some of the architecture from top to bottom with, while figure \ref{fig : microresnet} visualizes the final architecture we adopted  the architecture with initial features size of $16$ and stride of $2$. 
 
 \begin{table}[htbp]
     \centering
@@ -585,8 +659,7 @@ Our models have approximately $35$ times less parameters than the smalles ResNet
     \begin{subfigure}[b]{0.25\textwidth}
         \includegraphics[width=\textwidth]{../img/3/models/transparent-microresnet-se.png}
     \end{subfigure} 
-
-    \caption{MicroResNet with initial features size of $16$ and stride of $2$ with and without the Squeeze and Excitation module. The rectangle represent the building block of each layer. Convolutiol layers are described by the kernel size, the number of filters and the stride. Lines and dashed lines between layers represents the residual operations and the shortup respectively.}
+    \caption{MicroResNet with initial features size of $16$ and stride of $2$ with and without the Squeeze and Excitation module. The rectangle represent the building block of each layer. Convolutiol layers are described by the kernel size, the number of filters and the stride. Lines and dashed lines between layers represent the residual operations and the shortcut respectively.}
     \label{fig : microresnet}
 \end{figure}
 

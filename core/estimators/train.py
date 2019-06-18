@@ -125,7 +125,8 @@ class TrainAndEvaluate():
         if params['tr'] is not None:
             callbacks.append(SaveModelCallback(learn=learner, name=model_name_roc_auc, monitor='roc_auc'))
             # callbacks.append(SaveModelCallback(learn=learner, name=model_name_acc, monitor='accuracy'))
-            # callbacks.append(SaveModelCallback(learn=learner, name=model_name_loss))
+        else:
+            callbacks.append(SaveModelCallback(learn=learner, name=model_name_loss))
 
         with experiment.train():
             # learner.lr_find()
@@ -243,6 +244,8 @@ if __name__ == '__main__':
     #     return x
     params = get_params()
     params['test'] = '/media/francesco/saetta/krock-dataset/new-test-random/'
+    params['name'] = 'microresnet#3-gate=7x7-n=1-se=True-regression'
+    params['train_transform'] = train_transform
     train_and_evaluate = TrainAndEvaluate(params)
 
     for _ in range(5):
