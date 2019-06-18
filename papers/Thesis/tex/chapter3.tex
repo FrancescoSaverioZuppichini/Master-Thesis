@@ -603,7 +603,7 @@ The proposed network's architecture is composed by $n$ ResNet blocks and channel
 LeakyRelu(x)=\left\{\begin{array}{ll}{x} & {\text { if } x>0} \\ {0.1 x} & {\text { otherwise }}\end{array}\right.
 \end{equation}
 
-We called this model architecture \emph{MicroResNet}. We proposed four networks layouts: with $n=1$ and two fist layers setups, $3\times3$ stride $=1$ and $7\times7$, with and without the Squeeze and Excitation module. Those models can be used both for regression and classification by only chaning the output size of the fully connected later, $2$ for classification and $1$ for regression. All others layers are equals. Figure \ref{fig : microresnet} add additional informations.
+We called this model architecture \emph{MicroResNet}. We proposed four networks layouts: with $n=1$ and two fist layers setups, $3\times3$ stride $=1$ and $7\times7$, with and without the Squeeze and Excitation module. Those architectures can be used both for regression and classification by only chaning the output size of the fully connected later, $2$ for classification and $1$ for regression. All others layers are equals. Figure \ref{fig : microresnet} add additional informations.
 \begin{table}[htbp]
     \centering
     \ra{1.2}
@@ -653,15 +653,19 @@ Our models have approximately $35$ times less parameters than the smalles ResNet
     \centering
     \begin{subfigure}[b]{0.22\textwidth}
         \includegraphics[width=\textwidth]{../img/3/models/transparent-microresnet3x3.png}
+        \caption{}
     \end{subfigure}
     \begin{subfigure}[b]{0.22\textwidth}
         \includegraphics[width=\textwidth]{../img/3/models/transparent-microresnet3x3-se.png}
+        \caption{}
     \end{subfigure} 
     \begin{subfigure}[b]{0.22\textwidth}
         \includegraphics[width=\textwidth]{../img/3/models/transparent-microresnet7x7.png}
+        \caption{}
     \end{subfigure}
     \begin{subfigure}[b]{0.22\textwidth}
         \includegraphics[width=\textwidth]{../img/3/models/transparent-microresnet7x7-se.png}
+        \caption{}
     \end{subfigure} 
     \caption{MicroResNet architectures for classification. All models have an initial features size of $16$ and $n=1$ with and without the Squeeze and Excitation module. The rectangle represent the building block of each layer. Convolutiol layers are described by the kernel size, the number of filters and the stride. Lines and dashed lines between layers represent the residual operations and the shortcut respectively.}
     \label{fig : microresnet}

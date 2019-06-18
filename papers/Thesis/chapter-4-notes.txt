@@ -1,0 +1,31 @@
+Minor:
+
+
+
+
+
+Medium:
+
+
+
+Results:
+
+Medium:
+
+- "In the section we show and evaluate the model's results..." which results? from one model all models? which models? You should say that you generate one model using the architecture X (only one architecture?), and by variating some parameters you generate other models ...
+
+- I paragraph "To perform classication, ..." You do not need to mention this anymore, at this point it should be clear that you are doing classification. It should have been the idea the reader got 
+--- after finishing introduction: "he is doing estimation (calssificatio / regression ?) of something called traversability"
+--- after methodology: traversability is defined and now I know how it will estimate it
+--- after implementation: I know how he implement it (as a classification network / regression network?)
+--- before results: I know he will evaluate traversability estimation.
+- same paragraph, write it in a way that is clear what dataset you used (did you use two dataset? One for classification and one for regression?)
+- Paragraph "Initially, to train the models we rst use Standard Gradient Descent with momentum ..." why is this paragraph here? What is important to know this in Dataset section?
+
+
+Mayor:
+
+- [x] Up to Results chapter, it is not clear what or how many estimators you built/propose. Without this knowledge is Results seem like a list of facts about something else. Implementation should clearly state how many models (the general architectures you propose) there are. Did you build a model for classification and other for regression? The ResNet architecture was used for which one? The MicroResNet for which one? Name those models and use such names in the results to refer to them. Which of these architectures is the one you are showcasing (your best warrior) 
+- In the chapter implementation section 4.5 you mention this:
+
+"In this section we described the choices behind the evaluated network architecture." what evaluated architecture? You have to state, something around: In this section we propose our X proposed architectures and the decision for this choice. One is based in ResNet, the other in MicroResNet (I do not know if this is yours or not I am quite confused). Then the subsections should give a clear idea of what you are presenting. By the end of this chapter the reader should know what are the model (or models) at the core of your framework, why you chose them and how they are implemented. Then Result chapter will present the results of your framework using these proposed architectures (models) and how you evaluate such results. Then if you want to vary some parameters of one of those models to analyse the best one you can easily refer to it without the confusion of the current state of the chapter.
