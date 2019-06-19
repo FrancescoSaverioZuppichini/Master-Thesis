@@ -86,6 +86,15 @@ Using MicroResNet7x7-SE as regressor we obtained a MSE of $0.006$ on the validat
 \caption{Regression results of MicroResNet7x7-SE on different datasets.}
 \label{tab : regression-results}
 \end{table*}
+Figure \ref{fig : regression-preds-targs} plots the real advancement against the regressor output for the test set. In most cases the model did not correctly predict the advancement.
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}[b]{1\linewidth}
+    \includegraphics[width=\linewidth]{../img/4/regression_scatter.png} 
+  \end{subfigure}
+  \caption{RReal advancement against the regressor output for the test set. Most of the points are far away to the diagonal line showing that the regressor predicts the wrong advancement in many cases.}
+  \label{fig : regression-preds-targs}
+\end{figure}
 To decide which model evaluate, the regressor or the classifier, we need to describe their advantages. Since, the regressor directly predicts the advancement it can be used to classify patches using different threshold. This can be done by just see if the predicted advancement is greater or lower than a threshold. However, if we fixed a threshold, the same model trained directly to predict traversability outperforms the regressor. Table \ref{tab : reg-clas} shows the accuracy of two MicroResNet7x7-SE on classification and regression after a threshold of twenty centimeters is selected. The classifier outperformed the regressor. For this reason, we decided to evaluated the MicroResNet7x7-SE classifier. In some cases regressor is a more feasible solution. For example, if we need to consider multiple threshold than clasification requires to train one classifier per threshold while regression can evaluate always the same model.
 \begin{table*}[htbp]
   \centering
