@@ -2,9 +2,9 @@
 \begin{document}
 \chapter{Implementation}
 \label{chap: implementation}
-This section talks in detail about the implementation of the framework. We will first talk about the utilized robot, then describe each step in the dataset generation, illustrate the utilized estimators and finish by listing the employed software.
+This section talks in detail about the implementation of the framework. We will first describe the utilized robot, then discuss each step in the dataset generation. Then, we describe five convolutional neural network architectures.  We conclude by listing the employed software.
 \section{Robot}
-We tested our framewotk on a a legged crocodile-like robot called \emph{Krock} developed at \href{https://biorob.epfl.ch/}{EPFL}. The next figure shows the robot in real life with a cloak and in a simulated enviroment.
+We test our framework on a legged crocodile-like robot called \emph{Krock} developed at \href{https://biorob.epfl.ch/}{EPFL}. The next figure shows the robot in real life with a cloak and in a simulated environment.
 
 \begin{figure}[htbp]
     \centering
@@ -20,49 +20,49 @@ We tested our framewotk on a a legged crocodile-like robot called \emph{Krock} d
            \label{fig: krock}
 
     \end{figure}
-    K-rock robot was created for the purpose of montoring real crocodiles, hence it must walk and behave realistically enough to fool the real crocodiles. Krock has four legs, each one of them is equipped with three motors in order to rotate in each axis. The robot can raise itself in three different configurations, gaits, using the four motors on the body connected to the legs. In addition, there is another set of two motors in the torso to increase Krock's mobility. 
+    K-rock robot was created for the purpose of monitoring real crocodiles, hence it must walk and behave realistically enough to fool the real crocodiles. Krock has four legs, each one of them is equipped with three motors in order to rotate in each axis. The robot can raise itself in three different configurations, gaits, using the four motors on the body connected to the legs. In addition, there is another set of two motors in the torso to increase Krock's mobility. 
 The tail is composed by another set of three motors and can be used to perform a wide array of tasks.
-The robot is $85cm$ long, weights around $1.4kg$ and in its standard gait configuration its distance from the ground is $16$cm. Figure \ref{fig:krock-top} shows a topview of the robot.
+The robot is $85cm$ long, weights around $1.4kg$ and in its standard gait configuration its distance from the ground is $16$cm. Figure \ref{fig : krock-top} shows a topview of the robot.
 \begin{figure}[htbp]
 \centering
      \begin{subfigure}[b]{0.49\textwidth}
     \includegraphics[width=\textwidth]{../img/krock-top.jpg}
     \caption{Top view of \emph{Krock}}
-   	\end{subfigure}
+       \end{subfigure}
      \begin{subfigure}[b]{0.49\textwidth}
       \includegraphics[width=\textwidth]{../img/krock-top-highlight.png}
     \caption{Details highlighted in \emph{Krock}}
        \end{subfigure}
        \caption{Top view of Krock to help reader understanding its composition and the correct ratio between its parts.  Each motor is highlighted with a red marker.}
-   	\label{fig:krock-top}
+       \label{fig : krock-top}
 
 \end{figure}
 \emph{Krock}'s moves by lifting and moving forward one leg after the other. The following figure shows the robots going forward.
-	\begin{figure}[htbp]
+    \begin{figure}[htbp]
 \centering
-    	\begin{subfigure}[b]{0.3\textwidth}
-			\includegraphics[width=\textwidth]{../img/krock-moving-1}
-			\caption{$t=1$}
-	    \end{subfigure}
-		\begin{subfigure}[b]{0.3\textwidth}
-			\includegraphics[width=\textwidth]{../img/krock-moving-2}
-			\caption{$t=2$}
-	    \end{subfigure}	
-	   \begin{subfigure}[b]{0.3\textwidth}
-			\includegraphics[width=\textwidth]{../img/krock-moving-3}
-			\caption{$t=3$}
-	    \end{subfigure}	
-    \caption{\emph{Krock} moving forward. In this gait configuration, the robot distance from the ground is $16$cm.}
+        \begin{subfigure}[b]{0.3\textwidth}
+            \includegraphics[width=\textwidth]{../img/krock-moving-1}
+            \caption{$t=1s$}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.3\textwidth}
+            \includegraphics[width=\textwidth]{../img/krock-moving-2}
+            \caption{$t=2s$}
+        \end{subfigure}    
+       \begin{subfigure}[b]{0.3\textwidth}
+            \includegraphics[width=\textwidth]{../img/krock-moving-3}
+            \caption{$t=3s$}
+        \end{subfigure}    
+    \caption{\emph{Krock} moving forward. In this gait configuration, the robot distance from the ground is $16$cm. Approximately every second the robot moves one leg. }
     \label{fig: krock-moving}
-	\end{figure}
-In our framework we fixed the gait configuration to normal, showed in figure \ref{fig: krock}, where the body is at the same legs' motors height.
+    \end{figure}
+In our framework we fix the gait configuration to normal, showed in figure \ref{fig: krock}, where the body is at the same legs' motors height.
 % \begin{figure}
 % \ref{fig: krock-gait}
-% \caption{Krock differents gait configuration.}	
+% \caption{Krock differents gait configuration.}    
 % \end{figure}
-\section{Data Gathering}
+\section{Data gathering}
 \label{sec: data-gathering}
-This section describes in detail how we created, collected and processed the synthetic dataset used to train the traversability estimator in supervised way.
+This section describes in detail how we create, collect and process the synthetic dataset used to train the traversability estimator with supervised learning.
 \subsection{Ground generation}
 \label{subsec: heightmap-generation}
 % To collect the data throught simulation we first need to generate meaningful terrain to be explored by the robot. Each map is stored as a 2D image where each pixel's value represents the terrain's height. For example, the following image shows an heightmap representing a real world quarry and the relative terrain.
@@ -78,9 +78,9 @@ This section describes in detail how we created, collected and processed the syn
 %             \end{subfigure}    
 %     \caption{This image shows an heightmap and the 3D render of a quarry.}
 %     \end{figure}rom each trajectory, what you did in simulation was to command the robot to move forward for 2 secs, i.e. created a trajectory from the spawning pose to the pose reached at the end of those 2 secs of moving forward. Ergo, you have to extract the patches at each pose of the trajectory generated at simulation time
-We created thirty $10\times10$ maps with a resolution offset $0.02cm/pixel$ and a height of $1$m using 2D simplex noise variant of Perlin noise \cite{perlin}, a widely used technique in the terrain generation litterature. We divide the maps into five main categories based on ground features: $bumps$, $rails$, $steps$, $slopes$/$ramps$ and $holes$. 
+We create thirty $10\times10$ maps with a resolution offset $0.02cm/pixel$ and a height of $1$m using 2D simplex noise variant of Perlin noise \cite{perlin}, a widely used technique in the terrain generation litterature. We divide the maps into five main categories based on ground features: $bumps$, $rails$, $steps$, $slopes$/$ramps$ and $holes$. 
 \paragraph{Bumps:} 
-We genered four different maps with increasing bumps' height using simplex noise. 
+We generete four different maps with increasing bumps' height using simplex noise. 
 \begin{figure}[H]
     \centering
         \begin{subfigure}[b]{0.23\textwidth}
@@ -132,7 +132,7 @@ We genered four different maps with increasing bumps' height using simplex noise
         \end{subfigure}    
     \caption{Rails maps.}
 \end{figure}
-\paragraph{Steps:} These are maps with various steps at increasing distance and frequency.
+\paragraph{Steps:}  Maps with various steps at increasing distance and frequency.
 \begin{figure}[H]
     \centering
         \begin{subfigure}[b]{0.23\textwidth}
@@ -177,7 +177,7 @@ We genered four different maps with increasing bumps' height using simplex noise
 \caption{Holes map.}
 \end{figure}
 \subsection{Real world maps}
-We also included real word terrains. We gather two heightmaps produced by ground mapping flying drones from \href{https://www.sensefly.com/education/datasets/}{sensefly}'s dataset, a quarry and a small village. Figure \ref{fig : real-maps} shows the original and a 3D render of the heightmap for each terrain.
+We also include real word terrains. We gather two heightmaps produced by ground mapping flying drones from \href{https://www.sensefly.com/education/datasets/}{sensefly}'s dataset, a quarry and a small village. Figure \ref{fig : real-maps} shows the original and a 3D render of the heightmap for each terrain.
 \begin{figure}[htbp]
     \centering
     \begin{subfigure}[b]{1\textwidth}
@@ -204,19 +204,19 @@ We also included real word terrains. We gather two heightmaps produced by ground
 \end{figure}
 
 % \subsection{Simulator}
-% We used Webots as the simulation plaform for the robot model and the generated terrain. The controller was implemented using the Robotic Operating System, and send data using a special nodes called topics. The controller implements a ROS' node to publish Krock status including its pose at a rate of $250hz$. We decided to reduce it to $50hz$ by using ROS build it \texttt{throttle} command. 
-% To load the map into the simulator, we fist had to convert it to Webots's \emph{.wbt} file. Unfortunately, the simulator lacks support for heightmaps so we had to use a script to read the image and perform the conversion. To communicate with the simulator, Webots exposes a wide number of ROS services, similar to HTTP endpoints, with which we can communicate. The client can use the services to get the value of a field of a Webots' Node, for example, if we want to get the terrain height, we have to ask for the field value \texttt{height} from \texttt{TERRAIN} node. In addition, to call one service, we first have to get the correct type of message we wish to send and then we can call it. We decided to implement a little library called \href{https://github.com/FrancescoSaverioZuppichini/Master-Thesis/tree/master/core/utilities/webots2ros}{\texttt{webots2ros}} to hide all the complexity needed to fetch a field value from a node.
+% We used Webots as the simulation platform for the robot model and the generated terrain. The controller is implemented using the Robotic Operating System, and send data using special nodes called topics. The controller implements a ROS' node to publish Krock status including its pose at a rate of $250hz$. We decided to reduce it to $50hz$ by using ROS build it \texttt{throttle} command. 
+% To load the map into the simulator, we first had to convert it to Webots's \emph{.wbt} file. Unfortunately, the simulator lacks support for heightmaps so we had to use a script to read the image and perform the conversion. To communicate with the simulator, Webots exposes a wide number of ROS services, similar to HTTP endpoints, with which we can communicate. The client can use the services to get the value of a field of a Webots' Node, for example, if we want to get the terrain height, we have to ask for the field value \texttt{height} from \texttt{TERRAIN} node. In addition, to call one service, we first have to get the correct type of message we wish to send and then we can call it. We decided to implement a little library called \href{https://github.com/FrancescoSaverioZuppichini/Master-Thesis/tree/master/core/utilities/webots2ros}{\texttt{webots2ros}} to hide all the complexity needed to fetch a field value from a node.
 
 % We also implement one additional library called \href{https://github.com/FrancescoSaverioZuppichini/Master-Thesis/tree/master/core/simulation/agent}{\texttt{Agent}} to create reusable robot's interfaces independent from the simulator. The package supports callbacks that can be attached to each agent adding additional features such as storing its interaction. Finally, we used \emph{Gym} \cite{gym}, a toolkit to develop and evaluate reinforcement learning algorithms, to define our environment. Due to the library's popularity, the code can easily be shared with other researches or we may directly experiment with already made RL algorithm in the future without changing the underlying infrastructure.
 
 \section{Simulation}
 \subsection{Setup}
-We used Webots as the simulation plaform for the robot model and the generated terrains. The controller was implemented using the Robotic Operating System, it sends data using a special nodes called topics. The controller implements a ROS' node to publish Krock status including its pose at a rate of $250hz$. We decided to reduce it to $50hz$ by using ROS build it \texttt{throttle} command. 
+We used Webots as the simulation platform for the robot model and the generated terrains. The controller was implemented using the Robotic Operating System, it sends data using special nodes called topics. The controller implements a ROS' node to publish Krock status including its pose at a rate of $250hz$. We decided to reduce it to $50hz$ by using ROS build it \texttt{throttle} command. 
 \subsection{Spawing}
 To collect \emph{Krock}'s interaction with the environment, we spawn the robot on the ground and let it move forward for $t$ seconds. We repeat this process $n$ times per map.
-    Unfortunately, spawning the robot is not a trivial task. In certain maps, for instance, \emph{bars1}, a map with tons of walls, we must avoid spawning Krock on an obstacle otherwise the run will be ruined by \emph{Krock} getting stuck at the beginning introducing noise in the dataset. To solve the problem, we defined two spawn strategies, a random spawn and a flat ground spawn strategy. The first one is used in most of the maps without big obstacles such as \emph{slope\_rocks}. This stragety just spawn the robot on random position and rotation. 
-    On the other hand, the flat ground strategy first selects suitable spawn positions by using a sliding window on the heightmap of size equal Krock's footprint and check if the mean pixel value is lower than a small threshold. If so, we store the center coordinates of the patch as a candidate spawing point. Intuitively, if a patch is flat then its mean value will be close to zero.
-Since there may be more flat spawing positions than simulations needed, we have to reduce the size of the candidate points. To maintaing the correct distribution on the map to avoid spawing the robot always in the same cloud of points, we used K-Means with $k$ clusters where $k$ is equal to the number of simulations we wish to run. By clustering, we guarantee to cover all region of the map removing any bias. Picture \ref{fig : spawn-strat} shows this strategy on \emph{bars1}. 
+    Unfortunately, spawning the robot is not a trivial task. In certain maps, we must avoid spawning Krock on an obstacle otherwise the robot will be immediately been stuck introducing noise in the dataset. To solve this problem, we define two spawn strategies, a random spawn, and a flat ground spawn strategy. The first one is employed in most of the maps without big obstacles. This strategy just spawns the robot in a random position and orientation. 
+    On the other hand, the flat ground strategy first selects suitable spawn positions by using a sliding window on the heightmap of size equal Krock's footprint and check if the mean pixel value is lower than a small threshold. If so, we store the center coordinates of the patch as a candidate spawning point. Intuitively, if a patch is flat then its mean value will be close to zero.
+Since there may be more flat spawning positions than simulations needed, we have to reduce the size of the candidate points. To maintain the correct distribution on the map to avoid spawning the robot always in the same cloud of points, we used K-Means with $k$ clusters where $k$ is equal to the number of simulations we wish to run. By clustering, we guarantee to cover all region of the map removing any bias. Picture \ref{fig : spawn-strat} shows this strategy on \emph{bars1}. 
 \begin{figure}[htbp]
     \begin{subfigure}[b]{0.45\textwidth}
         \includegraphics[width=\textwidth]{../img/3/spawn/flat-spawn-10.png}
@@ -230,7 +230,7 @@ Since there may be more flat spawing positions than simulations needed, we have 
 \caption{Examples of the spawning selection process (marked as red blobs) for the map \emph{bars1} }   
 \end{figure}
 \subsection{Interactions}
-In each simulation, the robot is spawned using the two spawning strategies and it walks forward for a fixed amount of time. We selected ten or twenty seconds depending on the map. Every five simulations we completely regenerate the robot's body to counter possible damages during the hard traversable ground. We moved the robot only forward with a fixed controller since we cannot estimate if the robot can traverse a patch while moving sideways. Table \ref{tab: maps} shows the maps configuration used in the simulator. For some map we add three different rocky textures to create more complicated situations. For example, adding some rocks in the ramps map allowed the robot to anchor the legs to the rocks and climb them easily.
+In each simulation, the robot is spawned using the two spawning strategies and it walks forward for a fixed amount of time. We selected ten or twenty seconds depending on the map. Every five simulations we completely regenerate the robot's body to counter possible damages during the hard traversable ground. We moved the robot only forward with a fixed controller since we cannot estimate if the robot can traverse a patch while moving sideways. Table \ref{tab: maps} shows the configuration of the maps used in the simulator. For some terrain, we add three different rocky textures to create more complicated situations. For example, adding some rocks in the ramps map allowed the robot to anchor the legs to the rocks and climb them easily.
 \begin{table} [htbp]
     \centering
     \ra{1.2}
@@ -312,9 +312,9 @@ After, we loaded the stored dataframes with the respective terrains and started 
 To compute the robot's advancement we needed to define a time window, $\Delta t$, and consider how much the robot traveled between the currenct pose, $X(t)$ and the future one $X(t + \Delta t)$. We observed from the simulator than the robot moves each leg every second. Thus, we selected a time window of two seconds to allow Krock to move both legs. 
 
 \subsection{Patch extraction}
-Each patch must contain both Krock's footprint, to include the situations where the obstacle is under the robot, and certain amount of ground region in front of it. Intuitively, we want to include in each patch the correct amount of future informations according to the selected time window. Thus, we should add the maximum possible ground that Krock could traverse. 
+Each patch must contain both Krock's footprint, to include all the ground under the robot, and a certain amount of ground region in front of it. Intuitively, we want to include in each patch the correct amount of future information according to the selected time window. This corresponds to the maximum possible ground that Krock could traverse in a time window.  
 
-To find out the correct value, we must compute the maximum advancement on a flat ground for the $\Delta t$ and use it to calculate the final size of the patch. We compute it by running some simulations of \emph{Krock} on flat ground and averaging the advancement getting a value of $70$cm in our $\Delta t = 2$s.
+To find out the correct value, we must compute the maximum advancement on flat ground for the $\Delta t$ and use it to calculate the final size of the patch. We compute it by running some simulations of \emph{Krock} on flat ground and averaging the advancement getting a value of $70$cm in our $\Delta t = 2$s.
 
 Each patch must include Krock's footprint and the maximum possible distance it can travel is a $\Delta t$. So, since Krock's pose was stored from IMU located in the juncture between the head and the legs, we have to crop from behind its length, $85$cm minus the offset between the IMU and the head, $14$cm. Then, we have to take $70$cm, the maximum advancement with a $\Delta t = 2$s plus the removed offset. The following figure visualizes the patch extraction process. 
 \begin{figure}[htbp]
@@ -336,9 +336,9 @@ Each patch must include Krock's footprint and the maximum possible distance it c
 Lastly, we create a final dataframe containing the map coordinates, the advancement, and the patches paths per simulation and store them to disk as \emph{.csv} files. 
 
 \subsection{Final dataset}
-The final dataset is composed by $\approx470$K and $\approx 37$K patches for the train and test set respectively. A small part of the train set, $10\%$ is used as validation. Train and validation set's trajectories do not overlap, each set has entirely independent simulation's runs
+The final dataset is composed of $\approx470$K and $\approx 37$K patches for the train and test set respectively. A small part of the train set, $10\%$ is used as validation. Train and validation set's trajectories do not overlap, each set has entirely independent simulation's runs
 
-We also generated $\approx 38$K patches using the \emph{arc rocks} map to further evaluate the model. The whole pipeline took less than one hour to run the first time with 16 threads, and, once it is cached, less than fifteen minutes to extract all the patches. For compleness, we plotted in figure \ref{fig : mean-advs-train} the mean advancement over each map in the traning set. 
+We also generated $\approx 38$K patches using the \emph{arc rocks} map to further evaluate the model. The whole pipeline took less than one hour to run the first time with 16 threads, and, once it is cached, less than fifteen minutes to extract all the patches. For completeness, we plotted in figure \ref{fig : mean-advs-train} the mean advancement over each map in the training set. 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\linewidth]{../img/datasets/box_for_each_map.png}
@@ -349,7 +349,7 @@ As sanity check, we visualized some of the patches from the train set ordered by
 
 
 \subsection{Normalization}
-Before feeding the data to the models, at runtime, we needed to make the patches height invariant to correctly normalize different patches taken from different maps with different height scaling factor. To do so, we subtract the height of the map corresponding to Krock's position from the patch to correctly center it. Figure \ref{fig : center} shows the normalization process on a dummt patch.
+Before feeding the data to the models, at runtime, we needed to make the patches height invariant to correctly normalize different patches taken from different maps with different height scaling factor. To do so, we subtract the height of the map corresponding to Krock's position from the patch to correctly center it. Figure \ref{fig : center} shows the normalization process on a dummy patch.
 
 \begin{figure}[htbp]
     \centering
@@ -540,8 +540,9 @@ Before feeding the data to the models, at runtime, we needed to make the patches
     \end{figure}
 
 \section{Label patches}
-To classify the patches we first need to label them. We defined a thresold to represent and label each patch traversable if the advancement is greater or not traversle it is lower. Ideally, the threshold should small enough to include as less as possible false positive and big enough to cover all the cases where Krock gets stuck. We empirically compute the threshold's value by spawing Krock in front of a bumps and a ramp and let it walk.
-    \paragraph{Bumps} We spawned the robot on the \emph{bumps3} map close to the end and let it go for 20 seconds. Figure \ref{fig : krock-bumps-sim} shows Krock in the simulated environment.
+\label{sec : label-patches}
+To classify the patches we first need to label them. We need to select a threshold to consider a patch traversable if the advancement is greater or not traversable if it is lower. Ideally, the threshold should small enough to include as less as possible false positive and big enough to cover all the cases where Krock gets stuck. We empirically compute the threshold's value by spawning Krock in front of bumps and a ramp and let it walk.
+    \paragraph{Bumps} We place the robot on the \emph{bumps3} map close to the end and let it go for 20 seconds. Figure \ref{fig : krock-bumps-sim} shows Krock in the simulated environment.
     
     \begin{figure}[htbp]
     \centering
@@ -551,7 +552,7 @@ To classify the patches we first need to label them. We defined a thresold to re
     \caption{Krock tries to overcome an obstacle in the \emph{bumps3} map.}
     \label{fig : krock-bumps-sim}
     \end{figure}
-    Due to its characteristic locomotion, Krock tried to overcome the obstacle using its legs to move itself to the top but it fell backs producing a spicky advancement where first it is positive and then negative. Figure \ref{fig : krock-bumps-advs} shows the advancemnet on this map with $\Delta t = 2$, we can notice the noisy output.
+    Due to its characteristic locomotion, Krock tries to overcome the obstacle using its legs to move itself to the top but it fell backs producing a spicky advancement where first it is positive and then negative. Figure \ref{fig : krock-bumps-advs} shows the advancemnet on this map with $\Delta t = 2$, we can notice the noisy output.
     
     \begin{figure}[htbp]
         \centering
@@ -562,9 +563,9 @@ To classify the patches we first need to label them. We defined a thresold to re
     \caption{Advancement over time with  $\Delta t = 2$ on \emph{bumps3}.}
     \label{fig : krock-bumps-advs}
     \end{figure}
-    A wheel robot, on the other hand, will not produce such graph since it cannot free itself easily from an obstacle. Image a wheel robot moving forward, once it hits an obstance it stops moving, if we plot its advancement in this situation it will look more like a step than a series of spikes.
+    A wheeled robot, on the other hand, will not produce such a graph since it cannot free itself easily from an obstacle. Image a wheeled robot moving forward, once it hits an obstacle it stops moving. So, if we plot its advancement in this situation it will look more like a step than a series of spikes.
     \paragraph{Ramps}
-    The trehsold should be small enough to not create any false positive, patches that are traversable but were classified as not. So, we let the robot walk up hill on the $slope_rocks1$ map with a height scaling factor set to $5$. We knew from empirical experiment that the robot is able to climp this steep ramp, the advancement is showed in figure \ref{fig : krock-ramps-sim}.
+    The threshold should be also small enough to not create any false positive, patches that are traversable but were classified as not. So, we let the robot walk uphill on the $slope_rocks1$ map with a height scaling factor set to $5$. We knew from empirical experiments that the robot is able to climb this steep ramp, the advancement is showed in figure \ref{fig : krock-ramps-sim}.
     \begin{figure}[htbp]
         \centering
         \begin{subfigure}[b]{0.45\textwidth}
@@ -578,7 +579,7 @@ To classify the patches we first need to label them. We defined a thresold to re
 
 \section{Estimator}
 \label{sec: estimator}
-In this section we described the convolutional neural network utilized in the original paper. We then introduced residual network and new techniques used to improve their performance. In the end, we proposed four residual network variant to be evaluated.
+In this section, we described the convolutional neural network utilized in the original paper. Then, we introduce residual networks and new techniques used to improve their performance. In the end, we proposed four residual network variants to be evaluated.
 \subsection{Original Model}
 \label{subsec : vanilla-cnn}
 
@@ -589,11 +590,11 @@ The original model proposed by Chavez-Garcia et al. \cite{omar2018traversability
     \begin{subfigure}[b]{0.25\linewidth}
         \includegraphics[width=\linewidth]{../img/3/models/transparent-omar.png}
     \end{subfigure}
-    \caption{original model proposed by Chavez-Garcia et al. \cite{omar2018traversability}. The rectangle represent the building block of each layer. Convolutiol layers are described by the kernel size, the number of filters and the stride.}
+    \caption{original model proposed by Chavez-Garcia et al. \cite{omar2018traversability}. The rectangle represents the building block of each layer. Convolutional layers are described by the kernel size, the number of filters and the stride.}
     \label{fig : omar}
 \end{figure}
 \subsection{ResNet}
-We adopt a Residual Network, ResNet \cite{he2015deep}, variant. Residual networks are deep convolutional networks consisting of many stacked \" Residual Units \". Intuitively, the residual unit allows the input of a layer to contribute to the next layer's input by being added to the current layer's output. Due to possible different features dimension, the input must go through and identify map to make the addition possible. This allows a stronger gradient flows and mitigates the degradation problem. A \"Residual Units \" is composed by a two $3x3$ \emph{Convolution}, \emph{Batchnorm} \cite{ioffe2015batch} and a \emph{Relu} blocks. Formally defined as: 
+We adopt a Residual Network, ResNet \cite{he2015deep}, variant. Residual networks are deep convolutional networks consisting of many stacked \" Residual Units \". Intuitively, the residual unit allows the input of a layer to contribute to the next layer's input by being added to the current layer's output. Due to possible different features dimension, the input must go through and identify the map to make the addition possible. This allows a stronger gradient flows and mitigates the degradation problem. A \"Residual Units \" is composed by a two $3x3$ \emph{Convolution}, \emph{Batchnorm} \cite{ioffe2015batch} and a \emph{Relu} blocks. Formally defined as: 
 \begin{equation}
     \mathbf{y}=\mathcal{F}\left(\mathbf{x},\left\{W_{i}\right\}\right)+h(\mathbf{x})
     \label{eq : resnet}
@@ -615,21 +616,23 @@ Following the recent work of He et al. \cite{he2015identity} we adopted \emph{pr
 \end{figure}
 \subsection{Sqeeze and Excitation}
 Finally, we also used the \emph{Squeeze and Excitation} (SE) module \cite{hu2017squeeze}. It is a form of attention that weights the channel of each convolutional operation by learnable scaling factors. Formally, for a given transformation, e.g. Convolution, defined as $\bm{F}_{tr}  : \bm{X} \mapsto \bm{U}$, $\bm{X} \in mathbb{R}^{H' \times W' \times C'}$, $\bm{U} \in \mathbb{R}^{H \times W \times C}$, the SE module first squeeze the information by using average pooling, $\bm{F}_{sq}$, the it excitates them using learnable weights, $\bm{F}_{ex}$ and finally, adaptive recalibration is performed, $\bm{F}_{scale}$.
-The next figure visualises the SE module.
+Figure \ref{ fig : se} visualizes the SE module.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\linewidth]{../img/implementation/estimator/se.png}
-    \caption{\emph{Squeeze and Excitation} \cite{hu2017squeeze}}
+    \caption{\emph{Squeeze and Excitation}. Figure from the original paper. \cite{hu2017squeeze}}
+\label{fig : se}
 \end{figure}
 \subsection{MicroResNet}
 \label{subsec : micro-resnets}
-The proposed network's architecture is composed by $n$ ResNet blocks and channel incrementing factor of $2$. Originally, ResNet was used to classify RGB images with $224\times224$ pixels and  used an aggressive convolution and max-polling operation in the first layer to reduce the images's size. We decided to adopt a less aggressive convolution motivited by the smaller size of our inputs. We tested two kernel sized: $7\times7$ and $3\times3$ with stride of $2$ and $1$ respectively. Lastly, we used LeakyReLU \cite{leakyrelu} with a negative slope of $0.1$ instead of ReLU to allow a better gradient flow during backpropagation. LeakyRelu is defined as follows
+The proposed network's architecture is composed by $n$ ResNet blocks and channel incrementing factor of $2$. ResNet is used to classify RGB images with $224\times224$ pixels so it used an aggressive convolution and max-polling operation in the first layer to reduce the input size. We decide to adopt a less aggressive convolution motivated by the smaller size of our inputs. We test two kernel sized: $7\times7$ and $3\times3$ with stride of $2$ and $1$ respectively. Lastly, we use LeakyReLU \cite{leakyrelu} with a negative slope of $0.1$ instead of ReLU to allow a better gradient flow during backpropagation. LeakyRelu is defined in equation \ref{eq :lr} .
 \begin{equation}
 LeakyRelu(x)=\left\{\begin{array}{ll}{x} & {\text { if } x>0} \\ {0.1 x} & {\text { otherwise }}\end{array}\right.
+\label{eq : lr}
 \end{equation}
 
-We called this model architecture \emph{MicroResNet}. We proposed four networks layouts: with $n=1$ and two fist layers setups, $3\times3$ stride $=1$ and $7\times7$, with and without the Squeeze and Excitation module. Those architectures can be used both for regression and classification by only chaning the output size of the fully connected later, $2$ for classification and $1$ for regression. All others layers are equals. Figure \ref{fig : microresnet} add additional informations.
+We call this architecture \emph{MicroResNet}. We propose four networks layouts: with $n=1$ , two first layers setups, $3\times3$ stride $=1$ and $7\times7$, with and without the Squeeze and Excitation module. Those architectures can be used both for regression and classification by only changing the output size of the fully connected later, $2$ for classification and $1$ for regression. All other layers are equals. Figure \ref{fig : microresnet} shows the models architecture while table \ref{tab : microresnet} adds more information.
 \begin{table}[htbp]
     \centering
     \ra{1.2}
@@ -697,16 +700,16 @@ Our models have approximately $35$ times less parameters than the smalles ResNet
     \label{fig : microresnet}
 \end{figure}
 
-\section{Data Augmentation}
+\section{Data augmentation}
 \label{sec: data-aug}
-Data augmentation is used to change the input of a model in order to produce more training examples. Since our inputs are heightmaps we cannot utilize the classic image manipulations such as shifts, flips, and zooms. Imagine that we have a patch with a wall in front of it, if we random rotate the image the wall may go in a position where the wall is not facing the robot anymore, making the image now traversable with a wrong target. We decided to apply dropout, coarse dropout, and random simplex noise in the correct degree to make them traversability invariant. To illustrate those techniques we  used the dummy patch same cude in the middle, figure \ref{fig: center}.
+Data augmentation is used to change the input of a model in order to produce more training examples. Since our inputs are heightmaps we cannot utilize the classic image manipulations such as shifts, flips, and zooms. Imagine that we have a patch with a wall in front of it if we random rotate the image the wall may go in a position where the wall is not facing the robot anymore, making the image now traversable with a wrong target. We decided to apply dropout, coarse dropout, and random simplex noise in the correct degree to make them traversability invariant. To illustrate those techniques we used a dummy patch with a cube in the middle, figure \ref{fig: center}.
 
 \subsection{Dropout}
 Dropout is a technique to randomly set some pixels to zero, in our case we flat some random pixel in the patch. 
 \subsection{Coarse Dropout}
-Similar to dropout, it sets to zero random regions of pixels with defined boundaries.  To ensure we do create untraversable patches from traversable patch we limited the coarse dropout region to only few centiments. 
+Similar to dropout, it sets to zero random regions of pixels with defined boundaries.  To ensure we do create untraversable patches from traversable ones we limited the coarse dropout region to only a few centimeters..
 \subsection{Simplex Noise} 
-We added some noise the the inputs to slighty changed the ground in order help the network generalize better. Since it is computationally expensive, we first randomly applied the noise to five hundred images with only zeros, flat grounds. We cached them and then we randomly scaled them and added to the input image. To ensure traversability invariant we applyed simplex noise the the inputs based on their classes. For traversability grounds we used a noise feature size $15 - 25$  while, for not traversable samples a noise size between $5 -15 $. Figure \ref{fig: simplex-noise} clearly shows the grounds generated by differnt sizes.  
+We added some noise the inputs to slightly changed the ground in order to help the network generalize better. Since it is computationally expensive, we first randomly applied the noise to five hundred images with only zeros, flat grounds. We cached them and then we randomly scaled them and added to the input image. To ensure traversability invariant, we applied simplex noise to the inputs based on their classes. For traversability grounds, we used a noise feature size $15 - 25$  while, for not traversable samples a noise size between $5 -15 $. Figure \ref{fig: simplex-noise} clearly shows the grounds generated by different sizes.  
 \begin{figure}[htbp]
     \centering
 
@@ -753,9 +756,19 @@ Figure \ref{fig: data-aug} shows the tree data augmentation techniques used appl
             \caption{Final result}
         \end{subfigure}    
     \label{fig: data-aug}
-    \caption{Data augmentation applied on a patch. First we randomly set to flat some small regions of the ground. Then, we slighty mutate the surface using simplex noise.}    
+    \caption{Data augmentation applied on a patch. First, we randomly set to flat some small regions of the ground. Then, we slightly mutate the surface using simplex noise.}    
 \end{figure}
-We augmented $80\%$ of the input images with dropout and coarse dropout. Dropout has a probability between $0.05$ and $0.1$ and coarse dropout has a probability of $0.02$ and $0.1$ with a size of the lower resolution image from which to sample the dropout between $0.6$ and $0.8$. Simplex noise was applied on the $70\%$ of the training data samples.
+We augmented $80\%$ of the input images with dropout and coarse dropout. Dropout has a probability between $0.05$ and $0.1$ and coarse dropout has a probability of $0.02$ and $0.1$ with a size of the lower resolution image from which to sample the dropout between $0.6$ and $0.8$. Simplex noise is applied to the $70\%$ of the training data samples.
+
+\section{Experiments}
+
+\subsection{Metrics}
+\paragraph{Classification:} To evaluate the model's classification performance we used two metrics: \emph{accuracy} and \emph{AUC-ROC Curve}. Accuracy scores the number of correct predictions made by the network while the AUC-ROC Curve represents degree or measure of separability, informally it tells how much model is capable of distinguishing between classes. For each experiment, we selected the model with the higher AUC-ROC Curve during training to be evaluated on the test set.
+
+\paragraph{Regression:} We used the Mean Square Error to evaluate the model's performance.
+
+\section{Training setup}
+Initially, to train the models we first use Standard Gradient Descent with momentum set to $0.95$, weight decay to $1e-4$ and an initial learning rate of $1e-3$ as proposed in He et al. \cite{he2015deep}. Then, we switch to Leslie Smith's 1 cycle policy \cite{1cycle} that allow us to train the network faster and with higher accuracy. The average training time is $\approx 10$ minutes. We minimized the Binary Cross Entropy (BCE) for the classifier and the  Mean Square Error (MSE) for the regressor.
 
 \section{Tools}
 We briefly list the most important tools and libraries adopted in this project. The framework was entirely developed on Ubuntu 18.10 with Python 3.6.
@@ -764,18 +777,18 @@ We briefly list the most important tools and libraries adopted in this project. 
 Unfortunately, ROS does not natively support Python3, so we had to compile it by hand. Because it was a difficult and time-consuming operation, we decided to share the ready-to-go binaries as a \href{https://hub.docker.com/r/zuppif/ros-melodic-python3/}{docker image}. 
 
 \subsection{Data processing}
-\paragraph{Numpy}\href{https://www.numpy.org/}{Numpy} is a one of the most popular packages for any scientific use. It allows to express efficiently any matrix operation using its broadcasting functions. Numpy is used across the whole pipeline to manipulate matrices.
-\paragraph{Pandas}To process the data from the simulations we rely on \href{https://pandas.pydata.org/}{Pandas}, a Python library providing fast, flexible, and expressive data structures in a tabular form. Pandas is well suited for many different kinds of data such as handle tabular data with heterogeneously-typed columns, similar to SQL table or Excel spreadsheet, time series and matrices. We take advantages of the relationa data structure to perform custom manipulation on the rows by removing the outliears and computing the advancement.
+\paragraph{Numpy}\href{https://www.numpy.org/}{Numpy} is one of the most popular packages for any scientific use. It allows expressing efficiently any matrix operation using its broadcasting functions. Numpy is used across the whole pipeline to manipulate matrices.
+\paragraph{Pandas}To process the data from the simulations we rely on \href{https://pandas.pydata.org/}{Pandas}, a Python library providing fast, flexible, and expressive data structures in a tabular form. Pandas is well suited for many different kinds of data such as handle tabular data with heterogeneously-typed columns, similar to the SQL table or Excel spreadsheet, time series and matrices. We take advantages of the relational data structure to perform custom manipulation on the rows by removing the outliers and computing the advancement.
 
 Generally, pandas does not scale well and it is mostly used to handle small dataset while relegating \"big data\" to other frameworks such as Spark or Hadoop. We used Pandas to store the results from the simulator and inside a Thread Queue to parse each \emph{.csv} file efficiently.
 \paragraph{OpenCV} Open Source Computer Vision Library, \href{https://opencv.org/}{OpenCV}, is an open source computer vision library with a rich collection of highly optimized algorithms. It includes classic and state-of-the-art computer vision and machine learning methods applied in a wide array of tasks, such as object detection and face recognition. We adopt this library to handle image data, mostly to pre and post-process the heightmaps and the patches.
 \subsubsection{CNN training}
-\paragraph{Pytorch }\href{https://pytorch.org/}{PyTorch} is a Python open source deep learning framework. It allows Tensor computation (like NumPy) with strong GPU acceleration and Deep neural networks built on a tape-based auto grad system. Due to its Python-first philosophy, it is easy to use, expressive and predictable it is widely used amoung researches and enthusiast. Moreover, its main advantages over other mainstream frameworks such as TensorFlow \cite{tensorflow} are a cleaner API structure, better debugging, code shareability and an enormous number of high-quality third-party packages.
+\paragraph{Pytorch }\href{https://pytorch.org/}{PyTorch} is a Python open source deep learning framework. It allows Tensor computation (like NumPy) with strong GPU acceleration and Deep neural networks built on a tape-based auto grad system. Due to its Python-first philosophy, it is easy to use, expressive and predictable it is widely used among researches and enthusiast. Moreover, its main advantages over other mainstream frameworks such as TensorFlow \cite{tensorflow} are a cleaner API structure, better debugging, code shareability and an enormous number of high-quality third-party packages.
 \paragraph{FastAI}\href{https://course.fast.ai/}{FastAI} is library based on PyTorch that simplifies fast and accurate neural nets training using modern best practices. It provides a high-level API to train, evaluate and test deep learning models on any type of dataset. We used it to train, test, and evaluate our models.
-\paragraph{imgaug}\href{https://imgaug.readthedocs.io/en/latest/}{Image augmentation} (imgaug) is a python library to perform image augmenting operations on images. It provides a variety of methodologies, such as affine transformations, perspective transformations, contrast changes and Gaussian noise, to build sophisticated pipelines. It supports images,  heatmaps, segmentation maps, masks, key points/landmarks, bounding boxes, polygons, and line strings. We used it to augment the heightmap, details are in \hyperref[sec: data-aug]{section \ref{sec: data-aug}}
+\paragraph{imgaug}\href{https://imgaug.readthedocs.io/en/latest/}{Image augmentation} (imgaug) is a python library to perform image augmenting operations on images. It provides a variety of methodologies, such as affine transformations, perspective transformations, contrast changes, and Gaussian noise, to build sophisticated pipelines. It supports images,  heatmaps, segmentation maps, masks, key points/landmarks, bounding boxes, polygons, and line strings. We used it to augment the heightmap, details are in \hyperref[sec: data-aug]{section \ref{sec: data-aug}}
 \subsection{Visualization}
 \paragraph{matplotlib}Almost all the plots in this report were created by \href{https://matplotlib.org/}{Matplotlib}, is a Python 2D plotting library. It provides a similar functional interface to MATLAB and a deep ability to customize every region of the figure. All 
-It is worth citing \emph{seaborn} a data visualization library that we inglobate in our work-flow to create the heatmaps. It is based on Matplotlib and it provides an high-level interface.
-\paragraph{mayavi}Mayavi is a scientific data visualization and plotting in python library. We adopt it to rendered in 3D all the surfaces used in our framework.
+It is worth citing \emph{seaborn} a data visualization library that we inglobate in our work-flow to create the heatmaps. It is based on Matplotlib and it provides a high-level interface.
+\paragraph{mayavi}Mayavi is a scientific data visualization and plotting in python library. We adopt it to render in 3D all the surfaces used in our framework.
 
 \end{document}
