@@ -86,7 +86,7 @@ Using MicroResNet7x7-SE as regressor we obtained a MSE of $0.006$ on the validat
 \caption{Regression results of MicroResNet7x7-SE on different datasets.}
 \label{tab : regression-results}
 \end{table*}
-The regressor can be used to classify patches using different threshold by just see if the predicted advancement is greater or lower than a threshold. However, we always need to fix a threshold to estimate traversabilit. Once the value is fixed, the same model trained on the same dataset to classify patches drastically outperforms the regressor. Table \ref{tab : reg-clas} shows the accuracy of two MicroResNet7x7-SE on classification and regression after a threshold of twenty centimeters is selected. For this reason, we decided to evaluate the MicroResNet7x7-SE classifier.
+To decide which model evaluate, the regressor or the classifier, we need to describe their advantages. Since, the regressor directly predicts the advancement it can be used to classify patches using different threshold. This can be done by just see if the predicted advancement is greater or lower than a threshold. However, if we fixed a threshold, the same model trained directly to predict traversability outperforms the regressor. Table \ref{tab : reg-clas} shows the accuracy of two MicroResNet7x7-SE on classification and regression after a threshold of twenty centimeters is selected. The classifier outperformed the regressor. For this reason, we decided to evaluated the MicroResNet7x7-SE classifier. In some cases regressor is a more feasible solution. For example, if we need to consider multiple threshold than clasification requires to train one classifier per threshold while regression can evaluate always the same model.
 \begin{table*}[htbp]
   \centering
   \ra{1.2}
@@ -99,7 +99,7 @@ The regressor can be used to classify patches using different threshold by just 
    Mean & $73.6\%$ & \textbf{87.8\%} \\
   \bottomrule   
 \end{tabular}
-\caption{Regression and classification accuracy for the same model,  MicroResNet7x7-SE, once a threshold of $20$cm is fixed. The classifier outperforms the regressor by $15\%$.}
+\caption{Regression and classification accuracy for the same model,  MicroResNet7x7-SE, on a threshold of $20$cm. The regression accuracy is computed using its output labeled with the selected threshold and the binary targets from the classification dataset. This mimic the situaion when the fixed a minimim advancement for the root. The classifier outperforms the regressor.}
 \label{tab : reg-clas}
 \end{table*}
 % Moreover, we would like to also show the different steps we made to reach this result. The following table shows the metric's score without any data-augmentation.
@@ -190,7 +190,7 @@ Definitely, this was a hard map for the robot due to the high number of not trav
       % \subcaption{Robot moving from right to left} 
       % \label{fig: bars-r2l}
   \end{subfigure}
-  \caption{Detail of a region in the bars map where there are two walls forming a corridor. Correctly, when the robot is travel following the trail the region is label as traversable.}
+  \caption{Detail of a region in the bars map where there are two walls forming a corridor. When the robot is  following the trail the region is label as traversable.}
   \label{fig : bars-tunnel-trav}
   \end{figure}
 
@@ -219,10 +219,10 @@ We applied the same procedure to also a $10\times10$m small village map. Figure 
       \subcaption{Robot moving from right to left} 
       % \label{fig: bars-r2l}
   \end{subfigure}
-  \caption{Traversability probability on the map of a small village for different Krock's rotation. The surface covers $30\times 30$m and has a maximum height of $10$m. The values are obtained by sliding a window on the map to create the patches to predict their traversability.}
+  \caption{Traversability probability on the map of a small village for different Krock's rotation. The surface covers $30\times 30$m and has a maximum height of $10$m.}
   \label{fig : small-village-trav}
   \end{figure}
-  All the streets were label as traversable, while the church's roof traversability depend on the orientation. For example, most steep roofs are not traversable when walking uphill. On the other hand, if krock walks side by side they can be traversed. Figure \ref{fig : small-village-roof-trav} shows this behavior on the church's roof.
+  All the streets were label as traversable,while some buildings' roofs (e.g. the church's one) are traversable depending on the Krock orinetation. For example, most steep roofs are not traversable when walking uphill. On the other hand, if krock walks side by side they can be traversed. Figure \ref{fig : small-village-roof-trav} shows this behavior on the church's roof.
   \begin{figure} [htbp]
     \centering
     \begin{subfigure}[b]{0.45\textwidth}
