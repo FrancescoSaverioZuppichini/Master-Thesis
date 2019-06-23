@@ -13,7 +13,7 @@ In this section, we evaluate five convolutional neural networks: the model propo
 
 \section{Quantitative results}
 \subsection{Model selection}
-We compare the four different MicroRenset architectures \ref{subsec :micro-resnets} and the Original CNN \ref{subsec : vanilla-cnn} propose in the original work \cite{omar2018traversability} on classification. The dataset is labeled as described in \ref{sec : label-patches}. We run five experiments per architecture, and we select the best performing network using as a metric the ROC AUC. Table \ref{tab : models-results-comparison} shows the results for each architecture. The best performing model is MicroResNet7x7-SE with a ROC AUC of 0.896 on the test set. We suggest that the big kernel size allows the network to extrapolate more gound features in the first layer. Also, the results demonstrate the performance boots given by the Squeeze and Excitation. MicroResNet7x7-SE  gains a huge boost of $0.021$ compared to MicroResNet7x7.
+We compare the four different MicroRenset architectures \ref{subsec : micro-resnets} and the Original CNN \ref{subsec : vanilla-cnn} propose in the original work \cite{omar2018traversability} on classification. The dataset is labeled as described in \ref{sec : label-patches}. We run five experiments per architecture, and we select the best performing network using as a metric the ROC AUC. Table \ref{tab : models-results-comparison} shows the results for each architecture. The best performing model is MicroResNet7x7-SE with a ROC AUC of 0.896 on the test set. We suggest that the big kernel size allows the network to extrapolate more gound features in the first layer. Also, the results demonstrate the performance boots given by the Squeeze and Excitation. MicroResNet7x7-SE  gains a huge boost of $0.021$ compared to MicroResNet7x7.
 \begin{table*}[ht]
   \centering
   \ra{1.2}
@@ -85,7 +85,7 @@ Figure \ref{fig : regression-preds-targs} plots the real advancement against the
   \begin{subfigure}[b]{1\linewidth}
     \includegraphics[width=\linewidth]{../img/4/regression_scatter.png} 
   \end{subfigure}
-  \caption{RReal advancement against the regressor output for the test set. Most of the points are far away to the diagonal line showing that the regressor predicts the wrong advancement in many cases.}
+  \caption{l advancement against the predicted one by the regressor for the test set. Most of the points are far away to the diagonal line showing that the regressor predicts the wrong advancement in many cases.}
   \label{fig : regression-preds-targs}
 \end{figure}
 The regressor has several advantages compared to the classifier, First, since we can use the same model to classify patches with a different threshold. This is done by seeing if the predicted advancement is greater or lower than a threshold. Regression is a usually feasible solution. For example, if we need to consider multiple thresholds. Classification requires the training of one classifier per threshold while regression can evaluate always the same model.
@@ -108,12 +108,12 @@ However, if we fixed a threshold, the same exactly architecture trained directly
 \end{table*}
 % Moreover, we would like to also show the different steps we made to reach this result. The following table shows the metric's score without any data-augmentation.
 % Adding dropout increases the results.
-% With dropout plus coarse dropout.
+% With dropout plus coarse dropout
+\section{Qualitative results}
 We evaluate the classifier predictions by plotting the traversability probability on different maps in 3D. We used a sliding window to extract the patches to generate the patches. Then, we created a texture based on the traversable probability. For each map, we evaluated four headings.
-%  robot movingfrom bottom to top, top to bottom, left to right and right to left since those are the most human understandable. By using those angles, we can optimize the cropping process since to avoid rotate each patch based on the Krock's head position. Instead, we can just rotate the entire map beforehand. 
-subsection{Quarry}
+%  robot movingfrom bottom to top, top to bottom, left to right and right to left since these are the most human understandable. By using these angles, we can optimize the cropping process since to avoid rotate each patch based on the Krock's head position. Instead, we can just rotate the entire map beforehand. 
+\subsection{Quarry}
 We first evaluate the test set composed by the quarry map  $32\times32$m  and with a maximum height of $10$m. We expect the trail on the slopes to be traversable at almost any headings, especially when Krock move from left to right and vice-versa. The top part should be hard to traverse in almost any case. Figure \ref{fig : quarry-trav} shows the traversability probability directly on the map. 
-\todo[inline]{some where place the colormap bar}
 \begin{figure} [htbp]
 \centering
 \begin{subfigure}[b]{0.45\textwidth}
@@ -136,7 +136,7 @@ We first evaluate the test set composed by the quarry map  $32\times32$m  and wi
     \subcaption{Robot moving from right to left} 
     % \label{fig: quarry-r2l}
 \end{subfigure}
-\caption{Traversability probability on the test set, a quarry $32\times 32$m and a maximum height of $10$m, for different Krock's orientations. }
+\caption{Traversability probability on the test set, a quarry $32\times 32$m and a maximum height of $10$m, for different Krock's orientations. Red equal not traversable, green equal totally traversable. }
 \label{fig : quarry-trav}
 \end{figure}
  Correctly, the lower part of the map, composed by flat regions, is labeled with high confidence as traversable in all rotations. On the other hand, the traversability of the slopes and the bumps on the top region depends on the robot orientation.
@@ -169,7 +169,7 @@ Bars is a map composed of walls with different heights, thus we expected to be m
   \caption{Traversability probability on the bars map, a $10\times 10$m , for different Krock's orientations.}
   \label{fig : bars-trav}
   \end{figure}
-Due to the high number of not traversable walls, this is a hard map to traverse the robot . Interesting, we can identify a corridor near the bottom center of the maps. This region shows how the model correctly label those patches depending on the orientation. Figure \ref{fig : bars-tunnel-trav} highlights this detail.
+Due to the high number of not traversable walls, this is a hard map to traverse the robot . Interesting, we can identify a corridor near the bottom center of the maps. This region shows how the model correctly label these patches depending on the orientation. Figure \ref{fig : bars-tunnel-trav} highlights this detail.
 
 \begin{figure} [htbp]
   \centering
@@ -193,7 +193,7 @@ Due to the high number of not traversable walls, this is a hard map to traverse 
       % \subcaption{Robot moving from right to left} 
       % \label{fig: bars-r2l}
   \end{subfigure}
-  \caption{Detail of a region in the bars map where there are two walls forming a corridor. When the robot is  following the trail the region is label as traversable.}
+  \caption{Detail of a region in the bars map where there are two walls forming a corridor. When the robot is ollowing the trail the region is label as traversable. Red equal not traversable, green equal totally traversable. }
   \label{fig : bars-tunnel-trav}
   \end{figure}
 
@@ -222,7 +222,7 @@ We apply the same procedure to evaluate the network on a $10\times10$m small vil
       \subcaption{Robot moving from right to left} 
       % \label{fig: bars-r2l}
   \end{subfigure}
-  \caption{Traversability probability on the map of a small village for different Krock's rotation. The surface covers $30\times 30$m and has a maximum height of $10$m.}
+  \caption{Traversability probability on the map of a small village for different Krock's rotation. The surface covers $30\times 30$m and has a maximum height of $10$m. Red equal not traversable, green equal totally traversable. }
   \label{fig : small-village-trav}
   \end{figure}
   All the streets are labeled as traversable, while some buildings' roofs (e.g. the church's one) are traversable depending on the Krock orinetation. For example, most steep roofs are not traversable when walking uphill. On the other hand, if krock walks side by side they can be traversed. Figure \ref{fig : small-village-roof-trav} shows this behavior on the church's roof.
@@ -248,7 +248,7 @@ We apply the same procedure to evaluate the network on a $10\times10$m small vil
         \subcaption{Robot moving from right to left} 
         % \label{fig: bars-r2l}
     \end{subfigure}
-    \caption{Detail of the church in the small village map for different Krock's rotation. All the fours images are correctly labeled accordingly to the robot orientation. In the first two images only downhill part of the roof is traversable. While in the last two the robot is able to travel till the end.}
+    \caption{Detail of the church in the small village map for different Krock's rotation. All the fours images are correctly labeled accordingly to the robot orientation. In the first two images only downhill part of the roof is traversable. While in the last two the robot is able to travel till the end. Red equal not traversable, green equal totally traversable.}
     \label{fig :  small-village-roof-trav}
     \end{figure}
 \end{document}
