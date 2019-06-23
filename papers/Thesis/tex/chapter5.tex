@@ -2,22 +2,21 @@
 \begin{document}
 \chapter{Interpretability}
 \label{chap: interpretability}
-In this section, we interpret MicroResNet7x7-SE's predictions using different techniques to test its ability to properly estimate traversability by classifying ground patches. We highlight its strength, robustness to understand its limitations. We evaluated the quality of our traversability estimator with different methodology. First, we showed that the model has correctly learned grounds' features and was able to separable terrains based on them. Second, we utilized the test dataset to visualize the most traversable, the lest traversable and the misclassified patches.  Utilizing a special method, we determined that the model always looked at the correct features in the ground even if when it fails. Lastly, we crafted several patches with different unique features, such as walls, bumps, etc, to test the robustness of the model by comparing its predictions to the real data gathered from the simulator. 
+In this section, we interpret MicroResNet7x7-SE's predictions using different techniquesin order to understand its ability to properly estimate traversability by classifying ground patches. We highlight its strength, robustness to understand its limitations. We evaluate the quality of our traversability estimator with different methodology. First, we showed that the model has correctly learn grounds' features and is able to separate terrains based on them. Second, we utilize the test dataset to visualize the most traversable, the least traversable and the misclassified patches.  Utilizing a special method, we determine that the model always looke at the correct features in the ground even if when it fails. Finally, we craft several patches with different unique features, such as walls, bumps, etc, in order to verify the robustness of the model by comparing its predictions to the real data gathered from the simulator. 
 \section{Features separability}
 \label{sec: features-separability}
-In general, convolutional neural networks learn to encode images by applying filters of increasing size at each layer. Usually, the first layers learn basic features, such as edges, while the final one encodes complex shapes. The outputs in the final convolution layer are usually referred to as \emph{features space}, consequently, a feature vector is just the output of the last layer for a given image. Those last features are combined and mapped to the correct classes by one or more fully connected layers. Lee et al. \cite{deepbelief} have visualized the features learned by the first and last layers. Figure \ref 
-The following image help to visualize the different features learned at each layer for network trained to classify images. This is visualize in figure \ref{layers-features} where there are the low level features (down) and the high level features (up) for four different classes, faces, cars, elephants and chairs, learned by a convolution neural network.
+Convolutional neural networks learn to encode images by applying filters of increasing size at each layer. The first layers learn basic features, such as edges, while the final one encodes complex shapes. The outputs in the final convolution layer are usually referred to as \emph{features space}, consequently, a feature vector is just the output of the last layer for a given image. These last features are combined and mapped to the correct classes by one or more fully connected layers. Lee et al. \cite{deepbelief} have visualized the features learned by the first and last layers, this is illustrated in figure \ref{fig : layers-features}.
 \begin{figure} [htbp]
     \centering
     \includegraphics[width=\linewidth]{../img/5/deep_belief.png}
-    \caption{Figure from Lee et al. \cite{deepbelief} paper where they showed for fours different classes the low-level features (up) and the high-level features (down) learned by a convolution neural network.}
+    \caption{Figure from Lee et al. \cite{deepbelief} paper where they show for fours different classes the low-level features (up) and the high-level features (down) learned by a convolution neural network.}
     \label{fig : layers-features}
 \end{figure}
-So, a correctly trained network should be able to separate the inputs features based on the predicted classes. Intuitively, given two classes $\mathcal{A}$ and $\mathcal{B}$, for example, \emph{chairs} and \emph{cars}, the high-level features for each class should not be the same, otherwise, the model may misclassify the input due to the overlap of different classes' features. For instance, if the network believes that big wheels are features of both chairs and cars then chairs may be wrongly classified as cars. Similarly, two patches have a small and big wall in front of the robot should not be mapped in the same position in the features. Because, from a traversability point of view, have different characteristic, one has a traversable wall, the other not. However, those patches are close to each other in the features space, the model could foolishly believe they are similar and belong to the same class.
-One technique to discover the degree of separability is to directly visualize the features vectors for each class. In our case,  MicroResNet7x7-SE, maps inputs to a $128$ dimensional feature space.  Since, we cannot directly visualize such highg dimension space, we reduced the feature vectors to a two-dimension space by applying Principle Analysis Component (PCA) \cite{pca}. We investigated the features space of the model both in the train and test set.
+So, a correctly trained network should be able to separate the features vectors in the features space based on their classes. Intuitively, given two classes $\mathcal{A}$ and $\mathcal{B}$, for example, \emph{chairs} and \emph{cars}, the high-level features for each class should not be the same. For instance, if the network believes that big wheels are features of both chairs and cars then chairs may be wrongly classified as cars. Similarly, two patches have a small and big wall in front of the robot should not be mapped in the same position in the features. Because, from a traversability point of view, have different characteristic, one has a traversable wall, the other not. However, these patches are close to each other in the features space, the model could foolishly believe they are similar and belong to the same class.
+One technique to discover the degree of separability is to directly visualize the features vectors for each class. In our case,  MicroResNet7x7-SE, maps the inputs to a $128$ dimensional feature space.  Since, we cannot directly visualize such highg dimension space, we reduced the feature vectors to a two-dimension space by applying Principle Analysis Component (PCA) \cite{pca}. We investigat the features space of the model both in the train and test set.
 
 \subsection{Features space of the train set}
-The following figures shows the features of $11$K images sampled from the train set labeled with their classes, \emph{traversable} and \emph{not traversable}. 
+Figure \ref{fig : pca-train-set } shows the features space for $11$K images sampled from the train set labeled with their classes, \emph{traversable} and \emph{not traversable}. 
 \begin{figure} [htbp]
     \centering
     \begin{subfigure}[b]{1\textwidth}
@@ -34,7 +33,7 @@ The following figures shows the features of $11$K images sampled from the train 
 \caption{Principal Component Analysis on the features space computed using the outputs from the last convolutional layers on the train dataset. The two point clouds are perfectly separable.}
 \label{fig : pca-train-set}
 \end{figure}
-We can clearly recognize two main clusters based on the labels' color, one on the left and one of the right. Those points are easily separable, even by human eyes, meaning that the model was able to learn meaning features from the dataset and use to make accurate predictions. To be totally sure the center of each class' point cloud is not overlapping we plotted the density of each cluster.
+We can clearly recognize two main clusters based on the labels' color, one on the left and one of the right. These points are easily separable, even by human eyes, meaning that the model was able to learn meaning features from the dataset and use to make accurate predictions. To be totally sure the center of each class' point cloud is not overlapping we plotted the density of each cluster.
 \begin{figure} [htbp]
     \begin{subfigure}[b]{0.48\textwidth}
         \includegraphics[width=\linewidth]{../img/5/pca/pca-0-density.png}
@@ -44,21 +43,21 @@ We can clearly recognize two main clusters based on the labels' color, one on th
         \includegraphics[width=\linewidth]{../img/5/pca/pca-1-density.png}
         \caption{Traversable}
     \end{subfigure}
-    \caption{Density plot of the points sampled from the training dataset in the features space. The more opaque the color the close to the cluster center. The centers of the cluster are not overlapping yielding a good separability and correct learning.}
+    \caption{Density plot for train set features space. The more opaque the color the close to the cluster center. The centers of the cluster are not overlapping yielding a good separability and correct learning.}
     \end{figure}
-Clearly, there is some distance between the centers. Furthermore, we can directly plot the patch corresponding to each feature vector to identify clusters of patches based on their position. Intuitively, if similar inputs are close to each other in the features space then the model also learned to effectively encode terrains features. We decided to not show all images on the same plot to avoid overcrowding the image. Instead, we clustered the points using K-Means with $k=50$ clusters and then we took the patch that corresponded to the center point in each cluster. In this way, even by showing only a few inputs, we included all the meaningful ground types. Figures \ref{fig : pca-patches-200} visualizes the results.
+Clearly, there is some distance between the centers. Furthermore, we can directly plot the patch corresponding to each feature vector to identify clusters of inputs based on their similarities. Intuitively, if similar inputs are close to each other in the features space then the model also learned to effectively encode terrains features. We decid to not show all images on the same plot to avoid overcrowding the image. Instead, we cluster the points using K-Means with $k=50$ clusters and then we took the patch that corresponded to the center point in each cluster. In this way, even by showing only a few inputs, we include all the meaningful ground types. Figures \ref{fig : pca-patches-200} visualizes the results.
 \begin{figure} [htbp]
     \centering
     \begin{subfigure}[b]{1\textwidth}
         \includegraphics[width=\linewidth]{../img/5/pca/pca-patches-50-None.png}
     \end{subfigure}
-    \caption{Patches plotted using the coordinate of the features vector obtained from the last convolutional layer's output and then reduced using PCA to a two-dimensional vector. Similar grounds are close to each other.}
+    \caption{Patches plotted using the coordinate of the features vector obtained from the last convolutional layer's output and then reduced using PCA to a two-dimensional vector. Similar grounds are close to each other. From the top left in counterclockwise order, there are not traversable patches with walls, steps, and big bumps. On the plateau, we can found traversable patches with light bumps. Going up we encounter the downhills. }
     \label{fig : pca-patches-200}
 \end{figure}
-Definitely, patches with similar features are close to each other yielding a quality features encoding. On the left-top side, we can distinguish highly untraversable patches with walls/bumps in front of the robot. Going down, we encounter patches with smaller obstacles. On the plateau, there are traversable patches with small obstacles such as light bumps. Importantly,  those patches are the closest ones to the not traversable ones, so they were the hardest to separate, thus, to classify.  Going up on the right side, we see some grounds with small steps. Finally, on the top, we find all the downhill patches, the simplest ones to traverse.
+Definitely, patches with similar features are close to each other yielding a quality features encoding. On the left-top side, we can distinguish highly untraversable patches with walls/bumps in front of the robot. Going down, we encounter patches with smaller obstacles. On the plateau, there are traversable patches with small obstacles such as light bumps. Importantly,  these patches are the closest ones to the not traversable ones, so they were the hardest to separate, thus, to classify.  Going up on the right side, we see some grounds with small steps. Finally, on the top, we find all the downhill patches, the simplest ones to traverse.
 
 \subsection{Features space of the test set}
-We can apply the same procedure on the test set. Since it is a real world quarry, this dataset is harder than the train set and present challenging situations for the robot. The following image shows the features space after reducing its dimension to two using PCA.
+We can apply the same procedure on the test set. Since it is a real world quarry, this dataset is harder than the train set and present challenging situations for the robot. Figure \ref{fig : pca-test-set} displays the features space after reducing its dimension to two using PCA.
 \begin{figure} [htbp]
     \centering
     \begin{subfigure}[b]{1\textwidth}
@@ -84,23 +83,23 @@ Interesting, the traversable patches in figure \ref{fig : pca-test-se} are very 
     \caption{Traversable}
     \label{fig : pca-test-density-1}
 \end{subfigure}
-\caption{Density plot fofor the points sampled from the test dataset in the features space.  The more opaque the color the close to the cluster center. The centers of the clusters are close to each other yielding less separability/}
+\caption{ensity plot for test set features space. The more opaque the color the close to the cluster center. The centers of the clusters are close to each other yielding less separability/}
 \end{figure}
-The two centers are really close to each other, making those samples harder to separate and some not traversable points are mixed up with the traversable ones. This explains the elevated number of false negative that lower down the AUC score on this dataset. We can also visualize the patches by plotting them using their features coordinates
+The two centers are really close to each other, making these samples harder to separate and some not traversable points are mixed up with the traversable ones. This explains the elevated number of false negative that lower down the AUC score on this dataset. As we did before, we can also visualize the patches by plotting them using their features coordinates. Figure \ref{fig : pca-test-patche} shows the patches directly into the features space.
 \begin{figure} [htbp]
     \centering
     \begin{subfigure}[b]{1\textwidth}
         \includegraphics[width=\linewidth]{../img/5/pca/pca-test-patches-50-None.png}
     \end{subfigure}
-\caption{Patches that correspond to coordinates in the features space of the last convolutional layers on the test dataset. Similar grounds are close to each other.}
-\ref{fig: pca-test-patches}
+\caption{Patches that correspond to coordinates in the features space of the last convolutional layers on the test dataset. Similar grounds are close to each other. From the top left in counterclockwise order, we found not traversable patches with clearly not traversable features such us big bumps, huge obstacle towards the end. On the center, there are hardest surfaces to separate composed by slopes and small obstacles. Going up we found downhills and huge cliffs, highly traversable patches.}
+\label{fig : pca-test-patches}
 \end{figure}
-On the top left, from the not traversable cloud, we can see patches with a high level of bumps. Going down we find surfaces with huge walls in front of the robot while going close to the center we start to see all the traversable patches. Those samples have not too steep slopes. If we move to the density center, green double shown in figure \ref{pca-test-density-1}, we encounter lots of flat patches with little obstacles. Going up on the right branch we find downhill and on the top there are falls. 
+On the top left, from the not traversable cloud, we can see patches with a high level of bumps. Going down we find surfaces with huge walls in front of the robot while going close to the center we start to see all the traversable patches. These samples have not too steep slopes. If we move to the density center, green double shown in figure \ref{fig : pca-test-density-1}, we encounter lots of flat patches with little obstacles. Going up on the right branch we find downhill and on the top there are falls. 
 
-In the following section, we will take a deep look at the test set to find which patches confuse the most the model. Probably, those samples will be located between the two clusters' center where the difference between classes' features is minimum. 
+To summarize, we showed how the model correctly learned to separate the inputs based on their traversability, to encode meaningful grounds' information and to map close to each other patches with similar characteristic in the features spaces. In the following section, we will take a deep look at the test set to find which patches confuse the most the model. Probably, the samples will be located between the two clusters' center where the difference between classes' features is minimum. 
 
 \input{./tex/chapter5-quarry.tex}
 \input{./tex/chapter5-patches.tex}
-% %
+% % %
 
-\end{document}\documentclass[../document.tex]{subfiles}
+\end{document}

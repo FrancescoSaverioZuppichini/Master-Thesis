@@ -1,5 +1,5 @@
-\documentclass[../document.tex]{subfiles}
-\begin{document}
+% \documentclass[../document.tex]{subfiles}
+% \begin{document}
 \section{Robustness}
 \label{sec: robustness}
 To conclude the investigation of the network's abilities, we tested the model's robustness on patches with different features, walls, bumps, ramps, and examined the model's predictions against the real robot advancement obtained from the simulator. In general, the model's outputs matched the ground truth. When the network failed, on some edge cases, it showed a certain degree of uncertainty.
@@ -79,7 +79,7 @@ To be sure the results are correct, we run the last not traversable and the firs
     \caption{We run the last and first not traversable and traverable patch labeled by the model. Correctly, the real advancement is greater than the threshold when the distance between the robot is also greater.}
     \label{fig : walls-traversable}
 \end{figure}
-Furthermore, we increased the wall size of the first traversable patch, figure \ref{fig : walls-traversable-b}, to $10$ and to $50$m to see if the model will be confused. Accurately, the robot was not confused by the enourmous wall and the predictions did no change and those patches were still labeled as traversable. Figure \ref{fig : walls-tall} visualize those patches.
+Furthermore, we increased the wall size of the first traversable patch, figure \ref{fig : walls-traversable-b}, to $10$ and to $50$m to see if the model will be confused. Accurately, the robot was not confused by the enourmous wall and the predictions did no change and the patches were still labeled as traversable. Figure \ref{fig : walls-tall} visualize these patches.
 \begin{figure}[htbp]
     \centering
     \begin{subfigure}[b]{0.33\linewidth}
@@ -185,9 +185,9 @@ We combined the previous experiments and tested the model predictions against th
 \caption{Results for all the combination of patches with a wall's distance from $2-30$cm and heights between $5 - 19$cm. False negatives are labeled with red while false positive with blue. The model failed to classify some edges cases when the wall is very close to Krock's head and when the wall's distance is near the threshold. The overall accuracy is $91\%$.}    
 \label{fig : walls-heights}
 \end{figure}
-We obtained an overall accuracy of $91\%$. The model failed to predict some of the edge cases. The false positives are located in two regions: on the bottom left and on the top center. The first ones are the patches with a wall just ahead Krock of heights between $\approx 8 - 11$. The second region appears when the wall is at $\approx 20$cm, the threshold. But, even if the model failed to classify those inputs, it shows a correct degree of uncertainty. For example, most of the predictions' probability for the patches at $10$cm (red cells) are less than $0.7$, some of them even close to $0.5$.
+We obtained an overall accuracy of $91\%$. The model failed to predict some of the edge cases. The false positives are located in two regions: on the bottom left and on the top center. The first ones are the patches with a wall just ahead Krock of heights between $\approx 8 - 11$. The second region appears when the wall is at $\approx 20$cm, the threshold. But, even if the model failed to classify these inputs, it shows a correct degree of uncertainty. For example, most of the predictions' probability for the patches at $10$cm (red cells) are less than $0.7$, some of them even close to $0.5$.
 
-The false negative, (blue), are the inputs at distance close to the threshold and with a wall height between traversable and not traversable. Even if the model wrongly classified some of the inputs, all those errors are in the edge cases where the predicted classes' probability is not maximum. Moreover, in most cases, the model's showed uncertainty, especially on the false negative. Also, the prediction changes smoothly without any spikes accordingly to the features of the terrain. This shows a correct degree of understanding of the surface inputs. For instance, If the model outputs not traversable at height of $10$cm and at a distance of $16$cm, then all the taller wall are correctly labeled as not traversable showing consistency and predictability. 
+The false negative, (blue), are the inputs at distance close to the threshold and with a wall height between traversable and not traversable. Even if the model wrongly classified some of the inputs, all these errors are in the edge cases where the predicted classes' probability is not maximum. Moreover, in most cases, the model's showed uncertainty, especially on the false negative. Also, the prediction changes smoothly without any spikes accordingly to the features of the terrain. This shows a correct degree of understanding of the surface inputs. For instance, If the model outputs not traversable at height of $10$cm and at a distance of $16$cm, then all the taller wall are correctly labeled as not traversable showing consistency and predictability. 
 \subsection{Corridors}
 We also tested the model against corridors. We expected the model fails due to the lack of train samples similar to corridors. Only two maps in the whole dataset have featers that could generate corridors. This is confirmed by presence of only few patches with corridors in the features space, figure \ref{fig : pca-patches-200}. We generated ten different terrains starting from two walls at $30$cm from the borders. Figure \ref{fig : tunnels}  visualizes the inputs.
 \begin{figure}[htbp]
@@ -227,7 +227,7 @@ We also tested the model against corridors. We expected the model fails due to t
     \caption{Traversability probabilities against corridor offset from the top borders.}
     \label{fig : tunnels-preds}
 \end{figure}
-The model scored an accuracy of just $40\%$. It wronly predicted that all patches expected the last two are traversable. In reality, only the first two patches are traversable, while all the others are not. When the distance between the walls reach a certain point, the robot was stuck and it was not able to move. Interesting, all the patches with corridor's width less than the robot's footprin represented an impossible situation, since the robot cannot go inside an obstacle. But, even some of those inputs were classified as traversable by the model. We computed the Grad-CAM output on last fours samples, figure \ref{fig : tunnels-grad-cam} visualizes it. In the first two, wrongly predicted as traversable, the front region was highlighted meaning that the network did not consider the distance between the wallsh. in the last two patches, the network discriminated booth the under and ahead inner part of the corridor. Clearly, the model was confused. To improve the network performance on corridors we incorporate new maps in the train set.
+The model scored an accuracy of just $40\%$. It wronly predicted that all patches expected the last two are traversable. In reality, only the first two patches are traversable, while all the others are not. When the distance between the walls reach a certain point, the robot was stuck and it was not able to move. Interesting, all the patches with corridor's width less than the robot's footprin represented an impossible situation, since the robot cannot go inside an obstacle. But, even some of these inputs were classified as traversable by the model. We computed the Grad-CAM output on last fours samples, figure \ref{fig : tunnels-grad-cam} visualizes it. In the first two, wrongly predicted as traversable, the front region was highlighted meaning that the network did not consider the distance between the wallsh. in the last two patches, the network discriminated booth the under and ahead inner part of the corridor. Clearly, the model was confused. To improve the network performance on corridors we incorporate new maps in the train set.
  \begin{figure}[htbp]
     \centering
     \begin{subfigure}[b]{0.24\linewidth}
@@ -303,4 +303,4 @@ We generated twenty ramps with a maximum height from $0.25$m to $4$m. Figure \re
 \caption{The last traversable and the first non traversable patches with a steep ramp ahead of Krock.}    
 \label{fig: ramps-sim}
 \end{figure}
-\end{document}
+% \end{document}
