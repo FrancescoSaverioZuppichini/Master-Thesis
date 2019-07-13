@@ -2,10 +2,11 @@ from simulation.Simulation import Simulation
 from simulation.env.spawn.SpawnStragety import FlatGroundSpawnStrategy, RandomSpawnStrategy
 from os import path
 #
-MAPS_DIR = './maps/new-train/'
+MAPS_DIR = '../maps/new-train/'
 BAGS_DIR = '/media/francesco/saetta/krock-dataset/new-train/bags/'
 map_path = lambda x: path.abspath(MAPS_DIR + "/{}.png".format(x))
 #
+
 # MAX_TIME = 10
 # N_SIM = 50
 #
@@ -59,25 +60,12 @@ map_path = lambda x: path.abspath(MAPS_DIR + "/{}.png".format(x))
 # # test
 # BAGS_DIR = '/media/francesco/saetta/krock-dataset/new-test-random/bags/'
 # Simulation('/home/francesco/Documents/Master-Thesis/core/maps/test/querry-big-10.png', 50, 10, BAGS_DIR, RandomSpawnStrategy, max_time=20)()
-# # test
-# BAGS_DIR = '/media/francesco/saetta/krock-dataset/new-test/bags/'
-# Simulation('/home/francesco/Documents/Master-Thesis/core/maps/test/querry-big-10.png', 50, 10, BAGS_DIR, FlatGroundSpawnStrategy, max_time=20)()
 #
-
-# val
+#
+# # arc rocks
 # BAGS_DIR = '/media/francesco/saetta/krock-dataset/new-val/bags/'
-# # Simulation('/home/francesco/Documents/Master-Thesis/core/maps/val/arc_rocks.png', 50, 1, BAGS_DIR, FlatGroundSpawnStrategy, max_time=10)()
-# Simulation('/home/francesco/Documents/Master-Thesis/core/maps/val/arc_rocks.png', 50, 1, BAGS_DIR, RandomSpawnStrategy, max_time=10)()
-#
+# Simulation('/home/francesco/Documents/Master-Thesis/core/maps/val/arc_rocks.png', 50, 1, BAGS_DIR, FlatGroundSpawnStrategy, max_time=10)()
 
-# val
-# BAGS_DIR = '/media/francesco/saetta/krock-dataset/train/bags/'
-# Simulation(map_path('holes1'), 50, 1, BAGS_DIR, RandomSpawnStrategy, max_time=10)()
-# Simulation(map_path('holes2'), 50, 1, BAGS_DIR, RandomSpawnStrategy, max_time=10)()
-# #
 
-# /media/francesco/saetta/krock-dataset/train/bags
-BAGS_DIR = '/tmp'
-
-Simulation(map_path('bumps3-rocks0'), 2, 1, BAGS_DIR, RandomSpawnStrategy, max_time=10)(),
-Simulation(map_path('bars1'), 2, 1, BAGS_DIR, FlatGroundSpawnStrategy, max_time=10)(),
+BAGS_DIR = '/home/francesco/Desktop'
+Simulation('/home/francesco/Documents/Master-Thesis/core/maps/val/arc_rocks.png', 2, 5, BAGS_DIR, FlatGroundSpawnStrategy, max_time=3)()

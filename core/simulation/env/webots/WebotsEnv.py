@@ -14,10 +14,9 @@ from os import path
 
 
 class WebotsEnv(gym.Env, Supervisor):
-    name = '/krock'
 
-    def __init__(self, world_path, load_world=True, *args, **kwargs):
-        self.world_path = world_path
+    def __init__(self, world_path, load_world=True, children_path=None):
+        self.world_path, self.children_path = world_path, children_path
         # TODO refactor
         if load_world: self.load_world(self.world_path)
 
@@ -44,10 +43,15 @@ class WebotsEnv(gym.Env, Supervisor):
         self.y = (self.translation.z, self.y + self.translation.z)
         self.z = 0
 
-        with open('/home/francesco/Documents/Master-Thesis/core/simulation/env/webots/children_no_tail', 'r') as f:
-            self.children = f.read()
+        self.children=None
+
+        if children_path is not None:
+            with open(self.children_path, 'r') as f:
+                self.children = f.read()
+
 
     def reanimate(self):
+        if self.children is None: raise Exception('No children specified!')
         # get the ROBOT node using the NODE API to make our life easier :)
         node = Node.from_def('/krock', 'ROBOT')
         # get the children field that cointas all the joints connections
@@ -67,10 +71,6 @@ class WebotsEnv(gym.Env, Supervisor):
         self.terrain = Node.from_def(self.name, 'TERRAIN')
 
     def get_height(self, x, y):
-        # to get the 2d index in 1d matrix x + width * y
-        # x = x  // self.x_spac
-        # y = y  // self.y_spac
-        # print(x,y)
         idx = int(x + (self.x_dim * y))
         h = self.grid['height'][idx].value
 

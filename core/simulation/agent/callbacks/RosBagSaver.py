@@ -1,18 +1,13 @@
 import rosbag
 import threading
-import rospy
-import time
 
 from os import path
-
-import pandas as pd
-
 from .AgentCallback import AgentCallback
-from pypeln import thread as th
 
-# REVIEW: probably store all topic in the bag is not the best idea due to the fact that
-# if we want to just load one topic we are forced to load them all!
 class RosBagSaver(AgentCallback):
+    """
+    This callback stores the topics in which the Agent is subscribed into a bag file.
+    """
 
     def __init__(self, save_dir, topics=None, max_size=1024, workers=1):
         self.save_dir = save_dir
@@ -33,8 +28,7 @@ class RosBagSaver(AgentCallback):
 
         if store: self.cache[key].append(value)
         self.size = len(self.cache[key])
-        # REVIEW: for now we want to store only in the end
-        # if self.size == self.max_size: self.store(agent)
+
 
     def write(self, data):
         key, values = data
@@ -42,8 +36,8 @@ class RosBagSaver(AgentCallback):
             self.bag.write(key, value)
         return True
 
-    def store(self, name):
-        file_name = path.normpath(self.save_dir + '/{}.bag'.format(name))
+    def store(self, file_name):
+        file_name = path.normpath(self.save_dir + '/{}.bag'.format(file_name))
 
         self.bag = rosbag.Bag(file_name, 'w')
 
@@ -51,22 +45,12 @@ class RosBagSaver(AgentCallback):
             for value in self.cache[key]:
                 self.bag.write(key, value)
 
-        # self.write(data)
-        # stage = th.map(self.write, data, workers=self.workers)
-        # files_list = list(stage)
-
         self.bag.close()
 
-        # rospy.loginfo('Wrote bag file to disk.')
         # clear cache
         self.cache = {}
         self.size = 0
 
 
-    def on_shut_down(self, env, name, *args, **kwargs):
-        # print(len(self.cache['pose']))
-        self.store(name)
-        # self.tr.start()
-        # self.tr.join()
-        # self.tr = threading.Thread(target=self.store, args=(*args))
-
+    def on_shut_down(self, env, file_name, *args, **kwargs):
+        self.store(file_name)

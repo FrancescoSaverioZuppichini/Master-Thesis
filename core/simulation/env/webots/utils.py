@@ -2,27 +2,15 @@ import numpy as np
 import time
 import matplotlib.pyplot as plt
 import seaborn as sns
-from matplotlib.pyplot import imshow
 from tempfile import NamedTemporaryFile
 
 
-def plot_terrain(terrain):
-    sns.heatmap(terrain)
-    # plt.colorbar()
-    plt.show()
-
-def image2webots_terrain(image, src_world, config, output_path=None, verbose=False):
-
+def image2webots_terrain(image, src_world, config, output_path=None):
 
     height, resolution = config['height'], config['resolution']
     image = image.astype(np.float)
     image = image / 255
-    shape = image.shape
     terrain = image * height
-    if verbose: print('mod image type: ', terrain.dtype, ' height factor: ', height, ' max val (m): ',
-                           np.amax(terrain), ' shape', terrain.shape)
-
-    # if verbose: plot_terrain(terrain)
 
     data = []
     l1 = l2 = -1
@@ -44,8 +32,6 @@ def image2webots_terrain(image, src_world, config, output_path=None, verbose=Fal
     data[l2 - 6] = '        zDimension ' + str(terrain.shape[1]) + '\n'
     data[l2 - 5] = '        zSpacing ' + str(resolution) + '\n } \n'
 
-    start = time.time()
-
     # take it down to zero
     terrain_flatted -= np.max(terrain_flatted)
 
@@ -63,9 +49,6 @@ def image2webots_terrain(image, src_world, config, output_path=None, verbose=Fal
         for line in data[l2 - 9:]:
             f.write(line)
 
-    end = time.time()
-
-    if verbose: print('Wrote new world in {:.2f}s'.format((end - start)))
 
     return output_path
 

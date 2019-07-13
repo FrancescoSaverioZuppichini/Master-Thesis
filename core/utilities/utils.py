@@ -1,11 +1,6 @@
 import cv2
-import matplotlib
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
 import glob
-
-from os import path
 
 def hmread(path):
     hm = cv2.imread(path)

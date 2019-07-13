@@ -7,9 +7,11 @@ from cv_bridge import CvBridge
 from simulation.env.webots import WebotsEnv
 from simulation.env.conditions import *
 import time
+from os import path
 
 class KrockWebotsEnv(WebotsEnv):
     metadata = {'render_modes': ['human']}
+    name = '/krock'
 
     GO_FORWARD = {
         'frontal_freq': 1,
@@ -23,8 +25,9 @@ class KrockWebotsEnv(WebotsEnv):
         'gait': 1
     }
 
-    def __init__(self, world_path, agent_callbacks=[], *args, **kwargs):
-        super().__init__(world_path, *args, **kwargs)
+
+    def __init__(self, world_path, agent_callbacks=[], children_path=path.join(path.dirname(__file__), './children_no_tail'), *args, **kwargs):
+        super().__init__(world_path, *args, children_path=children_path, **kwargs)
 
         self.agent = Krock()
         self.agent.add_callbacks(agent_callbacks)
@@ -136,3 +139,8 @@ class KrockWebotsEnv(WebotsEnv):
         conditions = [IsInside()] if conditions is None else conditions
         self.should_stop = IfOneFalseOf(conditions)
         return self.make_obs_from_agent_state(self.agent)
+
+
+    def children(self):
+        with open('/home/francesco/Documents/Master-Thesis/core/simulation/env/webots/children_no_tail', 'r') as f:
+            self.children = f.read()

@@ -4,7 +4,7 @@ from tf import transformations
 from simulation.env.spawn import FlatGroundSpawnStrategy, spawn_points2webots_pose
 
 WORLD_PATH = '/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock2_ros/worlds/bars1.wbt'
-MAP = '/home/francesco/Documents/Master-Thesis/core/maps/test/sullens_me_cropped_resized_smoothed_resize.png'
+# MAP = '/home/francesco/Documents/Master-Thesis/core/maps/test/sullens_me_cropped_resized_smoothed_resize.png'
 # MAP = '/media/francesco/saetta/krock-dataset/test_with_obstacles/wall.png'
 
 # MAP = '/home/francesco/Desktop/center.png'
@@ -24,16 +24,16 @@ import random
 #     # agent_callbacks=[RosBagSaver('~/Desktop/querry-high/bags', topics=['pose'])],
 #     output_path='/home/francesco/Documents/Master-Thesis/core/env/webots/krock/krock2_ros/worlds/tmp.wbt')
 # #
-env = KrockWebotsEnv.from_image(
-    MAP,
-    '/home/francesco/Documents/Master-Thesis/core/simulation/env/webots/krock/krock_no_tail.wbt',
-    {'height': 10,
-     'resolution': 0.02 },
-    # agent_callbacks=[RosBagSaver('/media/francesco/saetta/krock-dataset/test_with_obstacle_in_center/bags',
-    #                              topics=['pose'])],
-    output_dir='/home/francesco/Documents/Master-Thesis/core/simulation/env/webots/krock/krock2_ros/worlds/')
+# env = KrockWebotsEnv.from_image(
+#     MAP,
+#     '/home/francesco/Documents/Master-Thesis/core/simulation/env/webots/krock/krock_no_tail.wbt',
+#     {'height': 10,
+#      'resolution': 0.02 },
+#     # agent_callbacks=[RosBagSaver('/media/francesco/saetta/krock-dataset/test_with_obstacle_in_center/bags',
+#     #                              topics=['pose'])],
+#     output_dir='/home/francesco/Documents/Master-Thesis/core/simulation/env/webots/krock/krock2_ros/worlds/')
 # #
-# env = KrockWebotsEnv(WORLD_PATH, load_world=True)
+env = KrockWebotsEnv(WORLD_PATH, load_world=True)
 
 # spawn_strategy = FlatGroundSpawnStrategy(MAP, scale = 1, debug=True)
 # spawn_points = spawn_strategy(k=20, tol=1e-2, size=45)
@@ -74,9 +74,9 @@ file_name = 'test'
 env.agent()
 env.reset(spawn=False)
 
-meta = pd.DataFrame(data={'filename': [file_name],
-                          'map': ['bars1'],
-                          'height': [1]})
+# meta = pd.DataFrame(data={'filename': [file_name],
+#                           'map': ['bars1'],
+#                           'height': [1]})
 
 # meta.to_csv('/media/francesco/saetta/krock-dataset/crop/meta.csv')
 elapsed = 0
@@ -86,10 +86,10 @@ while elapsed <= 5:
 # #     # print(time.time())
     elapsed = time.time() - start
 #
-    # obs, r, done, _ = env.step(env.STOP)
+    obs, r, done, _ = env.step(env.GO_FORWARD)
     # pass
 #
 # #
 # env.step(env.STOP)
 # #
-env.agent.die(env, file_name)
+# env.agent.die(env, file_name)

@@ -1,5 +1,4 @@
 import rospy
-import numpy as np
 
 from geometry_msgs.msg import PoseStamped
 from webots_ros.msg import Int8Stamped, Float64ArrayStamped
@@ -7,10 +6,8 @@ from sensor_msgs.msg import Joy, Image
 from std_msgs.msg import String
 
 from simulation.agent import RospyAgent
-from utilities.webots2ros import Supervisor
 
 from cv_bridge import CvBridge
-
 
 class Krock(RospyAgent):
     BASE_TOPIC = '/krock'
