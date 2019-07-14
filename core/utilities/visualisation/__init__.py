@@ -1,6 +1,6 @@
 import glob
 import cv2
-
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
@@ -10,7 +10,7 @@ import seaborn as sns
 from utilities.postprocessing.utils import *
 from matplotlib import gridspec
 from utilities.postprocessing.handlers import add_advancement
-from utilities.postprocessing.utils import PatchExtractStrategy
+from utilities.postprocessing.extractions import PatchExtractStrategy, KrockPatchExtractStrategy
 from utilities.visualisation.utils import *
 
 class DataFrameVisualization():
