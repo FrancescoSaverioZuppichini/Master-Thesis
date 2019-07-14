@@ -7,12 +7,19 @@ import random
 
 import time
 import pandas as pd
+import os
 from simulation.agent.callbacks import *
 from simulation.env.webots.krock import KrockWebotsEnv
 from simulation.env.spawn import spawn_points2webots_pose, RandomSpawnStrategy
 from utilities.utils import hmread
 
 class Simulation():
+    """
+    This class run an agent on an environment multiple times. It uses a spawn stategy to define candidate
+    spawing points and then run the robot for a certain amount of time the terrain.
+    TODO This class is not so generic, it would be better to also pass an env to make it as generic as possible or have a constructor like .from_webots_env
+
+    """
     REANIMATE_EVERY = 20
 
     def __init__(self, map_path, n, height=1,  out_dir='/tmp/',
@@ -32,16 +39,15 @@ class Simulation():
 
         self.spanwer = self.spawn_strategy(self.map)
         spawn_points = self.spanwer(self.n)
-
         self.env = KrockWebotsEnv.from_numpy(
             self.map,
-            path.abspath('/home/francesco/Documents/Master-Thesis/core/simulation/env/webots/krock/krock_no_tail.wbt'),
+            KrockWebotsEnv.WORLD_PATH,
             {'height': self.height,
              'resolution': 0.02},
             output_path=path.abspath(
-                '/home/francesco/Documents/Master-Thesis/core/simulation/env/webots/krock/krock2_ros/worlds/{}.wbt'.format(
+                path.join(path.dirname(__file__), './env/webots/krock/krock2_ros/worlds/{}.wbt').format(
                     self.map_name)),
-            agent_callbacks=[RosBagSaver(self.out_dir, topics=['pose'])]
+            agent_callbacks=[RosBagSaver(self.agent_out_dir, topics=['pose'])]
         )
 
         n_sim_bar = tqdm.tqdm(range(self.n), leave=False)
@@ -97,3 +103,10 @@ class Simulation():
     @property
     def map_name(self):
         return path.splitext(path.basename(self.map_path))[0]
+
+    @property
+    def agent_out_dir(self):
+        agent_out_dir = self.out_dir + '/bags'
+        os.makedirs(agent_out_dir, exist_ok=True)
+
+        return agent_out_dir

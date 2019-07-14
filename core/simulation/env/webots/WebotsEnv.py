@@ -14,6 +14,11 @@ from os import path
 
 
 class WebotsEnv(gym.Env, Supervisor):
+    """
+    Basic Webots Environment
+    """
+    HEIGHT_SPAWN_OFFSET = 0.5 # offset in m to use when spawning the robot
+    N_AGENT_CHILDREN = 10 # number of parts that compose the robot
 
     def __init__(self, world_path, load_world=True, children_path=None):
         self.world_path, self.children_path = world_path, children_path
@@ -43,12 +48,11 @@ class WebotsEnv(gym.Env, Supervisor):
         self.y = (self.translation.z, self.y + self.translation.z)
         self.z = 0
 
-        self.children=None
+        self.children = None
 
         if children_path is not None:
             with open(self.children_path, 'r') as f:
                 self.children = f.read()
-
 
     def reanimate(self):
         if self.children is None: raise Exception('No children specified!')
@@ -57,7 +61,7 @@ class WebotsEnv(gym.Env, Supervisor):
         # get the children field that cointas all the joints connections
         h = node['children']
         # remove all children from node ROBOT
-        for _ in range(7):
+        for _ in range(self.N_AGENT_CHILDREN):
             del node[h]
         node[h] = self.children
         # restart the simulation and enable the camera
@@ -86,7 +90,7 @@ class WebotsEnv(gym.Env, Supervisor):
         random_pose.position.y = ry
         h = self.get_height(rx, ry)
 
-        random_pose.position.z = h + 0.5
+        random_pose.position.z = h + self.HEIGHT_SPAWN_OFFSET
         qto = transformations.quaternion_from_euler(0, 0, 2 * np.pi * np.random.uniform(0, 1), axes='sxyz')
 
         position = [rx, h + 0.5, ry]
@@ -112,7 +116,6 @@ class WebotsEnv(gym.Env, Supervisor):
     def from_image(cls, image_path, src_world, config, output_dir, *args, **kwargs):
         image = cv2.imread(image_path)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        # image = cv2.normalize(image, None, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
 
         filename_w_ext = os.path.basename(image_path)
         filename, file_extension = os.path.splitext(filename_w_ext)

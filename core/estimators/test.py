@@ -1,6 +1,5 @@
 from estimators.utils import get_learner
 from estimators.data.transformations import get_transform
-from Config import Config
 from fastai.vision import ClassificationInterpretation
 from fastai.metrics import accuracy, dice, accuracy_thresh
 from estimators.callbacks import ROC_AUC, Timer
@@ -37,7 +36,6 @@ class Scatter(Callback):
     Compute roc auc by storing all the predictions/targets and run it once
     when the epoch is over
     """
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.outs = np.array([])

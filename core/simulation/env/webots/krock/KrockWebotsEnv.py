@@ -26,7 +26,13 @@ class KrockWebotsEnv(WebotsEnv):
     }
 
 
-    def __init__(self, world_path, agent_callbacks=[], children_path=path.join(path.dirname(__file__), './children_no_tail'), *args, **kwargs):
+    WORLD_PATH = path.join(path.dirname(__file__), 'krock_no_tail.wbt')
+    CHILDREN_PATH = path.join(path.dirname(__file__), 'children_no_tail')
+
+
+    def __init__(self, world_path, children_path=None, agent_callbacks=[], *args, **kwargs):
+        children_path = self.CHILDREN_PATH if children_path is None else children_path
+        print(children_path)
         super().__init__(world_path, *args, children_path=children_path, **kwargs)
 
         self.agent = Krock()

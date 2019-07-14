@@ -1,10 +1,7 @@
 import os
 import pandas as pd
-from os import path
 import glob
-# back compatibility
-from utilities.postprocessing.extractions import *
-
+from os import path
 
 class TraversabilityDir():
     def __init__(self, root, maps_dir, time_window):

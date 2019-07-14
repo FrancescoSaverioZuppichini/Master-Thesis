@@ -1,10 +1,15 @@
 from utilities.postprocessing.handlers import *
 from utilities.postprocessing.utils import TraversabilityDir
-from utilities.postprocessing.utils import KrockPatchExtractStrategy, PatchExtractStrategy
+from utilities.postprocessing.extractions import KrockPatchExtractStrategy
 from utilities.pipeline import Compose, MultiThreadWrapper
 
 class PostProcessing():
+    """
+    This class parse the stored bags and create the final dataset. It uses TraversabilityDir to understand in which folder
+    each stage must be stored.
+    """
     def __init__(self, root, maps_dir, advancement, time_window):
+
         self.dir = TraversabilityDir(root, maps_dir, time_window)
         self.advancement, self.time_window = advancement, time_window
 
@@ -32,6 +37,7 @@ class PostProcessing():
 
     def __call__(self):
         meta = self.dir.meta
+        # convert the bags file is expensive, we only have to do it once
         if self.dir.should_convert_bags:
             self.convert_bags2dfs_and_store(meta['filename'])
             self.read_and_parse_dfs(meta.iterrows())

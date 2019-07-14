@@ -30,6 +30,6 @@ post()
 #                       time_window=100)
 #
 # post()
-# vis = DataFrameVisualization.from_root('/media/francesco/saetta/krock-dataset/tr/slope_rocks1/150/csvs')
-# # vis.df = vis.df[vis.df['advancement'] >= -0.2]
-# vis(0.2)
+vis = DataFrameVisualization.from_root('/media/francesco/saetta/krock-dataset/tr/slope_rocks1/150/csvs')
+# vis.df = vis.df[vis.df['advancement'] >= -0.2]
+vis(0.2)
