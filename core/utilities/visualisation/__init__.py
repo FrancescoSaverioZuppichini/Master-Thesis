@@ -241,8 +241,6 @@ class PatchesAndDataframeVisualization(DataFrameVisualization):
 
         plt.ion()
 
-        patch_size = 92
-
         gridspec.GridSpec(2, 2)
 
         fig.show()
