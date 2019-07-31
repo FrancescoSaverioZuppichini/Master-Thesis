@@ -3,6 +3,7 @@ import pandas as pd
 import glob
 
 def hmread(path):
+    print (">>>" , path)
     hm = cv2.imread(path)
     hm = cv2.cvtColor(hm, cv2.COLOR_BGR2GRAY)
     return hm

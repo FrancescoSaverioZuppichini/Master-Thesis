@@ -1,0 +1,49 @@
+FROM zuppif/ros-melodic-python3:test
+
+# change this based on your location
+ENV TZ=America/Los_Angeles
+ENV DEBIAN_FRONTEND noninteractive
+
+RUN ln -s /usr/local/lib/python3.6/dist-packages /usr/local/lib/python3.6/site-packages
+
+# ROS workspace setup
+RUN mkdir -p root/catkin_ws/src \
+&& cd root/catkin_ws/ \ 
+&& . /opt/ros/melodic/setup.sh \ 
+&& catkin_make
+
+# krock controller (from other repository)
+RUN git clone https://github.com/romarcg/krock-sim.git \
+&& cp -r krock-sim/catkin_ws_src/webots_ros/ root/catkin_ws/src/webots_ros
+
+# ROS enviroment setup (required to use python3 support)
+RUN cd root/catkin_ws/ \
+&& . /opt/ros/melodic/setup.sh \
+&& . ./devel/setup.sh \
+&& export PYTHONPATH="${PYTHONPATH}:/usr/local/lib/python3.6/dist-packages": \
+&& catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3 \
+&& pip3 install defusedxml
+
+RUN /bin/bash -c "echo 'source /opt/ros/melodic/setup.bash' >> ~/.bashrc"
+RUN /bin/bash -c "echo 'source /root/catkin_ws/devel/setup.bash' >> ~/.bashrc"
+
+# install all packages needed by the pipeline
+ADD requirements.txt /root/requirements.txt
+RUN pip3 install -r /root/requirements.txt
+
+# utilities
+RUN apt-get update && apt-get install -y net-tools nano
+
+# prepare directory for linking the code from the host (dev mode)
+# then use docker-compose to mount a volume
+# if all coded is set, it should be better to include the code (deploy mode) 
+# here using with ADD
+#ADD . /root/code
+RUN mkdir -p root/code
+WORKDIR /root/code
+
+#RUN chmod 777 /root/code/start.sh
+#SHELL [" ", "-c"]
+
+CMD bash
+

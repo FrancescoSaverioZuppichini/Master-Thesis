@@ -301,9 +301,12 @@ void RosKrock::setupRobot(){
     wb_robot_init();
 
     mRobot = new RobotSim(TIME_STEP);
+
+    /*
     if (mRobot->getType() == Node::SUPERVISOR){
         cout << "::This robot is a supervisor" << endl;
     }
+    */
     cout<<"RobotSIM CREATED"<<endl;
     controller = new GaitControl(FREQUENCY, gait_files[current_gait_idx]);
     controller->setTimeStep(dt);

@@ -22,7 +22,9 @@
 # CC_SOURCES = my_controller.cc my_clever_algo.cc my_gui.cc
 
 
-WEBOTS_HOME:=/usr/local/webots
+
+#WEBOTS_HOME:=/home/omar/Software/webots/webots
+#WEBOTS_HOME:=/usr/local/webots
 
 space :=
 space +=
@@ -91,7 +93,7 @@ LIBRARIES += -Wl,-rpath,"$(WEBOTS_HOME_PATH)/projects/default/libraries/ros"
 # CLASSPATH=relative/mylib.jar
 
 ### Do not modify: this includes Webots global Makefile.include
-WEBOTS_HOME:=/usr/local/webots
+#WEBOTS_HOME:=/usr/local/webots
 CC=/usr/bin/gcc
 CXX=/usr/bin/g++
 space :=

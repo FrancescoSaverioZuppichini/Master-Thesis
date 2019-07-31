@@ -26,7 +26,8 @@ class KrockWebotsEnv(WebotsEnv):
     }
 
 
-    WORLD_PATH = path.join(path.dirname(__file__), 'krock_no_tail.wbt')
+    #WORLD_PATH = path.join(path.dirname(__file__), 'krock_no_tail.wbt')
+    WORLD_PATH = path.join(path.dirname(__file__), 'krock2_camera.wbt')
     CHILDREN_PATH = path.join(path.dirname(__file__), 'children_no_tail')
 
 
