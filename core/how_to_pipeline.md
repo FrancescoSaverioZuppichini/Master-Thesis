@@ -50,19 +50,19 @@ Clone the repository and checkout the branch epfl_dev.
 
 Copy the content of folder `core/simulation/env/webots/krock/krock2_ros/worlds/controllers` to the shared folder which in turn should be outside the scope of the repository folder. This will be considered the `webots_base_dir` and is used when running webots outside the containerised tasks.
 
-Open a three terminals in `core/`.
+Open a three (t)erminals in `core/`.
 
-Bring up the ROS core container:
+(t1)Bring up the ROS core container:
 
 > `docker-compose -f docker-compose-pipeline.yml up trav-pipeline-roscore`
 
-Bring up the topic throttling container:
+(t2)Bring up the topic throttling container:
 
 > `docker-compose -f docker-compose-pipeline.yml up trav-pipeline-throttle`
 
 Open webots and open the file `krock2_camera.wbt`. A message should appear indicating that the controller has started and that a communication with ROS is active.
 
-Run the container with the development environment:
+(t3)Run the container with the development environment:
 
 > `docker-compose -f docker-compose-pipeline.yml run trav-pipeline bash`
 
