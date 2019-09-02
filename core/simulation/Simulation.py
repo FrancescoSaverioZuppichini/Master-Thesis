@@ -22,12 +22,15 @@ class Simulation():
     """
     REANIMATE_EVERY = 20
 
-    def __init__(self, map_path, n, height=1,  out_dir='/tmp/',
+    def __init__(self, map_path, webots_base_dir, n, height=1,  out_dir='/tmp/',
                  spawn_strategy=RandomSpawnStrategy,
                  max_time=20):
 
         self.map_path = map_path
         self.map = hmread(map_path)
+
+        self.webots_base_dir = webots_base_dir
+        print (">>> ", self.webots_base_dir)
 
         self.n, self.height, self.out_dir = n, height, out_dir
         self.max_time = max_time
@@ -45,7 +48,9 @@ class Simulation():
             {'height': self.height,
              'resolution': 0.02},
             output_path=path.abspath(
-                path.join(path.dirname(__file__), './env/webots/krock/krock2_ros/worlds/{}.wbt').format(
+                #path.join(path.dirname(__file__), './env/webots/krock/krock2_ros/worlds/{}.wbt').format(
+                #path.join(path.dirname(__file__), '/home/omar/shared_data/worlds/controllers/{}.wbt').format(
+                path.join(path.dirname(__file__), self.webots_base_dir+'/{}.wbt').format(
                     self.map_name)),
             agent_callbacks=[RosBagSaver(self.agent_out_dir, topics=['pose'])]
         )
